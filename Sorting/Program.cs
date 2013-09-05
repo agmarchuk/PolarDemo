@@ -47,11 +47,57 @@ namespace Sorting
 
             // Надо перевести данные в фиксированный формат
             PxCell cell_seqnameid = new PxCell(tp_seq, path + "seqnameid.pxc", false);
+            
             // очистим и перекинем данные
             cell_seqnameid.Clear();
             cell_seqnameid.Fill2(cella.Root.Get().Value);
-            // Теперь сортируем пары по первому (нулевому) полю
 
+            Console.WriteLine("Fill ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
+            // Теперь сортируем пары по первому (нулевому) полю
+            cell_seqnameid.Root.Sort((e1, e2) =>
+            {
+                string s1 = (string)e1.Field(0).Get().Value;
+                string s2 = (string)e2.Field(0).Get().Value;
+                return s1.CompareTo(s2);
+            });
+            Console.WriteLine("Sort ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
+            //// Сортируем по-другому
+            //cell_seqnameid.Root.Sort(e => {
+            //    return (string)e.Field(0).Get().Value;
+            //});
+            //Console.WriteLine("Sort2 ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
+            // Посмотрим первые 100
+            var qu = cell_seqnameid.Root.Elements().Take(100);
+            foreach (var c in qu)
+            {
+                var v = c.Get();
+                Console.WriteLine(v.Type.Interpret(v.Value));
+            }
+
+            tt0 = DateTime.Now;
+            // поищем чего-нибудь
+            string name = "Марчук Александр Гурьевич";
+            var found = cell_seqnameid.Root.BinarySearchFirst(e =>
+            {
+                string nm = (string)e.Field(0).Get().Value;
+                return nm.CompareTo(name);
+            });
+            var f = found.Get();
+            Console.WriteLine(f.Type.Interpret(f.Value));
+
+            // поищем  по-другому
+            string name2 = "марчук";
+            var found2 = cell_seqnameid.Root.BinarySearchFirst(e =>
+            {
+                string nm = ((string)e.Field(0).Get().Value).ToLower();
+                if (nm.StartsWith(name2)) return 0;
+                return nm.CompareTo(name);
+            });
+            var f2 = found.Get();
+            Console.WriteLine(f2.Type.Interpret(f2.Value));
 
             Console.WriteLine("Fin. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
         }
