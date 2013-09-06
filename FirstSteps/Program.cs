@@ -36,11 +36,6 @@ namespace FirstSteps
             InitTypes();
             DateTime tt0 = DateTime.Now;
 
-            // Проверка рабочего типа
-            var tt = PType.TType;
-            var s = tt.Interpret(seqtriplets.ToPObject());
-            Console.WriteLine("Hello! working type is: " + s);
-
             // Проверка объекта
             object[] testdb = new object[] {
                 new object[] { 1, new object[] {"a", "b", "c"}},
