@@ -18,22 +18,15 @@ namespace BinaryTree
         public BTree()
         {
             // Тип элемента, как и в проекте Sorting: 
-            //tp_element = new PTypeRecord(
-            //    new NamedType("name", new PType(PTypeEnumeration.sstring)),
-            //    new NamedType("rec_off", new PType(PTypeEnumeration.longinteger)));
             tp_element = new PTypeRecord(
                 new NamedType("name", new PType(PTypeEnumeration.sstring)),
                 new NamedType("id", new PType(PTypeEnumeration.sstring)));
-            //tp_element = new PTypeRecord(
-            //    new NamedType("name", new PTypeFString(32)),
-            //    new NamedType("rec_off", new PType(PTypeEnumeration.longinteger)));
             // Заполнение типа дерева. Тип рекурсивный, поэтому это делается в два выражения
             tp_btree = new PTypeUnion();
             tp_btree.Variants = new NamedType[] {
                 new NamedType("empty", new PType(PTypeEnumeration.none)),
                 new NamedType("pair", new PTypeRecord(
                     new NamedType("element", tp_element),
-                    new NamedType("count", new PType(PTypeEnumeration.longinteger)),
                     new NamedType("less", tp_btree),
                     new NamedType("more", tp_btree)))
             };
@@ -57,8 +50,8 @@ namespace BinaryTree
             // сделаем пробное заполнение вручную
             object[] empty = new object[] { 0, null };
             object[] valu =
-                new object[] { 1, new object[] { new object[] {"name1", "333L"}, 2L, 
-                    new object[] { 1, new object[] { new object[] {"name0", "444L"}, 1L, empty, empty}}, 
+                new object[] { 1, new object[] { new object[] {"name1", "333L"}, 
+                    new object[] { 1, new object[] { new object[] {"name0", "444L"}, empty, empty}}, 
                     empty } };
             cell.Fill2(valu);
             // проверяем содержимое
@@ -67,13 +60,13 @@ namespace BinaryTree
 
             // Пробно добавим пару элементов через метод расширения, описанный в ExtensionMethods
             cell.Clear();
-            Comparison<object> compare = (object v1, object v2) =>
+            Func<object, PxEntry, int> edepth = (object v1, PxEntry en2) =>
                 {
                     string s1 = (string)(((object[])v1)[0]);
-                    return s1.CompareTo((string)(((object[])v2)[0]));
+                    return s1.CompareTo((string)(en2.Field(0).Get().Value));
                 };
-            cell.Root.Add(new object[] { "bbb_name", "333L" }, compare);
-            cell.Root.Add(new object[] { "bbc_name", "444L" }, compare);
+            cell.Root.Add(new object[] { "bbb_name", "333L" }, edepth);
+            cell.Root.Add(new object[] { "bbc_name", "444L" }, edepth);
             
             var res2 = cell.Root.Get();
             Console.WriteLine(res2.Type.Interpret(res.Value));
@@ -100,7 +93,7 @@ namespace BinaryTree
             ExtensionMethods.counter = 0;
             foreach (var pair in query.Take(5001).Reverse())
             {
-                cell.Root.Add(new object[] { pair.name, "555L" }, compare);
+                cell.Root.Add(new object[] { pair.name, "555L" }, edepth);
                 if (count % 1000 == 0)
                 {
                     Console.WriteLine("{0} {1}", count, ExtensionMethods.counter);
@@ -120,14 +113,14 @@ namespace BinaryTree
 
             foreach (int ind in IndSeq(0, 8))
             {
-                Console.WriteLine(ind);
+                Console.Write("{0} ", ind);
             }
             //return;
             count = 0;
             ExtensionMethods.counter = 0;
             foreach (int ind in IndSeq(0, len))
             {
-                cell.Root.Add(new object[] { special_array[ind].name, special_array[ind].id }, compare);
+                cell.Root.Add(new object[] { special_array[ind].name, special_array[ind].id }, edepth);
                 if (count % 1000 == 0)
                 {
                     Console.WriteLine("{0} {1}", count, ExtensionMethods.counter);
@@ -145,7 +138,7 @@ namespace BinaryTree
 
             // Под конец, добави еще одну пару и посмотрим появилась ли она
             TestSearch(cell, "Покрышкин Александр Иванович");
-            cell.Root.Add(new object[] { "Покрышкин Александр Иванович", "pokryshkin_ai" }, compare);
+            cell.Root.Add(new object[] { "Покрышкин Александр Иванович", "pokryshkin_ai" }, edepth);
             TestSearch(cell, "Покрышкин Александр Иванович");
             Console.WriteLine("======Total ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
         }
