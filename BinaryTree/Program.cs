@@ -12,7 +12,7 @@ namespace BinaryTree
     {
         // Тип
         // BTree<T> = empty^none,
-        //            pair^{element: T, count: longinteger, less: BTree<T>, more: BTree<T>};
+        //            pair^{element: T, less: BTree<T>, more: BTree<T>};
         PTypeUnion tp_btree;
         PType tp_element;
         public BTree()
@@ -35,7 +35,8 @@ namespace BinaryTree
         {
             DateTime tt0 = DateTime.Now;
 
-            string path = @"D:\home\FactographDatabases\PolarDemo\";
+            string path = @"C:\home\FactographDatabases\PolarDemo\";
+                         //"C:\home\FactographDatabases"
             Console.WriteLine("Start.");
             // Инициируем типы
             BTree tree = new BTree();
@@ -131,6 +132,17 @@ namespace BinaryTree
             Console.WriteLine("======BinaryTree ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             // У меня дома получилось 17 сек. для пары {string, long} и 22 сек. для {string, string}
 
+            // Еще один способ построения бинарного дерева: Сначалы мы формируем объект, потом его вводим стандартным Fill2
+            var array_of_elements = query.OrderBy(pair => pair.name)
+                .Select(oe => new object[] {oe.name, oe.id})
+                .ToArray();
+            object bt = BuildBinaryTreeObjectFromSortedSequence(array_of_elements, 0, array_of_elements.Length);
+            //Console.WriteLine(tree.tp_btree.Interpret(bt));
+            cell.Clear();
+            cell.Fill2(bt);
+            Console.WriteLine("======Binary Tree Build ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
+
             // Бинарный поиск на бинарном дереве
             string name = "Марчук Александр Гурьевич";
             TestSearch(cell, name);
@@ -141,6 +153,26 @@ namespace BinaryTree
             cell.Root.Add(new object[] { "Покрышкин Александр Иванович", "pokryshkin_ai" }, edepth);
             TestSearch(cell, "Покрышкин Александр Иванович");
             Console.WriteLine("======Total ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+        }
+
+        // Построение объекта дерева бинарного поиска
+        private static object BuildBinaryTreeObjectFromSortedSequence(object[] arr, int beg, int count)
+        {
+            int half = count / 2;
+            if (half == 0)
+            {
+                if (count == 1) return new object[] { 1, new object[] { arr[beg], new object[] { 0, null }, new object[] { 0, null } } };
+                else return new object[] { 0, null };
+            }
+            else
+            {
+                return new object[] { 1, new object[] {
+                    arr[beg + half],
+                    BuildBinaryTreeObjectFromSortedSequence(arr, beg, half),
+                    BuildBinaryTreeObjectFromSortedSequence(arr, beg + half + 1, count - half - 1)
+                }};
+            }
+
         }
 
         private static void TestSearch(PxCell cell, string name)
