@@ -16,7 +16,7 @@ namespace Sorting
 
         public static void Main(string[] args)
         {
-            string path = @"D:\home\FactographDatabases\PolarDemo\";
+            string path = @"..\..\..\Databases\";
 
             PType tp_seq = new PTypeSequence(new PTypeRecord(
                 new NamedType("name", new PType(PTypeEnumeration.sstring)),

@@ -35,7 +35,7 @@ namespace BinaryTree
         {
             DateTime tt0 = DateTime.Now;
 
-            string path = @"C:\home\FactographDatabases\PolarDemo\";
+            string path = @"..\..\..\Databases\";
                          //"C:\home\FactographDatabases"
             Console.WriteLine("Start.");
             // Инициируем типы

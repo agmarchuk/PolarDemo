@@ -214,3 +214,9 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 /Вывод-Построение.txt
+/ItalyComments.txt
+/Databases/btree.pxc
+/Databases/cella.pac
+/Databases/seqnameid.pxc
+/Databases/test.pac
+/Databases/test.pxc

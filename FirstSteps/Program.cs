@@ -32,7 +32,7 @@ namespace FirstSteps
 
         static void Main(string[] args)
         {
-            string path = @"C:\home\FactographDatabases\PolarDemo\";
+            string path = @"..\..\..\Databases\";
             InitTypes();
             DateTime tt0 = DateTime.Now;
 
