@@ -220,3 +220,6 @@ pip-log.txt
 /Databases/seqnameid.pxc
 /Databases/test.pac
 /Databases/test.pxc
+/Databases/records_fromObject.pac
+/Databases/records.pac
+/Databases/records_fromFlow.pac
