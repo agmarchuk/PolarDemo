@@ -153,6 +153,8 @@ namespace BinaryTree
             cell.Root.Add(new object[] { "Покрышкин Александр Иванович", "pokryshkin_ai" }, edepth);
             TestSearch(cell, "Покрышкин Александр Иванович");
             Console.WriteLine("======Total ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            cell.Close();
+            System.IO.File.Delete(path + "btree.pxc");
         }
 
         // Построение объекта дерева бинарного поиска

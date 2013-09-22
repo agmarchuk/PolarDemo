@@ -224,3 +224,8 @@ pip-log.txt
 /Databases/records.pac
 /Databases/records_fromFlow.pac
 /Databases/serbuftest.pac
+/Databases/triplets.pac
+/Databases/graph_a.pac
+/Databases/graph_x.pxc
+/Databases/n4.pac
+/Databases/quads.pac

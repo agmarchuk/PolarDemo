@@ -12,17 +12,26 @@ namespace SerialBufferTest
         public static void Main(string[] args)
         {
             string path = @"..\..\..\Databases\";
-            Console.WriteLine("Start");
+            Console.WriteLine("Start test. Wait appoximately 10 sec. ");
             DateTime tt0 = DateTime.Now;
             // Тестовый тип данных
             PType tp_seq_seq = new PTypeSequence(new PTypeSequence(new PType(PTypeEnumeration.integer)));
             PaCell cell = new PaCell(tp_seq_seq, path + "serbuftest.pac", false);
             cell.Clear();
-            var input = new SerialBuffer(cell, 3);
-            GenerateSerialTestFlow(9000000, input);
-            cell.Flush();
-            Console.WriteLine("======Fill ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
+            ISerialFlow input;
+
+            input = cell; // Ввод без буфера
+            GenerateSerialTestFlow(900000, input);
+            Console.WriteLine("======Fill without buffer ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
+            cell.Clear();
+            input = new SerialBuffer(cell, 2); // Ввод с буфером
+            GenerateSerialTestFlow(900000, input);
+            Console.WriteLine("======Fill with buffer ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
+            cell.Close();
+            System.IO.File.Delete(path + "serbuftest.pac");
         }
         // Генератор тестовых данных
         private static void GenerateSerialTestFlow(int volume, ISerialFlow receiver)

@@ -26,6 +26,7 @@ namespace Sorting
             Console.WriteLine("Start");
 
             PaCell cella = new PaCell(tp_seq, path + "cella.pac", false);
+            cella.Clear();
             
             // Заполним ячейку данными
             XElement db = XElement.Load(path + "0001.xml");
@@ -71,13 +72,13 @@ namespace Sorting
             Console.WriteLine("======Sort2 ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             // Посмотрим первые 100
-            var qu = cell_seqnameid.Root.Elements().Take(100);
+            var qu = cell_seqnameid.Root.Elements().Skip(100).Take(10);
             foreach (var c in qu)
             {
                 var v = c.Get();
                 Console.WriteLine(v.Type.Interpret(v.Value));
             }
-            Console.WriteLine("======First 100. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            Console.WriteLine("======First 10 after 100. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             // поищем чего-нибудь
             string name = "Марчук Александр Гурьевич";
@@ -103,7 +104,7 @@ namespace Sorting
             Console.WriteLine("======BinarySearchFirst variant 2. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             // Поиск всех, удовлетворяющих условию
-            string name3 = "марчук";
+            string name3 = "белинский";
             var found3 = cell_seqnameid.Root.BinarySearchAll(e =>
             {
                 string nm = ((string)e.Field(0).Get().Value).ToLower();
@@ -117,19 +118,23 @@ namespace Sorting
             }
             Console.WriteLine("======BinarySearchAll ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
-            //// Проверка "вручную" правильности поиска всех
-            //var query = cell_seqnameid.Root.Elements();
-            //foreach (var rec in query)
-            //{
-            //    object[] value = (object[])rec.Get().Value;
-            //    string nam = ((string)value[0]).ToLower();
-            //    if (nam.StartsWith(name3))
-            //    {
-            //        Console.WriteLine("{0} {1}", value[0], value[1]);
-            //    }
-            //}
+            // Проверка "вручную" правильности поиска всех
+            var query = cell_seqnameid.Root.Elements();
+            foreach (var rec in query)
+            {
+                object[] value = (object[])rec.Get().Value;
+                string nam = ((string)value[0]).ToLower();
+                if (nam.StartsWith(name3))
+                {
+                    Console.WriteLine("{0} {1}", value[0], value[1]);
+                }
+            }
 
             Console.WriteLine("======Fin. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            cella.Close();
+            cell_seqnameid.Close();
+            System.IO.File.Delete(path + "cella.pac");
+            System.IO.File.Delete(path + "seqnameid.pxc");
         }
     }
 }

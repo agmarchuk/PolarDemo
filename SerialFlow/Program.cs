@@ -158,6 +158,8 @@ namespace SerialFlow
             input.EndSerialFlow();
             cell.Close();
             Console.WriteLine("======Fill bufferred small flow ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            System.IO.File.Delete(path + "records_fromObject.pac");
+            System.IO.File.Delete(path + "records_fromFlow.pac");
         }
     }
 }
