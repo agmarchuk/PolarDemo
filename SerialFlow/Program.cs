@@ -51,17 +51,23 @@ namespace SerialFlow
                 }).ToArray();
             Console.WriteLine(db_obj.Length);
             DateTime tt0 = DateTime.Now;
+            
             // Создадим ячейку
-            PaCell cell = new PaCell(tp_seqrec, path + "records_fromObject.pac", false);
+            PaCell cell;
+
+            cell = new PaCell(tp_seqrec, path + "records_fromObject.pac", false);
             cell.Clear();
             cell.Fill(db_obj);
             cell.Close();
             Console.WriteLine("======Fill ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
+            // Это - для приема потока ввода
+            ISerialFlow input;
+
             // Теперь будем вводить через поток
             cell = new PaCell(tp_seqrec, path + "records_fromFlow.pac", false);
             cell.Clear();
-            ISerialFlow input = cell;
+            input = cell;
             input.StartSerialFlow();
             input.S();
             foreach (var rec in db_obj)
@@ -73,7 +79,7 @@ namespace SerialFlow
             cell.Close();
             Console.WriteLine("======Fill flow ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
-            // Будем мельчить поток (у меня получилось почти 8 сек.)
+            // Будем мельчить поток (у меня получилось 4.8 сек.)
             cell = new PaCell(tp_seqrec, path + "records_fromFlow.pac", false);
             cell.Clear();
             input = cell;
@@ -116,10 +122,10 @@ namespace SerialFlow
             cell.Close();
             Console.WriteLine("======Fill small flow ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
-            // Теперь предыдущий мелкий поток пропустим через буфер (у меня получилось почти 8 сек.)
+            // Теперь предыдущий мелкий поток пропустим через буфер (у меня получилось 2.2 сек.)
             cell = new PaCell(tp_seqrec, path + "records_fromFlow.pac", false);
             cell.Clear();
-            input = new SerialBuffer(cell, 3);
+            input = new SerialBuffer(cell, 1);
             input.StartSerialFlow();
             input.S();
             foreach (object[] rec in db_obj)
