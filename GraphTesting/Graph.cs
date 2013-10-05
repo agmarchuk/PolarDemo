@@ -48,6 +48,7 @@ namespace GraphTesting
             // Закроем использование
             if (triplets != null) { triplets.Close(); triplets = null; }
             if (graph_x != null) { graph_x.Close(); graph_x = null; }
+            if (n4 != null) { n4.Close(); n4 = null; }
             // Создадим ячейки
             triplets = new PaCell(tp_triplets, path + "triplets.pac", false);
             triplets.Clear();
@@ -76,14 +77,17 @@ namespace GraphTesting
             SortN4();
             Console.WriteLine("After SortN4(). duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
-            FormingSerialGraph(new SerialBuffer(graph_a, 3));
+            //FormingSerialGraph(new SerialBuffer(graph_a, 1));
+            FormingSerialGraph(graph_a);
             Console.WriteLine("Forming serial graph ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             // произвести объектное представление
             object g_value = graph_a.Root.Get().Value;
             graph_x.Fill2(g_value);
             Console.WriteLine("Forming fixed graph ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            
+
+            // Console.ReadKey(); // Это для того, чтобы смотреть сколько использовалось памяти
+
             // ========= Завершение загрузки =========
             // Закроем файлы и уничтожим ненужные
             triplets.Close();
