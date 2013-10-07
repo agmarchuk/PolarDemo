@@ -74,6 +74,15 @@ namespace BigDbTest
             }
             connection.Close();
         }
+        public void Test3()
+        {
+            connection.Open();
+            var comm = connection.CreateCommand();
+            comm.CommandText = "SELECT COUNT(*) FROM Tab1 WHERE randcol % 2 = 0;";
+            var obj = comm.ExecuteScalar();
+            Console.WriteLine("Test3 result={0}", obj);
+            connection.Close();
+        }
         // Начальная и конечная "скобки" транзакции. В серединке должны использоваться SQL-команды ТОЛЬКО на основе команды runcommand
         private DbCommand RunStart()
         {
