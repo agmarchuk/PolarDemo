@@ -9,21 +9,24 @@ namespace BigDbTest
 {
     class BigPolar
     {
+        private string cellPath;
+        private PaCell cell;
+        public BigPolar(string path)
+        {
+            this.cellPath = path + @"Databases\bigtest.pac";
+            cell = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)), cellPath, false);
+        }
         System.Random rnd = new Random();
         public void PrepareToLoad()
         {
         }
         public void Index()
         {
-            PaCell cell = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)),
-                @"D:\home\dev2012\PolarDemo\Databases\bigtest.pac", false);
             cell.Root.Sort<RecInt>();
-            cell.Close();
+            cell.Flush();
         }
-        private void Load(int numb)
+        public void Load(int numb)
         {
-            PaCell cell = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)),
-                @"D:\home\dev2012\PolarDemo\Databases\bigtest.pac", false);
             cell.Clear();
             int portion = 200;
             cell.StartSerialFlow();
@@ -39,10 +42,19 @@ namespace BigDbTest
             }
             cell.Se();
             cell.EndSerialFlow();
-            cell.Close();
+            cell.Flush();
         }
         public void Test2(string condition)
         {
+        }
+        public void Test3()
+        {
+            int cnt = 0;
+            foreach (var x in cell.Root.Elements())
+            {
+                if ((int)x.Value % 2 == 0) cnt++;
+            }
+            Console.WriteLine("Test3 result=" + cnt);
         }
 
     }
