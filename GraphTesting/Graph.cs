@@ -78,7 +78,8 @@ namespace GraphTesting
             Console.WriteLine("After SortN4(). duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             //FormingSerialGraph(new SerialBuffer(graph_a, 1));
-            FormingSerialGraph(graph_a);
+            //FormingSerialGraph(graph_a);
+            FormingSerialGraph(new SerialBuffer(graph_a, 1));
             Console.WriteLine("Forming serial graph ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             // произвести объектное представление

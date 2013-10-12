@@ -33,15 +33,32 @@ namespace BigDbTest
             cell.S();
             for (int i = 0; i < numb / portion; i++)
             {
-                if (i % 10000 == 0) Console.WriteLine("{0}%", (double)i * 100.0 / (double)numb * (double)portion);
+                if (i % 1000 == 0) Console.WriteLine("{0}%", (double)i * 100.0 / (double)numb * (double)portion);
                 for (int j = 0; j < portion; j++)
                 {
-                    int value = rnd.Next();
+                    int value = i * portion + j; // rnd.Next();
                     cell.V(value);
                 }
             }
             cell.Se();
             cell.EndSerialFlow();
+            cell.Flush();
+        }
+        // Проверка метода AppendElement
+        public void Load2(int numb)
+        {
+            cell.Clear();
+            int portion = 200;
+            cell.Fill(new object[0]);
+            for (int i = 0; i < numb / portion; i++)
+            {
+                if (i % 1000 == 0) Console.WriteLine("{0}%", (double)i * 100.0 / (double)numb * (double)portion);
+                for (int j = 0; j < portion; j++)
+                {
+                    int value = i * portion + j; // rnd.Next();
+                    cell.Root.AppendElement(value);
+                }
+            }
             cell.Flush();
         }
         public void Test2(string condition)
