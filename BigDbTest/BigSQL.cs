@@ -78,6 +78,7 @@ namespace BigDbTest
         {
             connection.Open();
             var comm = connection.CreateCommand();
+            comm.CommandTimeout = 1000;
             comm.CommandText = "SELECT COUNT(*) FROM Tab1 WHERE randcol % 2 = 0;";
             var obj = comm.ExecuteScalar();
             Console.WriteLine("Test3 result={0}", obj);
