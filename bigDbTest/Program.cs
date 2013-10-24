@@ -20,10 +20,10 @@ namespace BigDbTest
             if (sql)
             {
                 //BigSQL bs = new BigSQL(@"Data Source=(LocalDB)\v11.0;AttachDbFilename="+path+"Databases/test20131006.mdf;Integrated Security=True;Connect Timeout=30");
-                BigSQL bs = new BigSQL(@"Data Source=(LocalDB)\v11.0;AttachDbFilename=C:\home\dev2012\bigDbTest\test20131014.mdf;Integrated Security=True;Connect Timeout=30");
+                BigSQL bs = new BigSQL(@"Data Source=(LocalDB)\v11.0;AttachDbFilename=D:\home\FactographDatabases\test20131006.mdf;Integrated Security=True;Connect Timeout=30");
 
                 bs.PrepareToLoad();
-                bs.Load(10000000);
+                bs.Load(400000000);
                 Console.WriteLine("Load ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 //return;
 
