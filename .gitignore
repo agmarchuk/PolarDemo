@@ -229,3 +229,5 @@ pip-log.txt
 /Databases/graph_x.pxc
 /Databases/n4.pac
 /Databases/quads.pac
+/Databases/bigtest.pac
+/Databases/index.pxc
