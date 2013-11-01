@@ -23,7 +23,7 @@ namespace BigDbTest
                 BigSQL bs = new BigSQL(@"Data Source=(LocalDB)\v11.0;AttachDbFilename=D:\home\FactographDatabases\test20131006.mdf;Integrated Security=True;Connect Timeout=30");
 
                 bs.PrepareToLoad();
-                bs.Load(400000000);
+                bs.Load(1000000);
                 Console.WriteLine("Load ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 //return;
 

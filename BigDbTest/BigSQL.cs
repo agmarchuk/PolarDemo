@@ -22,7 +22,7 @@ namespace BigDbTest
         {
             connection.Open();
             var comm = connection.CreateCommand();
-            comm.CommandText = "DROP TABLE Tab1; CREATE TABLE Tab1 (randcol INT NOT NULL);";
+            comm.CommandText = "DROP INDEX ent_int ON Tab1; DROP TABLE Tab1; CREATE TABLE Tab1 (randcol INT NOT NULL);";
             string message = null;
             try
             {
