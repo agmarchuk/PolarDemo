@@ -29,12 +29,20 @@ namespace BinaryTree
                 // Если не пустое
                 // Сравним пришедший элемент с имеющимся в корне
 
-                PxEntry el_ent = nodeEntry.Field(0);
                 counter++;
-                int cmp = elementDepth(element, el_ent);
+                int cmp = elementDepth(element, nodeEntry.Field(0));
                 if (cmp == 0)
                 {
-                    el_ent.Set(element);
+                    node.Set(new object[]
+                    {
+                        1, new[]
+                        {
+                            element,
+                            nodeEntry.Field(1).Get().Value,
+                            nodeEntry.Field(2).Get().Value,
+                            nodeEntry.Field(3).Get().Value
+                        }
+                    });
                     return false;
                 }
                 if ((int)nodeEntry.Field(3).Get().Value != 0)
@@ -53,10 +61,6 @@ namespace BinaryTree
                     element, new object[] {0, null}, new object[] {0, null}, 0
                 }
             });
-            var temp = lastUnBalanceNode.Get().Value;
-            
-            //var temp = root.Get().Value;
-
             if (!any) return true;
             node = lastUnBalanceNode;
             for (int i = 0; i < goLeft.Count; i++)
@@ -99,12 +103,20 @@ namespace BinaryTree
             // Если не пустое
             // Сравним пришедший элемент с имеющимся в корне
             var rootEntry = root.UElement();
-            PxEntry el_ent = rootEntry.Field(0);
             counter++;
-            int cmp = elementDepth(element, el_ent);
+            int cmp = elementDepth(element, rootEntry.Field(0));
             if (cmp == 0)
             {
-                el_ent.Set(element);
+                root.Set(new object[]
+                    {
+                        1, new[]
+                        {
+                            element,
+                            rootEntry.Field(1).Get().Value,
+                            rootEntry.Field(2).Get().Value,
+                            rootEntry.Field(3).Get().Value
+                        }
+                    });
                 return false;
             }
             //если при добавлении не изменилась высота(возможно поддерево сбалансировалось), балансировать не надо
@@ -158,7 +170,6 @@ namespace BinaryTree
                             rEntry.Field(2).Get().Value,
                             rBalance==-1 ? 0 : 1
                         }});
-                        var temp = root.Get().Value;
                         return rBalance == 0;
                     }
                 case 1:
@@ -195,8 +206,6 @@ namespace BinaryTree
                             },
                             0
                         }});
-
-                        var temp = root.Get().Value;
                         return false;
                     }
                 default: return true;
@@ -222,9 +231,7 @@ namespace BinaryTree
                 case 0:
                 case 1:
                 {
-                    var llllllll =lEntry.Field(1).UElementUnchecked(1).Field(2).Get().Value;
-                    var temp = root.Get().Value;
-                    root.Set(new object []
+                    root.Set(new object[]
                     {
                         1, new[]
                         {
@@ -244,7 +251,6 @@ namespace BinaryTree
                             leftBalance == 1 ? 0 : -1
                         }
                     });
-                    var tem1p = root.Get().Value;
                     return leftBalance == 0;
                     }
                 case -1:
@@ -282,8 +288,6 @@ namespace BinaryTree
                                 0
                             }
                         });
-
-                        var temp = root.Get().Value;
                         return false;
                     }
                 default: return true;

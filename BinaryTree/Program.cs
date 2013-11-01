@@ -41,23 +41,40 @@ namespace BinaryTree
             string path = @"..\..\..\Databases\";
                          //"C:\home\FactographDatabases"
             Console.WriteLine("Start.");
+            
             // Инициируем типы
             BTree tree = new BTree();
             // Создадим фиксированную ячейку
+            //if (File.Exists(path + "btree.pxc")) File.Delete(path + "btree.pxc");
             PxCell cell = new PxCell(tree.tp_btree, path + "btree.pxc", false);
             cell.Clear();
 
             //// Проверим существует ли пустое значение
-            //var r1 = cell.Root.Get();
-            //Console.WriteLine(r1.Type.Interpret(r1.Value));
+            var r1 = cell.Root.Get();
+            Console.WriteLine(r1.Type.Interpret(r1.Value));
 
             // сделаем пробное заполнение вручную
             object[] empty = { 0, null };
             object[] valu =
-            { 1, new object[] { new object[] {"name1", "333L"}, 
-                new object[] { 1, new object[] { new object[] {"name0", "444L"}, empty, empty, 0}}, 
-                empty, -1 } };
+            {
+                1, new object[]
+                {
+                    new object[] {"name1", "333L"},
+                    new object[]
+                    {
+                        1, new object[]
+                        {
+                            new object[] {"name0", "444L"},
+                            empty,
+                            empty, 0
+                        }
+                    },
+                    empty, 1
+                }
+            };
             cell.Fill2(valu);
+            cell.Root.UElementUnchecked(1).Field(0).Set(new object[] { "", "" });
+            
             // проверяем содержимое
             var res = cell.Root.Get();
             Console.WriteLine(res.Type.Interpret(res.Value));
@@ -73,7 +90,7 @@ namespace BinaryTree
             cell.Root.Add(new object[] { "bbc_name", "444L" }, edepth);
             
             var res2 = cell.Root.Get();
-            Console.WriteLine(res2.Type.Interpret(res.Value));
+           Console.WriteLine(res2.Type.Interpret(res2.Value));
 
             // Теперь попробуем загрузить реальные данные
             tt0 = DateTime.Now;
@@ -128,8 +145,8 @@ namespace BinaryTree
             ExtensionMethods.counter = 0;
             foreach (var pair in query.Take(400000).Reverse())
             {
-                if (pair.name == "Марчук Александр Гурьевич") { }
-                if (pair.name == "Покрышкин Александр Иванович") { }
+                //if (pair.name == "Марчук Александр Гурьевич") { }
+                //if (pair.name == "Покрышкин Александр Иванович") { }
                 cell.Root.Add(new object[] { pair.name, "555L" }, edepth);
                 
                 if (count % 1000 == 0)
@@ -139,7 +156,7 @@ namespace BinaryTree
                 }
                 count++;
             }
-            Console.WriteLine(cell.Root.Get().Type.Interpret(cell.Root.Get().Value));
+          //  Console.WriteLine(cell.Root.Get().Type.Interpret(cell.Root.Get().Value));
             Console.WriteLine("======part of BinaryTree ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             // Теперь загрузим все данные, но для этого надо будет их отсортировать и подавать в специальном режиме
