@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,12 +24,14 @@ namespace BinaryTree
                 new NamedType("id", new PType(PTypeEnumeration.sstring)));
             // Заполнение типа дерева. Тип рекурсивный, поэтому это делается в два выражения
             tp_btree = new PTypeUnion();
-            tp_btree.Variants = new NamedType[] {
+            tp_btree.Variants = new[] {
                 new NamedType("empty", new PType(PTypeEnumeration.none)),
                 new NamedType("pair", new PTypeRecord(
                     new NamedType("element", tp_element),
                     new NamedType("less", tp_btree),
-                    new NamedType("more", tp_btree)))
+                    new NamedType("more", tp_btree),
+                    //1 - слева больше, -1 - справа больше.
+                    new NamedType("balance",new PType(PTypeEnumeration.integer))))
             };
         }
         public static void Main(string[] args)
@@ -49,11 +52,11 @@ namespace BinaryTree
             //Console.WriteLine(r1.Type.Interpret(r1.Value));
 
             // сделаем пробное заполнение вручную
-            object[] empty = new object[] { 0, null };
+            object[] empty = { 0, null };
             object[] valu =
-                new object[] { 1, new object[] { new object[] {"name1", "333L"}, 
-                    new object[] { 1, new object[] { new object[] {"name0", "444L"}, empty, empty}}, 
-                    empty } };
+            { 1, new object[] { new object[] {"name1", "333L"}, 
+                new object[] { 1, new object[] { new object[] {"name0", "444L"}, empty, empty, 0}}, 
+                empty, -1 } };
             cell.Fill2(valu);
             // проверяем содержимое
             var res = cell.Root.Get();
@@ -64,7 +67,7 @@ namespace BinaryTree
             Func<object, PxEntry, int> edepth = (object v1, PxEntry en2) =>
                 {
                     string s1 = (string)(((object[])v1)[0]);
-                    return s1.CompareTo((string)(en2.Field(0).Get().Value));
+                    return String.Compare(s1, (string)(en2.Field(0).Get().Value), StringComparison.Ordinal);
                 };
             cell.Root.Add(new object[] { "bbb_name", "333L" }, edepth);
             cell.Root.Add(new object[] { "bbc_name", "444L" }, edepth);
@@ -87,37 +90,22 @@ namespace BinaryTree
             // Еще раз
             Console.WriteLine(query.Count());
             Console.WriteLine("======Count() ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            
-            // Загрузим фрагмент бинарного дерева
             cell.Clear();
-            int count = 0;
-            ExtensionMethods.counter = 0;
-            foreach (var pair in query.Take(5001).Reverse())
-            {
-                cell.Root.Add(new object[] { pair.name, "555L" }, edepth);
-                if (count % 1000 == 0)
-                {
-                    Console.WriteLine("{0} {1}", count, ExtensionMethods.counter);
-                    ExtensionMethods.counter = 0;
-                }
-                count++;
-            }
-            Console.WriteLine("======part of BinaryTree ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
-            // Теперь загрузим все данные, но для этого надо будет их отсортировать и подавать в специальном режиме
-            cell.Clear();
             ExtensionMethods.counter = 0;
             var special_array = query.OrderBy(pair => pair.name)
                 .Select(oe => oe)
                 .ToArray();
-            int len = special_array.Length;
+
 
             foreach (int ind in IndSeq(0, 8))
             {
                 Console.Write("{0} ", ind);
             }
+         
             //return;
-            count = 0;
+           int count = 0;
+           int len = special_array.Length; 
             ExtensionMethods.counter = 0;
             foreach (int ind in IndSeq(0, len))
             {
@@ -132,14 +120,38 @@ namespace BinaryTree
             Console.WriteLine("======BinaryTree ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             // У меня дома получилось 17 сек. для пары {string, long} и 22 сек. для {string, string}
 
+
+
+            // Загрузим фрагмент бинарного дерева
+            cell.Clear();
+             count = 0;
+            ExtensionMethods.counter = 0;
+            foreach (var pair in query.Take(400000).Reverse())
+            {
+                if (pair.name == "Марчук Александр Гурьевич") { }
+                if (pair.name == "Покрышкин Александр Иванович") { }
+                cell.Root.Add(new object[] { pair.name, "555L" }, edepth);
+                
+                if (count % 1000 == 0)
+                {
+                    Console.WriteLine("{0} {1}", count, ExtensionMethods.counter);
+                    ExtensionMethods.counter = 0;
+                }
+                count++;
+            }
+            Console.WriteLine(cell.Root.Get().Type.Interpret(cell.Root.Get().Value));
+            Console.WriteLine("======part of BinaryTree ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
+            // Теперь загрузим все данные, но для этого надо будет их отсортировать и подавать в специальном режиме
+        
             // Еще один способ построения бинарного дерева: Сначалы мы формируем объект, потом его вводим стандартным Fill2
             var array_of_elements = query.OrderBy(pair => pair.name)
                 .Select(oe => new object[] {oe.name, oe.id})
                 .ToArray();
-            object bt = BuildBinaryTreeObjectFromSortedSequence(array_of_elements, 0, array_of_elements.Length);
+          //  object bt = BuildBinaryTreeObjectFromSortedSequence(array_of_elements, 0, array_of_elements.Length);
             //Console.WriteLine(tree.tp_btree.Interpret(bt));
-            cell.Clear();
-            cell.Fill2(bt);
+           // cell.Clear();
+         //   cell.Fill2(bt);
             Console.WriteLine("======Binary Tree Build ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
 
@@ -154,7 +166,7 @@ namespace BinaryTree
             TestSearch(cell, "Покрышкин Александр Иванович");
             Console.WriteLine("======Total ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             cell.Close();
-            System.IO.File.Delete(path + "btree.pxc");
+            File.Delete(path + "btree.pxc");
         }
 
         // Построение объекта дерева бинарного поиска
@@ -163,12 +175,13 @@ namespace BinaryTree
             int half = count / 2;
             if (half == 0)
             {
-                if (count == 1) return new object[] { 1, new object[] { arr[beg], new object[] { 0, null }, new object[] { 0, null } } };
-                else return new object[] { 0, null };
+                return count == 1 ? 
+                    new object[] { 1, new[] { arr[beg], new object[] { 0, null }, new object[] { 0, null } } } : 
+                    new object[] { 0, null };
             }
             else
             {
-                return new object[] { 1, new object[] {
+                return new object[] { 1, new[] {
                     arr[beg + half],
                     BuildBinaryTreeObjectFromSortedSequence(arr, beg, half),
                     BuildBinaryTreeObjectFromSortedSequence(arr, beg + half + 1, count - half - 1)
@@ -182,7 +195,7 @@ namespace BinaryTree
             PxEntry found = cell.Root.BinarySearchInBT((PxEntry pe) =>
             {
                 string s = (string)pe.Field(0).Get().Value;
-                return name.CompareTo(s);
+                return String.Compare(name, s, StringComparison.Ordinal);
             });
             if (found.offset == long.MinValue) Console.WriteLine("Имя {0} не найдено", name);
             else
