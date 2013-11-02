@@ -32,8 +32,8 @@ namespace BinaryTree
             cell.Clear();
         
             //// Проверим существует ли пустое значение
-            var r1 = cell.Root.Get();
-            Console.WriteLine(r1.Type.Interpret(r1.Value));
+            
+           // Console.WriteLine(r1.Type.Interpret(r1.Value));
 
             // сделаем пробное заполнение вручную
             object[] valu =
@@ -58,16 +58,16 @@ namespace BinaryTree
 
             // проверяем содержимое
             var res = cell.Root.Get();
-            Console.WriteLine(res.Type.Interpret(res.Value));
+          //  Console.WriteLine(res.Type.Interpret(res.Value));
 
 
             // Пробно добавим пару элементов через метод расширения, описанный в ExtensionMethods
             cell.Clear();
 
-            cell.Add(new object[] { "bbb_name", "333L" });
-            cell.Add(new object[] { "bbc_name", "444L" }, edepth);
-            cell.Add(new object[] { "bbd_name", "555L" }, edepth);
-            cell.Add(new object[] { "bbe_name", "666L" }, edepth);
+            cell.Add(new object[] { "1", "333L" });
+            cell.Add(new object[] { "2", "444L" });
+            cell.Add(new object[] { "3", "555L" });
+            cell.Add(new object[] { "4", "666L" });
             // Получается 444(333(), 555(, 666()))
             var res2 = cell.Root.Get();
             Console.WriteLine(res2.Type.Interpret(res2.Value));
@@ -85,9 +85,7 @@ namespace BinaryTree
 
             var res3 = cell.Root.Get();
             Console.WriteLine(res3.Type.Interpret(res3.Value));
-            var res4= cell.Root.Get();
-           Console.WriteLine(res4.Type.Interpret(res4.Value));
-
+            
             // Теперь попробуем загрузить реальные данные
             tt0 = DateTime.Now;
             XElement db = XElement.Load(path + "0001.xml");
@@ -122,7 +120,7 @@ namespace BinaryTree
             BTree.counter = 0;
             foreach (int ind in IndSeq(0, len))
             {
-                cell.Add(new object[] { special_array[ind].name, special_array[ind].id }, edepth);
+                cell.Add(new object[] { special_array[ind].name, special_array[ind].id });
                 if (count % 1000 == 0)
                 {
                     Console.WriteLine("{0} {1}", count, BTree.counter);
@@ -143,7 +141,7 @@ namespace BinaryTree
             {
                 //if (pair.name == "Марчук Александр Гурьевич") { }
                 //if (pair.name == "Покрышкин Александр Иванович") { }
-                cell.Add(new object[] { pair.name, "555L" }, edepth);
+                cell.Add(new object[] { pair.name, "555L" });
 
                 if (count % 1000 == 0)
                 {
@@ -175,7 +173,7 @@ namespace BinaryTree
 
             // Под конец, добави еще одну пару и посмотрим появилась ли она
             TestSearch(cell, "Покрышкин Александр Иванович");
-            cell.Add(new object[] { "Покрышкин Александр Иванович", "pokryshkin_ai" }, edepth);
+            cell.Add(new object[] { "Покрышкин Александр Иванович", "pokryshkin_ai" });
             TestSearch(cell, "Покрышкин Александр Иванович");
             Console.WriteLine("======Total ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             cell.Close();
@@ -191,15 +189,7 @@ namespace BinaryTree
             {
                 if (c++%1000000 == 0)
                     Console.WriteLine(c);
-                overflowCell.Add(c,
-                    (o, entry) =>
-                    {
-                        long l = (long) o - (long) entry.Get().Value;
-                        if (l < Int32.MinValue)
-                            return Int32.MinValue;
-                        if (l > Int32.MaxValue) return Int32.MaxValue;
-                        return Convert.ToInt32(l);
-                    });
+                overflowCell.Add(c);
             }
         }
 

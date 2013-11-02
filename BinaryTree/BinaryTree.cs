@@ -15,8 +15,8 @@ namespace BinaryTree
             /// <summary>
             /// 
             /// </summary>
-            /// <param name="ptElement"></param>
-            /// <param name="elementDepth"></param>
+            /// <param name="ptElement">polar type of element of tree</param>
+            /// <param name="elementDepth">функция сравнения элемента дерева и добавляемого объекта</param>
             /// <param name="filePath"></param>
             /// <param name="readOnly"></param>
             public BTree(PType ptElement, Func<object, PxEntry, int> elementDepth, string filePath, bool readOnly = true)
@@ -54,22 +54,21 @@ namespace BinaryTree
             }
 
             public static int counter = 0;
-            private Func<object, PxEntry, int> elementDepth;
+            private readonly Func<object, PxEntry, int> elementDepth;
+            private readonly List<KeyValuePair<PxEntry, bool>> listEntries4Balance = new List<KeyValuePair<PxEntry, bool>>();
 
             /// <summary>
             /// Поместить элемент в дерево в соответствии со значением функции сравнения,
             ///  вернуть ссылку на голову нового дерева
             /// </summary>
             /// <param name="element"></param>
-            /// <param name="edepth"></param>
             /// <returns>была ли изменена высота дерева</returns>
-            public bool Add(object element, Func<object, PxEntry, int> edepth = null)
+            public void Add(object element)
             {
-                if (edepth == null) edepth = elementDepth;
                 var node = Root;
                 var lastUnBalanceNode = node;
                 bool any = false;
-                var goLeft = new List<bool>();
+                listEntries4Balance.Clear();
                 while (node.Tag() != 0)
                 {
                     var nodeEntry = node.UElement();
@@ -79,7 +78,7 @@ namespace BinaryTree
 
                     counter++;
                     PxEntry elementEntry = nodeEntry.Field(0);
-                    int cmp = edepth(element, elementEntry);
+                    int cmp = elementDepth(element, elementEntry);
                     if (cmp == 0)
                     {
                         //nodeEntry.Field(0).Set(element);
@@ -98,15 +97,17 @@ namespace BinaryTree
                         node.UElement().Field(1).SetHead(left);
                         node.UElement().Field(2).SetHead(right);
 
-                        return false;
+                        return;
                     }
                     if ((int) nodeEntry.Field(3).Get().Value != 0)
                     {
                         lastUnBalanceNode = node;
-                        goLeft.Clear();
+                        listEntries4Balance.Clear();
                     }
-                    goLeft.Add(cmp < 0);
-                    node = nodeEntry.Field(cmp < 0 ? 1 : 2);
+                    var goLeft = cmp < 0;
+                    //TODO catch overflow memory
+                    listEntries4Balance.Add(new KeyValuePair<PxEntry, bool>(nodeEntry, goLeft));
+                    node = nodeEntry.Field(goLeft ? 1 : 2);
                 }
                 // когда дерево пустое, организовать одиночное значение
                 node.Set(new object[]
@@ -116,31 +117,47 @@ namespace BinaryTree
                         element, new object[] {0, null}, new object[] {0, null}, 0
                     }
                 });
-                if (!any) return true;
-                node = lastUnBalanceNode;
-                for (int i = 0; i < goLeft.Count; i++)
+                if (!any) return;
+                for (int i = 0; i < listEntries4Balance.Count; i++)
                 {
-                    var nodeEntry = node.UElement();
-                    var balanceEntry = nodeEntry.Field(3);
-                    if (goLeft[i])
-                    {
-                        balanceEntry.Set((int) balanceEntry.Get().Value + 1);
-                        node = nodeEntry.Field(1);
-                    }
-                    else
-                    {
-                        balanceEntry.Set((int) balanceEntry.Get().Value - 1);
-                        node = nodeEntry.Field(2);
-                    }
+                    var balanceEntry = listEntries4Balance[i].Key.Field(3);
+                    balanceEntry.Set((int) balanceEntry.Get().Value + (listEntries4Balance[i].Value ? 1 : -1));
+
                 }
+              //  ChangeBalanceSlowlyLongSequence(element, lastUnBalanceNode);
                 var b = (int) lastUnBalanceNode.UElement().Field(3).Get().Value;
                 if (b == 2)
                     FixWithRotateRight(lastUnBalanceNode);
                 else if (b == -2)
                     FixWithRotateLeft(lastUnBalanceNode);
-                return true;
+              //  return true;
             }
 
+            private void ChangeBalanceSlowlyLongSequence(object element, PxEntry lastUnBalanceNode)
+            {
+                var nodeBalance = lastUnBalanceNode;
+                //   foreach (bool isLeft in listEntries4Balance)
+                int com = elementDepth(element, nodeBalance.UElement().Field(0));
+                while (com != 0)
+                {
+                    var nodeEntry = nodeBalance.UElement();
+                    var balanceEntry = nodeEntry.Field(3);
+                    if (com < 0)
+                    {
+                        balanceEntry.Set((int) balanceEntry.Get().Value + 1);
+                        nodeBalance = nodeEntry.Field(1);
+                    }
+                    else
+                    {
+                        balanceEntry.Set((int) balanceEntry.Get().Value - 1);
+                        nodeBalance = nodeEntry.Field(2);
+                    }
+                    if (nodeBalance.Tag() == 0) com = 0;
+                    else com = elementDepth(element, nodeBalance.UElement().Field(0));
+                }
+            }
+
+            /*
             public static bool AddRecursive(PxEntry root, object element, Func<object, PxEntry, int> elementDepth)
             {
                 if (root.Tag() == 0)
@@ -191,13 +208,13 @@ namespace BinaryTree
                 balanceEntity.Set(balance);
                 return balance != 0;
             }
-
+            */
             /// <summary>
             /// балансирует дерево поворотом влево
             /// </summary>
             /// <param name="root"></param>
             /// <returns> возвращает истину, если высота не изменилась</returns>
-            private static bool FixWithRotateLeft(PxEntry root)
+            private static void FixWithRotateLeft(PxEntry root)
             {
                 var rootEntry = root.UElement();
                 var r = rootEntry.Field(2); //Right;
@@ -205,41 +222,39 @@ namespace BinaryTree
                 var rl = rEntry.Field(1); //right of Left;
                 var rBalanseEntry = rEntry.Field(3);
                 var rBalance = (int) rBalanseEntry.Get().Value;
-                switch (rBalance)
+                if (rBalance == 1) 
                 {
-                    case 0:
-                    case -1:
-                    {
-                        rootEntry.Field(3).Set(rBalance == -1 ? 0 : -1);
-                        rEntry.Field(3).Set(rBalance == -1 ? 0 : 1);
-                        var rOld = r.GetHead();
-                        r.SetHead(rl.GetHead());
-                        rl.SetHead(root.GetHead());
-                        root.SetHead(rOld);
-                        return rBalance == 0;
-                    }
-                    case 1:
-                    {
-
-                        var rlEntry = rl.UElement();
-                        var rlold = rl.GetHead();
-                        int rlBalance = (rl.Tag() == 0 ? 0 : (int) rlEntry.Field(3).Get().Value);
-                        rl.SetHead(rlEntry.Field(2).GetHead());
-                        rEntry.Field(3).Set(Math.Min(0, -rlBalance));
-                        var oldR = r.GetHead();
-                        r.SetHead(rlEntry.Field(1).GetHead());
-                        rootEntry.Field(3).Set(Math.Max(0, -rlBalance));
-                        var rootOld = root.GetHead();
-                        root.SetHead(rlold);
-                        rootEntry = root.UElement();
-                        rootEntry.Field(1).SetHead(rootOld);
-                        rootEntry.Field(2).SetHead(oldR);
-                        rootEntry.Field(3).Set(0);
-                        return false;
-                    }
-                    default:
-                        return true;
+                    var rlEntry = rl.UElement();
+                    var rlold = rl.GetHead();
+                    int rlBalance = (rl.Tag() == 0 ? 0 : (int) rlEntry.Field(3).Get().Value);
+                    rl.SetHead(rlEntry.Field(2).GetHead());
+                    rEntry.Field(3).Set(Math.Min(0, -rlBalance));
+                    var oldR = r.GetHead();
+                    r.SetHead(rlEntry.Field(1).GetHead());
+                    rootEntry.Field(3).Set(Math.Max(0, -rlBalance));
+                    var rootOld = root.GetHead();
+                    root.SetHead(rlold);
+                    rootEntry = root.UElement();
+                    rootEntry.Field(1).SetHead(rootOld);
+                    rootEntry.Field(2).SetHead(oldR);
+                    rootEntry.Field(3).Set(0);
+                    return;
                 }
+                if (rBalance == -1)
+                {
+                    rootEntry.Field(3).Set(0);
+                    rEntry.Field(3).Set(0);
+                }
+                else //0
+                {
+                    rootEntry.Field(3).Set(-1);
+                    rEntry.Field(3).Set(1);
+                }
+                var rOld = r.GetHead();
+                r.SetHead(rl.GetHead());
+                rl.SetHead(root.GetHead());
+                root.SetHead(rOld);
+                return; //rBalance == 0;
             }
 
             /// <summary>
@@ -247,7 +262,7 @@ namespace BinaryTree
             /// </summary>
             /// <param name="root"></param>
             /// <returns> возвращает истину, если высота не изменилась</returns>
-            private static bool FixWithRotateRight(PxEntry root)
+            private static void FixWithRotateRight(PxEntry root)
             {
                 var rootEntry = root.UElement();
                 var l = rootEntry.Field(1); //Left;
@@ -256,41 +271,41 @@ namespace BinaryTree
                 var lr = lEntry.Field(2); //right of Left;
                 var leftBalanseEntry = lEntry.Field(3);
                 var leftBalance = (int) leftBalanseEntry.Get().Value;
-                switch (leftBalance)
+                if (leftBalance == -1)
                 {
-                    case 0:
-                    case 1:
-                    {
-                        rootEntry.Field(3).Set(leftBalance == 1 ? 0 : 1);
-                        lEntry.Field(3).Set(leftBalance == 1 ? 0 : -1);
-                        var lOld = l.GetHead();
-                        l.SetHead(lr.GetHead());
-                        lr.SetHead(root.GetHead());
-                        root.SetHead(lOld);
-                        return leftBalance == 0;
-                    }
-                    case -1:
-                    {
-                        var lrEntry = lr.UElement();
-                        var rlold = lr.GetHead();
-                        int rlBalance = (lr.Tag() == 0 ? 0 : (int) lEntry.Field(3).Get().Value);
-                        lr.SetHead(lrEntry.Field(1).GetHead());
-                        lEntry.Field(3).Set(Math.Max(0, -rlBalance));
-                        var oldR = l.GetHead();
-                        l.SetHead(lrEntry.Field(2).GetHead());
-                        rootEntry.Field(3).Set(Math.Min(0, -rlBalance));
-                        var rootOld = root.GetHead();
-                        root.SetHead(rlold);
-                        rootEntry = root.UElement();
-                        rootEntry.Field(2).SetHead(rootOld);
-                        rootEntry.Field(1).SetHead(oldR);
-                        rootEntry.Field(3).Set(0);
-                        return false;
-                    }
-                    default:
-                        return true;
+                    var lrEntry = lr.UElement();
+                    var rlold = lr.GetHead();
+                    int rlBalance = (lr.Tag() == 0 ? 0 : (int) lEntry.Field(3).Get().Value);
+                    lr.SetHead(lrEntry.Field(1).GetHead());
+                    lEntry.Field(3).Set(Math.Max(0, -rlBalance));
+                    var oldR = l.GetHead();
+                    l.SetHead(lrEntry.Field(2).GetHead());
+                    rootEntry.Field(3).Set(Math.Min(0, -rlBalance));
+                    var rootOld = root.GetHead();
+                    root.SetHead(rlold);
+                    rootEntry = root.UElement();
+                    rootEntry.Field(2).SetHead(rootOld);
+                    rootEntry.Field(1).SetHead(oldR);
+                    rootEntry.Field(3).Set(0);
+                    return;
                 }
+                if (leftBalance == 1) // 1
+                {
+                    rootEntry.Field(3).Set(0);
+                    lEntry.Field(3).Set(0);
+                }
+                else // 0
+                {
+                    rootEntry.Field(3).Set(1);
+                    lEntry.Field(3).Set(-1);
+                }
+                var lOld = l.GetHead();
+                l.SetHead(lr.GetHead());
+                lr.SetHead(root.GetHead());
+                root.SetHead(lOld);
             }
+
+
 
             public PxEntry BinarySearch(Func<PxEntry, int> eDepth)
             {
