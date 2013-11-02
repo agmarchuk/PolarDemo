@@ -2,53 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using PolarDB;
 
 namespace BinaryTree
 {
-    public class BTree
-    {
-        // Тип
-        // BTree<T> = empty^none,
-        //            pair^{element: T, less: BTree<T>, more: BTree<T>};
-        PTypeUnion tp_btree;
-        PType tp_element;
-        internal static readonly object[] Empty;
-
-        public BTree()
-        {
-            // Тип элемента, как и в проекте Sorting: 
-            tp_element = new PTypeRecord(
-                new NamedType("name", new PType(PTypeEnumeration.sstring)),
-                new NamedType("id", new PType(PTypeEnumeration.sstring)));
-            // Заполнение типа дерева. Тип рекурсивный, поэтому это делается в два выражения
-
-            tp_btree = PTypeTree(tp_element);
-        }
-
-        static BTree()
-        {
-            Empty = new object[] {0, null};
-        }
-
-        private static PTypeUnion PTypeTree(PType tpElement)
-        { 
-           var tpBtree = new PTypeUnion();
-            tpBtree.Variants = new[]
-            {
-                new NamedType("empty", new PType(PTypeEnumeration.none)),
-                new NamedType("pair", new PTypeRecord(
-                    new NamedType("element", tpElement),
-                    new NamedType("less", tpBtree),
-                    new NamedType("more", tpBtree),
-                    //1 - слева больше, -1 - справа больше.
-                    new NamedType("balance", new PType(PTypeEnumeration.integer))))
-            };
-            return tpBtree;
-        }
+   public class Programm{
 
         public static void Main(string[] args)
         {
@@ -57,12 +16,19 @@ namespace BinaryTree
             string path = @"..\..\..\Databases\";
                          //"C:\home\FactographDatabases"
             Console.WriteLine("Start.");
-            
+
+            Func<object, PxEntry, int> edepth = (object v1, PxEntry en2) =>
+            {
+                string s1 = (string)(((object[])v1)[0]);
+                return String.Compare(s1, (string)(en2.Field(0).Get().Value), StringComparison.Ordinal);
+            };
             // Инициируем типы
-            BTree tree = new BTree();
             // Создадим фиксированную ячейку
-            //if (File.Exists(path + "btree.pxc")) File.Delete(path + "btree.pxc");
-            PxCell cell = new PxCell(tree.tp_btree, path + "btree.pxc", false);
+            BTree cell = new  BTree(new PTypeRecord(
+                new NamedType("name", new PType(PTypeEnumeration.sstring)),
+                new NamedType("id", new PType(PTypeEnumeration.sstring))),
+                edepth,
+                 path + "btree.pxc", false);
             cell.Clear();
         
             //// Проверим существует ли пустое значение
@@ -80,11 +46,11 @@ namespace BinaryTree
                         1, new object[]
                         {
                             new object[] {"name0", "444L"},
-                            Empty,
-                            Empty, 0
+                           BTree. Empty,
+                            BTree.Empty, 0
                         }
                     },
-                    Empty, 1
+                    BTree.Empty, 1
                 }
             };
             cell.Fill2(valu);
@@ -96,13 +62,9 @@ namespace BinaryTree
 
             // Пробно добавим пару элементов через метод расширения, описанный в ExtensionMethods
             cell.Clear();
-            Func<object, PxEntry, int> edepth = (object v1, PxEntry en2) =>
-                {
-                    string s1 = (string)(((object[])v1)[0]);
-                    return String.Compare(s1, (string)(en2.Field(0).Get().Value), StringComparison.Ordinal);
-                };
-            cell.Root.Add(new object[] { "bbb_name", "333L" }, edepth);
-            cell.Root.Add(new object[] { "bbc_name", "444L" }, edepth);
+
+            cell.Add(new object[] { "bbb_name", "333L" }, edepth);
+            cell.Add(new object[] { "bbc_name", "444L" }, edepth);
             
             var res2 = cell.Root.Get();
            Console.WriteLine(res2.Type.Interpret(res2.Value));
@@ -124,7 +86,7 @@ namespace BinaryTree
             Console.WriteLine("======Count() ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             cell.Clear();
 
-            ExtensionMethods.counter = 0;
+            BTree.counter = 0;
             var special_array = query.OrderBy(pair => pair.name)
                 .Select(oe => oe)
                 .ToArray();
@@ -138,14 +100,14 @@ namespace BinaryTree
            // //return;
             int count = 0;
             int len = special_array.Length;
-            ExtensionMethods.counter = 0;
+            BTree.counter = 0;
             foreach (int ind in IndSeq(0, len))
             {
-                cell.Root.Add(new object[] { special_array[ind].name, special_array[ind].id }, edepth);
+                cell.Add(new object[] { special_array[ind].name, special_array[ind].id }, edepth);
                 if (count % 1000 == 0)
                 {
-                    Console.WriteLine("{0} {1}", count, ExtensionMethods.counter);
-                    ExtensionMethods.counter = 0;
+                    Console.WriteLine("{0} {1}", count, BTree.counter);
+                    BTree.counter = 0;
                 }
                 count++;
             }
@@ -157,17 +119,17 @@ namespace BinaryTree
            // // Загрузим фрагмент бинарного дерева
             cell.Clear();
             count = 0;
-            ExtensionMethods.counter = 0;
+            BTree.counter = 0;
             foreach (var pair in query.Take(400000).Reverse())
             {
                 //if (pair.name == "Марчук Александр Гурьевич") { }
                 //if (pair.name == "Покрышкин Александр Иванович") { }
-                cell.Root.Add(new object[] { pair.name, "555L" }, edepth);
+                cell.Add(new object[] { pair.name, "555L" }, edepth);
 
                 if (count % 1000 == 0)
                 {
-                    Console.WriteLine("{0} {1}", count, ExtensionMethods.counter);
-                    ExtensionMethods.counter = 0;
+                    Console.WriteLine("{0} {1}", count, BTree.counter);
+                    BTree.counter = 0;
                 }
                 count++;
             }
@@ -194,7 +156,7 @@ namespace BinaryTree
 
             // Под конец, добави еще одну пару и посмотрим появилась ли она
             TestSearch(cell, "Покрышкин Александр Иванович");
-            cell.Root.Add(new object[] { "Покрышкин Александр Иванович", "pokryshkin_ai" }, edepth);
+            cell.Add(new object[] { "Покрышкин Александр Иванович", "pokryshkin_ai" }, edepth);
             TestSearch(cell, "Покрышкин Александр Иванович");
             Console.WriteLine("======Total ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             cell.Close();
@@ -202,16 +164,15 @@ namespace BinaryTree
           //  GetOverflow(path);
         }
 
-        private static void GetOverflow(string path)
+        private static void GetOverflow(string path, Func<object, PxEntry, int> edapth)
         {
-            var overflowCell = new PxCell(BTree.PTypeTree(new PType(PTypeEnumeration.longinteger)),
-                path + "overflowFile", false);
+            var overflowCell = new BTree(new PType(PTypeEnumeration.longinteger), edapth,  path + "overflowFile", false);
             long c = 0;
             while (true)
             {
                 if (c++%1000000 == 0)
                     Console.WriteLine(c);
-                overflowCell.Root.Add(c,
+                overflowCell.Add(c,
                     (o, entry) =>
                     {
                         long l = (long) o - (long) entry.Get().Value;
@@ -244,9 +205,9 @@ namespace BinaryTree
 
         }
 
-        private static void TestSearch(PxCell cell, string name)
+        private static void TestSearch(BTree cell, string name)
         {
-            PxEntry found = cell.Root.BinarySearchInBT((PxEntry pe) =>
+            PxEntry found = cell.BinarySearch(pe =>
             {
                 string s = (string)pe.Field(0).Get().Value;
                 return String.Compare(name, s, StringComparison.Ordinal);
