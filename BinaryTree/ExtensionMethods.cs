@@ -155,9 +155,9 @@ namespace BinaryTree
                     rootEntry.Field(3).Set(rBalance == -1 ? 0 : -1);
                     rEntry.Field(3).Set(rBalance == -1 ? 0 : 1);
                     var rOld = r.GetHead();
-                    r.GetHead(rl.GetHead());
-                    rl.GetHead(root.GetHead());
-                    root.GetHead(rOld);
+                    r.SetHead(rl.GetHead());
+                    rl.SetHead(root.GetHead());
+                    root.SetHead(rOld);
                     return rBalance == 0;
                 }
                 case 1:
@@ -166,16 +166,16 @@ namespace BinaryTree
                     var rlEntry = rl.UElement();
                     var rlold = rl.GetHead();
                     int rlBalance = (rl.Tag() == 0 ? 0 : (int) rlEntry.Field(3).Get().Value);
-                    rl.GetHead(rlEntry.Field(2).GetHead());
+                    rl.SetHead(rlEntry.Field(2).GetHead());
                     rEntry.Field(3).Set(Math.Min(0, -rlBalance));
                     var oldR = r.GetHead();
-                    r.GetHead(rlEntry.Field(1).GetHead());
+                    r.SetHead(rlEntry.Field(1).GetHead());
                     rootEntry.Field(3).Set(Math.Max(0, -rlBalance));
                     var rootOld = root.GetHead();
-                    root.GetHead(rlold);
+                    root.SetHead(rlold);
                     rootEntry = root.UElement();
-                    rootEntry.Field(1).GetHead(rootOld);
-                    rootEntry.Field(2).GetHead(oldR);
+                    rootEntry.Field(1).SetHead(rootOld);
+                    rootEntry.Field(2).SetHead(oldR);
                     rootEntry.Field(3).Set(0);
                     return false;
                 }
@@ -205,9 +205,9 @@ namespace BinaryTree
                     rootEntry.Field(3).Set(leftBalance == 1 ? 0 : 1);
                     lEntry.Field(3).Set(leftBalance == 1 ? 0 : -1);
                     var lOld = l.GetHead();
-                    l.GetHead(lr.GetHead());
-                    lr.GetHead(root.GetHead());
-                    root.GetHead(lOld);
+                    l.SetHead(lr.GetHead());
+                    lr.SetHead(root.GetHead());
+                    root.SetHead(lOld);
                     return leftBalance == 0;
                     }
                 case -1:
@@ -215,16 +215,16 @@ namespace BinaryTree
                         var lrEntry = lr.UElement();
                         var rlold = lr.GetHead();
                         int rlBalance = (lr.Tag() == 0 ? 0 : (int)lEntry.Field(3).Get().Value);
-                        lr.GetHead(lrEntry.Field(1).GetHead());
+                        lr.SetHead(lrEntry.Field(1).GetHead());
                         lEntry.Field(3).Set(Math.Max(0, -rlBalance));
                         var oldR = l.GetHead();
-                        l.GetHead(lrEntry.Field(2).GetHead());
+                        l.SetHead(lrEntry.Field(2).GetHead());
                         rootEntry.Field(3).Set(Math.Min(0, -rlBalance));
                         var rootOld = root.GetHead();
-                        root.GetHead(rlold);
+                        root.SetHead(rlold);
                         rootEntry = root.UElement();
-                        rootEntry.Field(2).GetHead(rootOld);
-                        rootEntry.Field(1).GetHead(oldR);
+                        rootEntry.Field(2).SetHead(rootOld);
+                        rootEntry.Field(1).SetHead(oldR);
                         rootEntry.Field(3).Set(0);
                         return false;
                 }

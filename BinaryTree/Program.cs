@@ -55,19 +55,38 @@ namespace BinaryTree
             };
             cell.Fill2(valu);
             cell.Root.UElementUnchecked(1).Field(0).Set(new object[] { "", "" });
-            
+
             // проверяем содержимое
             var res = cell.Root.Get();
             Console.WriteLine(res.Type.Interpret(res.Value));
 
+
             // Пробно добавим пару элементов через метод расширения, описанный в ExtensionMethods
             cell.Clear();
 
-            cell.Add(new object[] { "bbb_name", "333L" }, edepth);
+            cell.Add(new object[] { "bbb_name", "333L" });
             cell.Add(new object[] { "bbc_name", "444L" }, edepth);
-            
+            cell.Add(new object[] { "bbd_name", "555L" }, edepth);
+            cell.Add(new object[] { "bbe_name", "666L" }, edepth);
+            // Получается 444(333(), 555(, 666()))
             var res2 = cell.Root.Get();
-           Console.WriteLine(res2.Type.Interpret(res2.Value));
+            Console.WriteLine(res2.Type.Interpret(res2.Value));
+            Console.WriteLine();
+            // Повернем дерево, чтобы стало 555(444(333(),), 666())
+            // Для этого, сначала выделим корневой узел 444 и узел 555
+            var h444 = cell.Root.GetHead();
+            var h555 = cell.Root.UElement().Field(2).GetHead();
+            // Теперь 555 запишем в корень
+            cell.Root.SetHead(h555);
+            // Левое поддерево у нас пустое, поэтому просто перепишем этот вход
+            cell.Root.UElement().Field(1).SetHead(h444);
+            // а в h444 заменим правое поддерево на пустое
+            cell.Root.UElement().Field(1).UElement().Field(2).Set(BTree.Empty);
+
+            var res3 = cell.Root.Get();
+            Console.WriteLine(res3.Type.Interpret(res3.Value));
+            var res4= cell.Root.Get();
+           Console.WriteLine(res4.Type.Interpret(res4.Value));
 
             // Теперь попробуем загрузить реальные данные
             tt0 = DateTime.Now;
