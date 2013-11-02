@@ -24,7 +24,7 @@ namespace BinaryTree
             var goLeft=new List<bool>();
             while (node.Tag() != 0)
             {
-                var nodeEntry = node.UElementUnchecked(1);
+                var nodeEntry = node.UElement();
                 any = true;
                 // Если не пустое
                 // Сравним пришедший элемент с имеющимся в корне
@@ -65,7 +65,7 @@ namespace BinaryTree
             node = lastUnBalanceNode;
             for (int i = 0; i < goLeft.Count; i++)
             {
-                var nodeEntry = node.UElementUnchecked(1);
+                var nodeEntry = node.UElement();
                 var balanceEntry = nodeEntry.Field(3);
                 if (goLeft[i])
                 {
@@ -78,7 +78,7 @@ namespace BinaryTree
                     node = nodeEntry.Field(2);
                 }
             }
-            var b = (int) lastUnBalanceNode.UElementUnchecked(1).Field(3).Get().Value;
+            var b = (int) lastUnBalanceNode.UElement().Field(3).Get().Value;
             if (b == 2)
                 FixWithRotateRight(lastUnBalanceNode);
             else if (b == -2)
@@ -141,9 +141,9 @@ namespace BinaryTree
         /// <returns> возвращает истину, если высота не изменилась</returns>
         static bool FixWithRotateLeft(this PxEntry root)
         {
-            var rootEntry = root.UElementUnchecked(1);
+            var rootEntry = root.UElement();
             var r = rootEntry.Field(2); //Right;
-            var rEntry = r.UElementUnchecked(1);
+            var rEntry = r.UElement();
             var rl = rEntry.Field(1); //right of Left;
             var rBalanseEntry = rEntry.Field(3);
             var rBalance = (int)rBalanseEntry.Get().Value;
@@ -174,7 +174,7 @@ namespace BinaryTree
                     }
                 case 1:
                     {
-                        var rlEntry = rl.UElementUnchecked(1);
+                        var rlEntry = rl.UElement();
                         bool rlEmpty = rl.Tag() == 0;
                         var rlBalance =rlEmpty ? 0 : (int)rlEntry.Field(3).Get().Value;
                         root.Set(new object[]{1,
@@ -219,10 +219,10 @@ namespace BinaryTree
         /// <returns> возвращает истину, если высота не изменилась</returns>
         static bool FixWithRotateRight(this PxEntry root)
         {
-            var rootEntry = root.UElementUnchecked(1);
+            var rootEntry = root.UElement();
             var l = rootEntry.Field(1); //Left;
           
-            var lEntry = l.UElementUnchecked(1);
+            var lEntry = l.UElement();
             var lr = lEntry.Field(2); //right of Left;
             var leftBalanseEntry = lEntry.Field(3);
             var leftBalance = (int)leftBalanseEntry.Get().Value;
@@ -255,7 +255,7 @@ namespace BinaryTree
                     }
                 case -1:
                     {
-                        var lrEntry = lr.UElementUnchecked(1);
+                        var lrEntry = lr.UElement();
                         bool lrEmpty = lr.Tag() == 0;
                         var lrBalance = lrEmpty ? 0 : (int)lrEntry.Field(3).Get().Value;
                         root.Set(new object[]
@@ -293,15 +293,20 @@ namespace BinaryTree
                 default: return true;
             }
         }
+
+        static PxEntry ReWrite(this PxEntry entry)
+        {
+            return entry;
+        }
         public static PxEntry BinarySearchInBT(this PxEntry entry, Func<PxEntry, int> elementDepth)
         {
             while (true)
             {
                 if (entry.Tag() == 0) return new PxEntry(entry.Typ, long.MinValue, entry.fis);
-                PxEntry elementEntry = entry.UElementUnchecked(1).Field(0); // Можно сэкономить на запоминании входа для uelement'а
+                PxEntry elementEntry = entry.UElement().Field(0); // Можно сэкономить на запоминании входа для uelement'а
                 int level = elementDepth(elementEntry);
                 if (level == 0) return elementEntry;
-                entry = entry.UElementUnchecked(1).Field(level < 0 ? 1 : 2);
+                entry = entry.UElement().Field(level < 0 ? 1 : 2);
             }
         }
     }

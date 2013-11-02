@@ -23,17 +23,26 @@ namespace BinaryTree
                 new NamedType("name", new PType(PTypeEnumeration.sstring)),
                 new NamedType("id", new PType(PTypeEnumeration.sstring)));
             // Заполнение типа дерева. Тип рекурсивный, поэтому это делается в два выражения
-            tp_btree = new PTypeUnion();
-            tp_btree.Variants = new[] {
+           
+          tp_btree=  PTypeTree(tp_element);
+        }
+
+        private static PTypeUnion PTypeTree(PType tpElement)
+        { 
+           var tpBtree = new PTypeUnion();
+            tpBtree.Variants = new[]
+            {
                 new NamedType("empty", new PType(PTypeEnumeration.none)),
                 new NamedType("pair", new PTypeRecord(
-                    new NamedType("element", tp_element),
-                    new NamedType("less", tp_btree),
-                    new NamedType("more", tp_btree),
+                    new NamedType("element", tpElement),
+                    new NamedType("less", tpBtree),
+                    new NamedType("more", tpBtree),
                     //1 - слева больше, -1 - справа больше.
-                    new NamedType("balance",new PType(PTypeEnumeration.integer))))
+                    new NamedType("balance", new PType(PTypeEnumeration.integer))))
             };
+            return tpBtree;
         }
+
         public static void Main(string[] args)
         {
             DateTime tt0 = DateTime.Now;
@@ -120,9 +129,9 @@ namespace BinaryTree
                 Console.Write("{0} ", ind);
             }
          
-            //return;
-           int count = 0;
-           int len = special_array.Length; 
+           // //return;
+            int count = 0;
+            int len = special_array.Length;
             ExtensionMethods.counter = 0;
             foreach (int ind in IndSeq(0, len))
             {
@@ -135,20 +144,20 @@ namespace BinaryTree
                 count++;
             }
             Console.WriteLine("======BinaryTree ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            // У меня дома получилось 17 сек. для пары {string, long} и 22 сек. для {string, string}
+           // // У меня дома получилось 17 сек. для пары {string, long} и 22 сек. для {string, string}
 
 
 
-            // Загрузим фрагмент бинарного дерева
+           // // Загрузим фрагмент бинарного дерева
             cell.Clear();
-             count = 0;
+            count = 0;
             ExtensionMethods.counter = 0;
             foreach (var pair in query.Take(400000).Reverse())
             {
                 //if (pair.name == "Марчук Александр Гурьевич") { }
                 //if (pair.name == "Покрышкин Александр Иванович") { }
                 cell.Root.Add(new object[] { pair.name, "555L" }, edepth);
-                
+
                 if (count % 1000 == 0)
                 {
                     Console.WriteLine("{0} {1}", count, ExtensionMethods.counter);
@@ -184,6 +193,28 @@ namespace BinaryTree
             Console.WriteLine("======Total ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             cell.Close();
             File.Delete(path + "btree.pxc");
+          //  GetOverflow(path);
+        }
+
+        private static void GetOverflow(string path)
+        {
+            var overflowCell = new PxCell(BTree.PTypeTree(new PType(PTypeEnumeration.longinteger)),
+                path + "overflowFile", false);
+            long c = 0;
+            while (true)
+            {
+                if (c++%1000000 == 0)
+                    Console.WriteLine(c);
+                overflowCell.Root.Add(c,
+                    (o, entry) =>
+                    {
+                        long l = (long) o - (long) entry.Get().Value;
+                        if (l < Int32.MinValue)
+                            return Int32.MinValue;
+                        if (l > Int32.MaxValue) return Int32.MaxValue;
+                        return Convert.ToInt32(l);
+                    });
+            }
         }
 
         // Построение объекта дерева бинарного поиска
