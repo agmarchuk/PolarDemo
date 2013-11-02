@@ -116,39 +116,38 @@ namespace BinaryTree
             // Еще раз
             Console.WriteLine(query.Count());
             Console.WriteLine("======Count() ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            cell.Clear();
-
-            ExtensionMethods.counter = 0;
-            var special_array = query.OrderBy(pair => pair.name)
-                .Select(oe => oe)
-                .ToArray();
-
-
+            
+            // Проверка инверсного индекса            
             foreach (int ind in IndSeq(0, 8))
             {
                 Console.Write("{0} ", ind);
             }
          
-           // //return;
-            int count = 0;
-            int len = special_array.Length;
-            ExtensionMethods.counter = 0;
-            foreach (int ind in IndSeq(0, len))
-            {
-                cell.Root.Add(new object[] { special_array[ind].name, special_array[ind].id }, edepth);
-                if (count % 1000 == 0)
-                {
-                    Console.WriteLine("{0} {1}", count, ExtensionMethods.counter);
-                    ExtensionMethods.counter = 0;
-                }
-                count++;
-            }
-            Console.WriteLine("======BinaryTree ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            int count = 0; // переменная для ослеживания ввода
+
+            // Загрузка бинарного дерева с помощью сортировки и инверсного индекса            
+            //cell.Clear();
+            //var special_array = query.OrderBy(pair => pair.name)
+            //    .Select(oe => oe)
+            //    .ToArray();
+            //int len = special_array.Length;
+            //ExtensionMethods.counter = 0;
+            //foreach (int ind in IndSeq(0, len))
+            //{
+            //    cell.Root.Add(new object[] { special_array[ind].name, special_array[ind].id }, edepth);
+            //    if (count % 1000 == 0)
+            //    {
+            //        Console.WriteLine("{0} {1}", count, ExtensionMethods.counter);
+            //        ExtensionMethods.counter = 0;
+            //    }
+            //    count++;
+            //}
+            //Console.WriteLine("======BinaryTree ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
            // // У меня дома получилось 17 сек. для пары {string, long} и 22 сек. для {string, string}
 
 
 
-           // // Загрузим фрагмент бинарного дерева
+            // Загрузим фрагмент бинарного дерева
             cell.Clear();
             count = 0;
             ExtensionMethods.counter = 0;
@@ -169,16 +168,16 @@ namespace BinaryTree
             Console.WriteLine("======part of BinaryTree ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             // Теперь загрузим все данные, но для этого надо будет их отсортировать и подавать в специальном режиме
-        
+            // Метод перестал работать!!! РАЗОБРАТЬСЯ!
             // Еще один способ построения бинарного дерева: Сначалы мы формируем объект, потом его вводим стандартным Fill2
-            var array_of_elements = query.OrderBy(pair => pair.name)
-                .Select(oe => new object[] {oe.name, oe.id})
-                .ToArray();
-          //  object bt = BuildBinaryTreeObjectFromSortedSequence(array_of_elements, 0, array_of_elements.Length);
+            //var array_of_elements = query.OrderBy(pair => pair.name)
+            //    .Select(oe => new object[] {oe.name, oe.id})
+            //    .ToArray();
+            //object bt = BuildBinaryTreeObjectFromSortedSequence(array_of_elements, 0, array_of_elements.Length);
             //Console.WriteLine(tree.tp_btree.Interpret(bt));
-           // cell.Clear();
-         //   cell.Fill2(bt);
-            Console.WriteLine("======Binary Tree Build ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            //cell.Clear();
+            //cell.Fill2(bt);
+            //Console.WriteLine("======Binary Tree Build ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
 
             // Бинарный поиск на бинарном дереве

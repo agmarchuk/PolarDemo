@@ -24,20 +24,21 @@ namespace TableWithIndex
                 "p0011098",
                 "svet_100616111408_14354"
             };
-            XElement db = XElement.Load(@"..\..\..\Databases\0001.xml");
+            //XElement db = XElement.Load(@"..\..\..\Databases\0001.xml");
+            XElement db = XElement.Load(@"D:\home\dev2012\tm.xml");
             DateTime tt0 = DateTime.Now;
 
             Console.WriteLine("Start");
-            bool sql = false;
+            bool sql = true;
             if (sql)
             {
                 var test = new SQLTest(@"Data Source=(LocalDB)\v11.0;AttachDbFilename=D:\home\FactographDatabases\test20131025.mdf;Integrated Security=True;Connect Timeout=30");
-                //test.PrepareToLoad();
-                //Console.WriteLine("PrepareToLoad ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-                //test.Load(@"..\..\..\Databases\0001.xml");
-                //Console.WriteLine("Load ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-                //test.Index1();
-                //Console.WriteLine("Index1 ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                test.PrepareToLoad();
+                Console.WriteLine("PrepareToLoad ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                test.Load(db);
+                Console.WriteLine("Load ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                test.Index1();
+                Console.WriteLine("Index1 ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 //test.Index2();
                 //Console.WriteLine("Index2 ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 test.SelectById("w20070417_5_8436");
@@ -46,6 +47,7 @@ namespace TableWithIndex
                 Console.WriteLine("SelectById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 //test.SelectById("pavl_100531115859_6952");
                 //Console.WriteLine("SelectById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                test.Count();
             }
             else
             {

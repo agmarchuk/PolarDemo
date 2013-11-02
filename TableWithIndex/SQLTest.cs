@@ -58,7 +58,7 @@ namespace TableWithIndex
                 var id_att = element.Attribute(ONames.rdfabout);
                 var tname = element.Name;
                 if (id_att == null) continue;
-                if (!(tname == ONames.tag_person)) continue;
+                //if (!(tname == ONames.tag_person)) continue;
                 var name_el = element.Element(ONames.tag_name);
                 if (name_el == null) continue;
                 var fd_el = element.Element(ONames.tag_fromdate);
@@ -106,14 +106,14 @@ namespace TableWithIndex
             }
             connection.Close();
         }
-        public void Test3()
+        public void Count()
         {
             connection.Open();
             var comm = connection.CreateCommand();
             comm.CommandTimeout = 1000;
-            comm.CommandText = "SELECT COUNT(*) FROM Tab1 WHERE randcol % 2 = 0;";
+            comm.CommandText = "SELECT COUNT(*) FROM items;";
             var obj = comm.ExecuteScalar();
-            Console.WriteLine("Test3 result={0}", obj);
+            Console.WriteLine("Count()={0}", obj);
             connection.Close();
         }
         // Начальная и конечная "скобки" транзакции. В серединке должны использоваться SQL-команды ТОЛЬКО на основе команды runcommand
