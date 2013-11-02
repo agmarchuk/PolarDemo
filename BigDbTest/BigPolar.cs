@@ -63,6 +63,7 @@ namespace BigDbTest
         }
         public void Test2(string condition)
         {
+            var qu = cell.Root.
         }
         public void Test3()
         {
