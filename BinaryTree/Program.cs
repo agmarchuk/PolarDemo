@@ -16,6 +16,8 @@ namespace BinaryTree
         //            pair^{element: T, less: BTree<T>, more: BTree<T>};
         PTypeUnion tp_btree;
         PType tp_element;
+        internal static readonly object[] Empty;
+
         public BTree()
         {
             // Тип элемента, как и в проекте Sorting: 
@@ -23,8 +25,13 @@ namespace BinaryTree
                 new NamedType("name", new PType(PTypeEnumeration.sstring)),
                 new NamedType("id", new PType(PTypeEnumeration.sstring)));
             // Заполнение типа дерева. Тип рекурсивный, поэтому это делается в два выражения
-           
-          tp_btree=  PTypeTree(tp_element);
+
+            tp_btree = PTypeTree(tp_element);
+        }
+
+        static BTree()
+        {
+            Empty = new object[] {0, null};
         }
 
         private static PTypeUnion PTypeTree(PType tpElement)
@@ -57,13 +64,12 @@ namespace BinaryTree
             //if (File.Exists(path + "btree.pxc")) File.Delete(path + "btree.pxc");
             PxCell cell = new PxCell(tree.tp_btree, path + "btree.pxc", false);
             cell.Clear();
-
+        
             //// Проверим существует ли пустое значение
             var r1 = cell.Root.Get();
             Console.WriteLine(r1.Type.Interpret(r1.Value));
 
             // сделаем пробное заполнение вручную
-            object[] empty = { 0, null };
             object[] valu =
             {
                 1, new object[]
@@ -74,11 +80,11 @@ namespace BinaryTree
                         1, new object[]
                         {
                             new object[] {"name0", "444L"},
-                            empty,
-                            empty, 0
+                            Empty,
+                            Empty, 0
                         }
                     },
-                    empty, 1
+                    Empty, 1
                 }
             };
             cell.Fill2(valu);
@@ -112,7 +118,7 @@ namespace BinaryTree
             // Левое поддерево у нас пустое, поэтому просто перепишем этот вход
             cell.Root.UElement().Field(1).SetHead(h444);
             // а в h444 заменим правое поддерево на пустое
-            cell.Root.UElement().Field(1).UElement().Field(2).Set(empty);
+            cell.Root.UElement().Field(1).UElement().Field(2).Set(Empty);
             
             var res3 = cell.Root.Get();
            Console.WriteLine(res3.Type.Interpret(res3.Value));
@@ -133,8 +139,14 @@ namespace BinaryTree
             // Еще раз
             Console.WriteLine(query.Count());
             Console.WriteLine("======Count() ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            
-            // Проверка инверсного индекса            
+            cell.Clear();
+
+            ExtensionMethods.counter = 0;
+            var special_array = query.OrderBy(pair => pair.name)
+                .Select(oe => oe)
+                .ToArray();
+
+
             foreach (int ind in IndSeq(0, 8))
             {
                 Console.Write("{0} ", ind);
@@ -185,16 +197,16 @@ namespace BinaryTree
             Console.WriteLine("======part of BinaryTree ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             // Теперь загрузим все данные, но для этого надо будет их отсортировать и подавать в специальном режиме
-            // Метод перестал работать!!! РАЗОБРАТЬСЯ!
+        
             // Еще один способ построения бинарного дерева: Сначалы мы формируем объект, потом его вводим стандартным Fill2
-            //var array_of_elements = query.OrderBy(pair => pair.name)
-            //    .Select(oe => new object[] {oe.name, oe.id})
-            //    .ToArray();
-            //object bt = BuildBinaryTreeObjectFromSortedSequence(array_of_elements, 0, array_of_elements.Length);
+            var array_of_elements = query.OrderBy(pair => pair.name)
+                .Select(oe => new object[] {oe.name, oe.id})
+                .ToArray();
+          //  object bt = BuildBinaryTreeObjectFromSortedSequence(array_of_elements, 0, array_of_elements.Length);
             //Console.WriteLine(tree.tp_btree.Interpret(bt));
-            //cell.Clear();
-            //cell.Fill2(bt);
-            //Console.WriteLine("======Binary Tree Build ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+           // cell.Clear();
+         //   cell.Fill2(bt);
+            Console.WriteLine("======Binary Tree Build ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
 
             // Бинарный поиск на бинарном дереве
