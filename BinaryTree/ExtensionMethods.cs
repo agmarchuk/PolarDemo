@@ -294,9 +294,45 @@ namespace BinaryTree
             }
         }
 
-        static PxEntry ReWrite(this PxEntry entry)
+        private static PxEntry CopyFrom(this PxEntry output, PxEntry input)
         {
-            return entry;
+            if (input.Tag() == 0) return output;
+            output.Set(new object[]
+            {
+                1, new[]
+                {
+                    input.UElement().Field(0).Get().Value,
+                    BTree.Empty,
+                    BTree.Empty,
+                    input.UElement().Field(0).Get().Value,
+                }
+            });
+            output.UElement().Field(1).CopyFrom(input.UElement().Field(1));
+            output.UElement().Field(2).CopyFrom(input.UElement().Field(2));
+            return output;
+        }
+        private static PxEntry MoveDownRight(this PxEntry output, PxEntry input, object newRoot, object newBalance)
+        {
+            if (input.Tag() == 0) //last
+            {
+                output.Set(new object[] {1, new[] {newRoot, BTree.Empty, BTree.Empty, newBalance}});
+                return output;
+            }
+            var oldElement = input.UElement().Field(0).Get().Value;
+            var oldBalance = input.UElement().Field(3).Get().Value;
+            output.Set(new object[]
+            {
+                1, new[]
+                {
+                    input.UElement().Field(0).Get().Value,
+                    BTree.Empty,
+                    BTree.Empty,
+                    input.UElement().Field(0).Get().Value,
+                }
+            });
+            output.UElement().Field(1).CopyFrom(input.UElement().Field(1));
+            output.UElement().Field(2).CopyFrom(input.UElement().Field(2));
+            return output;
         }
         public static PxEntry BinarySearchInBT(this PxEntry entry, Func<PxEntry, int> elementDepth)
         {
