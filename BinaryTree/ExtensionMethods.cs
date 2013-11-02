@@ -151,63 +151,34 @@ namespace BinaryTree
             {
                 case 0:
                 case -1:
-                    {
-                        root.Set(new object[]
-                        {1, new []
-                        {
-                            rEntry.Field(0).Get().Value,
-                            new object[]
-                            {
-                                1,
-                                new[]
-                                {
-                                    rootEntry.Field(0).Get().Value,
-                                    rootEntry.Field(1).Get().Value,
-                                    rl.Get().Value,
-                                    rBalance==-1 ? 0 : -1
-                                }
-                            },
-                            rEntry.Field(2).Get().Value,
-                            rBalance==-1 ? 0 : 1
-                        }});
-                        return rBalance == 0;
-                    }
+                {
+                    rootEntry.Field(3).Set(rBalance == -1 ? 0 : -1);
+                    rEntry.Field(3).Set(rBalance == -1 ? 0 : 1);
+                    var rOld = r.GetHead();
+                    r.GetHead(rl.GetHead());
+                    rl.GetHead(root.GetHead());
+                    root.GetHead(rOld);
+                    return rBalance == 0;
+                }
                 case 1:
-                    {
-                        var rlEntry = rl.UElement();
-                        bool rlEmpty = rl.Tag() == 0;
-                        var rlBalance =rlEmpty ? 0 : (int)rlEntry.Field(3).Get().Value;
-                        root.Set(new object[]{1,
-                            new[]
-                        {
-                            rlEntry.Field(0).Get().Value,
-                            new object[]
-                            {
-                                1,
-                                new []
-                                {
-                                    rootEntry.Field(0).Get().Value,
-                                    rootEntry.Field(1).Get().Value,
-                                     rlEntry.Field(1).Get().Value,
-                                    Math.Max(0, -rlBalance)
-                                }
-                            },
-                            new object[]
-                            {
-                                1,
-                                
-                                new []
-                                {
-                                    rEntry.Field(0).Get().Value,
-                                    rlEntry.Field(2).Get().Value,
-                                    rEntry.Field(2).Get().Value,
-                                     Math.Min(0, -rlBalance)
-                                }
-                            },
-                            0
-                        }});
-                        return false;
-                    }
+                {
+
+                    var rlEntry = rl.UElement();
+                    var rlold = rl.GetHead();
+                    int rlBalance = (rl.Tag() == 0 ? 0 : (int) rlEntry.Field(3).Get().Value);
+                    rl.GetHead(rlEntry.Field(2).GetHead());
+                    rEntry.Field(3).Set(Math.Min(0, -rlBalance));
+                    var oldR = r.GetHead();
+                    r.GetHead(rlEntry.Field(1).GetHead());
+                    rootEntry.Field(3).Set(Math.Max(0, -rlBalance));
+                    var rootOld = root.GetHead();
+                    root.GetHead(rlold);
+                    rootEntry = root.UElement();
+                    rootEntry.Field(1).GetHead(rootOld);
+                    rootEntry.Field(2).GetHead(oldR);
+                    rootEntry.Field(3).Set(0);
+                    return false;
+                }
                 default: return true;
             }
         }
@@ -231,65 +202,32 @@ namespace BinaryTree
                 case 0:
                 case 1:
                 {
-                    root.Set(new object[]
-                    {
-                        1, new[]
-                        {
-                            lEntry.Field(0).Get().Value,
-                            lEntry.Field(1).Get().Value,
-                            new object[]
-                            {
-                                1,
-                                new[]
-                                {
-                                    rootEntry.Field(0).Get().Value,
-                                    lr.Get().Value,
-                                    rootEntry.Field(2).Get().Value,
-                                    leftBalance == 1 ? 0 : 1
-                                }
-                            },
-                            leftBalance == 1 ? 0 : -1
-                        }
-                    });
+                    rootEntry.Field(3).Set(leftBalance == 1 ? 0 : 1);
+                    lEntry.Field(3).Set(leftBalance == 1 ? 0 : -1);
+                    var lOld = l.GetHead();
+                    l.GetHead(lr.GetHead());
+                    lr.GetHead(root.GetHead());
+                    root.GetHead(lOld);
                     return leftBalance == 0;
                     }
                 case -1:
-                    {
+                {
                         var lrEntry = lr.UElement();
-                        bool lrEmpty = lr.Tag() == 0;
-                        var lrBalance = lrEmpty ? 0 : (int)lrEntry.Field(3).Get().Value;
-                        root.Set(new object[]
-                        {
-                            1, new[]
-                            {
-                                lrEntry.Field(0).Get().Value,
-                                new object[]
-                                {
-                                    1,
-                                    new[]
-                                    {
-                                        lEntry.Field(0).Get().Value,
-                                        lEntry.Field(1).Get().Value,
-                                        lrEntry.Field(1).Get().Value,
-                                        lrEmpty ? 0 : Math.Max(0, -lrBalance)
-                                    }
-                                },
-                                new object[]
-                                {
-                                    1,
-                                    new[]
-                                    {
-                                        rootEntry.Field(0).Get().Value,
-                                        lrEntry.Field(2).Get().Value,
-                                        rootEntry.Field(2).Get().Value,
-                                        lrEmpty ? 0 : Math.Min(0, -lrBalance)
-                                    }
-                                },
-                                0
-                            }
-                        });
+                        var rlold = lr.GetHead();
+                        int rlBalance = (lr.Tag() == 0 ? 0 : (int)lEntry.Field(3).Get().Value);
+                        lr.GetHead(lrEntry.Field(1).GetHead());
+                        lEntry.Field(3).Set(Math.Max(0, -rlBalance));
+                        var oldR = l.GetHead();
+                        l.GetHead(lrEntry.Field(2).GetHead());
+                        rootEntry.Field(3).Set(Math.Min(0, -rlBalance));
+                        var rootOld = root.GetHead();
+                        root.GetHead(rlold);
+                        rootEntry = root.UElement();
+                        rootEntry.Field(2).GetHead(rootOld);
+                        rootEntry.Field(1).GetHead(oldR);
+                        rootEntry.Field(3).Set(0);
                         return false;
-                    }
+                }
                 default: return true;
             }
         }

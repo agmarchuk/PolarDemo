@@ -64,7 +64,7 @@ namespace BinaryTree
             //if (File.Exists(path + "btree.pxc")) File.Delete(path + "btree.pxc");
             PxCell cell = new PxCell(tree.tp_btree, path + "btree.pxc", false);
             cell.Clear();
-
+        
             //// Проверим существует ли пустое значение
             var r1 = cell.Root.Get();
             Console.WriteLine(r1.Type.Interpret(r1.Value));
