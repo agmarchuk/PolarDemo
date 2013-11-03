@@ -98,46 +98,33 @@ namespace BinaryTree
             // Замерим время выборки данных из XML
             Console.WriteLine(query.Count());
             Console.WriteLine("======Count() ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            // Еще раз
-            Console.WriteLine(query.Count());
-            Console.WriteLine("======Count() ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            
             cell.Clear();
 
-            BTree.counter = 0;
-            var special_array = query.OrderBy(pair => pair.name)
-                .Select(oe => oe)
+            int count = 0; // Счетчик, используемый в отслеживании тестирований
+
+            // Иcпытание на "предельные" характеристики по скорости ввода данных. Данные сортируются, а потом выстраивается в
+            // оперативной памяти структурный объект, соответствующий синтаксису и семантике введенного бинарного дерева.
+            // Потом объект вводится в ячейку и испытывается.
+            object[][] special_array = query.OrderBy(pair => pair.name)
+                .Select(oe => new object[] { oe.name, oe.id })
                 .ToArray();
-
-
-            foreach (int ind in IndSeq(0, 8))
-            {
-                Console.Write("{0} ", ind);
-            }
-         
-           // //return;
-            int count = 0;
             int len = special_array.Length;
-            BTree.counter = 0;
-            foreach (int ind in IndSeq(0, len))
-            {
-                cell.Add(new object[] { special_array[ind].name, special_array[ind].id });
-                if (count % 1000 == 0)
-                {
-                    Console.WriteLine("{0} {1}", count, BTree.counter);
-                    BTree.counter = 0;
-                }
-                count++;
-            }
+            object[] special_value = ToTreeObject(special_array, 0, len);
+            Console.WriteLine("======TreeObject ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            // На моем домашнем компьютере - 350 мс.
+            cell.Root.Set(special_value);
             Console.WriteLine("======BinaryTree ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-           // // У меня дома получилось 17 сек. для пары {string, long} и 22 сек. для {string, string}
+            // На моем домашнем компьютере - 130 мс.
+            TestSearch(cell, "Марчук Александр Гурьевич");
+            Console.WriteLine("======TestSearch ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
 
-
-           // // Загрузим фрагмент бинарного дерева
+           // Основное испытание
             cell.Clear();
             count = 0;
             BTree.counter = 0;
-            foreach (var pair in query.Take(400000).Reverse())
+            foreach (var pair in query)
             {
                 //if (pair.name == "Марчук Александр Гурьевич") { }
                 //if (pair.name == "Покрышкин Александр Иванович") { }
@@ -156,9 +143,9 @@ namespace BinaryTree
             // Теперь загрузим все данные, но для этого надо будет их отсортировать и подавать в специальном режиме
         
             // Еще один способ построения бинарного дерева: Сначалы мы формируем объект, потом его вводим стандартным Fill2
-            var array_of_elements = query.OrderBy(pair => pair.name)
-                .Select(oe => new object[] {oe.name, oe.id})
-                .ToArray();
+            //var array_of_elements = query.OrderBy(pair => pair.name)
+            //    .Select(oe => new object[] {oe.name, oe.id})
+            //    .ToArray();
           //  object bt = BuildBinaryTreeObjectFromSortedSequence(array_of_elements, 0, array_of_elements.Length);
             //Console.WriteLine(tree.tp_btree.Interpret(bt));
            // cell.Clear();
@@ -179,6 +166,26 @@ namespace BinaryTree
             cell.Close();
             File.Delete(path + "btree.pxc");
           //  GetOverflow(path);
+        }
+
+        private static object[] ToTreeObject(object[][] special_array, int beg, int len)
+        {
+            if (len == 0) return BTree.Empty;
+            else if (len == 1)
+                return new object[] {1, new object[] { // запись
+                    new object[] { special_array[beg][0], special_array[beg][1] }, // значение
+                    BTree.Empty,
+                    BTree.Empty,
+                    0}};
+            else
+            {
+                int half = len / 2;
+                return new object[] {1, new object[] { // запись
+                    new object[] { special_array[beg + half][0], special_array[beg + half][1] }, // значение
+                    ToTreeObject(special_array, beg, half),
+                    ToTreeObject(special_array, beg + half + 1, len - half - 1),
+                    0}};
+            }
         }
 
         private static void GetOverflow(string path, Func<object, PxEntry, int> edapth)
