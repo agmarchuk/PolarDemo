@@ -55,7 +55,16 @@ namespace BinaryTree
 
             public static int counter = 0;
             private readonly Func<object, PxEntry, int> elementDepth;
-            private readonly List<KeyValuePair<PxEntry, bool>> listEntries4Balance = new List<KeyValuePair<PxEntry, bool>>();
+            private readonly List<KeyValuePair<PxEntry, int>> listEntries4Balance = new List<KeyValuePair<PxEntry, int>>();
+
+            public static int H(PxEntry tree)
+            {
+                int h = 0;
+                return tree.Tag() == 0 
+                    ? 0 
+                    : 1 + Math.Max(H(tree.UElement().Field(1)), 
+                                   H(tree.UElement().Field(2)));
+            }
 
             /// <summary>
             /// Поместить элемент в дерево в соответствии со значением функции сравнения,
@@ -67,18 +76,18 @@ namespace BinaryTree
             {
                 var node = Root;
                 var lastUnBalanceNode = node;
-                bool any = false;
                 listEntries4Balance.Clear();
                 while (node.Tag() != 0)
                 {
                     var nodeEntry = node.UElement();
-                    any = true;
                     // Если не пустое
                     // Сравним пришедший элемент с имеющимся в корне
 
                     counter++;
                     PxEntry elementEntry = nodeEntry.Field(0);
                     int cmp = elementDepth(element, elementEntry);
+                    PxEntry balanceEntry = nodeEntry.Field(3);
+                    int balance = (int)balanceEntry.Get().Value;
                     if (cmp == 0)
                     {
                         //nodeEntry.Field(0).Set(element);
@@ -91,22 +100,22 @@ namespace BinaryTree
                                 element,
                                 Empty,
                                 Empty,
-                                nodeEntry.Field(3).Get().Value
+                              balance
                             }
                         });
                         node.UElement().Field(1).SetHead(left);
                         node.UElement().Field(2).SetHead(right);
-
                         return;
                     }
-                    if ((int) nodeEntry.Field(3).Get().Value != 0)
+                    if (balance != 0)
                     {
                         lastUnBalanceNode = node;
                         listEntries4Balance.Clear();
                     }
                     var goLeft = cmp < 0;
                     //TODO catch overflow memory
-                    listEntries4Balance.Add(new KeyValuePair<PxEntry, bool>(nodeEntry, goLeft));
+                    listEntries4Balance.Add(new KeyValuePair<PxEntry, int>(balanceEntry,
+                        goLeft ? balance + 1 : balance - 1));
                     node = nodeEntry.Field(goLeft ? 1 : 2);
                 }
                 // когда дерево пустое, организовать одиночное значение
@@ -117,15 +126,11 @@ namespace BinaryTree
                         element, new object[] {0, null}, new object[] {0, null}, 0
                     }
                 });
-                if (!any) return;
+                if (listEntries4Balance.Count == 0) return;
                 for (int i = 0; i < listEntries4Balance.Count; i++)
-                {
-                    var balanceEntry = listEntries4Balance[i].Key.Field(3);
-                    balanceEntry.Set((int) balanceEntry.Get().Value + (listEntries4Balance[i].Value ? 1 : -1));
-
-                }
-              //  ChangeBalanceSlowlyLongSequence(element, lastUnBalanceNode);
-                var b = (int) lastUnBalanceNode.UElement().Field(3).Get().Value;
+                    listEntries4Balance[i].Key.Set(listEntries4Balance[i].Value);
+                //  ChangeBalanceSlowlyLongSequence(element, lastUnBalanceNode);
+                int b = listEntries4Balance[0].Value; //(int) lastUnBalanceNode.UElement().Field(3).Get().Value;
                 if (b == 2)
                     FixWithRotateRight(lastUnBalanceNode);
                 else if (b == -2)
@@ -272,19 +277,20 @@ namespace BinaryTree
                 if (leftBalance == -1)
                 {
                     var lrEntry = lr.UElement();
-                    var rlold = lr.GetHead();
-                    int rlBalance = (lr.Tag() == 0 ? 0 : (int) lEntry.Field(3).Get().Value);
+                    var lrold = lr.GetHead();
+                    int lrBalance = (lr.Tag() == 0 ? 0 : (int) lrEntry.Field(3).Get().Value);
                     lr.SetHead(lrEntry.Field(1).GetHead());
-                    lEntry.Field(3).Set(Math.Max(0, -rlBalance));
+                    lEntry.Field(3).Set(Math.Max(0, -lrBalance));
                     var oldR = l.GetHead();
                     l.SetHead(lrEntry.Field(2).GetHead());
-                    rootEntry.Field(3).Set(Math.Min(0, -rlBalance));
+                    rootEntry.Field(3).Set(Math.Min(0, -lrBalance));
                     var rootOld = root.GetHead();
-                    root.SetHead(rlold);
+                    root.SetHead(lrold);
                     rootEntry = root.UElement();
                     rootEntry.Field(2).SetHead(rootOld);
                     rootEntry.Field(1).SetHead(oldR);
                     rootEntry.Field(3).Set(0);
+                    var temp = root.Get().Value;
                     return;
                 }
                 if (leftBalance == 1) // 1

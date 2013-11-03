@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,14 +7,15 @@ using PolarDB;
 
 namespace BinaryTree
 {
-   public class Programm{
+    public class Programm
+    {
 
         public static void Main(string[] args)
         {
             DateTime tt0 = DateTime.Now;
 
             string path = @"..\..\..\Databases\";
-                         //"C:\home\FactographDatabases"
+            //"C:\home\FactographDatabases"
             Console.WriteLine("Start.");
 
             Func<object, PxEntry, int> edepth = (object v1, PxEntry en2) =>
@@ -24,16 +25,16 @@ namespace BinaryTree
             };
             // Инициируем типы
             // Создадим фиксированную ячейку
-            BTree cell = new  BTree(new PTypeRecord(
+            BTree cell = new BTree(new PTypeRecord(
                 new NamedType("name", new PType(PTypeEnumeration.sstring)),
                 new NamedType("id", new PType(PTypeEnumeration.sstring))),
                 edepth,
                  path + "btree.pxc", false);
             cell.Clear();
-        
+
             //// Проверим существует ли пустое значение
-            
-           // Console.WriteLine(r1.Type.Interpret(r1.Value));
+
+            // Console.WriteLine(r1.Type.Interpret(r1.Value));
 
             // сделаем пробное заполнение вручную
             object[] valu =
@@ -58,7 +59,7 @@ namespace BinaryTree
 
             // проверяем содержимое
             var res = cell.Root.Get();
-          //  Console.WriteLine(res.Type.Interpret(res.Value));
+            //  Console.WriteLine(res.Type.Interpret(res.Value));
 
 
             // Пробно добавим пару элементов через метод расширения, описанный в ExtensionMethods
@@ -85,7 +86,7 @@ namespace BinaryTree
 
             var res3 = cell.Root.Get();
             Console.WriteLine(res3.Type.Interpret(res3.Value));
-            
+
             // Теперь попробуем загрузить реальные данные
             tt0 = DateTime.Now;
             XElement db = XElement.Load(path + "0001.xml");
@@ -94,11 +95,12 @@ namespace BinaryTree
                 .Where(el => el.Attribute(rdfabout) != null)
                 .SelectMany(el => el.Elements())
                 .Where(prop => prop.Name.LocalName == "name")
-                .Select(prop => new { name = prop.Value, id = prop.Parent.Attribute(rdfabout).Value });
+                .Select(prop => new NameId{ name = prop.Value, id = prop.Parent.Attribute(rdfabout).Value });
             // Замерим время выборки данных из XML
             Console.WriteLine(query.Count());
             Console.WriteLine("======Count() ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            
+            tt0 = TestQueryInput(cell, query, tt0);
+
             cell.Clear();
 
             int count = 0; // Счетчик, используемый в отслеживании тестирований
@@ -120,52 +122,75 @@ namespace BinaryTree
             Console.WriteLine("======TestSearch ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
 
-           // Основное испытание
+            Func<object, PxEntry, int> func = (o, entry) =>
+            {
+                long value = (long) entry.Get().Value;
+                long l = (long) o;
+                var i = (int)(l - value);
+                return i;
+            };
+            //var test=new BTree(new PType(PTypeEnumeration.longinteger), func, path + "fgsdfg", false);
+            //test.Add(5L);
+            //test.Add(1L);
+            //test.Add(2L);
+            //test.Add(3L);
+            // Основное испытание
+
+            // Теперь загрузим все данные, но для этого надо будет их отсортировать и подавать в специальном режиме
+
+            // Еще один способ построения бинарного дерева: Сначалы мы формируем объект, потом его вводим стандартным Fill2
+            //var array_of_elements = query.OrderBy(pair => pair.name)
+            //    .Select(oe => new object[] {oe.name, oe.id})
+            //    .ToArray();
+            //  object bt = BuildBinaryTreeObjectFromSortedSequence(array_of_elements, 0, array_of_elements.Length);
+            //Console.WriteLine(tree.tp_btree.Interpret(bt));
+            // cell.Clear();
+            //   cell.Fill2(bt);
+            Console.WriteLine("======Binary Tree Build ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
+
+           
+            Console.WriteLine("======Total ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            cell.Close();
+            File.Delete(path + "btree.pxc");
+            //  GetOverflow(path);
+        }
+
+        private static DateTime TestQueryInput(BTree cell, IEnumerable<NameId> query, DateTime tt0)
+        {
             cell.Clear();
-            count = 0;
+            int count = 0;
             BTree.counter = 0;
             foreach (var pair in query)
             {
                 //if (pair.name == "Марчук Александр Гурьевич") { }
                 //if (pair.name == "Покрышкин Александр Иванович") { }
-                cell.Add(new object[] { pair.name, "555L" });
+                cell.Add(new object[] {pair.name, "555L"});
 
-                if (count % 1000 == 0)
+                if (count%1000 == 0)
                 {
-                    Console.WriteLine("{0} {1}", count, BTree.counter);
+                    Console.WriteLine("c={0} Lg c = {1} H={2} BTree.counter={3}", count, Math.Log(count, 2), BTree.H(cell.Root), BTree.counter);
                     BTree.counter = 0;
                 }
                 count++;
             }
-          //  Console.WriteLine(cell.Root.Get().Type.Interpret(cell.Root.Get().Value));
-            Console.WriteLine("======part of BinaryTree ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-
-            // Теперь загрузим все данные, но для этого надо будет их отсортировать и подавать в специальном режиме
-        
-            // Еще один способ построения бинарного дерева: Сначалы мы формируем объект, потом его вводим стандартным Fill2
-            //var array_of_elements = query.OrderBy(pair => pair.name)
-            //    .Select(oe => new object[] {oe.name, oe.id})
-            //    .ToArray();
-          //  object bt = BuildBinaryTreeObjectFromSortedSequence(array_of_elements, 0, array_of_elements.Length);
-            //Console.WriteLine(tree.tp_btree.Interpret(bt));
-           // cell.Clear();
-         //   cell.Fill2(bt);
-            Console.WriteLine("======Binary Tree Build ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-
-
+            //  Console.WriteLine(cell.Root.Get().Type.Interpret(cell.Root.Get().Value));
+            Console.WriteLine("======part of BinaryTree ok. duration=" + (DateTime.Now - tt0).Ticks/10000L);
+            tt0 = DateTime.Now;
+            
             // Бинарный поиск на бинарном дереве
-            string name = "Марчук Александр Гурьевич";
-            TestSearch(cell, name);
+            TestSearch(cell, "Марчук Александр Гурьевич");
             Console.WriteLine("======Binary Search ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
 
             // Под конец, добави еще одну пару и посмотрим появилась ли она
             TestSearch(cell, "Покрышкин Александр Иванович");
             cell.Add(new object[] { "Покрышкин Александр Иванович", "pokryshkin_ai" });
             TestSearch(cell, "Покрышкин Александр Иванович");
-            Console.WriteLine("======Total ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            cell.Close();
-            File.Delete(path + "btree.pxc");
-          //  GetOverflow(path);
+            Console.WriteLine("======Binary Search ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
+
+            return tt0;
         }
 
         private static object[] ToTreeObject(object[][] special_array, int beg, int len)
@@ -190,11 +215,11 @@ namespace BinaryTree
 
         private static void GetOverflow(string path, Func<object, PxEntry, int> edapth)
         {
-            var overflowCell = new BTree(new PType(PTypeEnumeration.longinteger), edapth,  path + "overflowFile", false);
+            var overflowCell = new BTree(new PType(PTypeEnumeration.longinteger), edapth, path + "overflowFile", false);
             long c = 0;
             while (true)
             {
-                if (c++%1000000 == 0)
+                if (c++ % 1000000 == 0)
                     Console.WriteLine(c);
                 overflowCell.Add(c);
             }
@@ -206,8 +231,8 @@ namespace BinaryTree
             int half = count / 2;
             if (half == 0)
             {
-                return count == 1 ? 
-                    new object[] { 1, new[] { arr[beg], new object[] { 0, null }, new object[] { 0, null } } } : 
+                return count == 1 ?
+                    new object[] { 1, new[] { arr[beg], new object[] { 0, null }, new object[] { 0, null } } } :
                     new object[] { 0, null };
             }
             else
