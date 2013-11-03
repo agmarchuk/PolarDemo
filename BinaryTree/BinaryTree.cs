@@ -62,8 +62,8 @@ namespace BinaryTree
                 int h = 0;
                 return tree.Tag() == 0 
                     ? 0 
-                    : 1 + Math.Max(H(tree.UElement().Field(1)), 
-                                   H(tree.UElement().Field(2)));
+                    : 1 + Math.Max(H(tree.UElementUnchecked(1).Field(1)), 
+                                   H(tree.UElementUnchecked(1).Field(2)));
             }
 
             /// <summary>
@@ -79,7 +79,7 @@ namespace BinaryTree
                 listEntries4Balance.Clear();
                 while (node.Tag() != 0)
                 {
-                    var nodeEntry = node.UElement();
+                    var nodeEntry = node.UElementUnchecked(1);
                     // Если не пустое
                     // Сравним пришедший элемент с имеющимся в корне
 
@@ -103,8 +103,8 @@ namespace BinaryTree
                               balance
                             }
                         });
-                        node.UElement().Field(1).SetHead(left);
-                        node.UElement().Field(2).SetHead(right);
+                        node.UElementUnchecked(1).Field(1).SetHead(left);
+                        node.UElementUnchecked(1).Field(2).SetHead(right);
                         return;
                     }
                     if (balance != 0)
@@ -130,22 +130,22 @@ namespace BinaryTree
                 for (int i = 0; i < listEntries4Balance.Count; i++)
                     listEntries4Balance[i].Key.Set(listEntries4Balance[i].Value);
                 //  ChangeBalanceSlowlyLongSequence(element, lastUnBalanceNode);
-                int b = listEntries4Balance[0].Value; //(int) lastUnBalanceNode.UElement().Field(3).Get().Value;
+                int b = listEntries4Balance[0].Value; //(int) lastUnBalanceNode.UElementUnchecked(1).Field(3).Get().Value;
                 if (b == 2)
-                    FixWithRotateRight(lastUnBalanceNode);
+                    FixWithRotateRight(lastUnBalanceNode, listEntries4Balance);
                 else if (b == -2)
-                    FixWithRotateLeft(lastUnBalanceNode);
+                    FixWithRotateLeft(lastUnBalanceNode, listEntries4Balance);
               //  return true;
             }
-
+/*
             private void ChangeBalanceSlowlyLongSequence(object element, PxEntry lastUnBalanceNode)
             {
                 var nodeBalance = lastUnBalanceNode;
                 //   foreach (bool isLeft in listEntries4Balance)
                 int com = 0;
-                while (nodeBalance.Tag() != 0 && (com=elementDepth(element, nodeBalance.UElement().Field(0))) != 0)
+                while (nodeBalance.Tag() != 0 && (com=elementDepth(element, nodeBalance.UElementUnchecked(1).Field(0))) != 0)
                 {
-                    var nodeEntry = nodeBalance.UElement();
+                    var nodeEntry = nodeBalance.UElementUnchecked(1);
                     var balanceEntry = nodeEntry.Field(3);
                     if (com < 0)
                     {
@@ -178,7 +178,7 @@ namespace BinaryTree
                 }
                 // Если не пустое
                 // Сравним пришедший элемент с имеющимся в корне
-                var rootEntry = root.UElement();
+                var rootEntry = root.UElementUnchecked(1);
                 counter++;
                 int cmp = elementDepth(element, rootEntry.Field(0));
                 if (cmp == 0)
@@ -212,32 +212,34 @@ namespace BinaryTree
                 return balance != 0;
             }
             */
+
             /// <summary>
             /// балансирует дерево поворотом влево
             /// </summary>
             /// <param name="root"></param>
+            /// <param name="rBalance">баланск поддерева спара</param>
             /// <returns> возвращает истину, если высота не изменилась</returns>
-            private static void FixWithRotateLeft(PxEntry root)
+            private static void FixWithRotateLeft(PxEntry root, List<KeyValuePair<PxEntry, int>> entries)
             {
-                var rootEntry = root.UElement();
+                var rootEntry = root.UElementUnchecked(1);
                 var r = rootEntry.Field(2); //Right;
-                var rEntry = r.UElement();
+                var rEntry = r.UElementUnchecked(1);
                 var rl = rEntry.Field(1); //right of Left;
-                var rBalanseEntry = rEntry.Field(3);
-                var rBalance = (int) rBalanseEntry.Get().Value;
+                var rBalance = entries[1].Value; //(int) rBalanseEntry.Get().Value;
                 if (rBalance == 1) 
                 {
-                    var rlEntry = rl.UElement();
+                    var rlEntry = rl.UElementUnchecked(1);
                     var rlold = rl.GetHead();
-                    int rlBalance = (rl.Tag() == 0 ? 0 : (int) rlEntry.Field(3).Get().Value);
+                    int rlBalance = (entries.Count == 2 ? 0 : entries[2].Value); //: (int) lrEntry.Field(3).Get().Value);
+                 //   int rlBalance = (rl.Tag() == 0 ? 0 : (int)rlEntry.Field(3).Get().Value);
                     rl.SetHead(rlEntry.Field(2).GetHead());
-                    rEntry.Field(3).Set(Math.Min(0, -rlBalance));
+                    entries[1].Key.Set(Math.Min(0, -rlBalance));
                     var oldR = r.GetHead();
                     r.SetHead(rlEntry.Field(1).GetHead());
-                    rootEntry.Field(3).Set(Math.Max(0, -rlBalance));
+                    entries[0].Key.Set(Math.Max(0, -rlBalance));
                     var rootOld = root.GetHead();
                     root.SetHead(rlold);
-                    rootEntry = root.UElement();
+                    rootEntry = root.UElementUnchecked(1);
                     rootEntry.Field(1).SetHead(rootOld);
                     rootEntry.Field(2).SetHead(oldR);
                     rootEntry.Field(3).Set(0);
@@ -245,13 +247,13 @@ namespace BinaryTree
                 }
                 if (rBalance == -1)
                 {
-                    rootEntry.Field(3).Set(0);
-                    rEntry.Field(3).Set(0);
+                    entries[0].Key.Set(0);
+                    entries[1].Key.Set(0);
                 }
                 else //0
                 {
-                    rootEntry.Field(3).Set(-1);
-                    rEntry.Field(3).Set(1);
+                    entries[0].Key.Set(-1);
+                    entries[1].Key.Set(1);
                 }
                 var rOld = r.GetHead();
                 r.SetHead(rl.GetHead());
@@ -264,44 +266,43 @@ namespace BinaryTree
             /// балансирует дерево поворотом вправо
             /// </summary>
             /// <param name="root"></param>
+            /// <param name="leftBalance">баланс поддерева слева</param>
             /// <returns> возвращает истину, если высота не изменилась</returns>
-            private static void FixWithRotateRight(PxEntry root)
+            private static void FixWithRotateRight(PxEntry root, List<KeyValuePair<PxEntry, int>> entries)
             {
-                var rootEntry = root.UElement();
+                var rootEntry = root.UElementUnchecked(1);
                 var l = rootEntry.Field(1); //Left;
-
-                var lEntry = l.UElement();
+                var lEntry = l.UElementUnchecked(1);
                 var lr = lEntry.Field(2); //right of Left;
-                var leftBalanseEntry = lEntry.Field(3);
-                var leftBalance = (int) leftBalanseEntry.Get().Value;
+             //  var leftBalanseEntry = lEntry.Field(3);
+                var leftBalance = entries[1].Value; //(int) leftBalanseEntry.Get().Value;
                 if (leftBalance == -1)
                 {
-                    var lrEntry = lr.UElement();
+                    var lrEntry = lr.UElementUnchecked(1);
                     var lrold = lr.GetHead();
-                    int lrBalance = (lr.Tag() == 0 ? 0 : (int) lrEntry.Field(3).Get().Value);
+                    int lrBalance = (entries.Count == 2 ? 0 : entries[2].Value); //: (int) lrEntry.Field(3).Get().Value);
                     lr.SetHead(lrEntry.Field(1).GetHead());
-                    lEntry.Field(3).Set(Math.Max(0, -lrBalance));
+                    entries[1].Key.Set(Math.Max(0, -lrBalance));
                     var oldR = l.GetHead();
                     l.SetHead(lrEntry.Field(2).GetHead());
-                    rootEntry.Field(3).Set(Math.Min(0, -lrBalance));
+                    entries[0].Key.Set(Math.Min(0, -lrBalance));
                     var rootOld = root.GetHead();
                     root.SetHead(lrold);
-                    rootEntry = root.UElement();
+                    rootEntry = root.UElementUnchecked(1);
                     rootEntry.Field(2).SetHead(rootOld);
                     rootEntry.Field(1).SetHead(oldR);
                     rootEntry.Field(3).Set(0);
-                    var temp = root.Get().Value;
                     return;
                 }
                 if (leftBalance == 1) // 1
                 {
-                    rootEntry.Field(3).Set(0);
-                    lEntry.Field(3).Set(0);
+                    entries[0].Key.Set(0);
+                    entries[1].Key.Set(0);
                 }
                 else // 0
                 {
-                    rootEntry.Field(3).Set(1);
-                    lEntry.Field(3).Set(-1);
+                    entries[0].Key.Set(1);
+                    entries[1].Key.Set(-1);
                 }
                 var lOld = l.GetHead();
                 l.SetHead(lr.GetHead());
@@ -317,11 +318,11 @@ namespace BinaryTree
                 while (true)
                 {
                     if (entry.Tag() == 0) return new PxEntry(entry.Typ, long.MinValue, entry.fis);
-                    PxEntry elementEntry = entry.UElement().Field(0);
+                    PxEntry elementEntry = entry.UElementUnchecked(1).Field(0);
                         // Можно сэкономить на запоминании входа для uelement'а
                     int level = eDepth(elementEntry);
                     if (level == 0) return elementEntry;
-                    entry = entry.UElement().Field(level < 0 ? 1 : 2);
+                    entry = entry.UElementUnchecked(1).Field(level < 0 ? 1 : 2);
                 }
             }
         }

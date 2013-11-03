@@ -169,7 +169,7 @@ namespace BinaryTree
 
                 if (count%1000 == 0)
                 {
-                    Console.WriteLine("c={0} Lg c = {1} H={2} BTree.counter={3}", count, Math.Log(count, 2), BTree.H(cell.Root), BTree.counter);
+                    Console.WriteLine("c={0} BTree.counter={1}", count, BTree.counter);
                     BTree.counter = 0;
                 }
                 count++;
