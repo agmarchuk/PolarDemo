@@ -103,7 +103,7 @@ namespace BinaryTree
 
             cell.Clear();
 
-            int count = 0; // Счетчик, используемый в отслеживании тестирований
+           // int count = 0; // Счетчик, используемый в отслеживании тестирований
 
             // Иcпытание на "предельные" характеристики по скорости ввода данных. Данные сортируются, а потом выстраивается в
             // оперативной памяти структурный объект, соответствующий синтаксису и семантике введенного бинарного дерева.
@@ -122,18 +122,7 @@ namespace BinaryTree
             Console.WriteLine("======TestSearch ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
 
-            Func<object, PxEntry, int> func = (o, entry) =>
-            {
-                long value = (long) entry.Get().Value;
-                long l = (long) o;
-                var i = (int)(l - value);
-                return i;
-            };
-            //var test=new BTree(new PType(PTypeEnumeration.longinteger), func, path + "fgsdfg", false);
-            //test.Add(5L);
-            //test.Add(1L);
-            //test.Add(2L);
-            //test.Add(3L);
+         
             // Основное испытание
 
             // Теперь загрузим все данные, но для этого надо будет их отсортировать и подавать в специальном режиме
@@ -160,7 +149,7 @@ namespace BinaryTree
         {
             cell.Clear();
             int count = 0;
-            BTree.counter = 0;
+           BTree.counter = 0;
             foreach (var pair in query)
             {
                 //if (pair.name == "Марчук Александр Гурьевич") { }
@@ -174,8 +163,7 @@ namespace BinaryTree
                 }
                 count++;
             }
-            //  Console.WriteLine(cell.Root.Get().Type.Interpret(cell.Root.Get().Value));
-            Console.WriteLine("======part of BinaryTree ok. duration=" + (DateTime.Now - tt0).Ticks/10000L);
+           Console.WriteLine("======part of BinaryTree ok. duration=" + (DateTime.Now - tt0).Ticks/10000L);
             tt0 = DateTime.Now;
             
             // Бинарный поиск на бинарном дереве

@@ -6,11 +6,7 @@ namespace BinaryTree
 {
         public class BTree : PxCell
         {
-           
-            //PTypeUnion tp_btree;
-            //PType tp_element;
             internal static readonly object[] Empty;
-
           
             /// <summary>
             /// 
@@ -55,11 +51,13 @@ namespace BinaryTree
 
             public static int counter = 0;
             private readonly Func<object, PxEntry, int> elementDepth;
+            /// <summary>
+            /// путь от последнего узла с ненулевым балансом до добавленой вершины (не включая её) составляет пары: <PxEntry /> ,баланса и значение баланса.
+            /// </summary>
             private readonly List<KeyValuePair<PxEntry, int>> listEntries4Balance = new List<KeyValuePair<PxEntry, int>>();
 
             public static int H(PxEntry tree)
             {
-                int h = 0;
                 return tree.Tag() == 0 
                     ? 0 
                     : 1 + Math.Max(H(tree.UElementUnchecked(1).Field(1)), 
@@ -80,17 +78,12 @@ namespace BinaryTree
                 while (node.Tag() != 0)
                 {
                     var nodeEntry = node.UElementUnchecked(1);
-                    // Если не пустое
-                    // Сравним пришедший элемент с имеющимся в корне
-
                     counter++;
-                    PxEntry elementEntry = nodeEntry.Field(0);
-                    int cmp = elementDepth(element, elementEntry);
+                    int cmp = elementDepth(element, nodeEntry.Field(0));
                     PxEntry balanceEntry = nodeEntry.Field(3);
-                    int balance = (int)balanceEntry.Get().Value;
+                    var balance = (int)balanceEntry.Get().Value;
                     if (cmp == 0)
                     {
-                        //nodeEntry.Field(0).Set(element);
                         var left = nodeEntry.Field(1).GetHead();
                         var right = nodeEntry.Field(2).GetHead();
                         node.Set(new object[]
@@ -130,7 +123,7 @@ namespace BinaryTree
                 for (int i = 0; i < listEntries4Balance.Count; i++)
                     listEntries4Balance[i].Key.Set(listEntries4Balance[i].Value);
                 //  ChangeBalanceSlowlyLongSequence(element, lastUnBalanceNode);
-                int b = listEntries4Balance[0].Value; //(int) lastUnBalanceNode.UElementUnchecked(1).Field(3).Get().Value;
+                int b = listEntries4Balance[0].Value;
                 if (b == 2)
                     FixWithRotateRight(lastUnBalanceNode, listEntries4Balance);
                 else if (b == -2)
@@ -138,6 +131,7 @@ namespace BinaryTree
               //  return true;
             }
 /*
+ * пригодится, когда дерево оооочень большое будет, так ое, что  список переполнит оперативную память
             private void ChangeBalanceSlowlyLongSequence(object element, PxEntry lastUnBalanceNode)
             {
                 var nodeBalance = lastUnBalanceNode;
@@ -160,89 +154,44 @@ namespace BinaryTree
                 }
             }
 
-            /*
-            public static bool AddRecursive(PxEntry root, object element, Func<object, PxEntry, int> elementDepth)
-            {
-                if (root.Tag() == 0)
-                {
-// Если дерево пустое, то организовать одиночное значение
-                    root.Set(new object[]
-                    {
-                        1, new[]
-                        {
-                            element, new object[] {0, null}, new object[] {0, null}, 0
-                        }
-                    });
-                    counter++;
-                    return true;
-                }
-                // Если не пустое
-                // Сравним пришедший элемент с имеющимся в корне
-                var rootEntry = root.UElementUnchecked(1);
-                counter++;
-                int cmp = elementDepth(element, rootEntry.Field(0));
-                if (cmp == 0)
-                {
-                    root.Set(new object[]
-                    {
-                        1, new[]
-                        {
-                            element,
-                            rootEntry.Field(1).Get().Value,
-                            rootEntry.Field(2).Get().Value,
-                            rootEntry.Field(3).Get().Value
-                        }
-                    });
-                    return false;
-                }
-                //если при добавлении не изменилась высота(возможно поддерево сбалансировалось), балансировать не надо
-                if (!AddRecursive(rootEntry.Field(cmp < 0 ? 1 : 2), element, elementDepth)) return false;
-                var balanceEntity = rootEntry.Field(3);
-                //добавили влево, увеличили баланс. вправо уменьшили
-                var balance = (int) balanceEntity.Get().Value;
-                if (balance == 2)
-                {
-                }
-                balance += (cmp > 0 ? -1 : 1);
-                if (balance == 2)
-                    return FixWithRotateRight(root);
-                if (balance == -2)
-                    return FixWithRotateLeft(root);
-                balanceEntity.Set(balance);
-                return balance != 0;
-            }
-            */
+          */
 
             /// <summary>
             /// балансирует дерево поворотом влево
-            /// </summary>
-            /// <param name="root"></param>
-            /// <param name="rBalance">баланск поддерева спара</param>
-            /// <returns> возвращает истину, если высота не изменилась</returns>
+            /// </summary>           
+            /// <param name="root">PxEntry балансируемой вершины с балансом=-2</param>
+            /// <param name="entries">balance entries of path from prime node to added(excluded from entries), and them balaces</param>
             private static void FixWithRotateLeft(PxEntry root, List<KeyValuePair<PxEntry, int>> entries)
             {
                 var rootEntry = root.UElementUnchecked(1);
                 var r = rootEntry.Field(2); //Right;
                 var rEntry = r.UElementUnchecked(1);
                 var rl = rEntry.Field(1); //right of Left;
-                var rBalance = entries[1].Value; //(int) rBalanseEntry.Get().Value;
+                var rBalance = entries[1].Value;
                 if (rBalance == 1) 
                 {
+
                     var rlEntry = rl.UElementUnchecked(1);
+                    rlEntry.Field(3).Set(0);
+                    //запоминаем RL
                     var rlold = rl.GetHead();
-                    int rlBalance = (entries.Count == 2 ? 0 : entries[2].Value); //: (int) lrEntry.Field(3).Get().Value);
-                 //   int rlBalance = (rl.Tag() == 0 ? 0 : (int)rlEntry.Field(3).Get().Value);
+                    int rlBalance = (entries.Count == 2 ? 0 : entries[2].Value); 
+                    //Изменяем правую
                     rl.SetHead(rlEntry.Field(2).GetHead());
                     entries[1].Key.Set(Math.Min(0, -rlBalance));
+                    //запоминаем правую
                     var oldR = r.GetHead();
+                    //изменяем корневую
                     r.SetHead(rlEntry.Field(1).GetHead());
                     entries[0].Key.Set(Math.Max(0, -rlBalance));
+                    //запоминаем корневую
                     var rootOld = root.GetHead();
+                    //RL теперь корень
                     root.SetHead(rlold);
                     rootEntry = root.UElementUnchecked(1);
+                    //подставляем запомненые корень и правую.
                     rootEntry.Field(1).SetHead(rootOld);
                     rootEntry.Field(2).SetHead(oldR);
-                    rootEntry.Field(3).Set(0);
                     return;
                 }
                 if (rBalance == -1)
@@ -255,32 +204,30 @@ namespace BinaryTree
                     entries[0].Key.Set(-1);
                     entries[1].Key.Set(1);
                 }
+                
                 var rOld = r.GetHead();
                 r.SetHead(rl.GetHead());
                 rl.SetHead(root.GetHead());
                 root.SetHead(rOld);
-                return; //rBalance == 0;
             }
 
             /// <summary>
             /// балансирует дерево поворотом вправо
             /// </summary>
-            /// <param name="root"></param>
-            /// <param name="leftBalance">баланс поддерева слева</param>
-            /// <returns> возвращает истину, если высота не изменилась</returns>
+            /// <param name="root">PxEntry балансируемой вершины с балансом=2</param>
+            /// <param name="entries"> пары: PxEntry содержащая баланс и баланс, соответсвующие пути от балансируемой вершины (включительно) до добавленой не включительно</param>
             private static void FixWithRotateRight(PxEntry root, List<KeyValuePair<PxEntry, int>> entries)
             {
                 var rootEntry = root.UElementUnchecked(1);
                 var l = rootEntry.Field(1); //Left;
                 var lEntry = l.UElementUnchecked(1);
                 var lr = lEntry.Field(2); //right of Left;
-             //  var leftBalanseEntry = lEntry.Field(3);
-                var leftBalance = entries[1].Value; //(int) leftBalanseEntry.Get().Value;
+                var leftBalance = entries[1].Value; 
                 if (leftBalance == -1)
                 {
                     var lrEntry = lr.UElementUnchecked(1);
                     var lrold = lr.GetHead();
-                    int lrBalance = (entries.Count == 2 ? 0 : entries[2].Value); //: (int) lrEntry.Field(3).Get().Value);
+                    int lrBalance = (entries.Count == 2 ? 0 : entries[2].Value); 
                     lr.SetHead(lrEntry.Field(1).GetHead());
                     entries[1].Key.Set(Math.Max(0, -lrBalance));
                     var oldR = l.GetHead();
