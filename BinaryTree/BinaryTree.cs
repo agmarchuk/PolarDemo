@@ -137,8 +137,8 @@ namespace BinaryTree
             {
                 var nodeBalance = lastUnBalanceNode;
                 //   foreach (bool isLeft in listEntries4Balance)
-                int com = elementDepth(element, nodeBalance.UElement().Field(0));
-                while (com != 0)
+                int com = 0;
+                while (nodeBalance.Tag() != 0 && (com=elementDepth(element, nodeBalance.UElement().Field(0))) != 0)
                 {
                     var nodeEntry = nodeBalance.UElement();
                     var balanceEntry = nodeEntry.Field(3);
@@ -152,8 +152,6 @@ namespace BinaryTree
                         balanceEntry.Set((int) balanceEntry.Get().Value - 1);
                         nodeBalance = nodeEntry.Field(2);
                     }
-                    if (nodeBalance.Tag() == 0) com = 0;
-                    else com = elementDepth(element, nodeBalance.UElement().Field(0));
                 }
             }
 
