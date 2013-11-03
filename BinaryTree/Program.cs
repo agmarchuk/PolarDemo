@@ -156,9 +156,9 @@ namespace BinaryTree
             // Теперь загрузим все данные, но для этого надо будет их отсортировать и подавать в специальном режиме
         
             // Еще один способ построения бинарного дерева: Сначалы мы формируем объект, потом его вводим стандартным Fill2
-            var array_of_elements = query.OrderBy(pair => pair.name)
-                .Select(oe => new object[] {oe.name, oe.id})
-                .ToArray();
+            //var array_of_elements = query.OrderBy(pair => pair.name)
+            //    .Select(oe => new object[] {oe.name, oe.id})
+            //    .ToArray();
           //  object bt = BuildBinaryTreeObjectFromSortedSequence(array_of_elements, 0, array_of_elements.Length);
             //Console.WriteLine(tree.tp_btree.Interpret(bt));
            // cell.Clear();
