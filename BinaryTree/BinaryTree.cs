@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 using PolarDB;
 
 namespace BinaryTree
@@ -257,14 +259,57 @@ namespace BinaryTree
                 root.SetHead(lOld);
             }
 
+            public void Fill(PxEntry elementsEntry, Func<object, object> orderKeySelector)
+            {
+                Fill(elementsEntry.Elements()
+                                    .Select(oe => oe.Get().Value), orderKeySelector);
+            }
 
+            public void Fill(IEnumerable<object> elements, Func<object, object> orderKeySelector)
+            {
+                object[] elementsSorted = elements
+                    .OrderBy(orderKeySelector)
+                    .Cast<object>()
+                    .ToArray();
+                Clear();
+                Fill2(ToTreeObject(elementsSorted, 0, elementsSorted.Length));
+            }
+
+            private static object[] ToTreeObject(object[] elements, int beg, int len)
+            {
+                if (len == 0) return Empty;
+                if (len == 1)
+                    return new object[]
+                    {
+                        1, new[]
+                        {
+                            // запись
+                            elements[beg], // значение
+                            Empty,
+                            Empty,
+                            0
+                        }
+                    };
+                int half = len / 2;
+                return new object[]
+                {
+                    1, new[]
+                    {
+                        // запись
+                        elements[beg + half], // значение
+                        ToTreeObject(elements, beg, half),
+                        ToTreeObject(elements, beg + half + 1, len - half - 1),
+                        0
+                    }
+                };
+            }
 
             public PxEntry BinarySearch(Func<PxEntry, int> eDepth)
             {
                 var entry = Root;
                 while (true)
                 {
-                    if (entry.Tag() == 0) return new PxEntry(entry.Typ, long.MinValue, entry.fis);
+                    if (entry.Tag() == 0) return new PxEntry(entry.Typ, Int64.MinValue, entry.fis);
                     PxEntry elementEntry = entry.UElementUnchecked(1).Field(0);
                         // Можно сэкономить на запоминании входа для uelement'а
                     int level = eDepth(elementEntry);
