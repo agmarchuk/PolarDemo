@@ -8,6 +8,7 @@ namespace BinaryTree
 {
         public class BTree : PxCell
         {
+
             internal static readonly object[] Empty;
           
             /// <summary>
@@ -316,6 +317,31 @@ namespace BinaryTree
                     if (level == 0) return elementEntry;
                     entry = entry.UElementUnchecked(1).Field(level < 0 ? 1 : 2);
                 }
+            }
+
+            public bool Equals(object obj, Func<object, object, bool> elementsComparer)
+            {
+                if (ReferenceEquals(null, obj)) return false;
+                if (ReferenceEquals(this, obj)) return true;
+                if (obj.GetType() != this.GetType()) return false;
+                return Equals(((BTree) obj).Root, Root, elementsComparer);
+            }
+
+            private static bool Equals(PxEntry left, PxEntry right, Func<object, object, bool> elementsComparer)
+            {
+                int tag = 0;
+                if((tag=left.Tag())!=right.Tag()) return false;
+                if(tag==0) return true;
+               var r = right.UElement();
+                var l =right.UElement();
+                bool @equals = elementsComparer(r.Field(0).Get().Value, l.Field(0).Get().Value);
+                bool b = (int)r.Field(3).Get().Value == (int)l.Field(3).Get().Value;
+                if(!b) return false;
+                if(!@equals) return false;
+                return @equals
+                       && b
+                       && Equals(r.Field(1), l.Field(1))
+                       && Equals(r.Field(2), l.Field(2));
             }
         }
     }

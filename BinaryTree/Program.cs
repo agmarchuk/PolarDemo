@@ -102,20 +102,26 @@ namespace BinaryTree
             // Замерим время выборки данных из XML
             Console.WriteLine(query.Count());
             Console.WriteLine("======Count() ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-         //   TestQueryInput(cell, query, tt0);
-         
-          //TestToBTree(query, ptElement, path, edepth);
-         
-            TestBTreeFill(query, ptElement, path, edepth);
 
-           
+            var addTree = TestQueryInput(query, ptElement, edepth, path);
+         
+          BTree toBTree =TestToBTree(query, ptElement, path, edepth);
+         
+           var treeFromFill = TestBTreeFill(query, ptElement, path, edepth);
+            Func<object, object, bool> elementsComparer = (o1, o2)=>(string)(((object[])o1)[0])==(string)((object[])o2)[0];
+            Console.WriteLine("tree sequantialy add == tree fill - " + treeFromFill.Equals(addTree, elementsComparer));
+            Console.WriteLine("tree sequantialy add == query to BTree  - " + toBTree.Equals(addTree, elementsComparer));
+
+            treeFromFill.Close();
+            addTree.Close();
+            toBTree.Close();
         //    Console.WriteLine("======Total ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             cell.Close();
             File.Delete(path + "btree.pxc");
             //  GetOverflow(path);
         }
 
-        private static void TestToBTree(IEnumerable<object[]> query, PTypeRecord ptElement, string path,
+        private static BTree TestToBTree(IEnumerable<object[]> query, PTypeRecord ptElement, string path,
             Func<object, PxEntry, int> edepth)
         {
             var tt0 = DateTime.Now;
@@ -129,20 +135,19 @@ namespace BinaryTree
             // На моем домашнем компьютере - 130 мс.
             TestSearch(treeFromQuery, "Марчук Александр Гурьевич");
             Console.WriteLine("======TestSearch ok. duration=" + (DateTime.Now - tt0).Ticks/10000L);
-            treeFromQuery.Close();
+            return treeFromQuery;
         }
 
-        private static void TestBTreeFill(IEnumerable<object[]> query, PTypeRecord ptElement, string path,
+        private static BTree TestBTreeFill(IEnumerable<object[]> query, PTypeRecord ptElement, string path,
             Func<object, PxEntry, int> edepth)
         {
             PxCell elementsCell = new PxCell(new PTypeSequence(ptElement), path + "elements", false);
             elementsCell.Fill2(query);
             var tt0 = DateTime.Now;
 
-            var treeFromQuery = new BTree(ptElement, edepth, path + "TreeFromQuery.pxc", false);
+            var treeFromQuery = new BTree(ptElement, edepth, path + "TreeFromEntree.pxc", false);
             treeFromQuery.Fill(elementsCell.Root, o => ((object[]) o)[0]);
             Console.WriteLine("tree from query createtd,duration={0}", (DateTime.Now - tt0).Ticks/10000L);
-
             tt0 = DateTime.Now;
             // Иcпытание на "предельные" характеристики по скорости ввода данных. Данные сортируются, а потом выстраивается в
             // оперативной памяти структурный объект, соответствующий синтаксису и семантике введенного бинарного дерева.
@@ -150,13 +155,14 @@ namespace BinaryTree
             // На моем домашнем компьютере - 130 мс.
             TestSearch(treeFromQuery, "Марчук Александр Гурьевич");
             Console.WriteLine("======TestSearch ok. duration=" + (DateTime.Now - tt0).Ticks/10000L);
-            treeFromQuery.Close();
             elementsCell.Close();
+            return treeFromQuery;
         }
 
-        private static void TestQueryInput(BTree cell, IEnumerable<object[]> query, DateTime tt0)
+        private static BTree TestQueryInput(IEnumerable<object[]> query, PType ptElement, Func<object, PxEntry, int> edepth, string path)
         {
-            cell.Clear();
+            BTree cell =new BTree(ptElement, edepth, path+"add.pxc", false);
+            var tt0 = DateTime.Now;
             int count = 0;
            BTree.counter = 0;
             foreach (var pair in query)
@@ -185,7 +191,8 @@ namespace BinaryTree
             cell.Add(new object[] { "Покрышкин Александр Иванович", "pokryshkin_ai" });
             TestSearch(cell, "Покрышкин Александр Иванович");
             Console.WriteLine("======Binary Search ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L);
-            }
+            return cell;
+        }
 
       
 
