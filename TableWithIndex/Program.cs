@@ -11,6 +11,7 @@ namespace TableWithIndex
     {
         public static void Main(string[] args)
         {
+            Console.WriteLine("Start");
             string[] ids = new[]
             {
                 "svet_100616111408_10844",
@@ -24,23 +25,33 @@ namespace TableWithIndex
                 "p0011098",
                 "svet_100616111408_14354"
             };
-            //XElement db = XElement.Load(@"..\..\..\Databases\0001.xml");
-            XElement db = XElement.Load(@"D:\home\dev2012\tm.xml");
+            XElement db = XElement.Load(@"D:\home\dev2012\tm3.xml");
+
+            var query = db.Elements()
+                .Where(el => el.Attribute(ONames.rdfabout) != null && el.Element(ONames.tag_name) != null);
+
+            //foreach (XElement el in query)
+            //{
+            //    var id_att = el.Attribute(ONames.rdfabout);
+            //    if (id_att != null && id_att.Value == "w20070417_5_8436")
+            //    {
+            //    }
+            //}
+
             DateTime tt0 = DateTime.Now;
 
-            Console.WriteLine("Start");
-            bool sql = true;
+            bool sql = false;
             if (sql)
             {
                 var test = new SQLTest(@"Data Source=(LocalDB)\v11.0;AttachDbFilename=D:\home\FactographDatabases\test20131025.mdf;Integrated Security=True;Connect Timeout=30");
                 test.PrepareToLoad();
                 Console.WriteLine("PrepareToLoad ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-                test.Load(db);
+                test.Load(query);
                 Console.WriteLine("Load ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 test.Index1();
                 Console.WriteLine("Index1 ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-                //test.Index2();
-                //Console.WriteLine("Index2 ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                
+                
                 test.SelectById("w20070417_5_8436");
                 Console.WriteLine("Первый Select ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 foreach (string id in ids) test.SelectById(id);
@@ -52,7 +63,7 @@ namespace TableWithIndex
             else
             {
                 var test2 = new PolarTest(@"..\..\..\Databases\");
-                //test2.Load(db);
+                //test2.Load(query);
                 //Console.WriteLine("Load ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 //test2.CreateIndex();
                 //Console.WriteLine("Index ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
