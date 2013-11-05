@@ -104,7 +104,7 @@ namespace BinaryTree
             Console.WriteLine("======Count() ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
          //   TestQueryInput(cell, query, tt0);
          
-          //TestToBTree(query, ptElement, path, edepth);
+            TestToBTree(query, ptElement, path, edepth);
          
             TestBTreeFill(query, ptElement, path, edepth);
 
