@@ -50,10 +50,10 @@ namespace TableWithIndex
         }
 
 
-        public void Load(XElement db)
+        public void Load(IEnumerable<XElement> dbflow)
         {
             DbCommand runcomm = RunStart();
-            foreach (XElement element in db.Elements())
+            foreach (XElement element in dbflow)
             {
                 var id_att = element.Attribute(ONames.rdfabout);
                 var tname = element.Name;

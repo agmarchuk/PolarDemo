@@ -25,26 +25,21 @@ namespace TableWithIndex
             this.cell = new PaCell(tp_seq, path + @"bigtest.pac", false);
             this.index = new PIndex(path, cell, 0);
         }
-        public void Load(XElement db)
+        public void Load(IEnumerable<XElement> db_flow)
         {
             cell.Clear();
             cell.Fill(new object[0]);
-            foreach (XElement element in db.Elements())
+            foreach (XElement element in db_flow)
             {
-                var id_att = element.Attribute(ONames.rdfabout);
-                var tname = element.Name;
-                if (id_att == null) continue;
-                if (!(tname == ONames.tag_person)) continue;
-                var name_el = element.Element(ONames.tag_name);
-                if (name_el == null) continue;
                 var fd_el = element.Element(ONames.tag_fromdate);
 
-                string id = id_att.Value;
-                string name = name_el.Value;
+                string id = element.Attribute(ONames.rdfabout).Value;
+                string name = element.Element(ONames.tag_name).Value;
                 string fd = fd_el == null ? "" : fd_el.Value;
                 cell.Root.AppendElement(new object[] { id, name, fd, false });
             }
             cell.Flush();
+            Console.WriteLine("Число записей: " + cell.Root.Count());
         }
         private PIndex index;
         public void CreateIndex()

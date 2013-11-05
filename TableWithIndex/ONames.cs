@@ -22,4 +22,28 @@ namespace TableWithIndex
         public static XName tag_name = "{http://fogid.net/o/}name";
         public static XName tag_fromdate = "{http://fogid.net/o/}from-date";
     }
+    public class TransformRdf
+    {
+        public static void Tr(IEnumerable<XElement> db_flow, string nfilename)
+        {
+            XElement db2 = new XElement(XName.Get("RDF", ONames.rdfnsstring),
+                new XAttribute(ONames.AttRdf, ONames.rdfnsstring),
+                new XAttribute(XName.Get("xmlns"), "http://fogid.net/o/"));
+            System.Collections.Generic.HashSet<string> id_set = new HashSet<string>();
+            foreach (XElement el in db_flow)
+            {
+                string idd = el.Attribute(ONames.rdfabout).Value;
+                if (id_set.Contains(idd)) { }
+                else
+                {
+                    id_set.Add(idd);
+                    XElement ael = new XElement(el.Name,
+                        new XAttribute(ONames.rdfabout, el.Attribute(ONames.rdfabout).Value),
+                        el.Elements());
+                    db2.Add(ael);
+                }
+            }
+            db2.Save(nfilename);
+        }
+    }
 }
