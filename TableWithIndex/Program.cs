@@ -72,8 +72,8 @@ namespace TableWithIndex
             {
                 Console.WriteLine("SemiIndex Strat. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 SITest sit = new SITest(path);
-                //sit.Load(query);
-                //Console.WriteLine("Load ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                sit.Load(query);
+                Console.WriteLine("Load ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 var rec = sit.GetById("w20070417_5_8436");
                 Console.WriteLine("GetById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 //Console.WriteLine(rec.Type.Interpret(rec.Value));
