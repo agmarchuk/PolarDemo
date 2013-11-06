@@ -232,3 +232,8 @@ pip-log.txt
 /Databases/bigtest.pac
 /Databases/index.pxc
 
+/Databases/*.pac
+/Databases/*.pxc
+/Databases/*.pac
+/Databases/*.pxc
+/Databases/*.pac
