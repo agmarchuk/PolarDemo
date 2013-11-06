@@ -47,6 +47,8 @@
     <Compile Include="PolarTest.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SemiIndex.cs" />
+    <Compile Include="SITest.cs" />
     <Compile Include="SQLTest.cs" />
   </ItemGroup>
   <ItemGroup>
