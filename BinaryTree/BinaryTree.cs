@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using PolarDB;
 
@@ -336,12 +335,11 @@ namespace BinaryTree
                 var l =right.UElement();
                 bool @equals = elementsComparer(r.Field(0).Get().Value, l.Field(0).Get().Value);
                 bool b = (int)r.Field(3).Get().Value == (int)l.Field(3).Get().Value;
-                if(!b) return false;
-                if(!@equals) return false;
                 return @equals
                        && b
                        && Equals(r.Field(1), l.Field(1))
                        && Equals(r.Field(2), l.Field(2));
             }
         }
+    
     }

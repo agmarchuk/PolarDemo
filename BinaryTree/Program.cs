@@ -1,13 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Xml.Linq;
+using Microsoft.Office.Interop.Excel;
 using PolarDB;
 
 namespace BinaryTree
 {
-    public class Program
+    public class Programm
     {
 
         public static void Main(string[] args)
@@ -103,22 +107,26 @@ namespace BinaryTree
             Console.WriteLine(query.Count());
             Console.WriteLine("======Count() ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
-            var addTree = TestQueryInput(query, ptElement, edepth, path);
+   //         var addTree = TestQueryInput(query, ptElement, edepth, path);
          
-          BTree toBTree =TestToBTree(query, ptElement, path, edepth);
+     //     BTree toBTree =TestToBTree(query, ptElement, path, edepth);
          
-           var treeFromFill = TestBTreeFill(query, ptElement, path, edepth);
+       //    var treeFromFill = TestBTreeFill(query, ptElement, path, edepth);
             Func<object, object, bool> elementsComparer = (o1, o2)=>(string)(((object[])o1)[0])==(string)((object[])o2)[0];
-            Console.WriteLine("tree sequantialy add == tree fill - " + treeFromFill.Equals(addTree, elementsComparer));
-            Console.WriteLine("tree sequantialy add == query to BTree  - " + toBTree.Equals(addTree, elementsComparer));
+        //    Console.WriteLine("tree sequantialy add == tree fill - " + treeFromFill.Equals(addTree, elementsComparer));
+         //   Console.WriteLine("tree sequantialy add == query to BTree  - " + toBTree.Equals(addTree, elementsComparer));
 
-            treeFromFill.Close();
-            addTree.Close();
-            toBTree.Close();
+
+        //   treeFromFill.Close();
+         //   addTree.Close();
+         //   toBTree.Close();
         //    Console.WriteLine("======Total ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             cell.Close();
             File.Delete(path + "btree.pxc");
             //  GetOverflow(path);
+
+        //    TestTreeOfInt(query, path);
+            SimpleTreeInt(path);
         }
 
         private static BTree TestToBTree(IEnumerable<object[]> query, PTypeRecord ptElement, string path,
@@ -135,6 +143,7 @@ namespace BinaryTree
             // На моем домашнем компьютере - 130 мс.
             TestSearch(treeFromQuery, "Марчук Александр Гурьевич");
             Console.WriteLine("======TestSearch ok. duration=" + (DateTime.Now - tt0).Ticks/10000L);
+            Console.WriteLine();
             return treeFromQuery;
         }
 
@@ -147,7 +156,7 @@ namespace BinaryTree
 
             var treeFromQuery = new BTree(ptElement, edepth, path + "TreeFromEntree.pxc", false);
             treeFromQuery.Fill(elementsCell.Root, o => ((object[]) o)[0]);
-            Console.WriteLine("tree from query createtd,duration={0}", (DateTime.Now - tt0).Ticks/10000L);
+            Console.WriteLine("tree fill reading entry createtd,duration={0}", (DateTime.Now - tt0).Ticks/10000L);
             tt0 = DateTime.Now;
             // Иcпытание на "предельные" характеристики по скорости ввода данных. Данные сортируются, а потом выстраивается в
             // оперативной памяти структурный объект, соответствующий синтаксису и семантике введенного бинарного дерева.
@@ -155,6 +164,7 @@ namespace BinaryTree
             // На моем домашнем компьютере - 130 мс.
             TestSearch(treeFromQuery, "Марчук Александр Гурьевич");
             Console.WriteLine("======TestSearch ok. duration=" + (DateTime.Now - tt0).Ticks/10000L);
+            Console.WriteLine();
             elementsCell.Close();
             return treeFromQuery;
         }
@@ -171,12 +181,12 @@ namespace BinaryTree
                 //if (pair.name == "Покрышкин Александр Иванович") { }
                 cell.Add(pair);
 
-                if (count%1000 == 0)
-                {
-                    Console.WriteLine("c={0} BTree.counter={1}", count, BTree.counter);
-                    BTree.counter = 0;
-                }
-                count++;
+                //if (count%1000 == 0)
+                //{
+                //    Console.WriteLine("c={0} BTree.counter={1}", count, BTree.counter);
+                //    BTree.counter = 0;
+                //}
+                //count++;
             }
            Console.WriteLine("======part of BinaryTree ok. duration=" + (DateTime.Now - tt0).Ticks/10000L);
             tt0 = DateTime.Now;
@@ -191,23 +201,123 @@ namespace BinaryTree
             cell.Add(new object[] { "Покрышкин Александр Иванович", "pokryshkin_ai" });
             TestSearch(cell, "Покрышкин Александр Иванович");
             Console.WriteLine("======Binary Search ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L);
+            Console.WriteLine();
             return cell;
         }
 
-      
+        private static void TestTreeOfInt(IEnumerable<object[]> query, string path)
+        {
+            PType treePType = new PTypeRecord(new NamedType("id_hash", new PType(PTypeEnumeration.integer)),
+                new NamedType("indexes", new PTypeSequence(new PType(PTypeEnumeration.longinteger))));
+            long sample = 0;
+            var tt0 = DateTime.Now;
+            
+            var tree = query.Select(q => (string) q[0])
+                .GroupBy(q => q.GetHashCode())
+                .Select(g => new object[] {g.Key, g.Select(q => sample as object).ToArray()})
+                .ToBTree(treePType, path + "treeOfInt",
+                    (o, entry) => (int) ((object[]) o)[0] - (int) entry.Field(0).Get().Value,
+                    o => (int) ((object[]) o)[0]);
+            Console.WriteLine("create tree of int long pairs ok " + (DateTime.Now - tt0).TotalMilliseconds);
+            var testIdHash = query.First()[0].GetHashCode();//"w20070417_5_8436".GetHashCode();
+            tt0 = DateTime.Now;
+            var finded = tree.BinarySearch(entry => testIdHash - (int) entry.Field(0).Get().Value );
+            Console.WriteLine(finded.Field(0).Get().Value + " finded, duration=" + (DateTime.Now - tt0).TotalMilliseconds+"ms");
+            Console.WriteLine();
+            tree.Close();
+        }
+
+        static void SimpleTreeInt(string path)
+        {
+            int pointsCount = 20, pointsDistance=100;
+            int[][] results = { new int[pointsCount], new int[pointsCount], new int[pointsCount] };
+            for (int i = 0, j=0; i < pointsDistance*pointsCount; i+=pointsDistance, j++)
+            {
+                if (File.Exists(path + "simple int.pac")) File.Delete(path + "simple int.pac");
+                if (File.Exists(path + "simple int tree.pxc")) File.Delete(path + "simple int tree.pxc");
+                if (File.Exists(path + "simple int tree add.pxc")) File.Delete(path + "simple int tree add.pxc");
+
+                Thread.Sleep(1);
+                var objects = Enumerable.Range(0, i).Cast<object>().ToArray();
+                Stopwatch timer = new Stopwatch();
+                timer.Start();
+                var simpleIntCell = objects.ToBTree(new PType(PTypeEnumeration.integer), path + "simple int tree.pxc",
+                    (o, entry) => (int) o - (int) entry.Get().Value, o => o);
+                timer.Stop();
+                results[0][j] = (int)timer.Elapsed.Ticks;
+             //   Console.WriteLine("simple int tree " + timer.Elapsed.TotalMilliseconds);
+                timer.Restart();
+                PaCell paCell = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)),
+                    path + "simple int.pac", false);
+                paCell.Fill(objects);
+                timer.Stop();
+                results[1][j] = (int)timer.Elapsed.Ticks;
+                //Console.WriteLine("simple int pa " + timer.Elapsed.TotalMilliseconds);
+               // Console.WriteLine();
+
+                //линейное возрастание времени
+            //    AddTreeAddChart(path, timer, objects, results, j);
+                paCell.Close();
+                simpleIntCell.Close();
+            }
+            Draw(results);
+        }
+
+        private static void AddTreeAddChart(string path, Stopwatch timer, object[] objects, int[][] results, int j)
+        {
+            timer.Restart();
+            var cell = new BTree(new PType(PTypeEnumeration.integer),
+                (o, entry) => (int) o - (int) entry.Get().Value, path + "simple int tree add.pxc", false);
+            foreach (var pair in objects)
+                cell.Add(pair);
+            timer.Stop();
+
+            results[2][j] = (int) timer.Elapsed.Ticks;
+            cell.Close();
+        }
+
 
         private static void GetOverflow(string path, Func<object, PxEntry, int> edapth)
         {
             var overflowCell = new BTree(new PType(PTypeEnumeration.longinteger), edapth, path + "overflowFile", false);
             long c = 0;
-            while (true)
+            while (true) 
             {
                 if (c++ % 1000000 == 0)
                     Console.WriteLine(c);
                 overflowCell.Add(c);
             }
         }
+        /// <summary>
+        /// Отображает грфик в EXEL, но не сохраняет его. 
+        /// </summary>
+        /// <param name="xy">корневой массив-линий, листовой точек. Точки должны отличться на одну постоянноую величину</param>
+        static void Draw(int[][] xy)
+        {
+            Application application = new Application(){Visible = true};
+            var workbooks = application.Workbooks;
+            var wordBook = workbooks.Open(new DirectoryInfo(Directory.GetCurrentDirectory()).Parent.Parent.FullName+"/chart.xls");
+            var sheet = (_Worksheet) wordBook.ActiveSheet;
+var chart =(_Chart)wordBook.Charts.Add();
+            chart.Name = "sdfs";
+            Thread.CurrentThread.CurrentCulture=new CultureInfo("en-US");
+            sheet.ClearArrows();
+            for (int j = 0; j < xy.Length; j++)
+                for (int i = 0; i < xy[0].Length; i++)
+            {
+                {
+                    sheet.Cells[i + 1, j + 1] = xy[j][i].ToString(CultureInfo.InvariantCulture);
+                }
+            }
 
+            chart.ChartWizard(sheet.Range["A1", "G" + xy[0].Length], XlChartType.xlLine);
+            //System.Runtime.InteropServices.Marshal.ReleaseComObject(chart);
+            //System.Runtime.InteropServices.Marshal.ReleaseComObject(sheet);
+            //wordBook.Close(false);
+            //System.Runtime.InteropServices.Marshal.ReleaseComObject(wordBook);
+            //System.Runtime.InteropServices.Marshal.ReleaseComObject(workbooks);
+            //System.Runtime.InteropServices.Marshal.ReleaseComObject(application);
+        }
         // Построение объекта дерева бинарного поиска
         private static object BuildBinaryTreeObjectFromSortedSequence(object[] arr, int beg, int count)
         {
