@@ -27,15 +27,15 @@ namespace TableWithIndex
                 "p0011098",
                 "svet_100616111408_14354"
             };
-            //XElement db = XElement.Load(@"D:\home\dev2012\tm3.xml");
-            XElement db = XElement.Load(@"..\..\..\Databases\0001.xml");
+            XElement db = XElement.Load(@"D:\home\dev2012\tm3.xml");
+            //XElement db = XElement.Load(@"..\..\..\Databases\0001.xml");
 
             var query = db.Elements()
                 .Where(el => el.Attribute(ONames.rdfabout) != null && el.Element(ONames.tag_name) != null);
 
             DateTime tt0 = DateTime.Now;
 
-            string variant = "semiindex";
+            string variant = "freeindex";
             if (variant == "sql")
             {
                 var test = new SQLTest(@"Data Source=(LocalDB)\v11.0;AttachDbFilename=D:\home\FactographDatabases\test20131025.mdf;Integrated Security=True;Connect Timeout=30");
@@ -72,8 +72,8 @@ namespace TableWithIndex
             {
                 Console.WriteLine("SemiIndex Strat. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 SITest sit = new SITest(path);
-                sit.Load(query);
-                Console.WriteLine("Load ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //sit.Load(query);
+                //Console.WriteLine("Load ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 var rec = sit.GetById("w20070417_5_8436");
                 Console.WriteLine("GetById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 //Console.WriteLine(rec.Type.Interpret(rec.Value));
@@ -81,6 +81,20 @@ namespace TableWithIndex
                 Console.WriteLine("10 GetById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 sit.Search("марчук");
                 Console.WriteLine("Search ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            }
+            else if (variant == "freeindex")
+            {
+                Console.WriteLine("FreeIndex Start. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                FITest fit = new FITest(path);
+                fit.Load(query);
+                Console.WriteLine("Load ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                var rec = fit.GetById("w20070417_5_8436");
+                Console.WriteLine("GetById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //Console.WriteLine(rec.Type.Interpret(rec.Value));
+                foreach (string id in ids) fit.GetById(id);
+                Console.WriteLine("10 GetById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //fit.Search("марчук");
+                //Console.WriteLine("Search ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             }
         }
     }

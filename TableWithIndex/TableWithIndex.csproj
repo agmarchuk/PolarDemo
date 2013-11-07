@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FITest.cs" />
     <Compile Include="ONames.cs" />
     <Compile Include="PIndex.cs" />
     <Compile Include="PolarTest.cs" />
