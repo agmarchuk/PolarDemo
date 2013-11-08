@@ -81,18 +81,9 @@ namespace BinaryTree
                 var balance = (int) balanceEntry.Get();
                 if (cmp == 0)
                 {
-//<<<<<<< HEAD
-//                    var nodeEntry = node.UElementUnchecked(1);
-//                    counter++;
-//                    int cmp = elementDepth(element, nodeEntry.Field(0));
-//                    PxEntry balanceEntry = nodeEntry.Field(3);
-//                    var balance = (int)balanceEntry.Get();
-//                    if (cmp == 0)
-//=======
                     var left = nodeEntry.Field(1).GetHead();
                     var right = nodeEntry.Field(2).GetHead();
                     node.Set(new object[]
-//>>>>>>> 8e2e82fcbc3d298b405ee9719ea96b8b79f35bde
                     {
                         1, new[]
                         {
@@ -208,13 +199,8 @@ namespace BinaryTree
             }
             else //0
             {
-//<<<<<<< HEAD
-//                Fill(elementsEntry.Elements()
-//                                    .Select(oe => oe.Get()), orderKeySelector);
-//=======
                 entries[0].Key.Set(-1);
                 entries[1].Key.Set(1);
-//>>>>>>> 8e2e82fcbc3d298b405ee9719ea96b8b79f35bde
             }
 
             var rOld = r.GetHead();
@@ -384,29 +370,12 @@ namespace BinaryTree
             }
         }
 
-//<<<<<<< HEAD
-//            private static bool Equals(PxEntry left, PxEntry right, Func<object, object, bool> elementsComparer)
-//            {
-//                int tag = 0;
-//                if((tag=left.Tag())!=right.Tag()) return false;
-//                if(tag==0) return true;
-//               var r = right.UElement();
-//                var l =right.UElement();
-//                bool @equals = elementsComparer(r.Field(0).Get(), l.Field(0).Get());
-//                bool b = (int)r.Field(3).Get() == (int)l.Field(3).Get();
-//                return @equals
-//                       && b
-//                       && Equals(r.Field(1), l.Field(1))
-//                       && Equals(r.Field(2), l.Field(2));
-//            }
-//=======
         public bool Equals(object obj, Func<object, object, bool> elementsComparer)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
             return Equals(((BTree) obj).Root, Root, elementsComparer);
-//>>>>>>> 8e2e82fcbc3d298b405ee9719ea96b8b79f35bde
         }
 
         private static bool Equals(PxEntry left, PxEntry right, Func<object, object, bool> elementsComparer)
@@ -417,7 +386,7 @@ namespace BinaryTree
             var r = right.UElement();
             var l = right.UElement();
             bool @equals = elementsComparer(r.Field(0).Get(), l.Field(0).Get());
-            bool b = (int) r.Field(3).Get() == (int) l.Field(3).Get();
+           // bool b = (int) r.Field(3).Get().Value == (int) l.Field(3).Get().Value;
             return @equals
                 //   && b
                    && Equals(r.Field(1), l.Field(1))

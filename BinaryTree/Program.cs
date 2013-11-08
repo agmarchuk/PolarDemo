@@ -229,9 +229,9 @@ namespace BinaryTree
 
         static void SimpleTreeInt(string path)
         {
-            int pointsCount = 20, pointsDistance=100;
+            int pointsCount = 2, pointsDistance=1000000;
             int[][] results = { new int[pointsCount], new int[pointsCount], new int[pointsCount] };
-            for (int i = 0, j=0; i < pointsDistance*pointsCount; i+=pointsDistance, j++)
+            for (int i = 1, j=0; j < pointsCount; i+=pointsDistance, j++)
             {
                 if (File.Exists(path + "simple int.pac")) File.Delete(path + "simple int.pac");
                 if (File.Exists(path + "simple int tree.pxc")) File.Delete(path + "simple int tree.pxc");
@@ -245,22 +245,23 @@ namespace BinaryTree
                     (o, entry) => (int) o - (int) entry.Get(), o => o, false);
                 timer.Stop();
                 results[0][j] = (int)timer.Elapsed.Ticks;
-             //   Console.WriteLine("simple int tree " + timer.Elapsed.TotalMilliseconds);
+                Console.WriteLine("simple int tree "+i+"elements created for (ms)" + timer.Elapsed.TotalMilliseconds);
                 timer.Restart();
                 PaCell paCell = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)),
                     path + "simple int.pac", false);
                 paCell.Fill(objects);
                 timer.Stop();
                 results[1][j] = (int)timer.Elapsed.Ticks;
-                //Console.WriteLine("simple int pa " + timer.Elapsed.TotalMilliseconds);
-               // Console.WriteLine();
+                Console.WriteLine("simple int pa " + i + "elements created for (ms)" + timer.Elapsed.TotalMilliseconds);
 
-                //линейное возрастание времени
-            //    AddTreeAddChart(path, timer, objects, results, j);
+               // линейное возрастание времени
+                AddTreeAddChart(path, timer, objects, results, j);
+                Console.WriteLine();
+                TestGetByKey(simpleIntCell, i, paCell);
+                Console.WriteLine();
                 paCell.Close();
                 simpleIntCell.Close();
             }
-            //Draw(results);
         }
 
         private static void AddTreeAddChart(string path, Stopwatch timer, object[] objects, int[][] results, int j)
@@ -271,11 +272,31 @@ namespace BinaryTree
             foreach (var pair in objects)
                 cell.Add(pair);
             timer.Stop();
+            Console.WriteLine("simple int tree " + objects.Length + "elements created by add per one for (ms)" + timer.Elapsed.TotalMilliseconds);
 
             results[2][j] = (int) timer.Elapsed.Ticks;
             cell.Close();
         }
 
+        private static void TestGetByKey(BTree tree, int max, PaCell paCell)
+        {
+            Stopwatch timer=new Stopwatch();
+            for (int i = 0; i < 3; i++)
+            {
+                if(i==0)
+                    Console.WriteLine("first search");
+                int tested = new Random(DateTime.Now.Millisecond).Next(max-1);
+                timer.Restart();
+                var res=tree.BinarySearch(entry => tested - (int)entry.Get());
+                timer.Stop();
+                Console.WriteLine("search in "+max+" elements TREE find "+tested+" for (ticks)"+timer.Elapsed.Ticks);
+                timer.Restart();
+                var res1 = paCell.Root.BinarySearchFirst(entry => (int)entry.Get() - tested);
+                timer.Stop();
+                Console.WriteLine("binary search in "+max+" elements PA CELL find " + tested + " for (ticks)" + timer.Elapsed.Ticks);
+                Console.WriteLine();
+            }
+        }
 
         private static void GetOverflow(string path, Func<object, PxEntry, int> edapth)
         {
@@ -318,26 +339,8 @@ namespace BinaryTree
 //            //System.Runtime.InteropServices.Marshal.ReleaseComObject(workbooks);
 //            //System.Runtime.InteropServices.Marshal.ReleaseComObject(application);
 //        }
-        // Построение объекта дерева бинарного поиска
-        private static object BuildBinaryTreeObjectFromSortedSequence(object[] arr, int beg, int count)
-        {
-            int half = count / 2;
-            if (half == 0)
-            {
-                return count == 1 ?
-                    new object[] { 1, new[] { arr[beg], new object[] { 0, null }, new object[] { 0, null } } } :
-                    new object[] { 0, null };
-            }
-            else
-            {
-                return new object[] { 1, new[] {
-                    arr[beg + half],
-                    BuildBinaryTreeObjectFromSortedSequence(arr, beg, half),
-                    BuildBinaryTreeObjectFromSortedSequence(arr, beg + half + 1, count - half - 1)
-                }};
-            }
-
-        }
+ 
+      
 
         private static void TestSearch(BTree cell, string name)
         {
@@ -352,23 +355,24 @@ namespace BinaryTree
                 var res3 = found.GetValue();
                 Console.WriteLine(res3.Type.Interpret(res3.Value));
             }
-        }
-        public static IEnumerable<int> IndSeq(int beg, int count)
-        {
-            int half = count / 2;
-            if (half == 0)
-            { // выдать индекс если count == 1
-                if (count == 1) yield return beg;
-            }
-            else
-            {
-                // Сам индекс
-                yield return beg + half;
-                // Все индексы до
-                foreach (var i in IndSeq(beg, half)) yield return i;
-                // Все индексы после
-                foreach (var i in IndSeq(beg + half + 1, count - half - 1)) yield return i;
-            }
-        }
+        } 
+        // Построение объекта дерева бинарного поиска
+        //public static IEnumerable<int> IndSeq(int beg, int count)
+        //{
+        //    int half = count / 2;
+        //    if (half == 0)
+        //    { // выдать индекс если count == 1
+        //        if (count == 1) yield return beg;
+        //    }
+        //    else
+        //    {
+        //        // Сам индекс
+        //        yield return beg + half;
+        //        // Все индексы до
+        //        foreach (var i in IndSeq(beg, half)) yield return i;
+        //        // Все индексы после
+        //        foreach (var i in IndSeq(beg + half + 1, count - half - 1)) yield return i;
+        //    }
+        //}
     }
 }
