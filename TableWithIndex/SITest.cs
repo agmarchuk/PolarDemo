@@ -42,13 +42,13 @@ namespace TableWithIndex
 
             si.Load(cell.Root.Elements().Select(r4 =>
             {
-                object[] o4 = (object[])r4.Value;
-                return new object[] { o4[0], r4.Offset };
+                object[] o4 = (object[])r4.Get();
+                return new object[] { o4[0], r4.offset };
             }));
             ni.Load(cell.Root.Elements().Select(r4 =>
             {
-                object[] o4 = (object[])r4.Value;
-                return new object[] { ((string)o4[1]).ToLower(), r4.Offset };
+                object[] o4 = (object[])r4.Get();
+                return new object[] { ((string)o4[1]).ToLower(), r4.offset };
             }));
         }
         public PValue GetById(string id)
@@ -56,7 +56,7 @@ namespace TableWithIndex
             long offset = si.FindFirst(id);
             PaEntry entry = cell.Root.Element(0);
             entry.offset = offset;
-            var rec = entry.Get();
+            var rec = entry.GetValue();
             //Console.WriteLine(rec.Type.Interpret(rec.Value));
             return rec;
         }
@@ -71,7 +71,7 @@ namespace TableWithIndex
             {
                 PaEntry entry = cell.Root.Element(0);
                 entry.offset = off;
-                var rec = entry.Get();
+                var rec = entry.GetValue();
 
                 //Console.WriteLine("VAlu=" + rec.Type.Interpret(rec.Value));
             }

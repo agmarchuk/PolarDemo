@@ -83,7 +83,7 @@ namespace BinaryTree
                     counter++;
                     int cmp = elementDepth(element, nodeEntry.Field(0));
                     PxEntry balanceEntry = nodeEntry.Field(3);
-                    var balance = (int)balanceEntry.Get().Value;
+                    var balance = (int)balanceEntry.Get();
                     if (cmp == 0)
                     {
                         var left = nodeEntry.Field(1).GetHead();
@@ -262,7 +262,7 @@ namespace BinaryTree
             public void Fill(PxEntry elementsEntry, Func<object, object> orderKeySelector)
             {
                 Fill(elementsEntry.Elements()
-                                    .Select(oe => oe.Get().Value), orderKeySelector);
+                                    .Select(oe => oe.Get()), orderKeySelector);
             }
 
             public void Fill(IEnumerable<object> elements, Func<object, object> orderKeySelector)
@@ -333,8 +333,8 @@ namespace BinaryTree
                 if(tag==0) return true;
                var r = right.UElement();
                 var l =right.UElement();
-                bool @equals = elementsComparer(r.Field(0).Get().Value, l.Field(0).Get().Value);
-                bool b = (int)r.Field(3).Get().Value == (int)l.Field(3).Get().Value;
+                bool @equals = elementsComparer(r.Field(0).Get(), l.Field(0).Get());
+                bool b = (int)r.Field(3).Get() == (int)l.Field(3).Get();
                 return @equals
                        && b
                        && Equals(r.Field(1), l.Field(1))

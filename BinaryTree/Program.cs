@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Xml.Linq;
-using Microsoft.Office.Interop.Excel;
+//using Microsoft.Office.Interop.Excel;
 using PolarDB;
 
 namespace BinaryTree
@@ -25,7 +25,7 @@ namespace BinaryTree
             Func<object, PxEntry, int> edepth = (object v1, PxEntry en2) =>
             {
                 string s1 = (string)(((object[])v1)[0]);
-                return String.Compare(s1, (string)(en2.Field(0).Get().Value), StringComparison.Ordinal);
+                return String.Compare(s1, (string)(en2.Field(0).Get()), StringComparison.Ordinal);
             };
             // Инициируем типы
             // Создадим фиксированную ячейку
@@ -63,7 +63,7 @@ namespace BinaryTree
             cell.Root.UElementUnchecked(1).Field(0).Set(new object[] { "", "" });
 
             // проверяем содержимое
-            var res = cell.Root.Get();
+            var res = cell.Root.GetValue();
             //  Console.WriteLine(res.Type.Interpret(res.Value));
 
 
@@ -75,7 +75,7 @@ namespace BinaryTree
             cell.Add(new object[] { "3", "555L" });
             cell.Add(new object[] { "4", "666L" });
             // Получается 444(333(), 555(, 666()))
-            var res2 = cell.Root.Get();
+            var res2 = cell.Root.GetValue();
             Console.WriteLine(res2.Type.Interpret(res2.Value));
             Console.WriteLine();
             // Повернем дерево, чтобы стало 555(444(333(),), 666())
@@ -89,7 +89,7 @@ namespace BinaryTree
             // а в h444 заменим правое поддерево на пустое
             cell.Root.UElement().Field(1).UElement().Field(2).Set(BTree.Empty);
 
-            var res3 = cell.Root.Get();
+            var res3 = cell.Root.GetValue();
             Console.WriteLine(res3.Type.Interpret(res3.Value));
 
             // Теперь попробуем загрузить реальные данные
@@ -216,13 +216,13 @@ namespace BinaryTree
                 .GroupBy(q => q.GetHashCode())
                 .Select(g => new object[] {g.Key, g.Select(q => sample as object).ToArray()})
                 .ToBTree(treePType, path + "treeOfInt",
-                    (o, entry) => (int) ((object[]) o)[0] - (int) entry.Field(0).Get().Value,
+                    (o, entry) => (int) ((object[]) o)[0] - (int) entry.Field(0).Get(),
                     o => (int) ((object[]) o)[0]);
             Console.WriteLine("create tree of int long pairs ok " + (DateTime.Now - tt0).TotalMilliseconds);
             var testIdHash = query.First()[0].GetHashCode();//"w20070417_5_8436".GetHashCode();
             tt0 = DateTime.Now;
-            var finded = tree.BinarySearch(entry => testIdHash - (int) entry.Field(0).Get().Value );
-            Console.WriteLine(finded.Field(0).Get().Value + " finded, duration=" + (DateTime.Now - tt0).TotalMilliseconds+"ms");
+            var finded = tree.BinarySearch(entry => testIdHash - (int) entry.Field(0).Get() );
+            Console.WriteLine(finded.Field(0).Get() + " finded, duration=" + (DateTime.Now - tt0).TotalMilliseconds+"ms");
             Console.WriteLine();
             tree.Close();
         }
@@ -242,7 +242,7 @@ namespace BinaryTree
                 Stopwatch timer = new Stopwatch();
                 timer.Start();
                 var simpleIntCell = objects.ToBTree(new PType(PTypeEnumeration.integer), path + "simple int tree.pxc",
-                    (o, entry) => (int) o - (int) entry.Get().Value, o => o);
+                    (o, entry) => (int) o - (int) entry.Get(), o => o);
                 timer.Stop();
                 results[0][j] = (int)timer.Elapsed.Ticks;
              //   Console.WriteLine("simple int tree " + timer.Elapsed.TotalMilliseconds);
@@ -260,14 +260,14 @@ namespace BinaryTree
                 paCell.Close();
                 simpleIntCell.Close();
             }
-            Draw(results);
+            //Draw(results);
         }
 
         private static void AddTreeAddChart(string path, Stopwatch timer, object[] objects, int[][] results, int j)
         {
             timer.Restart();
             var cell = new BTree(new PType(PTypeEnumeration.integer),
-                (o, entry) => (int) o - (int) entry.Get().Value, path + "simple int tree add.pxc", false);
+                (o, entry) => (int) o - (int) entry.Get(), path + "simple int tree add.pxc", false);
             foreach (var pair in objects)
                 cell.Add(pair);
             timer.Stop();
@@ -292,32 +292,32 @@ namespace BinaryTree
         /// Отображает грфик в EXEL, но не сохраняет его. 
         /// </summary>
         /// <param name="xy">корневой массив-линий, листовой точек. Точки должны отличться на одну постоянноую величину</param>
-        static void Draw(int[][] xy)
-        {
-            Application application = new Application(){Visible = true};
-            var workbooks = application.Workbooks;
-            var wordBook = workbooks.Open(new DirectoryInfo(Directory.GetCurrentDirectory()).Parent.Parent.FullName+"/chart.xls");
-            var sheet = (_Worksheet) wordBook.ActiveSheet;
-var chart =(_Chart)wordBook.Charts.Add();
-            chart.Name = "sdfs";
-            Thread.CurrentThread.CurrentCulture=new CultureInfo("en-US");
-            sheet.ClearArrows();
-            for (int j = 0; j < xy.Length; j++)
-                for (int i = 0; i < xy[0].Length; i++)
-            {
-                {
-                    sheet.Cells[i + 1, j + 1] = xy[j][i].ToString(CultureInfo.InvariantCulture);
-                }
-            }
+//        static void Draw(int[][] xy)
+//        {
+//            Application application = new Application(){Visible = true};
+//            var workbooks = application.Workbooks;
+//            var wordBook = workbooks.Open(new DirectoryInfo(Directory.GetCurrentDirectory()).Parent.Parent.FullName+"/chart.xls");
+//            var sheet = (_Worksheet) wordBook.ActiveSheet;
+//var chart =(_Chart)wordBook.Charts.Add();
+//            chart.Name = "sdfs";
+//            Thread.CurrentThread.CurrentCulture=new CultureInfo("en-US");
+//            sheet.ClearArrows();
+//            for (int j = 0; j < xy.Length; j++)
+//                for (int i = 0; i < xy[0].Length; i++)
+//            {
+//                {
+//                    sheet.Cells[i + 1, j + 1] = xy[j][i].ToString(CultureInfo.InvariantCulture);
+//                }
+//            }
 
-            chart.ChartWizard(sheet.Range["A1", "G" + xy[0].Length], XlChartType.xlLine);
-            //System.Runtime.InteropServices.Marshal.ReleaseComObject(chart);
-            //System.Runtime.InteropServices.Marshal.ReleaseComObject(sheet);
-            //wordBook.Close(false);
-            //System.Runtime.InteropServices.Marshal.ReleaseComObject(wordBook);
-            //System.Runtime.InteropServices.Marshal.ReleaseComObject(workbooks);
-            //System.Runtime.InteropServices.Marshal.ReleaseComObject(application);
-        }
+//            chart.ChartWizard(sheet.Range["A1", "G" + xy[0].Length], XlChartType.xlLine);
+//            //System.Runtime.InteropServices.Marshal.ReleaseComObject(chart);
+//            //System.Runtime.InteropServices.Marshal.ReleaseComObject(sheet);
+//            //wordBook.Close(false);
+//            //System.Runtime.InteropServices.Marshal.ReleaseComObject(wordBook);
+//            //System.Runtime.InteropServices.Marshal.ReleaseComObject(workbooks);
+//            //System.Runtime.InteropServices.Marshal.ReleaseComObject(application);
+//        }
         // Построение объекта дерева бинарного поиска
         private static object BuildBinaryTreeObjectFromSortedSequence(object[] arr, int beg, int count)
         {
@@ -343,13 +343,13 @@ var chart =(_Chart)wordBook.Charts.Add();
         {
             PxEntry found = cell.BinarySearch(pe =>
             {
-                string s = (string)pe.Field(0).Get().Value;
+                string s = (string)pe.Field(0).Get();
                 return String.Compare(name, s, StringComparison.Ordinal);
             });
             if (found.offset == long.MinValue) Console.WriteLine("Имя {0} не найдено", name);
             else
             {
-                var res3 = found.Get();
+                var res3 = found.GetValue();
                 Console.WriteLine(res3.Type.Interpret(res3.Value));
             }
         }

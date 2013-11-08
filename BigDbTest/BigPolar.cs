@@ -13,7 +13,7 @@ namespace BigDbTest
         private PaCell cell;
         public BigPolar(string path)
         {
-            this.cellPath = path + @"Databases\bigtest.pac";
+            this.cellPath = path + @"bigtest.pac";
             cell = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)), cellPath, false);
         }
         System.Random rnd = new Random();
@@ -70,7 +70,7 @@ namespace BigDbTest
             int cnt = 0;
             foreach (var x in cell.Root.Elements())
             {
-                if ((int)x.Value % 2 == 0) cnt++;
+                if ((int)x.Get() % 2 == 0) cnt++;
             }
             Console.WriteLine("Test3 result=" + cnt);
         }
