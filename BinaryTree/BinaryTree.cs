@@ -17,7 +17,7 @@ namespace BinaryTree
         /// <param name="elementDepth">функция сравнения элемента дерева и добавляемого объекта</param>
         /// <param name="filePath"></param>
         /// <param name="readOnly"></param>
-        public BTree(PType ptElement, Func<object, PxEntry, int> elementDepth, string filePath, bool readOnly = true)
+        public BTree(PType ptElement, Func<object, PxEntry, int> elementDepth, string filePath,  bool readOnly = true)
             : base(PTypeTree(ptElement), filePath, readOnly)
         {
             this.elementDepth = elementDepth;
@@ -58,15 +58,7 @@ namespace BinaryTree
         /// путь от последнего узла с ненулевым балансом до добавленой вершины (не включая её) составляет пары: <PxEntry /> ,баланса и значение баланса.
         /// </summary>
         private readonly List<KeyValuePair<PxEntry, int>> listEntries4Balance = new List<KeyValuePair<PxEntry, int>>();
-
-        public static int H(PxEntry tree)
-        {
-            return tree.Tag() == 0
-                ? 0
-                : 1 + Math.Max(H(tree.UElementUnchecked(1).Field(1)),
-                    H(tree.UElementUnchecked(1).Field(2)));
-        }
-
+        
         /// <summary>
         /// Поместить элемент в дерево в соответствии со значением функции сравнения,
         ///  вернуть ссылку на голову нового дерева
@@ -78,8 +70,10 @@ namespace BinaryTree
             var node = Root;
             var lastUnBalanceNode = node;
             listEntries4Balance.Clear();
+            int h = 0;
             while (node.Tag() != 0)
             {
+                h++;
                 var nodeEntry = node.UElementUnchecked(1);
                 counter++;
                 int cmp = elementDepth(element, nodeEntry.Field(0));
@@ -261,20 +255,26 @@ namespace BinaryTree
             root.SetHead(lOld);
         }
 
-        public void Fill(PxEntry elementsEntry, Func<object, object> orderKeySelector)
+        public void Fill(PxEntry elementsEntry, Func<object, object> orderKeySelector, bool editable)
         {
             Fill(elementsEntry.Elements()
-                .Select(oe => oe.Get().Value), orderKeySelector);
+                .Select(oe => oe.Get().Value), orderKeySelector, editable);
         }
-
-        public void Fill(IEnumerable<object> elements, Func<object, object> orderKeySelector)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="elements"></param>
+        /// <param name="orderKeySelector"></param>
+        /// <param name="editable"></param>
+        public void Fill(IEnumerable<object> elements, Func<object, object> orderKeySelector, bool  editable)
         {
             object[] elementsSorted = elements
                 .OrderBy(orderKeySelector)
-                .Cast<object>()
                 .ToArray();
             Clear();
-            Fill2(ToTreeObject(elementsSorted, 0, elementsSorted.Length));
+            int h = 0;
+            var treeNodes = editable ? ToTreeObjectWithBalance(new ToTreeObjectParams(elementsSorted, 0, elementsSorted.Length), ref h) : ToTreeObject(elementsSorted, 0, elementsSorted.Length);
+            Fill2(treeNodes);
         }
 
         private static object[] ToTreeObject(object[] elements, int beg, int len)
@@ -306,6 +306,56 @@ namespace BinaryTree
             };
         }
 
+        public class ToTreeObjectParams
+        {
+            public ToTreeObjectParams(object[] elements, int beg, int len)
+            {
+                this.Elements = elements;
+                this.Beg = beg;
+                this.Len = len;
+            }
+
+            public object[] Elements;
+
+            public int Beg;
+
+            public int Len;
+        }
+
+        private static object[] ToTreeObjectWithBalance(ToTreeObjectParams @params, ref int h)
+        {
+            if (@params.Len == 0) return Empty;
+            h++;
+            if (@params.Len == 1)
+                return new object[]
+                {
+                    1, new[]
+                    {
+                        // запись
+                        @params.Elements[@params.Beg], // значение
+                        Empty,
+                        Empty,
+                        0
+                    }
+                };
+            int leftH = 0, rightH = 0, l = @params.Len;
+            @params.Len /= 2;
+            var left = ToTreeObjectWithBalance(@params, ref leftH);
+            @params.Beg += @params.Len + 1;
+            @params.Len = l - @params.Len - 1;
+            return new object[]
+            {
+                1, new[]
+                {
+                    // запись
+                    @params.Elements[@params.Beg + @params.Len/2], // значение
+                    left,
+                    ToTreeObjectWithBalance(@params, ref rightH),
+                    leftH - rightH
+                }
+            };
+        }
+
         public PxEntry BinarySearch(Func<PxEntry, int> eDepth)
         {
             var entry = Root;
@@ -324,31 +374,38 @@ namespace BinaryTree
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (obj.GetType() != GetType()) return false;
             return Equals(((BTree) obj).Root, Root, elementsComparer);
         }
 
         private static bool Equals(PxEntry left, PxEntry right, Func<object, object, bool> elementsComparer)
         {
-            int tag = 0;
+            int tag;
             if ((tag = left.Tag()) != right.Tag()) return false;
             if (tag == 0) return true;
             var r = right.UElement();
             var l = right.UElement();
             bool @equals = elementsComparer(r.Field(0).Get().Value, l.Field(0).Get().Value);
-            bool b = (int) r.Field(3).Get().Value == (int) l.Field(3).Get().Value;
+           // bool b = (int) r.Field(3).Get().Value == (int) l.Field(3).Get().Value;
             return @equals
-                   && b
+                //   && b
                    && Equals(r.Field(1), l.Field(1))
                    && Equals(r.Field(2), l.Field(2));
         }
+        public static int H(PxEntry tree)
+        {
+            return tree.Tag() == 0
+                ? 0
+                : 1 + Math.Max(H(tree.UElementUnchecked(1).Field(1)),
+                    H(tree.UElementUnchecked(1).Field(2)));
+        }
     }
 
-    public class RamBTree
+   
+
+    public class EntriesPair
     {
-        public object Element;
-        public int Balance;
-        public int H;
-        public RamBTree Left, Right;
+        public PxEntry Left;
+        public PxEntry Right;
     }
 }

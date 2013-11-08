@@ -34,7 +34,7 @@ namespace BinaryTree
                 new NamedType("id", new PType(PTypeEnumeration.sstring)));
             BTree cell = new BTree(ptElement,
                 edepth,
-                 path + "btree.pxc", false);
+                 path + "btree.pxc", readOnly: false);
             cell.Clear();
 
             //// Проверим существует ли пустое значение
@@ -133,7 +133,7 @@ namespace BinaryTree
             Func<object, PxEntry, int> edepth)
         {
             var tt0 = DateTime.Now;
-            var treeFromQuery = query.ToBTree(ptElement, path + "TreeFromQuery.pxc", edepth, o => ((object[]) o)[0]);
+            var treeFromQuery = query.ToBTree(ptElement, path + "TreeFromQuery.pxc", edepth, o => ((object[]) o)[0], false);
             Console.WriteLine("tree from query createtd,duration={0}", (DateTime.Now - tt0).Ticks/10000L);
             tt0 = DateTime.Now;
 
@@ -154,8 +154,8 @@ namespace BinaryTree
             elementsCell.Fill2(query);
             var tt0 = DateTime.Now;
 
-            var treeFromQuery = new BTree(ptElement, edepth, path + "TreeFromEntree.pxc", false);
-            treeFromQuery.Fill(elementsCell.Root, o => ((object[]) o)[0]);
+            var treeFromQuery = new BTree(ptElement, edepth, path + "TreeFromEntree.pxc", readOnly: false);
+            treeFromQuery.Fill(elementsCell.Root, o => ((object[]) o)[0], false);
             Console.WriteLine("tree fill reading entry createtd,duration={0}", (DateTime.Now - tt0).Ticks/10000L);
             tt0 = DateTime.Now;
             // Иcпытание на "предельные" характеристики по скорости ввода данных. Данные сортируются, а потом выстраивается в
@@ -171,7 +171,7 @@ namespace BinaryTree
 
         private static BTree TestQueryInput(IEnumerable<object[]> query, PType ptElement, Func<object, PxEntry, int> edepth, string path)
         {
-            BTree cell =new BTree(ptElement, edepth, path+"add.pxc", false);
+            BTree cell =new BTree(ptElement, edepth, path+"add.pxc", readOnly: false);
             var tt0 = DateTime.Now;
             int count = 0;
            BTree.counter = 0;
@@ -217,7 +217,7 @@ namespace BinaryTree
                 .Select(g => new object[] {g.Key, g.Select(q => sample as object).ToArray()})
                 .ToBTree(treePType, path + "treeOfInt",
                     (o, entry) => (int) ((object[]) o)[0] - (int) entry.Field(0).Get().Value,
-                    o => (int) ((object[]) o)[0]);
+                    o => (int) ((object[]) o)[0], false);
             Console.WriteLine("create tree of int long pairs ok " + (DateTime.Now - tt0).TotalMilliseconds);
             var testIdHash = query.First()[0].GetHashCode();//"w20070417_5_8436".GetHashCode();
             tt0 = DateTime.Now;
@@ -242,7 +242,7 @@ namespace BinaryTree
                 Stopwatch timer = new Stopwatch();
                 timer.Start();
                 var simpleIntCell = objects.ToBTree(new PType(PTypeEnumeration.integer), path + "simple int tree.pxc",
-                    (o, entry) => (int) o - (int) entry.Get().Value, o => o);
+                    (o, entry) => (int) o - (int) entry.Get().Value, o => o,false);
                 timer.Stop();
                 results[0][j] = (int)timer.Elapsed.Ticks;
              //   Console.WriteLine("simple int tree " + timer.Elapsed.TotalMilliseconds);
