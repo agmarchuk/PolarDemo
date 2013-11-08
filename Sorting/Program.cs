@@ -51,15 +51,15 @@ namespace Sorting
             
             // очистим и перекинем данные
             cell_seqnameid.Clear();
-            cell_seqnameid.Fill2(cella.Root.Get().Value);
+            cell_seqnameid.Fill2(cella.Root.Get());
 
             Console.WriteLine("======Fill ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             //// Теперь сортируем пары по первому (нулевому) полю
             //cell_seqnameid.Root.SortComparison((e1, e2) =>
             //{
-            //    string s1 = (string)e1.Field(0).Get().Value;
-            //    string s2 = (string)e2.Field(0).Get().Value;
+            //    string s1 = (string)e1.Field(0).Get();
+            //    string s2 = (string)e2.Field(0).Get();
             //    return s1.CompareTo(s2);
             //});
             //Console.WriteLine("======Sort ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
@@ -67,7 +67,7 @@ namespace Sorting
             // Сортируем по-другому
             cell_seqnameid.Root.Sort(e =>
             {
-                return (string)e.Field(0).Get().Value;
+                return (string)e.Field(0).Get();
             });
             Console.WriteLine("======Sort2 ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
@@ -75,7 +75,7 @@ namespace Sorting
             var qu = cell_seqnameid.Root.Elements().Skip(100).Take(10);
             foreach (var c in qu)
             {
-                var v = c.Get();
+                var v = c.GetValue();
                 Console.WriteLine(v.Type.Interpret(v.Value));
             }
             Console.WriteLine("======First 10 after 100. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
@@ -84,10 +84,10 @@ namespace Sorting
             string name = "Марчук Александр Гурьевич";
             var found = cell_seqnameid.Root.BinarySearchFirst(e =>
             {
-                string nm = (string)e.Field(0).Get().Value;
+                string nm = (string)e.Field(0).Get();
                 return nm.CompareTo(name);
             });
-            var f = found.Get();
+            var f = found.GetValue();
             Console.WriteLine(f.Type.Interpret(f.Value));
             Console.WriteLine("======BinarySearchFirst. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
@@ -95,11 +95,11 @@ namespace Sorting
             string name2 = "марчук";
             var found2 = cell_seqnameid.Root.BinarySearchFirst(e =>
             {
-                string nm = ((string)e.Field(0).Get().Value).ToLower();
+                string nm = ((string)e.Field(0).Get()).ToLower();
                 if (nm.StartsWith(name2)) return 0;
                 return nm.CompareTo(name);
             });
-            var f2 = found.Get();
+            var f2 = found.GetValue();
             Console.WriteLine(f2.Type.Interpret(f2.Value));
             Console.WriteLine("======BinarySearchFirst variant 2. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
@@ -107,13 +107,13 @@ namespace Sorting
             string name3 = "белинский";
             var found3 = cell_seqnameid.Root.BinarySearchAll(e =>
             {
-                string nm = ((string)e.Field(0).Get().Value).ToLower();
+                string nm = ((string)e.Field(0).Get()).ToLower();
                 if (nm.StartsWith(name3)) return 0;
                 return nm.CompareTo(name3);
             });
             foreach (var ff in found3)
             {
-                var f3 = ff.Get();
+                var f3 = ff.GetValue();
                 Console.WriteLine(f3.Type.Interpret(f3.Value));
             }
             Console.WriteLine("======BinarySearchAll ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
@@ -122,7 +122,7 @@ namespace Sorting
             var query = cell_seqnameid.Root.Elements();
             foreach (var rec in query)
             {
-                object[] value = (object[])rec.Get().Value;
+                object[] value = (object[])rec.Get();
                 string nam = ((string)value[0]).ToLower();
                 if (nam.StartsWith(name3))
                 {

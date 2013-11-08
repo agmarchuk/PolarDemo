@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FITest.cs" />
+    <Compile Include="FreeIndex.cs" />
     <Compile Include="ONames.cs" />
     <Compile Include="PIndex.cs" />
     <Compile Include="PolarTest.cs" />

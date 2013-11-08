@@ -30,32 +30,32 @@ namespace TableWithIndex
             }
             acell.Flush();
             xcell.Clear();
-            xcell.Fill2(acell.Root.Get().Value);
+            xcell.Fill2(acell.Root.Get());
             xcell.Flush();
-            xcell.Root.Sort((PxEntry entry) => (string)entry.Field(0).Get().Value); // Это надо привести в соответствие с типом ключа
+            xcell.Root.Sort((PxEntry entry) => (string)entry.Field(0).Get()); // Это надо привести в соответствие с типом ключа
         }
         public long FindFirst(object sample)
         {
-            foreach (PxEntry found in xcell.Root.BinarySearchAll((PxEntry entry) => ((string)entry.Field(0).Get().Value).CompareTo(sample)))
+            foreach (PxEntry found in xcell.Root.BinarySearchAll((PxEntry entry) => ((string)entry.Field(0).Get()).CompareTo(sample)))
             {
-                if ((bool)found.Field(2).Get().Value == false) return (long)found.Field(1).Get().Value; 
+                if ((bool)found.Field(2).Get() == false) return (long)found.Field(1).Get(); 
             }
             return Int64.MinValue;
         }
         public IEnumerable<long> FindAll(Func<object, int> compare)
         {
-            foreach (PxEntry found in xcell.Root.BinarySearchAll((PxEntry entry) => compare((string)entry.Field(0).Get().Value)))
+            foreach (PxEntry found in xcell.Root.BinarySearchAll((PxEntry entry) => compare((string)entry.Field(0).Get())))
             {
-                if ((bool)found.Field(2).Get().Value == false) yield return (long)found.Field(1).Get().Value;
+                if ((bool)found.Field(2).Get() == false) yield return (long)found.Field(1).Get();
             }
         }
 
         public void Delete(object key, long value)
         {
-            foreach (PxEntry found in xcell.Root.BinarySearchAll((PxEntry entry) => ((string)entry.Field(0).Get().Value).CompareTo(key)))
+            foreach (PxEntry found in xcell.Root.BinarySearchAll((PxEntry entry) => ((string)entry.Field(0).Get()).CompareTo(key)))
             {
-                if ((bool)found.Field(2).Get().Value == false &&
-                    (long)found.Field(1).Get().Value == value)
+                if ((bool)found.Field(2).Get() == false &&
+                    (long)found.Field(1).Get() == value)
                 {
                     found.Field(2).Set(true);
                     return;

@@ -29,18 +29,18 @@ namespace TableWithIndex
 
             object[] ivalue = table.Root.Elements().Select(rec =>
             {
-                return new object[] { ((object[])rec.Value)[field_numb], rec.Offset };
+                return new object[] { ((object[])rec.Get())[field_numb], rec.offset };
             }).ToArray();
             icell.Fill2(ivalue);
             icell.Flush();
-            icell.Root.Sort(entry => (string)entry.Field(0).Get().Value);
+            icell.Root.Sort(entry => (string)entry.Field(0).Get());
             //icell.Root.SortComparison((e1, e2) => ((string)((object[])e1.Get().Value)[0]).CompareTo((string)((object[])e2.Get().Value)[0]));
             Console.WriteLine(icell.Root.Count());
         }
         public long SelectFirst(string id)
         {
-            PxEntry candidate = icell.Root.BinarySearchFirst(entry => ((string)entry.Field(0).Get().Value).CompareTo(id));
-            return (long)candidate.Field(1).Get().Value;
+            PxEntry candidate = icell.Root.BinarySearchFirst(entry => ((string)entry.Field(0).Get()).CompareTo(id));
+            return (long)candidate.Field(1).Get();
         }
     }
 }

@@ -50,7 +50,7 @@ namespace TableWithIndex
             PaEntry entry = cell.Root.Element(0);
             entry.offset = offset;
 
-            PValue pv = entry.Get();
+            PValue pv = entry.GetValue();
             Console.WriteLine("record=" + pv.Type.Interpret(pv.Value));
         }
 
