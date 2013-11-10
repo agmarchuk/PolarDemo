@@ -83,7 +83,7 @@ namespace GraphTesting
             Console.WriteLine("Forming serial graph ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             // произвести объектное представление
-            object g_value = graph_a.Root.Get().Value;
+            object g_value = graph_a.Root.Get();
             graph_x.Fill2(g_value);
             Console.WriteLine("Forming fixed graph ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
@@ -112,7 +112,7 @@ namespace GraphTesting
         {
             PxEntry found = graph_x.Root.BinarySearchFirst(element =>
             {
-                int v = (int)element.Field(0).Get().Value;
+                int v = (int)element.Field(0).Get();
                 return v < e_hs ? -1 : (v == e_hs ? 0 : 1);
             });
             return found;
@@ -124,15 +124,15 @@ namespace GraphTesting
             int hs_s4 = name4.ToLower().GetHashCode();
             int hs_pname = sema2012m.ONames.p_name.GetHashCode();
             var query = n4.Root.Elements()
-                .Where(p => (int)((object[])p.Value)[1] == hs_s4)
-                .Select(p => GetEntryByHash((int)((object[])p.Value)[0]).Field(3))
-                .SelectMany(en => en.Elements().Where(en2 => (int)en2.Field(0).Get().Value == hs_pname))
+                .Where(p => (int)((object[])p.Get())[1] == hs_s4)
+                .Select(p => GetEntryByHash((int)((object[])p.Get())[0]).Field(3))
+                .SelectMany(en => en.Elements().Where(en2 => (int)en2.Field(0).Get() == hs_pname))
                 .SelectMany(en2 => en2.Field(1).Elements())
                 .Select(en3 => 
                 {
-                    long off = (long)en3.Get().Value;
+                    long off = (long)en3.Get();
                     any_triplet.offset = off;
-                    return (object[])any_triplet.UElement().Get().Value;
+                    return (object[])any_triplet.UElement().Get();
                 })
                 .Where(four => (string)four[1] == sema2012m.ONames.p_name && ((string)four[2]).StartsWith(ss))
                 .Select(four => new { id = (string)four[0], name = (string)four[2] });
@@ -180,15 +180,15 @@ namespace GraphTesting
                 foreach (var p_rec in dir_ent.Elements())
                 {
                     // Возьмем первый элемент и отфильтруем по несовпадению
-                    int h = (int)p_rec.Field(0).Get().Value;
+                    int h = (int)p_rec.Field(0).Get();
                     if (h != hs) continue;
                     // Теперь надо пройтись по списку и посмотреть реальные триплеты
                     foreach (var off_en in p_rec.Field(1).Elements())
                     {
-                        long off = (long)off_en.Get().Value;
+                        long off = (long)off_en.Get();
                         // Находим триплет
                         any_triplet.offset = off;
-                        object[] tri_o = (object[])any_triplet.Get().Value;
+                        object[] tri_o = (object[])any_triplet.Get();
                         int tag = (int)tri_o[0];
                         object[] rec = (object[])tri_o[1];
                         // Обрабатываем только "правильные"
@@ -255,15 +255,15 @@ namespace GraphTesting
             foreach (var p_rec in direct_ent.Elements())
             {
                 // Возьмем первый элемент и отфильтруем по несовпадению
-                int h = (int)p_rec.Field(0).Get().Value;
+                int h = (int)p_rec.Field(0).Get();
                 if (h != hs_type) continue;
                 // Теперь надо пройтись по списку и посмотреть реальные триплеты
                 foreach (var off_en in p_rec.Field(1).Elements())
                 {
-                    long off = (long)off_en.Get().Value;
+                    long off = (long)off_en.Get();
                     // Находим триплет
                     any_triplet.offset = off;
-                    var tri_o = any_triplet.Get().Value;
+                    var tri_o = any_triplet.Get();
                     Triplet tri = Triplet.Create(tri_o);
                     // Еще отбраковка
                     if (tri is OProp && tri.s == id && tri.p == predicate_id) { einfo.type = ((OProp)tri).o; break; }
@@ -282,11 +282,11 @@ namespace GraphTesting
                 foreach (long off in ein.entry.Field(fields[direction]).Elements()
                     .SelectMany(pRec => 
                         pRec.Field(1).Elements()
-                                      .Select(offEn => (long)offEn.Get().Value)))
+                                      .Select(offEn => (long)offEn.Get())))
                 {
                     // Находим триплет
                     any_triplet.offset = off;
-                    object[] tri_o = (object[])any_triplet.Get().Value;
+                    object[] tri_o = (object[])any_triplet.Get();
                     int tag = (int)tri_o[0];
                     object[] rec = (object[])tri_o[1];
                     // Обрабатываем только "правильные"
@@ -330,7 +330,7 @@ namespace GraphTesting
 
             bool firsttime = true;
             bool firstprop = true;
-            foreach (object[] el in quads.Root.Elements().Select(e => e.Value))
+            foreach (object[] el in quads.Root.Elements().Select(e => e.Get()))
             {
                 FourFields record = new FourFields((int)el[0], (int)el[1], (int)el[2], (long)el[3]);
                 if (firsttime || record.e_hs != hs_e)
@@ -431,7 +431,7 @@ namespace GraphTesting
             quads.S();
             foreach (var tri in triplets.Root.Elements())
             {
-                object[] tri_uni = (object[])tri.Value;
+                object[] tri_uni = (object[])tri.Get();
                 int tag = (int)tri_uni[0];
                 object[] rec = (object[])tri_uni[1];
                 int hs_s = ((string)rec[0]).GetHashCode();
@@ -439,12 +439,12 @@ namespace GraphTesting
                 if (tag == 1) // объектое свойство
                 {
                     int hs_o = ((string)rec[2]).GetHashCode();
-                    quads.V(new object[] { hs_s, 0, hs_p, tri.Offset });
-                    quads.V(new object[] { hs_o, 1, hs_p, tri.Offset });
+                    quads.V(new object[] { hs_s, 0, hs_p, tri.offset });
+                    quads.V(new object[] { hs_o, 1, hs_p, tri.offset });
                 }
                 else // поле данных
                 {
-                    quads.V(new object[] { hs_s, 2, hs_p, tri.Offset });
+                    quads.V(new object[] { hs_s, 2, hs_p, tri.offset });
                     if ((string) rec[1] != sema2012m.ONames.p_name) continue; 
                     // Поместим информацию в таблицу имен n4
                     string name = (string)rec[2];

@@ -13,10 +13,11 @@ namespace BigDbTest
     {
         public static void Main(string[] args)
         {
-            string path = @"C:\home\dev2012\PolarDemo\";
+            //string path = @"D:\home\dev2012\PolarDemo\Databases\";
+            string path = @"..\..\..\Databases\";
             Console.WriteLine("Hello!");
             DateTime tt0 = DateTime.Now;
-            bool sql = true;
+            bool sql = false;
             if (sql)
             {
                 //BigSQL bs = new BigSQL(@"Data Source=(LocalDB)\v11.0;AttachDbFilename="+path+"Databases/test20131006.mdf;Integrated Security=True;Connect Timeout=30");
@@ -46,9 +47,8 @@ namespace BigDbTest
                 BigPolar bp = new BigPolar(path);
                 bp.Load2(1000000);
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-                return;
-                //bp.Index();
-                //Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                bp.Index();
+                Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 bp.Test3();
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 bp.Test3();

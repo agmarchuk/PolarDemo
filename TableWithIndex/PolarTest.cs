@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using PolarDB;
 
@@ -53,7 +50,7 @@ namespace TableWithIndex
             PaEntry entry = cell.Root.Element(0);
             entry.offset = offset;
 
-            PValue pv = entry.Get();
+            PValue pv = entry.GetValue();
             Console.WriteLine("record=" + pv.Type.Interpret(pv.Value));
         }
 

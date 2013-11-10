@@ -21,6 +21,8 @@ namespace TableWithIndex
         public static XName tag_person = "{http://fogid.net/o/}person";
         public static XName tag_name = "{http://fogid.net/o/}name";
         public static XName tag_fromdate = "{http://fogid.net/o/}from-date";
+
+        public static string p_name = "http://fogid.net/o/name";
     }
     public class TransformRdf
     {
