@@ -8,8 +8,8 @@ using PolarDB;
 namespace TableWithIndex
 {
     /// <summary>
-    /// Класс индексирует колонку i_field в таблицы, на основе которой индекс построен. Предполагается, что нулевая колонка 
-    /// таблиы - признак deleted, фиксирующий уничтожение записи из таблицы. deleted=false - запись не уничтожена. 
+    /// Класс индексирует колонку i_field таблицы, на основе которой индекс построен. Предполагается, что нулевая колонка 
+    /// таблицы - признак deleted, фиксирующий уничтожение записи из таблицы. deleted=false - запись не уничтожена. 
     /// </summary>
     public class FreeIndex
     {
@@ -18,7 +18,7 @@ namespace TableWithIndex
         private PaCell index_cell;
         private PType columnType;
         /// <summary>
-        /// Индекс конструируется для последовательности записей, расположенной в сяейке с  
+        /// Индекс конструируется для последовательности записей, расположенной в ячейке свободного формата  
         /// </summary>
         /// <param name="indexName">имя индекса вместе с путем в файловой системе</param>
         /// <param name="table">Таблица</param>
@@ -78,6 +78,66 @@ namespace TableWithIndex
             else throw new Exception("Wrong type of column for indexing"); 
             
         }
+        public PaEntry GetFirst(Func<PaEntry, int> elementDepth)
+        {
+            if (table.Count() == 0) return new PaEntry(null, Int64.MinValue, null);
+            PaEntry entry = table.Element(0);
+            PaEntry entry_in_index = index_cell.Root.BinarySearchFirst(ent =>
+            {
+                long off = (long)ent.Get();
+                entry.offset = off;
+                return elementDepth(entry.Field(i_field));
+            });
+            if (entry_in_index.offset == Int64.MinValue) return entry_in_index; // не найден
+            entry.offset = (long)entry_in_index.Get();
+            return entry;
+        }
+        // Использование GetFirst:
+        //var qu = iset_index.GetFirst(ent =>
+        //{
+        //    int v = (int)ent.Get();
+        //    return v.CompareTo(sample);
+        //});
+
+        public PaEntry GetFirst(object sample)
+        {
+            PaEntry found = GetFirst(ent =>
+            {
+                IComparable v = (IComparable)ent.Get();
+                return v.CompareTo(sample);
+            });
+            //if (found.offset == Int64.MinValue) return found; // Транслируем сообщение о ненахождении
+            return found;
+        }
+        public IEnumerable<PaEntry> GetAll(Func<PaEntry, int> elementDepth)
+        {
+            if (table.Count() > 0)
+            {
+                PaEntry entry = table.Element(0);
+                IEnumerable<PaEntry> query = index_cell.Root.BinarySearchAll(ent =>
+                {
+                    long off = (long)ent.Get();
+                    entry.offset = off;
+                    return elementDepth(entry.Field(i_field));
+                }).Select(ent =>
+                {
+                    entry.offset = (long)ent.Get();
+                    return entry;
+                });
+                return query;
+            }
+            else return Enumerable.Empty<PaEntry>();
+        }
+        public IEnumerable<PaEntry> GetAll(object sample)
+        {
+            return GetAll(ent =>
+            {
+                IComparable v = (IComparable)ent.Get();
+                return v.CompareTo(sample);
+            });
+        }
+
+        // =============== Частные случаи =================
         public PValue GetById(string id)
         {
             if (table.Count() == 0) return new PValue(null, Int64.MinValue, null);

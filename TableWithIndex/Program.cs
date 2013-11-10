@@ -27,15 +27,24 @@ namespace TableWithIndex
                 "p0011098",
                 "svet_100616111408_14354"
             };
-            //XElement db = XElement.Load(@"D:\home\dev2012\tm3.xml");
-            XElement db = XElement.Load(@"..\..\..\Databases\0001.xml");
+            XElement formats = XElement.Load(path + "ApplicationProfile.xml").Element("formats");
+            bool toload = false;
+            XElement db = null;
+            IEnumerable<XElement> query = Enumerable.Empty<XElement>();
+            if (toload)
+            {
+                //db = XElement.Load(@"D:\home\dev2012\tm3.xml");
+                db = XElement.Load(@"..\..\..\Databases\0001.xml");
+                query = db.Elements()
+                    .Where(el => el.Attribute(ONames.rdfabout) != null && el.Element(ONames.tag_name) != null);
+            }
 
-            var query = db.Elements()
-                .Where(el => el.Attribute(ONames.rdfabout) != null && el.Element(ONames.tag_name) != null);
 
             DateTime tt0 = DateTime.Now;
 
-            string variant = "freeindex";
+            string variant = "rdfengine";
+            //string variant = "bigintset";
+            //string variant = "freeindex";
             //string variant = "semiindex";
             if (variant == "sql")
             {
@@ -101,6 +110,92 @@ namespace TableWithIndex
                     Console.WriteLine(v.Type.Interpret(v.Value));
                 }
                 Console.WriteLine("Search ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            }
+            else if (variant == "bigintset")
+            {
+                Console.WriteLine("BigIntSet Start. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                PaCell iset_cell = new PaCell(new PTypeSequence(new PTypeRecord(
+                    new NamedType("deleted", new PType(PTypeEnumeration.boolean)),
+                    new NamedType("value", new PType(PTypeEnumeration.integer)))), path + "intset.pac", false);
+                
+                // Загрузка таблицы
+                System.Random rnd = new Random();
+                iset_cell.Clear();
+                iset_cell.Fill(new object[0]);
+                for (int i = 0; i < 1000000; i++)
+                {
+                    iset_cell.Root.AppendElement(new object[] { false, rnd.Next() });
+                }
+                int special = 7777777; // Это для поиска
+                for (int i = 0; i < 11; i++) iset_cell.Root.AppendElement(new object[] { false, special + i * 10000000 });
+                iset_cell.Flush();
+                Console.WriteLine("Load ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
+                // подключение индекса
+                FreeIndex iset_index = new FreeIndex(path + "intset_index", iset_cell.Root, 1);
+
+                // Создание индекса
+                iset_index.Load();
+                Console.WriteLine("Index ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
+                // Поиск
+                int sample = 7777777;
+                Find(iset_index, sample);
+                Console.WriteLine("Search ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                for (int i = 1; i < 11; i++) Find( iset_index, sample + i * 10000000 );
+                Console.WriteLine("10 Search ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            }
+            else if (variant == "rdfengine")
+            {
+                Console.WriteLine("RdfEngine start");
+                PolarBasedEngine engine = new PolarBasedEngine(path);
+                if (toload)
+                {
+                    engine.Load(db);
+                    Console.WriteLine("Load ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                    engine.MakeIndexes();
+                    Console.WriteLine("Indexes ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                    engine.MakeVector();
+                    Console.WriteLine("MakeVector ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                }
+                tt0 = DateTime.Now;
+                engine.GetById("w20070417_5_8436");
+                Console.WriteLine("GetById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                foreach (string id in ids) engine.GetById(id);
+                Console.WriteLine("10 GetById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //engine.Search("марчук");
+                foreach (XElement res in engine.SearchByName("Марчук Александр"))
+                {
+                    //Console.WriteLine(res.ToString());
+                }
+                Console.WriteLine("Search ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //engine.GetInverse("w20070417_5_8436");
+                engine.GetById("w20070417_5_8436");
+                Console.WriteLine("GetById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                var xres = engine.GetItemByIdBasic("w20070417_5_8436", true);
+                Console.WriteLine("GetItemByIdBasic ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                XElement format = formats.Elements("record").First(r => r.Attribute("type").Value == "http://fogid.net/o/person");
+                xres = engine.GetItemById("w20070417_5_8436", format);
+                Console.WriteLine("GetItemById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                Console.WriteLine(xres.Elements().Count());
+                //Console.WriteLine(xres.ToString());
+                foreach (string id in ids) engine.GetItemById(id, format);
+                Console.WriteLine("10 GetItemById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            }
+        }
+
+        private static void Find(FreeIndex iset_index, int sample)
+        {
+            var qu = iset_index.GetFirst(ent =>
+            {
+                int v = (int)ent.Get();
+                return v.CompareTo(sample);
+            });
+            if (qu.offset == Int64.MinValue) Console.WriteLine("value not found");
+            else
+            {
+                var val = qu.GetValue();
+                Console.WriteLine(val.Type.Interpret(val.Value));
             }
         }
     }
