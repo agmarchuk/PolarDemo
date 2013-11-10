@@ -49,6 +49,8 @@
     <Compile Include="NameId.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="BinaryTreeTemplated.cs" />
+    <Compile Include="ExperimentBinaryTree.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="chart.xls" />

@@ -240,9 +240,13 @@ namespace BinaryTree
                 Thread.Sleep(1);
                 var objects = Enumerable.Range(0, i).Cast<object>().ToArray();
                 Stopwatch timer = new Stopwatch();
+                var ints = objects.Cast<int>();
                 timer.Start();
-                var simpleIntCell = objects.ToBTree(new PType(PTypeEnumeration.integer), path + "simple int tree.pxc",
-                    (o, entry) => (int) o - (int) entry.Get(), o => o, false);
+                var simpleIntCell = new BTreeInt(new PType(PTypeEnumeration.integer), 
+                    path + "simple int tree.pxc", false);
+                simpleIntCell.Fill(ints, false);
+                    //objects.ToBTree(new PType(PTypeEnumeration.integer), path + "simple int tree.pxc",
+                    //(o, entry) => (int) o - (int) entry.Get(), o => o, false);
                 timer.Stop();
                 results[0][j] = (int)timer.Elapsed.Ticks;
                 Console.WriteLine("simple int tree "+i+"elements created for (ms)" + timer.Elapsed.TotalMilliseconds);
@@ -255,7 +259,7 @@ namespace BinaryTree
                 Console.WriteLine("simple int pa " + i + "elements created for (ms)" + timer.Elapsed.TotalMilliseconds);
 
                // линейное возрастание времени
-                AddTreeAddChart(path, timer, objects, results, j);
+               // AddTreeAddChart(path, timer, objects, results, j);
                 Console.WriteLine();
                 TestGetByKey(simpleIntCell, i, paCell);
                 Console.WriteLine();
@@ -278,7 +282,7 @@ namespace BinaryTree
             cell.Close();
         }
 
-        private static void TestGetByKey(BTree tree, int max, PaCell paCell)
+        private static void TestGetByKey(BTreeInt tree, int max, PaCell paCell)
         {
             Stopwatch timer=new Stopwatch();
             for (int i = 0; i < 3; i++)
@@ -287,7 +291,7 @@ namespace BinaryTree
                     Console.WriteLine("first search");
                 int tested = new Random(DateTime.Now.Millisecond).Next(max-1);
                 timer.Restart();
-                var res=tree.BinarySearch(entry => tested - (int)entry.Get());
+                var res=tree.BinarySearch(tested);
                 timer.Stop();
                 Console.WriteLine("search in "+max+" elements TREE find "+tested+" for (ticks)"+timer.Elapsed.Ticks);
                 timer.Restart();
