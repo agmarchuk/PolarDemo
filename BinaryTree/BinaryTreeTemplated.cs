@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using PolarDB;
 
 namespace BinaryTree
 {
-    public class BTree : PxCell
+    public class BTreeExp<Tkey> : PxCell
     {
 
         internal static readonly object[] Empty;
@@ -14,18 +15,23 @@ namespace BinaryTree
         /// 
         /// </summary>
         /// <param name="ptElement">polar type of element of tree</param>
-        /// <param name="elementDepth">функция сравнения элемента дерева и добавляемого объекта</param>
+        /// <param name="keyComparer">функция сравнения элемента дерева и добавляемого объекта</param>
+        /// <param name="getKey"></param>
         /// <param name="filePath"></param>
+        /// <param name="emptyElement"></param>
         /// <param name="readOnly"></param>
-        public BTree(PType ptElement, Func<object, PxEntry, int> elementDepth, string filePath,  bool readOnly = true)
+        public BTreeExp(PType ptElement, Func<Tkey, Tkey, int> keyComparer, Func<object, Tkey> getKey, 
+            string filePath, object emptyElement, bool readOnly = true)
             : base(PTypeTree(ptElement), filePath, readOnly)
         {
-            this.elementDepth = elementDepth;
+            this.keyComparer = keyComparer;
+            this.getKey = getKey;
+            this.keyOfEmpty = getKey(EmptyElement = emptyElement);
         }
 
-        static BTree()
+        static BTreeExp()
         {
-            Empty = new object[] {0, null};
+            Empty = new object[0];
         }
 
         /// <summary>
@@ -35,30 +41,36 @@ namespace BinaryTree
         /// </summary>
         /// <param name="tpElement"></param>
         /// <returns></returns>
-        private static PTypeUnion PTypeTree(PType tpElement)
+        private static PType PTypeTree(PType tpElement)
         {
-            var tpBtree = new PTypeUnion();
-            tpBtree.Variants = new[]
+            var tpBtree = new PTypeRecord();
+            tpBtree = new PTypeRecord(
+                new NamedType("element", tpElement),
+                new NamedType("next", new PTypeUnion()));
+
+            ((PTypeUnion) tpBtree.Fields[1].Type).Variants = new[]
             {
                 new NamedType("empty", new PType(PTypeEnumeration.none)),
                 new NamedType("pair", new PTypeRecord(
-                    new NamedType("element", tpElement),
                     new NamedType("less", tpBtree),
                     new NamedType("more", tpBtree),
                     //1 - слева больше, -1 - справа больше.
                     new NamedType("balance", new PType(PTypeEnumeration.integer))))
             };
+
             return tpBtree;
         }
 
         public static int counter = 0;
-        private readonly Func<object, PxEntry, int> elementDepth;
+        private readonly Func<Tkey, Tkey, int> keyComparer;
 
         /// <summary>
         /// путь от последнего узла с ненулевым балансом до добавленой вершины (не включая её) составляет пары: <PxEntry /> ,баланса и значение баланса.
         /// </summary>
         private readonly List<KeyValuePair<PxEntry, int>> listEntries4Balance = new List<KeyValuePair<PxEntry, int>>();
-        
+
+        private readonly Tkey keyOfEmpty;
+        private readonly Func<object, Tkey> getKey;
         /// <summary>
         /// Поместить элемент в дерево в соответствии со значением функции сравнения,
         ///  вернуть ссылку на голову нового дерева
@@ -70,31 +82,30 @@ namespace BinaryTree
             var node = Root;
             var lastUnBalanceNode = node;
             listEntries4Balance.Clear();
-            int h = 0;
-            while (node.Tag() != 0)
+            //int h = 0;
+            Tkey key,keyAdd = getKey(element);
+            object value;
+            while (Equals(key=getKey((value=node.Field(0).Get())),keyOfEmpty))
             {
-                h++;
-                var nodeEntry = node.UElementUnchecked(1);
+              //  h++;
                 counter++;
-                int cmp = elementDepth(element, nodeEntry.Field(0));
-                PxEntry balanceEntry = nodeEntry.Field(3);
+                PxEntry balanceEntry = node.Field(3);
                 var balance = (int) balanceEntry.Get();
+                int cmp = keyComparer(key, keyAdd);
                 if (cmp == 0)
                 {
-                    var left = nodeEntry.Field(1).GetHead();
-                    var right = nodeEntry.Field(2).GetHead();
-                    node.Set(new object[]
+                    var left = node.Field(1).GetHead();
+                    var right = node.Field(2).GetHead();
+                    node.Set(new []
                     {
-                        1, new[]
-                        {
                             element,
                             Empty,
                             Empty,
                             balance
-                        }
+                     
                     });
-                    node.UElementUnchecked(1).Field(1).SetHead(left);
-                    node.UElementUnchecked(1).Field(2).SetHead(right);
+                    node.Field(1).SetHead(left);
+                    node.Field(2).SetHead(right);
                     return;
                 }
                 if (balance != 0)
@@ -104,18 +115,14 @@ namespace BinaryTree
                 }
                 var goLeft = cmp < 0;
                 //TODO catch overflow memory
-                listEntries4Balance.Add(new KeyValuePair<PxEntry, int>(balanceEntry,
-                    goLeft ? balance + 1 : balance - 1));
-                node = nodeEntry.Field(goLeft ? 1 : 2);
+                listEntries4Balance.Add(new KeyValuePair<PxEntry, int>(balanceEntry, goLeft ? balance + 1 : balance - 1));
+                node = node.Field(goLeft ? 1 : 2);
             }
             // когда дерево пустое, организовать одиночное значение
-            node.Set(new object[]
-            {
-                1, new[]
+            node.Set( new[]
                 {
                     element, new object[] {0, null}, new object[] {0, null}, 0
-                }
-            });
+                });
             if (listEntries4Balance.Count == 0) return;
             for (int i = 0; i < listEntries4Balance.Count; i++)
                 listEntries4Balance[i].Key.Set(listEntries4Balance[i].Value);
@@ -161,35 +168,32 @@ namespace BinaryTree
         /// <param name="entries">balance entries of path from prime node to added(excluded from entries), and them balaces</param>
         private static void FixWithRotateLeft(PxEntry root, List<KeyValuePair<PxEntry, int>> entries)
         {
-            var rootEntry = root.UElementUnchecked(1);
-            var r = rootEntry.Field(2); //Right;
-            var rEntry = r.UElementUnchecked(1);
-            var rl = rEntry.Field(1); //right of Left;
+            var r = root.Field(2); //Right;
+            var rl = r.Field(1); //right of Left;
             var rBalance = entries[1].Value;
             if (rBalance == 1)
             {
 
-                var rlEntry = rl.UElementUnchecked(1);
-                rlEntry.Field(3).Set(0);
+                rl.Field(3).Set(0);
                 //запоминаем RL
                 var rlold = rl.GetHead();
                 int rlBalance = (entries.Count == 2 ? 0 : entries[2].Value);
                 //Изменяем правую
-                rl.SetHead(rlEntry.Field(2).GetHead());
+                rl.SetHead(rl.Field(2).GetHead());
                 entries[1].Key.Set(Math.Min(0, -rlBalance));
                 //запоминаем правую
                 var oldR = r.GetHead();
                 //изменяем корневую
-                r.SetHead(rlEntry.Field(1).GetHead());
+                r.SetHead(rl.Field(1).GetHead());
                 entries[0].Key.Set(Math.Max(0, -rlBalance));
                 //запоминаем корневую
                 var rootOld = root.GetHead();
                 //RL теперь корень
                 root.SetHead(rlold);
-                rootEntry = root.UElementUnchecked(1);
+                
                 //подставляем запомненые корень и правую.
-                rootEntry.Field(1).SetHead(rootOld);
-                rootEntry.Field(2).SetHead(oldR);
+                root.Field(1).SetHead(rootOld);
+                root.Field(2).SetHead(oldR);
                 return;
             }
             if (rBalance == -1)
@@ -216,27 +220,23 @@ namespace BinaryTree
         /// <param name="entries"> пары: PxEntry содержащая баланс и баланс, соответсвующие пути от балансируемой вершины (включительно) до добавленой не включительно</param>
         private static void FixWithRotateRight(PxEntry root, List<KeyValuePair<PxEntry, int>> entries)
         {
-            var rootEntry = root.UElementUnchecked(1);
-            var l = rootEntry.Field(1); //Left;
-            var lEntry = l.UElementUnchecked(1);
-            var lr = lEntry.Field(2); //right of Left;
+            var l = root.Field(1); //Left;
+            var lr = l.Field(2); //right of Left;
             var leftBalance = entries[1].Value;
             if (leftBalance == -1)
             {
-                var lrEntry = lr.UElementUnchecked(1);
                 var lrold = lr.GetHead();
                 int lrBalance = (entries.Count == 2 ? 0 : entries[2].Value);
-                lr.SetHead(lrEntry.Field(1).GetHead());
+                lr.SetHead(lr.Field(1).GetHead());
                 entries[1].Key.Set(Math.Max(0, -lrBalance));
                 var oldR = l.GetHead();
-                l.SetHead(lrEntry.Field(2).GetHead());
+                l.SetHead(lr.Field(2).GetHead());
                 entries[0].Key.Set(Math.Min(0, -lrBalance));
                 var rootOld = root.GetHead();
                 root.SetHead(lrold);
-                rootEntry = root.UElementUnchecked(1);
-                rootEntry.Field(2).SetHead(rootOld);
-                rootEntry.Field(1).SetHead(oldR);
-                rootEntry.Field(3).Set(0);
+                root.Field(2).SetHead(rootOld);
+                root.Field(1).SetHead(oldR);
+                root.Field(3).Set(0);
                 return;
             }
             if (leftBalance == 1) // 1
@@ -255,10 +255,10 @@ namespace BinaryTree
             root.SetHead(lOld);
         }
 
-        public void Fill(PxEntry elementsEntry, Func<object, object> orderKeySelector, bool editable)
+        public void Fill(PxEntry elementsEntry, bool editable)
         {
             Fill(elementsEntry.Elements()
-                .Select(oe => oe.Get()), orderKeySelector, editable);
+                .Select(oe => oe.Get()), editable);
         }
         /// <summary>
         /// 
@@ -266,45 +266,46 @@ namespace BinaryTree
         /// <param name="elements"></param>
         /// <param name="orderKeySelector"></param>
         /// <param name="editable"></param>
-        public void Fill(IEnumerable<object> elements, Func<object, object> orderKeySelector, bool  editable)
+        public void Fill(IEnumerable<object> elements, bool  editable)
         {
             object[] elementsSorted = elements
-                .OrderBy(orderKeySelector)
+                .OrderBy(getKey)
                 .ToArray();
             Clear();
             int h = 0;
-            var treeNodes = editable ? ToTreeObjectWithBalance(new ToTreeObjectParams(elementsSorted, 0, elementsSorted.Length), ref h) : ToTreeObject(elementsSorted, 0, elementsSorted.Length);
-            Fill2(treeNodes);
+            Fill2(editable ? ToTreeObjectWithBalance(new ToTreeObjectParams(elementsSorted, 0, elementsSorted.Length), ref h) : ToTreeObject(elementsSorted, 0, elementsSorted.Length));
         }
 
-        private static object[] ToTreeObject(object[] elements, int beg, int len)
+        private object[] ToTreeObject(object[] elements, int beg, int len)
         {
-            if (len == 0) return Empty;
-            if (len == 1)
-                return new object[]
+            if (len == 0) return new[] {EmptyElement, new object[]{0, null}};
+            //if (len == 1)
+            //    return new[]
+            //    {
+            //        // запись
+            //        elements[beg], // значение
+            //        new object[]{0, null}
+            //    };
+            int half = len/2;
+            return new[]
+            {
+                // запись
+                elements[beg + half], // значение
+                new object[]
                 {
-                    1, new[]
+                    1,
+                    new object[]
                     {
-                        // запись
-                        elements[beg], // значение
-                        Empty,
-                        Empty,
+                        ToTreeObject(elements, beg, half),
+                        ToTreeObject(elements, beg + half + 1, half==0 ? 0 : len - half - 1),
                         0
                     }
-                };
-            int half = len/2;
-            return new object[]
-            {
-                1, new[]
-                {
-                    // запись
-                    elements[beg + half], // значение
-                    ToTreeObject(elements, beg, half),
-                    ToTreeObject(elements, beg + half + 1, len - half - 1),
-                    0
                 }
+
             };
         }
+
+        public readonly object EmptyElement;
 
         public class ToTreeObjectParams
         {
@@ -356,17 +357,19 @@ namespace BinaryTree
             };
         }
 
-        public PxEntry BinarySearch(Func<PxEntry, int> eDepth)
+        public PxEntry BinarySearch(Tkey key)
         {
             var entry = Root;
             while (true)
             {
-                if (entry.Tag() == 0) return new PxEntry(entry.Typ, Int64.MinValue, entry.fis);
-                PxEntry elementEntry = entry.UElementUnchecked(1).Field(0);
+                //if (entry.Tag() == 0) return new PxEntry(entry.Typ, Int64.MinValue, entry.fis);
+                PxEntry elementEntry = entry.Field(0);
                 // Можно сэкономить на запоминании входа для uelement'а
-                int level = eDepth(elementEntry);
-                if (level == 0) return elementEntry;
-                entry = entry.UElementUnchecked(1).Field(level < 0 ? 1 : 2);
+                var o = getKey(elementEntry.Get());
+                if(Equals(o,key))
+                 return elementEntry;
+                if (Equals(o, keyOfEmpty)) return new PxEntry(entry.Typ, Int64.MinValue, entry.fis);
+                entry = entry.Field(1).UElementUnchecked(1).Field(keyComparer(o, key) < 0 ? 0 : 1);
             }
         }
 
@@ -392,20 +395,13 @@ namespace BinaryTree
                    && Equals(r.Field(1), l.Field(1))
                    && Equals(r.Field(2), l.Field(2));
         }
-        public static int H(PxEntry tree)
+        public int H(PxEntry tree)
         {
-            return tree.Tag() == 0
+            return Equals(getKey(tree.Field(0).Get()), keyOfEmpty)
                 ? 0
-                : 1 + Math.Max(H(tree.UElementUnchecked(1).Field(1)),
-                    H(tree.UElementUnchecked(1).Field(2)));
+                : 1 + Math.Max(H(tree.Field(1)),
+                    H(tree.Field(2)));
         }
     }
 
-   
-
-    public class EntriesPair
-    {
-        public PxEntry Left;
-        public PxEntry Right;
-    }
 }
