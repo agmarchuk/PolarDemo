@@ -38,7 +38,7 @@ namespace TableWithIndex
                 object[][] pairs = genPairs(rec);
                 foreach (object[] pair in pairs)
                 {
-                    intern_cell.Root.AppendElement(new object[] { false, pair[1], pair[0] });
+                    intern_cell.Root.AppendElement(new object[] { false, pair[0], pair[1] });
                 }
             }
             intern_cell.Flush();

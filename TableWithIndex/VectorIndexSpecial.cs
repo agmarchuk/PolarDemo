@@ -52,7 +52,7 @@ namespace TableWithIndex
                 if ((string)v4[3] != predicate)
                     entry_table.offset = Int64.MinValue;
                 else
-                    entry_table.offset = (long)v4[0];
+                    entry_table.offset = (long)v4[1];
                 return entry_table;
             })
             .Where(ent => ent.offset != Int64.MinValue);
@@ -66,7 +66,7 @@ namespace TableWithIndex
             var query = key_index.GetAll(id).Select(ent =>
             {
                 object[] v4 = (object[])ent.Get();
-                entry_table.offset = (long)v4[2];
+                entry_table.offset = (long)v4[1];
                 return new entry_string_pair() { entr = entry_table, stri = (string)v4[3] };
             });
             return query;

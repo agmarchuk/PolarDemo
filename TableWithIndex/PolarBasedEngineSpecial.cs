@@ -25,7 +25,7 @@ namespace TableWithIndex
         private string path;
         private PaCell records;
         private FreeIndex id_index;
-        private VectorIndexSpecial name_index;
+        private VectorIndex name_index;
         private VectorIndexSpecial inverse_index;
 
         public PolarBasedEngineSpecial(string path)
@@ -34,7 +34,7 @@ namespace TableWithIndex
             records = new PaCell(pt_records, path + "rdfrecords.pac", false);
             if (records.IsEmpty) records.Fill(new object[0]);
             id_index = new FreeIndex(path + "rdf_id", records.Root, 1);
-            name_index = new VectorIndexSpecial(path + "rdf_name", records.Root);
+            name_index = new VectorIndex(path + "rdf_name", new PType(PTypeEnumeration.sstring), records.Root);
             inverse_index = new VectorIndexSpecial(path + "rdf_inverse", records.Root);
         }
         public void Load(XElement db)
@@ -72,8 +72,8 @@ namespace TableWithIndex
             name_index.Load(ent =>
                 ((object[])ent.Field(3).Get())
                 .Cast<object[]>()
-                //.Where(r3 => (string)r3[0] == ONames.p_name)
-                .Select(r3 => new object[] { ent.offset,  r3[1], r3[0] }).ToArray());
+                .Where(r3 => (string)r3[0] == ONames.p_name)
+                .Select(r3 => new object[] { ent.offset,  r3[1] }).ToArray());
             inverse_index.Load(ent =>
                 ((object[])ent.Field(4).Get())
                 .Cast<object[]>()
@@ -82,7 +82,7 @@ namespace TableWithIndex
         //=========================================================
         public IEnumerable<XElement> SearchByName(string searchstring)
         {
-            foreach (PaEntry ent in name_index.Search(searchstring, "http://fogid.net/o/name"))
+            foreach (PaEntry ent in name_index.Search(searchstring))
             {
                 object[] valu = (object[])ent.Get();
                 yield return new XElement("record",
@@ -108,15 +108,21 @@ namespace TableWithIndex
                 null);
             if (addinverse)
             {
-                var qu = inverse_index.GetAll(id).Select(en => en.entr.Get()).Cast<object[]>()
-                    .SelectMany(v5 => ((object[])v5[4]).Where(v2 => (string)((object[])v2)[1] == id).Select(v2 =>
-                        new XElement("inverse",
-                            new XAttribute("prop", ((object[])v2)[0]),
-                            new XElement("record", new XAttribute("id", v5[1])))));
-                //var qu = inverse_index.GetAll(id)
-                //    .Select(esp => new XElement("inverse", new XAttribute("prop", esp.stri))).ToArray();
-                    //.GroupBy(esp => esp.stri)
-                    //.Select(ee => new XElement("inverse", new XAttribute("prop", ee.Key))).ToArray();
+                //var qu = inverse_index.GetAll(id).Select(en => en.entr.Get()).Cast<object[]>()
+                //    .SelectMany(v5 => ((object[])v5[4]).Where(v2 => (string)((object[])v2)[1] == id).Select(v2 =>
+                //        new XElement("inverse",
+                //            new XAttribute("prop", ((object[])v2)[0]),
+                //            new XElement("record", new XAttribute("id", v5[1])))));
+                var qu = inverse_index.GetAll(id)
+                    //.Select(esp => new XElement("inverse", new XAttribute("prop", esp.stri))).ToArray();
+                    .GroupBy(esp => esp.stri)
+                    .Select(ee => new XElement("inverse", new XAttribute("prop", ee.Key),
+                        ee.Select(eee =>
+                        {
+                            var v = (string)eee.entr.Field(1).Get();
+                            return new XElement("record", new XAttribute("id", v));
+                        })
+                        ));
 
                     //.Select(en => en.entr.Get())
                     //.Cast<object[]>()
@@ -245,7 +251,7 @@ namespace TableWithIndex
             return rec;
         }
 
-        //=========================================================
+        //========================================================= для тестирования, не для использования
         public void GetById(string id)
         {
             PaEntry ent = id_index.GetFirst(id);
@@ -258,7 +264,7 @@ namespace TableWithIndex
         }
         public void Search(string ss)
         {
-            foreach (PaEntry ent in name_index.Search(ss, "http://fogid.net/o/name"))
+            foreach (PaEntry ent in name_index.Search(ss))
             {
                 var val = ent.GetValue();
                 Console.WriteLine(val.Type.Interpret(val.Value));
