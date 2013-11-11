@@ -47,6 +47,7 @@
     <Compile Include="ONames.cs" />
     <Compile Include="PIndex.cs" />
     <Compile Include="PolarBasedEngine.cs" />
+    <Compile Include="PolarBasedEngineSpecial.cs" />
     <Compile Include="PolarTest.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -54,6 +55,7 @@
     <Compile Include="SITest.cs" />
     <Compile Include="SQLTest.cs" />
     <Compile Include="VectorIndex.cs" />
+    <Compile Include="VectorIndexSpecial.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Description.txt" />

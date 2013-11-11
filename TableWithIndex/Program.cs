@@ -148,7 +148,7 @@ namespace TableWithIndex
             else if (variant == "rdfengine")
             {
                 Console.WriteLine("RdfEngine start");
-                PolarBasedEngine engine = new PolarBasedEngine(path);
+                PolarBasedEngineSpecial engine = new PolarBasedEngineSpecial(path);
                 if (toload)
                 {
                     engine.Load(db);
@@ -163,22 +163,23 @@ namespace TableWithIndex
                 Console.WriteLine("GetById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 foreach (string id in ids) engine.GetById(id);
                 Console.WriteLine("10 GetById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-                //engine.Search("марчук");
                 foreach (XElement res in engine.SearchByName("Марчук Александр"))
                 {
-                    //Console.WriteLine(res.ToString());
+                    Console.WriteLine(res.ToString());
                 }
                 Console.WriteLine("Search ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 //engine.GetInverse("w20070417_5_8436");
                 engine.GetById("w20070417_5_8436");
                 Console.WriteLine("GetById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 var xres = engine.GetItemByIdBasic("w20070417_5_8436", true);
+                Console.WriteLine(xres.ToString());
                 Console.WriteLine("GetItemByIdBasic ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                return;
+                
                 XElement format = formats.Elements("record").First(r => r.Attribute("type").Value == "http://fogid.net/o/person");
                 xres = engine.GetItemById("w20070417_5_8436", format);
                 Console.WriteLine("GetItemById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 Console.WriteLine(xres.Elements().Count());
-                //Console.WriteLine(xres.ToString());
                 foreach (string id in ids) engine.GetItemById(id, format);
                 Console.WriteLine("10 GetItemById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             }
