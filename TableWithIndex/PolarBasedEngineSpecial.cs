@@ -108,21 +108,22 @@ namespace TableWithIndex
                 null);
             if (addinverse)
             {
-                //var qu = inverse_index.GetAll(id).Select(en => en.entr.Get()).Cast<object[]>()
-                //    .SelectMany(v5 => ((object[])v5[4]).Where(v2 => (string)((object[])v2)[1] == id).Select(v2 =>
-                //        new XElement("inverse",
-                //            new XAttribute("prop", ((object[])v2)[0]),
-                //            new XElement("record", new XAttribute("id", v5[1])))));
-                var qu = inverse_index.GetAll(id)
-                    //.Select(esp => new XElement("inverse", new XAttribute("prop", esp.stri))).ToArray();
-                    .GroupBy(esp => esp.stri)
-                    .Select(ee => new XElement("inverse", new XAttribute("prop", ee.Key),
-                        ee.Select(eee =>
-                        {
-                            var v = (string)eee.entr.Field(1).Get();
-                            return new XElement("record", new XAttribute("id", v));
-                        })
-                        ));
+                var qu = inverse_index.GetAll(id).Select(en => en.entr.Get()).Cast<object[]>()
+                    .SelectMany(v5 => ((object[])v5[4]).Where(v2 => (string)((object[])v2)[1] == id).Select(v2 =>
+                        new XElement("inverse",
+                            new XAttribute("prop", ((object[])v2)[0]),
+                            new XElement("record", new XAttribute("id", v5[1])))));
+                
+                //var qu = inverse_index.GetAll(id)
+                //    //.Select(esp => new XElement("inverse", new XAttribute("prop", esp.stri))).ToArray();
+                //    .GroupBy(esp => esp.stri)
+                //    .Select(ee => new XElement("inverse", new XAttribute("prop", ee.Key),
+                //        ee.Select(eee =>
+                //        {
+                //            var v = (string)eee.entr.Field(1).Get();
+                //            return new XElement("record", new XAttribute("id", v));
+                //        })
+                //        ));
 
                     //.Select(en => en.entr.Get())
                     //.Cast<object[]>()
@@ -130,6 +131,8 @@ namespace TableWithIndex
                     //    new XElement("inverse",
                     //        new XAttribute("prop", ((object[])v2)[0]),
                     //        new XElement("record", new XAttribute("id", v5[1])))));
+
+
                 res.Add(qu);
             }
             return res;

@@ -114,16 +114,28 @@ namespace TableWithIndex
             if (table.Count() > 0)
             {
                 PaEntry entry = table.Element(0);
-                IEnumerable<PaEntry> query = index_cell.Root.BinarySearchAll(ent =>
+                Diapason dia = index_cell.Root.BinarySearchDiapason((PaEntry ent) =>
                 {
                     long off = (long)ent.Get();
                     entry.offset = off;
                     return elementDepth(entry.Field(i_field));
-                }).Select(ent =>
-                {
-                    entry.offset = (long)ent.Get();
-                    return entry;
                 });
+                var query = index_cell.Root.Elements(dia.start, dia.numb)
+                    .Select(ent =>
+                    {
+                        entry.offset = (long)ent.Get();
+                        return entry;
+                    });
+                //IEnumerable<PaEntry> query = index_cell.Root.BinarySearchAll(ent =>
+                //{
+                //    long off = (long)ent.Get();
+                //    entry.offset = off;
+                //    return elementDepth(entry.Field(i_field));
+                //}).Select(ent =>
+                //{
+                //    entry.offset = (long)ent.Get();
+                //    return entry;
+                //});
                 return query;
             }
             else return Enumerable.Empty<PaEntry>();
@@ -138,6 +150,14 @@ namespace TableWithIndex
         }
 
         // =============== Частные случаи =================
+
+        public void SortDiapason(long start, long number, Func<PaEntry, string> sortKeyProducer)
+        {
+            index_cell.Root.SortSpecialByKey<string>(start, number, recobj =>
+            {
+                return "Не знаю, как сформировать этот метод!..";
+            });
+        }
         public PValue GetById(string id)
         {
             if (table.Count() == 0) return new PValue(null, Int64.MinValue, null);
@@ -160,19 +180,34 @@ namespace TableWithIndex
             {
                 ss = ss.ToLower();
                 PaEntry entry = table.Element(0);
-                var query = index_cell.Root.BinarySearchAll((PaEntry ent) =>
+                Diapason dia = index_cell.Root.BinarySearchDiapason((PaEntry ent) =>
                 {
                     long off = (long)ent.Get();
                     entry.offset = off;
                     string name = ((string)entry.Field(i_field).Get()).ToLower();
                     if (name.StartsWith(ss)) return 0;
                     return name.CompareTo(ss);
-                }).Select(ent =>
-                {
-                    long off = (long)ent.Get();
-                    entry.offset = off;
-                    return entry;
                 });
+                var query = index_cell.Root.Elements(dia.start, dia.numb)
+                    .Select(ent =>
+                    {
+                        long off = (long)ent.Get();
+                        entry.offset = off;
+                        return entry;
+                    });
+                //var query = index_cell.Root.BinarySearchAll((PaEntry ent) =>
+                //{
+                //    long off = (long)ent.Get();
+                //    entry.offset = off;
+                //    string name = ((string)entry.Field(i_field).Get()).ToLower();
+                //    if (name.StartsWith(ss)) return 0;
+                //    return name.CompareTo(ss);
+                //}).Select(ent =>
+                //{
+                //    long off = (long)ent.Get();
+                //    entry.offset = off;
+                //    return entry;
+                //});
                 return query;
             }
             else return Enumerable.Empty<PaEntry>();
