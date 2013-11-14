@@ -76,7 +76,49 @@ namespace TableWithIndex
                 });
             }
             else throw new Exception("Wrong type of column for indexing"); 
-            
+        }
+        // Сортировка по дополнительному индексу. Предполагается, что по первичному индексу сортировка уже произведена
+        public void AdditionalIndex(int second_field)
+        {
+            long start = 0;
+            object current_prime_value = null;
+            if (table.Count() == 0) return;
+            PaEntry tab_entry = table.Element(0); // Нулевой элемент таблицы
+            PType second_type = tab_entry.Field(second_field).Type;
+            long llen = index_cell.Root.Count();
+            if (llen == 0) return;
+            PaEntry ent = index_cell.Root.Element(0);
+            PType tel = ent.Type;
+            int size = tel.HeadSize;
+            long offset = ent.offset;
+            for (long ii = 0; ii < llen; ii++)
+            {
+                ent.offset = offset;
+                offset += size;
+                long tab_offset = (long)ent.Get();
+                tab_entry.offset = tab_offset;
+                object prime_value = tab_entry.Field(i_field).Get();
+                int cmp;
+                if (current_prime_value == null)
+                {
+                    current_prime_value = prime_value;
+                    start = ii;
+                }
+                else if ((cmp = ((IComparable)prime_value).CompareTo(current_prime_value)) != 0 || ii == llen - 1) // Смена значения первичного ключа
+                {
+                    long number = ii - start + (cmp == 0 && ii == llen - 1? 1 : 0);
+                    if (number > 1)
+                    { // нужно сделать сортировку по вторичному ключу 
+                        index_cell.Root.SortSpecialByKey<string>(start, number, (object v) =>
+                        {
+                            tab_entry.offset = (long)v;
+                            return (string)tab_entry.Field(second_field).Get();
+                        });
+                    }
+                    current_prime_value = prime_value;
+                    start = ii;
+                }
+            }
         }
         public PaEntry GetFirst(Func<PaEntry, int> elementDepth)
         {
@@ -126,16 +168,21 @@ namespace TableWithIndex
                         entry.offset = (long)ent.Get();
                         return entry;
                     });
-                //IEnumerable<PaEntry> query = index_cell.Root.BinarySearchAll(ent =>
-                //{
-                //    long off = (long)ent.Get();
-                //    entry.offset = off;
-                //    return elementDepth(entry.Field(i_field));
-                //}).Select(ent =>
-                //{
-                //    entry.offset = (long)ent.Get();
-                //    return entry;
-                //});
+                return query;
+            }
+            else return Enumerable.Empty<PaEntry>();
+        }
+        public IEnumerable<PaEntry> GetAll()
+        {
+            if (table.Count() > 0)
+            {
+                PaEntry entry = table.Element(0);
+                var query = index_cell.Root.Elements()
+                    .Select(ent =>
+                    {
+                        entry.offset = (long)ent.Get();
+                        return entry;
+                    });
                 return query;
             }
             else return Enumerable.Empty<PaEntry>();
@@ -151,13 +198,6 @@ namespace TableWithIndex
 
         // =============== Частные случаи =================
 
-        public void SortDiapason(long start, long number, Func<PaEntry, string> sortKeyProducer)
-        {
-            index_cell.Root.SortSpecialByKey<string>(start, number, recobj =>
-            {
-                return "Не знаю, как сформировать этот метод!..";
-            });
-        }
         public PValue GetById(string id)
         {
             if (table.Count() == 0) return new PValue(null, Int64.MinValue, null);

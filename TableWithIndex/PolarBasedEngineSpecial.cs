@@ -20,7 +20,10 @@ namespace TableWithIndex
                 new NamedType("lang", new PType(PTypeEnumeration.sstring))))),
             new NamedType("direct", new PTypeSequence(new PTypeRecord(
                 new NamedType("predicate", new PType(PTypeEnumeration.sstring)),
-                new NamedType("obj", new PType(PTypeEnumeration.sstring)))))));
+                new NamedType("obj", new PType(PTypeEnumeration.sstring))))),
+            new NamedType("inv_beg", new PType(PTypeEnumeration.longinteger)),
+            new NamedType("inv_count", new PType(PTypeEnumeration.longinteger))
+                ));
 
         private string path;
         private PaCell records;
@@ -62,7 +65,7 @@ namespace TableWithIndex
                         return new object[] { sel.Name.NamespaceName + sel.Name.LocalName, 
                             sel.Attribute(ONames.rdfresource).Value };
                     }).ToArray();
-                records.Root.AppendElement(new object[] { false, id_att.Value, type, fields, direct });
+                records.Root.AppendElement(new object[] { false, id_att.Value, type, fields, direct, Int64.MinValue, Int64.MinValue });
             }
             records.Flush();
         }
@@ -77,7 +80,13 @@ namespace TableWithIndex
             inverse_index.Load(ent =>
                 ((object[])ent.Field(4).Get())
                 .Cast<object[]>()
-                .Select(r2 => new object[] { ent.offset, r2[1], r2[0] }).ToArray());
+                .Select(r2 => new object[] 
+                { 
+                    ent.offset, 
+                    r2[1], 
+                    r2[0], 
+                    id_index.GetById((string)r2[1]).Offset
+                }).ToArray()); // надо вычисление второго поля сделать экономнее
         }
         //=========================================================
         public IEnumerable<XElement> SearchByName(string searchstring)
@@ -108,32 +117,30 @@ namespace TableWithIndex
                 null);
             if (addinverse)
             {
-                var qu = inverse_index.GetAll(id).Select(en => en.entr.Get()).Cast<object[]>()
-                    .SelectMany(v5 => ((object[])v5[4]).Where(v2 => (string)((object[])v2)[1] == id).Select(v2 =>
-                        new XElement("inverse",
-                            new XAttribute("prop", ((object[])v2)[0]),
-                            new XElement("record", new XAttribute("id", v5[1])))));
-                
                 //var qu = inverse_index.GetAll(id)
-                //    //.Select(esp => new XElement("inverse", new XAttribute("prop", esp.stri))).ToArray();
-                //    .GroupBy(esp => esp.stri)
-                //    .Select(ee => new XElement("inverse", new XAttribute("prop", ee.Key),
-                //        ee.Select(eee =>
-                //        {
-                //            var v = (string)eee.entr.Field(1).Get();
-                //            return new XElement("record", new XAttribute("id", v));
-                //        })
-                //        ));
+                //    .Select(pair => 
+                //    {
+                //        return new XElement("inverse", new XAttribute("prop", pair.stri),
+                //            new XElement("record", new XAttribute("id", pair.entr.Field(1).Get())));
+                //    });
+                //res.Add(qu);
 
-                    //.Select(en => en.entr.Get())
-                    //.Cast<object[]>()
-                    //.SelectMany(v5 => ((object[])v5[4]).Where(v2 => (string)((object[])v2)[1] == id).Select(v2 =>
-                    //    new XElement("inverse",
-                    //        new XAttribute("prop", ((object[])v2)[0]),
-                    //        new XElement("record", new XAttribute("id", v5[1])))));
+                string predicate = null;
+                XElement inverse = null;
+                foreach (var qq in inverse_index.GetAll(id))
+                {
+                    string pred = qq.stri;
+                    if (pred != predicate)
+                    {
+                        res.Add(inverse);
+                        inverse = new XElement("inverse", new XAttribute("prop", pred));
+                        predicate = pred;
+                    }
+                    string idd = (string)qq.entr.Field(1).Get();
+                    inverse.Add(new XElement("record", new XAttribute("id", idd)));
+                }
+                res.Add(inverse);
 
-
-                res.Add(qu);
             }
             return res;
         }
@@ -205,66 +212,16 @@ namespace TableWithIndex
                     rec.Add(new XElement("inverse", new XAttribute("prop", prop), xinv));
                 }
 
-            //if (f_props.Length > 0)
-            //{
-            //    rec.Add(fields.Where(v3 => f_props.Contains<string>((string)((object[])v3)[0]))
-            //        .Select(v3 => new XElement("field", new XAttribute("prop", ((object[])v3)[0]),
-            //            string.IsNullOrEmpty((string)((object[])v3)[0]) ? null : new XAttribute(ONames.xmllang, ((object[])v3)[2]),
-            //            ((object[])v3)[1]
-            //            )));
-            //}
-            //if (d_props.Length > 0)
-            //{
-            //    rec.Add(direct.Where(v2 => d_props.Contains<string>((string)((object[])v2)[0]))
-            //        .Select(v2 => 
-            //        {
-            //            string prop = (string)((object[])v2)[0];
-            //            var fmts = format.Elements("direct")
-            //                .Where(d => d.Attribute("prop").Value == prop)
-            //                .SelectMany(d => d.Elements("record"));
-            //            foreach (XElement fmt in fmts)
-            //            {
-            //                XElement r = GetItemById((string)((object[])v2)[1], fmt);
-            //                if (r != null) return new XElement("direct", new XAttribute("prop", prop), r);
-            //            }
-            //            return null;
-
-            //        }));
-            //}
-            //if (i_props.Length > 0)
-            //{
-            //    foreach (object[] inv_obj in inverse_index.GetAll(id).Select(ent => ent.Get()).Cast<object[]>())
-            //    {
-            //        // Какое именно отношение было использовано?
-            //        var pair = ((object[])inv_obj[4]).FirstOrDefault(v2 => (string)((object[])v2)[1] == id);
-            //        if (pair == null) continue;
-            //        string prop = (string)((object[])pair)[0];
-            //        if (!i_props.Contains(prop)) continue;
-            //        string tp = (string)((object[])inv_obj)[2];
-            //        XElement fmt = format.Elements("inverse")
-            //            .Where(d => d.Attribute("prop").Value == prop)
-            //            .SelectMany(d => d.Elements("record"))
-            //            .FirstOrDefault(r => { var type_att = r.Attribute("type"); return type_att == null || type_att.Value == tp; });
-            //        if (fmt == null) continue;
-            //        XElement xinv = GetItemF5(inv_obj, fmt);
-            //        if (xinv == null) continue;
-            //        rec.Add(new XElement("inverse", new XAttribute("prop", prop), xinv));
-            //    }
-            //}
             return rec;
         }
 
         //========================================================= для тестирования, не для использования
-        public void GetById(string id)
+        public PValue GetById(string id)
         {
             PaEntry ent = id_index.GetFirst(id);
-            var val = ent.GetValue();
-            //Console.WriteLine(val.Type.Interpret(val.Value));
+            return ent.GetValue();
         }
 
-        public void MakeVector()
-        {
-        }
         public void Search(string ss)
         {
             foreach (PaEntry ent in name_index.Search(ss))

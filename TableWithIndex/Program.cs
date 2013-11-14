@@ -28,7 +28,7 @@ namespace TableWithIndex
                 "svet_100616111408_14354"
             };
             XElement formats = XElement.Load(path + "ApplicationProfile.xml").Element("formats");
-            bool toload = false;
+            bool toload = true;
             XElement db = null;
             IEnumerable<XElement> query = Enumerable.Empty<XElement>();
             if (toload)
@@ -42,7 +42,8 @@ namespace TableWithIndex
 
             DateTime tt0 = DateTime.Now;
 
-            string variant = "rdfengine";
+            string variant = "rdfengineflex";
+            //string variant = "rdfengine";
             //string variant = "bigintset";
             //string variant = "freeindex";
             //string variant = "semiindex";
@@ -149,17 +150,18 @@ namespace TableWithIndex
             {
                 Console.WriteLine("RdfEngine start");
                 PolarBasedEngineSpecial engine = new PolarBasedEngineSpecial(path);
+                
+                //toload = false;
                 if (toload)
                 {
                     engine.Load(db);
                     Console.WriteLine("Load ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                     engine.MakeIndexes();
                     Console.WriteLine("Indexes ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-                    engine.MakeVector();
-                    Console.WriteLine("MakeVector ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 }
                 tt0 = DateTime.Now;
-                engine.GetById("w20070417_5_8436");
+                var val = engine.GetById("w20070417_5_8436");
+                Console.WriteLine(val.Type.Interpret(val.Value));
                 Console.WriteLine("GetById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 foreach (string id in ids) engine.GetById(id);
                 Console.WriteLine("10 GetById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
@@ -174,7 +176,7 @@ namespace TableWithIndex
                 //var xres = engine.GetItemByIdBasic("w20070417_5_8436", true); // Это я
                 var xres = engine.GetItemByIdBasic("w20071030_1_20927", true); // Это Андрей
                 Console.WriteLine("GetItemByIdBasic ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-                //Console.WriteLine(xres.ToString());
+                Console.WriteLine(xres.ToString());
                 
                 XElement format = formats.Elements("record").First(r => r.Attribute("type").Value == "http://fogid.net/o/person");
                 xres = engine.GetItemById("w20070417_5_8436", format);
@@ -182,6 +184,48 @@ namespace TableWithIndex
                 Console.WriteLine(xres.Elements().Count());
                 foreach (string id in ids) engine.GetItemById(id, format);
                 Console.WriteLine("10 GetItemById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            }
+            else if (variant == "rdfengineflex")
+            {
+                Console.WriteLine("RdfEngineFlex start");
+                tt0 = DateTime.Now;
+                PolarBasedEngineFlex engine = new PolarBasedEngineFlex(path);
+
+                toload = false;
+                if (toload)
+                {
+                    engine.Load(db);
+                    Console.WriteLine("Load ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                    engine.MakeIndexes();
+                    Console.WriteLine("Indexes ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                }
+                var val = engine.GetById("w20070417_5_8436");
+                //Console.WriteLine(val.Type.Interpret(val.Value));
+                Console.WriteLine("GetById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                foreach (string id in ids) engine.GetById(id);
+                Console.WriteLine("10 GetById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                foreach (XElement res in engine.SearchByName("Марчук"))
+                {
+                    //Console.WriteLine(res.ToString());
+                }
+                Console.WriteLine("Search ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
+                //engine.GetInverse("w20070417_5_8436");
+                //engine.GetInverse("w20071030_1_20927");
+                //Console.WriteLine("GetInverse ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
+                //var xres = engine.GetItemByIdBasic("w20070417_5_8436", true); // Это я
+                var xres = engine.GetItemByIdBasic("piu_200809051508", true); // Это Г.И.
+                //var xres = engine.GetItemByIdBasic("w20071030_1_20927", true); // Это Андрей
+                Console.WriteLine("GetItemByIdBasic ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //Console.WriteLine(xres.ToString());
+
+                XElement format = formats.Elements("record").First(r => r.Attribute("type").Value == "http://fogid.net/o/person");
+                tt0 = DateTime.Now;
+                //xres = engine.GetItemById("w20070417_5_8436", format);
+                xres = engine.GetItemById("piu_200809051508", format);
+                Console.WriteLine("GetItemById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                Console.WriteLine(xres.ToString());
             }
         }
 

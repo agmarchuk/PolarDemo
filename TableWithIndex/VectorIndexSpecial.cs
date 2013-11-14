@@ -22,8 +22,10 @@ namespace TableWithIndex
             tp_intern = new PTypeSequence(new PTypeRecord(
                 new NamedType("deleted", new PType(PTypeEnumeration.boolean)),
                 new NamedType("sourceoffset", new PType(PTypeEnumeration.longinteger)),
-                new NamedType("key", new PType(PTypeEnumeration.sstring)),
-                new NamedType("predicate", new PType(PTypeEnumeration.sstring))));
+                new NamedType("targetid", new PType(PTypeEnumeration.sstring)),
+                new NamedType("predicate", new PType(PTypeEnumeration.sstring)),
+                new NamedType("targetoffset", new PType(PTypeEnumeration.longinteger))
+                ));
             intern_cell = new PaCell(tp_intern, indexName + "_i.pac", false);
             if (intern_cell.IsEmpty) intern_cell.Fill(new object[0]);
             key_index = new FreeIndex(indexName + "_v", intern_cell.Root, 2);
@@ -37,11 +39,40 @@ namespace TableWithIndex
                 object[][] triples = genTriples(rec);
                 foreach (object[] v3 in triples)
                 {
-                    intern_cell.Root.AppendElement(new object[] { false, v3[0], v3[1], v3[2] });
+                    intern_cell.Root.AppendElement(new object[] { false, v3[0], v3[1], v3[2], v3[3] });
                 }
             }
             intern_cell.Flush();
             key_index.Load();
+            key_index.AdditionalIndex(3); // дополнительный индекс - предикат
+            
+            //Проставим начала групп обратных ссылок и длину групп
+            long inv_beg = Int64.MinValue, inv_count = Int64.MinValue; // offset начала серии в intern_cell и длина серии 
+            PaEntry tab_el_ent = table.Element(0);
+            long key_offset = Int64.MaxValue; // будем фиксировать серию по совпадению оффсета с полем цели
+            foreach (PaEntry ent in key_index.GetAll())
+            {
+                object[] v5 = (object[])ent.Get();
+                long tab_pnt = (long)v5[4]; // указатель на таблицу
+                if (tab_pnt != key_offset)
+                { // заканчивается серия, начинается новая серия
+                    if (key_offset != Int64.MaxValue)
+                    { // надо закончить предыдущую серию
+                        tab_el_ent.offset = key_offset;
+                        tab_el_ent.Field(5).Set(inv_beg);
+                        tab_el_ent.Field(6).Set(inv_count);
+                    }
+                    // установим новую серию
+                    key_offset = tab_pnt;
+                    inv_beg = ent.offset;
+                    inv_count = 0;
+                }
+                inv_count++;
+            }
+            // закончим последнюю серию
+            tab_el_ent.offset = key_offset;
+            tab_el_ent.Field(5).Set(inv_beg);
+            tab_el_ent.Field(6).Set(inv_count);
         }
         public IEnumerable<PaEntry> Search(string sample, string predicate)
         {

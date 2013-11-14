@@ -43,10 +43,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FITest.cs" />
+    <Compile Include="FlexIndex.cs" />
     <Compile Include="FreeIndex.cs" />
     <Compile Include="ONames.cs" />
     <Compile Include="PIndex.cs" />
     <Compile Include="PolarBasedEngine.cs" />
+    <Compile Include="PolarBasedEngineFlex.cs" />
     <Compile Include="PolarBasedEngineSpecial.cs" />
     <Compile Include="PolarTest.cs" />
     <Compile Include="Program.cs" />
