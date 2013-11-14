@@ -66,6 +66,19 @@ namespace TableWithIndex
             //if (found.offset == Int64.MinValue) return found; // Транслируем сообщение о ненахождении
             return found;
         }
+        public IEnumerable<PaEntry> GetMany(IEnumerable<object> samples)
+        {
+            foreach (var sample in samples)
+            {
+                PaEntry found = GetFirst(ent =>
+                {
+                    IComparable v = (IComparable)ent.Get();
+                    return v.CompareTo(sample);
+                });
+                if (found.offset == Int64.MinValue) continue;
+                yield return found;
+            }
+        }
         public IEnumerable<PaEntry> GetAll(Func<PaEntry, int> elementDepth)
         {
             if (table.Count() > 0)

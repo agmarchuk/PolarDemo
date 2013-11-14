@@ -237,3 +237,4 @@ pip-log.txt
 /Databases/*.pac
 /Databases/*.pxc
 /Databases/*.pac
+/Databases/look.xml

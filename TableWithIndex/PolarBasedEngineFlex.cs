@@ -56,8 +56,10 @@ namespace TableWithIndex
             records = new PaCell(pt_records, path + "rdfrecords.pac", false);
             if (records.IsEmpty) records.Fill(new object[0]);
             id_index = new FreeIndex(path + "rdf_id", records.Root, 1);
+            //id_index = new FlexIndex(path + "rdf_id", records.Root);
             name_index = new VectorIndex(path + "rdf_name", new PType(PTypeEnumeration.sstring), records.Root);
             triplets = new PaCell(pt_triplets, path + "rdftriplets.pac", false);
+            if (triplets.IsEmpty) triplets.Fill(new object[0]);
             direct_index = new FlexIndex(path + "rdf_dir", triplets.Root);
             inverse_index = new FlexIndex(path + "rdf_inv", triplets.Root);
         }
@@ -94,6 +96,7 @@ namespace TableWithIndex
         }
         public void MakeIndexes()
         {
+            //id_index.Load(ent => ent.Field(1).Get());
             id_index.Load();
             name_index.Load(ent =>
                 ((object[])ent.Field(3).Get())
@@ -139,7 +142,7 @@ namespace TableWithIndex
                 null);
             // Прямые ссылки
             {
-                var query = inverse_index.GetAll(ient =>
+                var query = direct_index.GetAll(ient =>
                 {
                     string v = (string)ient.Field(1).Get();
                     return v.CompareTo(id);
@@ -156,7 +159,7 @@ namespace TableWithIndex
                         direct = new XElement("direct", new XAttribute("prop", pred));
                         predicate = pred;
                     }
-                    string idd = (string)rec[1];
+                    string idd = (string)rec[3];
                     direct.Add(new XElement("record", new XAttribute("id", idd)));
                 }
                 res.Add(direct);
@@ -203,49 +206,40 @@ namespace TableWithIndex
             object[] item = (object[])ent.Get();
             var type_att = format.Attribute("type");
             if (type_att != null && type_att.Value != (string)item[2]) return null;
-
+            return GetItemById(item, format);
+        }
+        private XElement GetItemById(object[] item, XElement format)
+        {
             object[] fields = (object[])item[3];
+            string id = (string)item[1];
             XElement record = new XElement("record", new XAttribute("id", item[1]), new XAttribute("type", item[2]));
 
             var f_props = format.Elements("field").Select(f => f.Attribute("prop").Value);
-            //var d_props = format.Elements("direct").Select(f => f.Attribute("prop").Value);
-            //var i_props = format.Elements("inverse").Select(f => f.Attribute("prop").Value);
-            //if (f_props.Count() > 0)
-            //    record.Add(fields
-            //        //.Where(v3 => f_props.Contains<string>((string)((object[])v3)[0]))
-            //        .Select(v3 => new XElement("field", new XAttribute("prop", ((object[])v3)[0]),
-            //            string.IsNullOrEmpty((string)((object[])v3)[0]) ? null : new XAttribute(ONames.xmllang, ((object[])v3)[2]),
-            //            ((object[])v3)[1]
-            //            )));
-            //if (d_props.Count() > 0)
-            //{
-            //}
             record.Add(f_props
                 .SelectMany(prop => fields.Cast<object[]>()
                     .Where(v3 => (string)v3[0] == prop)
                     .Select(v3 => new XElement("field", new XAttribute("prop", v3[0]),
                         string.IsNullOrEmpty((string)v3[2]) ? null : new XAttribute(ONames.xmllang, ((object[])v3)[2]),
                         v3[1]))));
-            record.Add(format.Elements("direct")
-                .Select(fd => 
-                {
-                    string prop = fd.Attribute("prop").Value;
-                    return new XElement("direct", new XAttribute(fd.Attribute("prop")),
-                    direct_index.GetAll(tent => 
-                    {
-                        object[] triplet = (object[])tent.Get();
-                        string subj = (string)triplet[1];
-                        string pred = (string)triplet[2];
-                        int cmp = subj.CompareTo(id);
-                        return cmp != 0? cmp : pred.CompareTo(prop);
-                    }));
-                }));
-            record.Add(format.Elements("inverse")
+            //record.Add(format.Elements("direct")
+            //    .Select(fd => 
+            //    {
+            //        string prop = fd.Attribute("prop").Value;
+            //        return new XElement("direct", new XAttribute(fd.Attribute("prop")),
+            //        direct_index.GetAll(tent => 
+            //        {
+            //            object[] triplet = (object[])tent.Get();
+            //            string subj = (string)triplet[1];
+            //            string pred = (string)triplet[2];
+            //            int cmp = subj.CompareTo(id);
+            //            return cmp != 0? cmp : pred.CompareTo(prop);
+            //        }));
+            //    }));
+            var inv_query = format.Elements("inverse")
                 .Select(fi =>
                 {
                     string prop = fi.Attribute("prop").Value;
-                    return new XElement("inverse", new XAttribute("prop", prop),
-                    inverse_index.GetAll(tent =>
+                    var inv = inverse_index.GetAll(tent =>
                     {
                         object[] triplet = (object[])tent.Get();
                         string subj = (string)triplet[3];
@@ -253,9 +247,49 @@ namespace TableWithIndex
                         int cmp = subj.CompareTo(id);
                         return cmp != 0 ? cmp : pred.CompareTo(prop);
                     })
-                    .SelectMany(tent => fi.Elements("record").Select(r => GetItemById((string)tent.Field(1).Get(), r)))
-                    );
-                }));
+                    .Select(ent => (string)ent.Field(1).Get())
+                    .ToArray();
+                    var qq = inv.Select(subject_id =>
+                        {
+                            object[] subject = (object[])id_index.GetFirst(subject_id).Get();
+                            return subject;
+                        }).ToArray();
+                    //var qq = id_index.Get
+                    var rr = new XElement("inverse", new XAttribute("prop", prop), qq.Select(subject =>
+                        {
+                            var xrec = fi.Elements("record")
+                            .Select(r => GetItemById(subject, r))
+                            .FirstOrDefault();
+                            return xrec;
+                        }));
+                    return rr.IsEmpty? null : rr;
+                });
+            record.Add(inv_query);
+            //record.Add(format.Elements("inverse")
+            //    .Select(fi =>
+            //    {
+            //        string prop = fi.Attribute("prop").Value;
+            //        XElement xinverse = new XElement("inverse", new XAttribute("prop", prop),
+            //            inverse_index.GetAll(tent =>
+            //            {
+            //                object[] triplet = (object[])tent.Get();
+            //                string subj = (string)triplet[3];
+            //                string pred = (string)triplet[2];
+            //                int cmp = subj.CompareTo(id);
+            //                return cmp != 0 ? cmp : pred.CompareTo(prop);
+            //            })
+            //            .Select(tent => 
+            //            {
+            //                string subject_id = (string)tent.Field(1).Get();
+            //                object[] subject = (object[])id_index.GetFirst(subject_id).Get();
+            //                var xrec = fi.Elements("record")
+            //                .Select(r => GetItemById(subject, r))
+            //                .FirstOrDefault();
+            //                return xrec;
+            //            })
+            //            );
+            //        return xinverse.IsEmpty ? null : xinverse;
+            //    }));
             return record;
         }
 
