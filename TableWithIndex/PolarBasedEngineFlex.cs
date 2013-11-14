@@ -253,7 +253,7 @@ namespace TableWithIndex
                         int cmp = subj.CompareTo(id);
                         return cmp != 0 ? cmp : pred.CompareTo(prop);
                     })
-                    .Count()
+                    .SelectMany(tent => fi.Elements("record").Select(r => GetItemById((string)tent.Field(1).Get(), r)))
                     );
                 }));
             return record;

@@ -222,10 +222,11 @@ namespace TableWithIndex
 
                 XElement format = formats.Elements("record").First(r => r.Attribute("type").Value == "http://fogid.net/o/person");
                 tt0 = DateTime.Now;
-                //xres = engine.GetItemById("w20070417_5_8436", format);
-                xres = engine.GetItemById("piu_200809051508", format);
+                xres = engine.GetItemById("w20070417_5_8436", format);
+                //xres = engine.GetItemById("piu_200809051508", format);
                 Console.WriteLine("GetItemById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 Console.WriteLine(xres.ToString());
+                Console.WriteLine(xres.Descendants().Count());
             }
         }
 
