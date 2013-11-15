@@ -190,6 +190,7 @@ namespace TableWithIndex
                 Console.WriteLine("RdfEngineFlex start");
                 tt0 = DateTime.Now;
                 PolarBasedEngineFlex engine = new PolarBasedEngineFlex(path);
+                Console.WriteLine("Init ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
                 toload = false;
                 if (toload)
@@ -230,6 +231,7 @@ namespace TableWithIndex
                 //xres.Save(path + "look.xml");
                 foreach (string id in ids) engine.GetItemById(id, format);
                 Console.WriteLine("10 GetItemById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //Console.ReadKey();
             }
         }
 

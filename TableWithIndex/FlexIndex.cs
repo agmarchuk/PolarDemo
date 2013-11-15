@@ -56,25 +56,11 @@ namespace TableWithIndex
         //    return v.CompareTo(sample);
         //});
 
-        public PaEntry GetFirst(object sample)
-        {
-            PaEntry found = GetFirst(ent =>
-            {
-                IComparable v = (IComparable)ent.Get();
-                return v.CompareTo(sample);
-            });
-            //if (found.offset == Int64.MinValue) return found; // Транслируем сообщение о ненахождении
-            return found;
-        }
-        public IEnumerable<PaEntry> GetMany(IEnumerable<object> samples)
+        public IEnumerable<PaEntry> GetMany(IEnumerable<object> samples, Func<PaEntry, object> keyFunction)
         {
             foreach (var sample in samples)
             {
-                PaEntry found = GetFirst(ent =>
-                {
-                    IComparable v = (IComparable)ent.Get();
-                    return v.CompareTo(sample);
-                });
+                PaEntry found = GetFirst(ent => ((IComparable)keyFunction(ent)).CompareTo(sample));
                 if (found.offset == Int64.MinValue) continue;
                 yield return found;
             }

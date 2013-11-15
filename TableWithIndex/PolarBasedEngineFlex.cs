@@ -29,10 +29,10 @@ namespace TableWithIndex
             new NamedType("fields", new PTypeSequence(new PTypeRecord(
                 new NamedType("predicate", new PType(PTypeEnumeration.sstring)),
                 new NamedType("data", new PType(PTypeEnumeration.sstring)),
-                new NamedType("lang", new PType(PTypeEnumeration.sstring)))))
-            //new NamedType("direct", new PTypeSequence(new PTypeRecord(
-            //    new NamedType("predicate", new PType(PTypeEnumeration.sstring)),
-            //    new NamedType("obj", new PType(PTypeEnumeration.sstring))))),
+                new NamedType("lang", new PType(PTypeEnumeration.sstring))))),
+            new NamedType("direct", new PTypeSequence(new PTypeRecord(
+                new NamedType("predicate", new PType(PTypeEnumeration.sstring)),
+                new NamedType("obj", new PType(PTypeEnumeration.sstring)))))
             //new NamedType("inv_beg", new PType(PTypeEnumeration.longinteger)),
             //new NamedType("inv_count", new PType(PTypeEnumeration.longinteger))
                 ));
@@ -44,7 +44,9 @@ namespace TableWithIndex
             ));
         private string path;
         private PaCell records;
-        private FreeIndex id_index;
+        private FlexIndex id_index;
+        private Dictionary<string, PaEntry> item_dic = null;
+        bool toload_dic = true;
         private VectorIndex name_index;
         private PaCell triplets; // Только объектные триплеты 
         private FlexIndex direct_index;
@@ -55,13 +57,15 @@ namespace TableWithIndex
             this.path = path;
             records = new PaCell(pt_records, path + "rdfrecords.pac", false);
             if (records.IsEmpty) records.Fill(new object[0]);
-            id_index = new FreeIndex(path + "rdf_id", records.Root, 1);
-            //id_index = new FlexIndex(path + "rdf_id", records.Root);
+            //id_index = new FreeIndex(path + "rdf_id", records.Root, 1);
+            id_index = new FlexIndex(path + "rdf_id", records.Root);
             name_index = new VectorIndex(path + "rdf_name", new PType(PTypeEnumeration.sstring), records.Root);
             triplets = new PaCell(pt_triplets, path + "rdftriplets.pac", false);
             if (triplets.IsEmpty) triplets.Fill(new object[0]);
             direct_index = new FlexIndex(path + "rdf_dir", triplets.Root);
             inverse_index = new FlexIndex(path + "rdf_inv", triplets.Root);
+            if (toload_dic) item_dic = id_index.GetAll().ToDictionary(ent => (string)ent.Field(1).Get());
+            //if (toload_dic) item_dic = records.Root.Elements().ToDictionary(ent => (string)ent.Field(1).Get());
         }
         public void Load(XElement db)
         {
@@ -83,7 +87,14 @@ namespace TableWithIndex
                             sel.Value,
                             lang_att == null? "" : lang_att.Value };
                     }).ToArray();
-                records.Root.AppendElement(new object[] { false, id_att.Value, type, fields });
+                object[] direct = el.Elements()
+                    .Where(sel => sel.Attribute(ONames.rdfresource) != null)
+                    .Select(sel =>
+                    {
+                        return new object[] { sel.Name.NamespaceName + sel.Name.LocalName, 
+                            sel.Attribute(ONames.rdfresource).Value };
+                    }).ToArray();
+                records.Root.AppendElement(new object[] { false, id_att.Value, type, fields, direct });
                 foreach (XElement xprop in el.Elements().Where(xel => xel.Attribute(ONames.rdfresource) != null))
                 {
                     string prop = xprop.Name.NamespaceName + xprop.Name.LocalName;
@@ -96,8 +107,8 @@ namespace TableWithIndex
         }
         public void MakeIndexes()
         {
-            //id_index.Load(ent => ent.Field(1).Get());
-            id_index.Load();
+            id_index.Load(ent => ent.Field(1).Get());
+            if (toload_dic) item_dic = id_index.GetAll().ToDictionary(ent => (string)ent.Field(1).Get());
             name_index.Load(ent =>
                 ((object[])ent.Field(3).Get())
                 .Cast<object[]>()
@@ -129,41 +140,44 @@ namespace TableWithIndex
         }
         public XElement GetItemByIdBasic(string id, bool addinverse)
         {
-            PaEntry ent = id_index.GetFirst(id);
+            PaEntry ent;
+            if (item_dic == null) ent = id_index.GetFirst(en => ((IComparable)en.Field(1).Get()).CompareTo(id));
+            else { if (!item_dic.TryGetValue(id, out ent)) ent = new PaEntry(null, Int64.MinValue, null); }
+
             object[] item = (object[])ent.Get();
             XElement res = new XElement("record", new XAttribute("id", item[1]), new XAttribute("type", item[2]),
                 ((object[])item[3]).Cast<object[]>().Select(v3 =>
                     new XElement("field", new XAttribute("prop", v3[0]),
                         string.IsNullOrEmpty((string)v3[2]) ? null : new XAttribute(ONames.xmllang, v3[2]),
                         v3[1])),
-                //((object[])item[4]).Cast<object[]>().Select(v2 =>
-                //    new XElement("direct", new XAttribute("prop", v2[0]),
-                //        v2[1])),
+                ((object[])item[4]).Cast<object[]>().Select(v2 =>
+                    new XElement("direct", new XAttribute("prop", v2[0]),
+                        v2[1])),
                 null);
             // Прямые ссылки
-            {
-                var query = direct_index.GetAll(ient =>
-                {
-                    string v = (string)ient.Field(1).Get();
-                    return v.CompareTo(id);
-                });
-                string predicate = null;
-                XElement direct = null;
-                foreach (PaEntry en in query)
-                {
-                    var rec = (object[])en.Get();
-                    string pred = (string)rec[2];
-                    if (pred != predicate)
-                    {
-                        res.Add(direct);
-                        direct = new XElement("direct", new XAttribute("prop", pred));
-                        predicate = pred;
-                    }
-                    string idd = (string)rec[3];
-                    direct.Add(new XElement("record", new XAttribute("id", idd)));
-                }
-                res.Add(direct);
-            }
+            //{
+            //    var query = direct_index.GetAll(ient =>
+            //    {
+            //        string v = (string)ient.Field(1).Get();
+            //        return v.CompareTo(id);
+            //    });
+            //    string predicate = null;
+            //    XElement direct = null;
+            //    foreach (PaEntry en in query)
+            //    {
+            //        var rec = (object[])en.Get();
+            //        string pred = (string)rec[2];
+            //        if (pred != predicate)
+            //        {
+            //            res.Add(direct);
+            //            direct = new XElement("direct", new XAttribute("prop", pred));
+            //            predicate = pred;
+            //        }
+            //        string idd = (string)rec[3];
+            //        direct.Add(new XElement("record", new XAttribute("id", idd)));
+            //    }
+            //    res.Add(direct);
+            //}
             // Обратные ссылки
             if (addinverse)
             {
@@ -188,21 +202,17 @@ namespace TableWithIndex
                     inverse.Add(new XElement("record", new XAttribute("id", idd)));
                 }
                 res.Add(inverse);
-
-                //foreach (PaEntry en in query)
-                //{
-                //    var rec = (object[])en.Get();
-                //    res.Add(new XElement("inverse", new XAttribute("prop", rec[2]),
-                //        new XElement("record", new XAttribute("id", rec[1]))));
-                //}
             }
             return res;
         }
 
         public XElement GetItemById(string id, XElement format)
         {
-            PaEntry ent = id_index.GetFirst(id);
+            PaEntry ent;
+            if (item_dic == null) ent = id_index.GetFirst(en => ((IComparable)en.Field(1).Get()).CompareTo(id));
+            else { if (!item_dic.TryGetValue(id, out ent)) ent = new PaEntry(null, Int64.MinValue, null); }
             if (ent.offset == Int64.MinValue) return null;
+
             object[] item = (object[])ent.Get();
             var type_att = format.Attribute("type");
             if (type_att != null && type_att.Value != (string)item[2]) return null;
@@ -211,6 +221,7 @@ namespace TableWithIndex
         private XElement GetItemById(object[] item, XElement format)
         {
             object[] fields = (object[])item[3];
+            object[] direct = (object[])item[4];
             string id = (string)item[1];
             XElement record = new XElement("record", new XAttribute("id", item[1]), new XAttribute("type", item[2]));
 
@@ -221,75 +232,70 @@ namespace TableWithIndex
                     .Select(v3 => new XElement("field", new XAttribute("prop", v3[0]),
                         string.IsNullOrEmpty((string)v3[2]) ? null : new XAttribute(ONames.xmllang, ((object[])v3)[2]),
                         v3[1]))));
-            //record.Add(format.Elements("direct")
-            //    .Select(fd => 
-            //    {
-            //        string prop = fd.Attribute("prop").Value;
-            //        return new XElement("direct", new XAttribute(fd.Attribute("prop")),
-            //        direct_index.GetAll(tent => 
-            //        {
-            //            object[] triplet = (object[])tent.Get();
-            //            string subj = (string)triplet[1];
-            //            string pred = (string)triplet[2];
-            //            int cmp = subj.CompareTo(id);
-            //            return cmp != 0? cmp : pred.CompareTo(prop);
-            //        }));
-            //    }));
-            var inv_query = format.Elements("inverse")
-                .Select(fi =>
+            // Прямые ссылки
+            record.Add(format.Elements("direct")
+                .Select(di =>
                 {
-                    string prop = fi.Attribute("prop").Value;
-                    var inv = inverse_index.GetAll(tent =>
-                    {
-                        object[] triplet = (object[])tent.Get();
-                        string subj = (string)triplet[3];
-                        string pred = (string)triplet[2];
-                        int cmp = subj.CompareTo(id);
-                        return cmp != 0 ? cmp : pred.CompareTo(prop);
-                    })
-                    .Select(ent => (string)ent.Field(1).Get())
-                    .ToArray();
-                    var qq = inv.Select(subject_id =>
+                    string prop = di.Attribute("prop").Value;
+                    XElement xdirect = new XElement("direct", new XAttribute("prop", prop),
+                        direct.Cast<object[]>()
+                        .Where(v2 => (string)v2[0] == prop)
+                        .Select(v2 => 
                         {
-                            object[] subject = (object[])id_index.GetFirst(subject_id).Get();
-                            return subject;
-                        }).ToArray();
-                    //var qq = id_index.Get
-                    var rr = new XElement("inverse", new XAttribute("prop", prop), qq.Select(subject =>
-                        {
-                            var xrec = fi.Elements("record")
-                            .Select(r => GetItemById(subject, r))
-                            .FirstOrDefault();
+                            string idd = (string)v2[1];
+                            var xrec = di.Elements("record")
+                            .Select(r => GetItemById(idd, r))
+                            .FirstOrDefault(x => x != null);
                             return xrec;
                         }));
-                    return rr.IsEmpty? null : rr;
-                });
-            record.Add(inv_query);
-            //record.Add(format.Elements("inverse")
-            //    .Select(fi =>
+                    return xdirect.IsEmpty ? null : xdirect;
+                }));
+            //record.Add(format.Elements("direct")
+            //    .Select(fd =>
             //    {
-            //        string prop = fi.Attribute("prop").Value;
-            //        XElement xinverse = new XElement("inverse", new XAttribute("prop", prop),
-            //            inverse_index.GetAll(tent =>
+            //        string prop = fd.Attribute("prop").Value;
+            //        XElement xdirect = new XElement("direct", new XAttribute("prop", prop),
+            //            direct_index.GetAll(tent =>
             //            {
             //                object[] triplet = (object[])tent.Get();
-            //                string subj = (string)triplet[3];
+            //                string subj = (string)triplet[1];
             //                string pred = (string)triplet[2];
             //                int cmp = subj.CompareTo(id);
             //                return cmp != 0 ? cmp : pred.CompareTo(prop);
             //            })
-            //            .Select(tent => 
+            //            .Select(tent =>
             //            {
-            //                string subject_id = (string)tent.Field(1).Get();
-            //                object[] subject = (object[])id_index.GetFirst(subject_id).Get();
-            //                var xrec = fi.Elements("record")
-            //                .Select(r => GetItemById(subject, r))
+            //                string obj_id = (string)tent.Field(3).Get();
+            //                var xrec = fd.Elements("record")
+            //                .Select(r => GetItemById(obj_id, r))
             //                .FirstOrDefault();
             //                return xrec;
-            //            })
-            //            );
-            //        return xinverse.IsEmpty ? null : xinverse;
+            //            }));
+            //        return xdirect.IsEmpty ? null : xdirect;
             //    }));
+            record.Add(format.Elements("inverse")
+                .Select(fi =>
+                {
+                    string prop = fi.Attribute("prop").Value;
+                    XElement xinverse = new XElement("inverse", new XAttribute("prop", prop),
+                        inverse_index.GetAll(tent =>
+                        {
+                            object[] triplet = (object[])tent.Get();
+                            string subj = (string)triplet[3];
+                            string pred = (string)triplet[2];
+                            int cmp = subj.CompareTo(id);
+                            return cmp != 0 ? cmp : pred.CompareTo(prop);
+                        })
+                        .Select(tent =>
+                        {
+                            string subject_id = (string)tent.Field(1).Get();
+                            var xrec = fi.Elements("record")
+                            .Select(r => GetItemById(subject_id, r))
+                            .FirstOrDefault();
+                            return xrec;
+                        }));
+                    return xinverse.IsEmpty ? null : xinverse;
+                }));
             return record;
         }
 
@@ -297,7 +303,8 @@ namespace TableWithIndex
         //========================================================= для тестирования, не для использования
         public PValue GetById(string id)
         {
-            PaEntry ent = id_index.GetFirst(id);
+            PaEntry ent = item_dic == null ? id_index.GetFirst(en => ((IComparable)en.Field(1).Get()).CompareTo(id))
+                : item_dic[id];
             return ent.GetValue();
         }
 
