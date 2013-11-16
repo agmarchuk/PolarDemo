@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -21,6 +20,7 @@ namespace BinaryTree
             string path = @"..\..\..\Databases\";
             //"C:\home\FactographDatabases"
             Console.WriteLine("Start.");
+         
 
             Func<object, PxEntry, int> edepth = (object v1, PxEntry en2) =>
             {
@@ -107,20 +107,6 @@ namespace BinaryTree
             Console.WriteLine(query.Count());
             Console.WriteLine("======Count() ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
-   //         var addTree = TestQueryInput(query, ptElement, edepth, path);
-         
-     //     BTree toBTree =TestToBTree(query, ptElement, path, edepth);
-         
-       //    var treeFromFill = TestBTreeFill(query, ptElement, path, edepth);
-            Func<object, object, bool> elementsComparer = (o1, o2)=>(string)(((object[])o1)[0])==(string)((object[])o2)[0];
-        //    Console.WriteLine("tree sequantialy add == tree fill - " + treeFromFill.Equals(addTree, elementsComparer));
-         //   Console.WriteLine("tree sequantialy add == query to BTree  - " + toBTree.Equals(addTree, elementsComparer));
-
-
-        //   treeFromFill.Close();
-         //   addTree.Close();
-         //   toBTree.Close();
-        //    Console.WriteLine("======Total ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             cell.Close();
             File.Delete(path + "btree.pxc");
             //  GetOverflow(path);

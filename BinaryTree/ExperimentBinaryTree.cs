@@ -296,8 +296,6 @@ namespace BinaryTree
             };
         }
 
-        public readonly object EmptyElement;
-
         public class ToTreeObjectParams
         {
             public ToTreeObjectParams(int[] elements, int beg, int len)
@@ -313,42 +311,7 @@ namespace BinaryTree
 
             public int Len;
         }
-
-        //private static object[] ToTreeObjectWithBalance(ToTreeObjectParams @params, ref int h)
-        //{
-        //    if (@params.Len == 0) return Empty;
-        //    h++;
-        //    if (@params.Len == 1)
-        //        return new object[]
-        //        {
-        //            1, new[]
-        //            {
-        //                // запись
-        //                @params.Elements[@params.Beg], // значение
-        //                Empty,
-        //                Empty,
-        //                0
-        //            }
-        //        };
-        //    int leftH = 0, rightH = 0, l = @params.Len;
-        //    @params.Len /= 2;
-        //    var left = ToTreeObjectWithBalance(@params, ref leftH);
-        //    @params.Beg += @params.Len + 1;
-        //    @params.Len = l - @params.Len - 1;
-        //    return new object[]
-        //    {
-        //        1, new[]
-        //        {
-        //            // запись
-        //            @params.Elements[@params.Beg + @params.Len], // значение
-        //            left,
-        //            ToTreeObjectWithBalance(@params, ref rightH),
-        //            leftH - rightH
-        //        }
-        //    };
-        //}
-
-        public PxEntry BinarySearch(int key)
+         public PxEntry BinarySearch(int key)
         {
             var entry = Root;
             while (true)
