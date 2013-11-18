@@ -228,7 +228,7 @@ namespace TableWithIndex
                 Console.WriteLine("GetItemById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 //Console.WriteLine(xres.ToString());
                 //Console.WriteLine(xres.Descendants().Count());
-                //xres.Save(path + "look.xml");
+                xres.Save(path + "look.xml");
                 foreach (string id in ids) engine.GetItemById(id, format);
                 Console.WriteLine("10 GetItemById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 //Console.ReadKey();
