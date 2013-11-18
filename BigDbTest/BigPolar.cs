@@ -59,11 +59,13 @@ namespace BigDbTest
                     cell.Root.AppendElement(value);
                 }
             }
+            cell.Root.AppendElement(1111111111);
+            for (int i = 0; i< 10; i++) cell.Root.AppendElement(i * 100000000 + 77777777);
             cell.Flush();
         }
-        public void Test2(string condition)
+        public PaEntry Test2(int value)
         {
-            //var qu = cell.Root.
+            return cell.Root.BinarySearchFirst(ent => (int)ent.Get());
         }
         public void Test3()
         {
