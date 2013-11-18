@@ -44,7 +44,9 @@
   <ItemGroup>
     <Compile Include="FITest.cs" />
     <Compile Include="FlexIndex.cs" />
-    <Compile Include="FreeIndex.cs" />
+    <Compile Include="FreeIndex.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ONames.cs" />
     <Compile Include="PIndex.cs" />
     <Compile Include="PolarBasedEngine.cs" />
