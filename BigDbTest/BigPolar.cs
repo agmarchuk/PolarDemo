@@ -65,7 +65,7 @@ namespace BigDbTest
         }
         public PaEntry Test2(int value)
         {
-            return cell.Root.BinarySearchFirst(ent => (int)ent.Get());
+            return cell.Root.BinarySearchFirst(ent => ((int)ent.Get()).CompareTo(value));
         }
         public void Test3()
         {

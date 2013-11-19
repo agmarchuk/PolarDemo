@@ -45,21 +45,28 @@ namespace BigDbTest
             else
             {
                 BigPolar bp = new BigPolar(path);
-                //bp.Load2(1000000);
+                //bp.Load2(1000000000);
                 //Console.WriteLine("Load ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 //bp.Index();
                 //Console.WriteLine("index ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 //bp.Test3();
                 //Console.WriteLine("scan ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
                 int sample = 1111111111;
                 var ent = bp.Test2(sample);
-                if (ent.IsEmpty()) Console.WriteLine("No Value");
+                if (ent.IsEmpty) Console.WriteLine("No Value");
                 else Console.WriteLine("Value=" + (int)ent.Get());
                 Console.WriteLine("BinarySearch ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
+                sample = 1111111112;
                 sample = 77777777;
                 ent = bp.Test2(sample);
-                if (ent.IsEmpty()) Console.WriteLine("No Value");
+                if (ent.IsEmpty) Console.WriteLine("No Value");
+                else Console.WriteLine("Value=" + (int)ent.Get());
+                Console.WriteLine("BinarySearch ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
+                for (int i = 0; i < 10; i++) ent = bp.Test2(i * 100000000 + 77777777);
+                if (ent.IsEmpty) Console.WriteLine("No Value");
                 else Console.WriteLine("Value=" + (int)ent.Get());
                 Console.WriteLine("10 BinarySearch ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             }
