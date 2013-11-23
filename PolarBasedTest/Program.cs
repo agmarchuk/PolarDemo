@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -38,7 +38,7 @@ namespace PolarBasedTest
 
             var graph = new PolarBasedRdfGraph(path);
             Console.WriteLine("graph ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            //toload = true;
+            toload = true;
             if (toload)
             {
                 db = XElement.Load(path + "0001.xml");
