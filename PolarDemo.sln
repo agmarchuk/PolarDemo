@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolarBasedEngine", "..\Pola
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HardRdfTables", "HardRdfTables\HardRdfTables.csproj", "{686A7A37-F111-4EC9-A2CE-E6FD6FAC24EC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolarBasedTest", "PolarBasedTest\PolarBasedTest.csproj", "{D8335D57-7BBD-4617-9B29-2FBE802A9538}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -161,6 +163,16 @@ Global
 		{686A7A37-F111-4EC9-A2CE-E6FD6FAC24EC}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{686A7A37-F111-4EC9-A2CE-E6FD6FAC24EC}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{686A7A37-F111-4EC9-A2CE-E6FD6FAC24EC}.Release|x86.ActiveCfg = Release|Any CPU
+		{D8335D57-7BBD-4617-9B29-2FBE802A9538}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8335D57-7BBD-4617-9B29-2FBE802A9538}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8335D57-7BBD-4617-9B29-2FBE802A9538}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{D8335D57-7BBD-4617-9B29-2FBE802A9538}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{D8335D57-7BBD-4617-9B29-2FBE802A9538}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D8335D57-7BBD-4617-9B29-2FBE802A9538}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8335D57-7BBD-4617-9B29-2FBE802A9538}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8335D57-7BBD-4617-9B29-2FBE802A9538}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{D8335D57-7BBD-4617-9B29-2FBE802A9538}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{D8335D57-7BBD-4617-9B29-2FBE802A9538}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
