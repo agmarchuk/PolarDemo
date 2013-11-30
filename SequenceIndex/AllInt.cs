@@ -85,5 +85,58 @@ namespace SequenceIndex
         }
     }
 
-   
+    class HashIndex
+    {
+       static PType testTableType = new PTypeSequence(new PTypeRecord(new NamedType("id", new PType(PTypeEnumeration.sstring)), new NamedType("some", new PType(PTypeEnumeration.sstring))));
+       static PType hashesType = new PTypeSequence(new PTypeRecord(new NamedType("hash", new PType(PTypeEnumeration.integer)), new NamedType("offset", new PType(PTypeEnumeration.longinteger))));
+       static PType indexesType = new PTypeSequence(new PTypeRecord(new NamedType("offset4hash",new PType(PTypeEnumeration.longinteger)),new NamedType("count", new PType(PTypeEnumeration.integer))));
+        private PaCell testTable, hashes, indexes;
+
+        public HashIndex(string dirPath)
+        {
+            this.testTable = new PaCell(testTableType, dirPath + "/test_table.pac",false);
+            hashes = new PaCell(testTableType, dirPath + "/test_table.pac", false);
+            indexes = new PaCell(testTableType, dirPath + "/test_table.pac", false);
+            testTable.Fill(new object[0]);
+            hashes.Fill(new object[0]);
+            indexes.Fill(new object[0]);
+            long offset = testTable.Root.AppendElement(new object[] {"id", "some"});
+            KeyValuePair<long,int> offset4HashCount = GetOffsetAndCount4Hash("id");
+            if (offset4HashCount.Value == 0) // new key's hash
+            {
+                
+            }
+            else
+            {
+                
+            }
+            long offset4hash = hashes.Root.AppendElement(null);
+        }
+
+        public void Fill(KeyValuePair<object,long>[] keysOffsets)
+        {
+            indexes.Fill(new object[0]);
+            foreach (var key in 
+                keysOffsets.GroupBy(key => key.Key.GetHashCode() > 0 ? key.Key.GetHashCode() : -key.Key.GetHashCode()).OrderBy(g => g.Key))
+            {
+                
+                
+            }
+        }
+
+        public void CreateIndexes()
+        {
+            
+        }
+        public KeyValuePair<long, int> GetOffsetAndCount4Hash(string key)
+        {
+            int hash = key.GetHashCode();
+            if (hash < 0) hash = -hash;
+            PaEntry index = indexes.Root.Element(Convert.ToInt64(hash));
+            var count = Convert.ToInt32(index.Field(1).Get());
+            if (count == 0) return new KeyValuePair<long, int>(long.MinValue, 0);
+            return new KeyValuePair<long, int>(Convert.ToInt64(index.Field(0).Get()), count);
+        }
+
+    }
 }
