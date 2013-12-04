@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using PolarDB;
 
 namespace BigDbTest
@@ -78,6 +74,27 @@ namespace BigDbTest
         {
             cell.Root.SortByKey(o => (int)o);
             cell.Flush();
+        }
+
+        internal void Test4()
+        {
+            foreach (var se in new int[] {100, 100000000, 10, 4000000, 108, 90000000, 50000000, 1, int.MaxValue/16-1, 303})
+            {
+               cell.Root.BinarySearchFirst(entry =>
+                {
+                    int e = (int) entry.Get();
+                    return e == se ? 0 : e > se ? 1 : -1;
+                });
+            }
+        }
+        internal void Test5()
+        {
+            foreach (
+                var se in new int[] {100, 100000000, 10, 4000000, 108, 90000000, 50000000, 1, int.MaxValue/16 - 1, 303})
+            {
+                //var r = cell.Root.BinarySearchFirstByKey(se);
+            }
+            
         }
     }
     // Это нужно для сортировки записей, см. ранее
