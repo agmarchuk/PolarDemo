@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7E88592A-4489-4566-9C5B-280DA26BAA4D}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{686A7A37-F111-4EC9-A2CE-E6FD6FAC24EC}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TableWithIndex</RootNamespace>
-    <AssemblyName>TableWithIndex</AssemblyName>
+    <RootNamespace>HardRdfTables</RootNamespace>
+    <AssemblyName>HardRdfTables</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -28,10 +28,6 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <UseVSHostingProcess>true</UseVSHostingProcess>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -43,34 +39,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FITest.cs" />
-    <Compile Include="FlexIndex.cs" />
-    <Compile Include="FreeIndex.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="ONames.cs" />
-    <Compile Include="PIndex.cs" />
-    <Compile Include="PolarBasedEngine.cs" />
-    <Compile Include="PolarBasedEngineFlex.cs" />
-    <Compile Include="PolarBasedEngineSpecial.cs" />
-    <Compile Include="PolarTest.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SemiIndex.cs" />
-    <Compile Include="SITest.cs" />
-    <Compile Include="SQLTest.cs" />
-    <Compile Include="VectorIndex.cs" />
-    <Compile Include="VectorIndexSpecial.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Description.txt" />
-    <Content Include="Results.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\PolarDB\PolarDB.csproj">
-      <Project>{907bb4af-fbc9-4a1e-8f80-194af9337aa4}</Project>
-      <Name>PolarDB</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
