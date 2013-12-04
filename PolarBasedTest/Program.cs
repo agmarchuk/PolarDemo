@@ -38,7 +38,7 @@ namespace PolarBasedTest
 
             var graph = new PolarBasedRdfGraph(path);
             Console.WriteLine("graph ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            toload = true;
+            //toload = true;
             if (toload)
             {
                 db = XElement.Load(path + "0001.xml");
@@ -70,31 +70,36 @@ namespace PolarBasedTest
             foreach (string id in ids) graph.GetItemById(id, format);
             Console.WriteLine("10 GetItemById ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
-            // Редактирование
-            XElement record1 = new XElement(ONames.tag_person, new XAttribute(ONames.rdfabout, "testzone_0001"),
-                new XElement(ONames.tag_name, "Пупкин Василий Васильевич"),
-                new XElement(ONames.tag_fromdate, "2013-11-22"));
-            graph.InsertXElement(record1);
-            Console.WriteLine("InsertXElement ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            xFlow = graph.SearchByName("пупкин");
-            foreach (XElement x in xFlow)
-            {
-                Console.WriteLine(x.ToString());
-            }
-            Console.WriteLine("SearchByName ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            xres = graph.GetItemByIdBasic("testzone_0001", true); // Это Пупкин
-            if (xres != null) Console.WriteLine(xres.ToString());
+            //// Редактирование
+            //XElement record1 = new XElement(ONames.tag_person, new XAttribute(ONames.rdfabout, "testzone_0001"),
+            //    new XElement(ONames.tag_name, "Пупкин Василий Васильевич"),
+            //    new XElement(ONames.tag_fromdate, "2013-11-22"));
+            //graph.InsertXElement(record1);
+            //Console.WriteLine("InsertXElement ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            //xFlow = graph.SearchByName("пупкин");
+            //foreach (XElement x in xFlow)
+            //{
+            //    Console.WriteLine(x.ToString());
+            //}
+            //Console.WriteLine("SearchByName ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            //xres = graph.GetItemByIdBasic("testzone_0001", true); // Это Пупкин
+            //if (xres != null) Console.WriteLine(xres.ToString());
 
-            graph.Delete("testzone_0001");
-            xFlow = graph.SearchByName("пупкин");
-            foreach (XElement x in xFlow)
-            {
-                Console.WriteLine(x.ToString());
-            }
-            Console.WriteLine("Delete ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            xres = graph.GetItemByIdBasic("testzone_0001", true); // Это Пупкин
-            if (xres != null) Console.WriteLine(xres.ToString());
-
+            //graph.Delete("testzone_0001");
+            //xFlow = graph.SearchByName("пупкин");
+            //foreach (XElement x in xFlow)
+            //{
+            //    Console.WriteLine(x.ToString());
+            //}
+            //Console.WriteLine("Delete ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            //xres = graph.GetItemByIdBasic("testzone_0001", true); // Это Пупкин
+            //if (xres != null) Console.WriteLine(xres.ToString());
+            tt0 = DateTime.Now;
+            graph.GetItemByIdB("w20070417_5_8436", true); // Это я
+            Console.WriteLine("GetItemByIdB ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            tt0 = DateTime.Now;
+            foreach (string id in ids) graph.GetItemByIdB(id, true);
+            Console.WriteLine("10 GetItemByIdB ok. Duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
         }
     }
 }
