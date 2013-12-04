@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using BigDbTest;
 
 namespace BigDBSorting
@@ -16,8 +17,10 @@ namespace BigDBSorting
             Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             bp.IndexByKey();
             Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            bp.Test3();
-            Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            Stopwatch timer=new Stopwatch(); timer.Start();
+            bp.Test5();
+            timer.Stop();
+            Console.WriteLine("duration=" + timer.Elapsed.Ticks ); tt0 = DateTime.Now;
         }
     }
 }
