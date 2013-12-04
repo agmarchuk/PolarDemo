@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using PolarDB;
 
 namespace SequenceIndex
@@ -94,6 +96,8 @@ namespace SequenceIndex
 
         public HashIndex(string dirPath)
         {
+
+            
             this.testTable = new PaCell(testTableType, dirPath + "/test_table.pac",false);
             hashes = new PaCell(testTableType, dirPath + "/test_table.pac", false);
             indexes = new PaCell(testTableType, dirPath + "/test_table.pac", false);
@@ -137,6 +141,7 @@ namespace SequenceIndex
             if (count == 0) return new KeyValuePair<long, int>(long.MinValue, 0);
             return new KeyValuePair<long, int>(Convert.ToInt64(index.Field(0).Get()), count);
         }
-
+        //[DllImport("kernel32.dll", SetLastError = true)]
+        //public static extern bool GlobalMemoryStatusEx([In, Out] MEMORYSTATUSEX buffer);
     }
 }

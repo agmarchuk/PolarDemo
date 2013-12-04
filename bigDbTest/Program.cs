@@ -45,7 +45,7 @@ namespace BigDbTest
             else
             {
                 BigPolar bp = new BigPolar(path);
-                bp.Load2(1000000);
+                bp.Load2(1000000000);
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 bp.Index();
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
