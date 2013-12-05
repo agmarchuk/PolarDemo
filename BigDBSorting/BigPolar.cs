@@ -76,9 +76,9 @@ namespace BigDbTest
             cell.Flush();
         }
 
-        internal void Test4()
+        internal void Test4(int[] samples)
         {
-            foreach (var se in new int[] {100, 100000000, 10, 4000000, 108, 90000000, 50000000, 1, int.MaxValue/16-1, 303})
+            foreach (var se in samples)
             {
                cell.Root.BinarySearchFirst(entry =>
                 {
@@ -87,15 +87,7 @@ namespace BigDbTest
                 });
             }
         }
-        internal void Test5()
-        {
-            foreach (
-                var se in new int[] {100, 100000000, 10, 4000000, 108, 90000000, 50000000, 1, int.MaxValue/16 - 1, 303})
-            {
-                //var r = cell.Root.BinarySearchFirstByKey(se);
-            }
-            
-        }
+        public long Count() { return cell.Root.Count(); }
     }
     // Это нужно для сортировки записей, см. ранее
     internal struct RecInt : IBRW, IComparable
