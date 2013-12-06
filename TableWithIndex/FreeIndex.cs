@@ -113,7 +113,7 @@ namespace TableWithIndex
                         {
                             tab_entry.offset = (long)v;
                             return (string)tab_entry.Field(second_field).Get();
-                        });
+                        }, null); // Дефолтный компаратор???
                     }
                     current_prime_value = prime_value;
                     start = ii;
