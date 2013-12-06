@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using PolarDB;
 
 namespace BigDbTest
@@ -19,6 +20,7 @@ namespace BigDbTest
         public void Index()
         {
             cell.Root.Sort<RecInt>();
+            //cell.Root.SortByKey<RecInt>(o => (int)o);
             cell.Flush();
         }
         public void Load(int numb)
@@ -87,7 +89,16 @@ namespace BigDbTest
                 });
             }
         }
+
         public long Count() { return cell.Root.Count(); }
+
+        public void TestSort(int start, int stop)
+        {
+            for (int i = start; i < stop; i++)
+            {
+                Console.WriteLine(cell.Root.Element(i).Get());
+            }
+        }
     }
     // Это нужно для сортировки записей, см. ранее
     internal struct RecInt : IBRW, IComparable
