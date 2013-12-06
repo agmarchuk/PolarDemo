@@ -1,4 +1,4 @@
-#################
+﻿#################
 ## Eclipse
 #################
 
@@ -229,3 +229,12 @@ pip-log.txt
 /Databases/graph_x.pxc
 /Databases/n4.pac
 /Databases/quads.pac
+/Databases/bigtest.pac
+/Databases/index.pxc
+
+/Databases/*.pac
+/Databases/*.pxc
+/Databases/*.pac
+/Databases/*.pxc
+/Databases/*.pac
+/Databases/look.xml

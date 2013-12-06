@@ -13,7 +13,7 @@ namespace BigDbTest
         private PaCell cell;
         public BigPolar(string path)
         {
-            this.cellPath = path + @"Databases\bigtest.pac";
+            this.cellPath = path + @"bigtest.pac";
             cell = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)), cellPath, false);
         }
         System.Random rnd = new Random();
@@ -59,17 +59,20 @@ namespace BigDbTest
                     cell.Root.AppendElement(value);
                 }
             }
+            cell.Root.AppendElement(1111111111);
+            for (int i = 0; i< 10; i++) cell.Root.AppendElement(i * 100000000 + 77777777);
             cell.Flush();
         }
-        public void Test2(string condition)
+        public PaEntry Test2(int value)
         {
+            return cell.Root.BinarySearchFirst(ent => ((int)ent.Get()).CompareTo(value));
         }
         public void Test3()
         {
             int cnt = 0;
             foreach (var x in cell.Root.Elements())
             {
-                if ((int)x.Value % 2 == 0) cnt++;
+                if ((int)x.Get() % 2 == 0) cnt++;
             }
             Console.WriteLine("Test3 result=" + cnt);
         }

@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using PolarDB;
 
@@ -51,7 +48,7 @@ namespace FirstSteps
             // Заполнение ячейки данными из объекта
             cell.Fill(testdb);
             // Проверка того, что имеется в ячейке
-            var cell_pvalue = cell.Root.Get();
+            var cell_pvalue = cell.Root.GetValue();
             Console.WriteLine(cell_pvalue.Type.Interpret(cell_pvalue.Value));
 
             //cell.Clear();
@@ -80,7 +77,7 @@ namespace FirstSteps
             // Проверка создания ячейки в режиме чтения
             PaCell cell2pac = new PaCell(seqtriplets, testpacfilename);
             long cnt2 = cell2pac.Root.Count();
-            var pval2 = cell2pac.Root.Element(100000).Get();
+            var pval2 = cell2pac.Root.Element(100000).GetValue();
             Console.WriteLine("cnt2=" + cnt2 + " Element(100000).Get()=" + pval2.Type.Interpret(pval2.Value));
             Console.WriteLine("ReadObly cell ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
@@ -88,12 +85,12 @@ namespace FirstSteps
             PxCell xcell = new PxCell(seqtriplets, path + "test.pxc", false);
             var pv = cell2pac.Root.Get();
             tt0 = DateTime.Now;
-            xcell.Fill2(pv.Value); // Плохой метод, заменю на хороший
+            xcell.Fill2(pv); // Плохой метод, заменю на хороший
             Console.WriteLine("xcell Fill ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             // Проверка наполнения
             PxEntry rxt = xcell.Root;
-            var ele = rxt.Element(400000).Get();
+            var ele = rxt.Element(400000).GetValue();
             Console.WriteLine(ele.Type.Interpret(ele.Value));
             Console.WriteLine("ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 

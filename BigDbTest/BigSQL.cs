@@ -22,16 +22,13 @@ namespace BigDbTest
         {
             connection.Open();
             var comm = connection.CreateCommand();
-            comm.CommandText = "DROP TABLE Tab1; CREATE TABLE Tab1 (randcol INT NOT NULL);";
+            comm.CommandText = "DROP TABLE Tab1;";
             string message = null;
-            try
-            {
-                comm.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                message = ex.Message;
-            }
+            try { comm.ExecuteNonQuery(); } catch (Exception ex) { message = ex.Message; }
+            comm.CommandText = "CREATE TABLE Tab1 (randcol INT NOT NULL);";
+            //comm.CommandText = "CREATE TABLE Tab1 (randcol VARCHAR(10) NOT NULL);";
+            try { comm.ExecuteNonQuery(); }
+            catch (Exception ex) { message = ex.Message; }
             connection.Close();
             if (message != null) Console.WriteLine(message);
         }
@@ -55,10 +52,13 @@ namespace BigDbTest
                 if (i % 10000 == 0) Console.WriteLine("{0}%", (double)i * 100.0 / (double)numb * (double)portion);
                 string aaa = Enumerable.Range(0, portion).Select(n => "(" + rnd.Next() + ")")
                     .Aggregate((sum, s) => sum + "," + s);
+                //string aaa = Enumerable.Range(0, portion).Select(n => "('" + rnd.Next() + "')")
+                //    .Aggregate((sum, s) => sum + "," + s);
                 runcomm.CommandText = "INSERT INTO Tab1 VALUES " + aaa + ";";
                 runcomm.ExecuteNonQuery();
             }
             runcomm.CommandText = "INSERT INTO Tab1 VALUES (777777777);"; // Последним, чтобы не натыкаться на него в самом начале
+            //runcomm.CommandText = "INSERT INTO Tab1 VALUES ('777777777');"; // Последним, чтобы не натыкаться на него в самом начале
             runcomm.ExecuteNonQuery();
             RunStop(runcomm);
         }
