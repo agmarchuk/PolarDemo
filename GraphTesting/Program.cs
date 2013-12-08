@@ -42,7 +42,7 @@ namespace GraphTesting
                             new XElement("record",
                                 new XElement("field", new XAttribute("prop", "http://fogid.net/o/name")))))),
                 null);
-            string id = "svet_100616111408_10861";
+            string id = "w20070417_5_8436";
             //var item = engine.GetItemByIdBasic(id, true);
             var item1 = gr.GetItemById(id, format);
             if (item1 != null) Console.WriteLine(item1.ToString());
