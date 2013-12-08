@@ -109,7 +109,7 @@ namespace TableWithIndex
                     long number = ii - start + (cmp == 0 && ii == llen - 1? 1 : 0);
                     if (number > 1)
                     { // нужно сделать сортировку по вторичному ключу 
-                        index_cell.Root.SortByKey<string>(start, number, (object v) =>
+                        index_cell.Root.SortSpecialByKey<string>(start, number, (object v) =>
                         {
                             tab_entry.offset = (long)v;
                             return (string)tab_entry.Field(second_field).Get();

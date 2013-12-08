@@ -13,7 +13,7 @@ namespace PolarBasedRDF
             string path = @"..\..\..\Databases\";
             Console.WriteLine("Start");
             RDFTripletsByPolarEngine graph = new RDFTripletsByPolarEngine(new DirectoryInfo(path));
-            bool toload = true;
+            bool toload = false;
             if (toload)
             {
                 var freebase = "F:\\freebase-rdf-2013-02-10-00-00.nt2";
@@ -22,6 +22,8 @@ namespace PolarBasedRDF
                 graph.Load(10000000,freebase);
                // graph.FinishFillDb();
             }
+           string result= graph.GetItem("ns:m.0102c1j");
+            Console.WriteLine(result);
 
             //var query = graph.SearchByName("марчук");
             //foreach (XElement rec in query)

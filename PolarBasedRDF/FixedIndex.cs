@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using PolarDB;
 
@@ -11,7 +9,7 @@ namespace PolarBasedRDF
     public class FixedIndex<Tkey>
     {
         // Использовать надо следующим образом:
-        private class SubjPred 
+        public class SubjPred 
         { 
             public string subj, pred;
             public int CompareTo(object sp)
@@ -19,6 +17,13 @@ namespace PolarBasedRDF
                 int cmp = subj.CompareTo(((SubjPred)sp).subj);
                 if (cmp != 0) return cmp;
                 return pred.CompareTo(((SubjPred)sp).pred);
+            }
+        }
+        public class SubjPredComparer : IComparer<SubjPred>
+        {
+            public int Compare(SubjPred x, SubjPred y)
+            {
+                return x.CompareTo(y);
             }
         }
         public static void Test()
@@ -61,7 +66,7 @@ namespace PolarBasedRDF
         {
             index_cell.Clear();
             index_cell.Fill(new object[0]);
-            foreach (var rec in table.Elements().Where(ent => (bool)ent.Field(0).Get() == false)) // загрузка всех элементов за исключением уничтоженных
+            foreach (var rec in table.Elements()) //.Where(ent => (bool)ent.Field(0).Get() == false) загрузка всех элементов за исключением уничтоженных
             {
                 long offset = rec.offset;
                 index_cell.Root.AppendElement(offset);
@@ -155,8 +160,8 @@ namespace PolarBasedRDF
                 {
                     entry.offset = (long)ent.Get();
                     return entry;
-                })
-                .Where(t_ent => !(bool)t_ent.Field(0).Get()); // остаются только неуничтоженные
+                });
+                //.Where(t_ent => !(bool)t_ent.Field(0).Get()); // остаются только неуничтоженные
             return query;
         }
         private IEnumerable<PaEntry> GetAllFrom(PaCell cell, Func<PaEntry, int> elementDepth)
