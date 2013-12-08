@@ -212,12 +212,12 @@ namespace PolarBasedRDF
             return
                 sDirectIndex.GetAllByKey(id)
                     .Select(spo => spo.Type.Interpret(spo.Get()))
-                    .Aggregate((all, one) => all + one) +
+                    .Concat(
                 oIndex.GetAllByKey(id)
                     .Select(spo => spo.Type.Interpret(spo.Get()))
-                    .Aggregate((all, one) => all + one) +
+                    .Concat(
                 sDataIndex.GetAllByKey(id)
-                    .Select(spo => spo.Type.Interpret(spo.Get()))
+                    .Select(spo => spo.Type.Interpret(spo.Get()))))
                     .Aggregate((all, one) => all + one);
         }
     }
