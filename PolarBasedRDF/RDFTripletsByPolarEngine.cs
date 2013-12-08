@@ -1,13 +1,15 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
+using System.Xml.Linq;
 using PolarBasedEngine;
 using PolarDB;
 
 namespace PolarBasedRDF
 {
-    class RDFTripletsByPolarEngine
+    internal class RDFTripletsByPolarEngine
     {
         private readonly PType ptDirects = new PTypeSequence(new PTypeRecord(
             new NamedType("s", new PType(PTypeEnumeration.sstring)),
@@ -31,8 +33,10 @@ namespace PolarBasedRDF
         public RDFTripletsByPolarEngine(DirectoryInfo path)
         {
             if (!path.Exists) path.Create();
-            directCell = new PaCell(ptDirects, directCellPath = Path.Combine(path.FullName, "rdf.direct.pac"), File.Exists(directCellPath));
-            dataCell = new PaCell(ptData, dataCellPath = Path.Combine(path.FullName, "rdf.data.pac"), File.Exists(dataCellPath));
+            directCell = new PaCell(ptDirects, directCellPath = Path.Combine(path.FullName, "rdf.direct.pac"),
+                File.Exists(directCellPath));
+            dataCell = new PaCell(ptData, dataCellPath = Path.Combine(path.FullName, "rdf.data.pac"),
+                File.Exists(dataCellPath));
             CreateIndexes();
         }
 
@@ -43,13 +47,25 @@ namespace PolarBasedRDF
             oIndex = new FixedIndex<string>("o of direct", directCell.Root, entry => (string) entry.Field(2).Get());
             spDataIndex = new FixedIndex<FixedIndex<string>.SubjPred>("s and p of data", dataCell.Root,
                 entry =>
-                    new FixedIndex<string>.SubjPred {subj = (string) entry.Field(0).Get(), pred = (string) entry.Field(1).Get()});
+                    new FixedIndex<string>.SubjPred
+                    {
+                        subj = (string) entry.Field(0).Get(),
+                        pred = (string) entry.Field(1).Get()
+                    });
             spDirectIndex = new FixedIndex<FixedIndex<string>.SubjPred>("s and p of direct", directCell.Root,
                 entry =>
-                    new FixedIndex<string>.SubjPred {subj = (string) entry.Field(0).Get(), pred = (string) entry.Field(1).Get()});
+                    new FixedIndex<string>.SubjPred
+                    {
+                        subj = (string) entry.Field(0).Get(),
+                        pred = (string) entry.Field(1).Get()
+                    });
             opIndex = new FixedIndex<FixedIndex<string>.SubjPred>("o and p of direct", directCell.Root,
                 entry =>
-                    new FixedIndex<string>.SubjPred {subj = (string) entry.Field(2).Get(), pred = (string) entry.Field(1).Get()});
+                    new FixedIndex<string>.SubjPred
+                    {
+                        subj = (string) entry.Field(2).Get(),
+                        pred = (string) entry.Field(1).Get()
+                    });
         }
 
         #region Load
@@ -213,12 +229,48 @@ namespace PolarBasedRDF
                 sDirectIndex.GetAllByKey(id)
                     .Select(spo => spo.Type.Interpret(spo.Get()))
                     .Concat(
-                oIndex.GetAllByKey(id)
-                    .Select(spo => spo.Type.Interpret(spo.Get()))
-                    .Concat(
-                sDataIndex.GetAllByKey(id)
-                    .Select(spo => spo.Type.Interpret(spo.Get()))))
+                        oIndex.GetAllByKey(id)
+                            .Select(spo => spo.Type.Interpret(spo.Get()))
+                            .Concat(
+                                sDataIndex.GetAllByKey(id)
+                                    .Select(spo => spo.Type.Interpret(spo.Get()))))
                     .Aggregate((all, one) => all + one);
         }
+
+        public XElement GetItemByIdBasic(string id, bool addinverse)
+        {
+            XElement res = new XElement("record", new XAttribute("id", id), new XAttribute("type", spDirectIndex.GetFirstByKey(new FixedIndex<string>.SubjPred{pred = "rdf:type", subj = id})),
+                sDataIndex.GetAllByKey(id).Select(entry => entry.Get()).Cast<object[]>().Select(v3 =>
+                    new XElement("field", new XAttribute("prop", v3[1]),
+                        string.IsNullOrEmpty((string) v3[3]) ? null : new XAttribute(ONames.xmllang, v3[3]),
+                        v3[2])),
+                 sDirectIndex.GetAllByKey(id).Select(entry => entry.Get()).Cast<object[]>().Select(v2 =>
+                    new XElement("direct", new XAttribute("prop", v2[1]),
+                        new XElement("record", new XAttribute("id", v2[2])))),
+                null);
+            // Обратные ссылки
+            if (addinverse)
+            {
+                var query = oIndex.GetAllByKey(id);
+                string predicate = null;
+                XElement inverse = null;
+                foreach (PaEntry en in query)
+                {
+                    var rec = (object[]) en.Get();
+                    string pred = (string) rec[1];
+                    if (pred != predicate)
+                    {
+                        res.Add(inverse);
+                        inverse = new XElement("inverse", new XAttribute("prop", pred));
+                        predicate = pred;
+                    }
+                    string idd = (string) rec[0];
+                    inverse.Add(new XElement("record", new XAttribute("id", idd)));
+                }
+                res.Add(inverse);
+            }
+            return res;
+        }
+
     }
 }

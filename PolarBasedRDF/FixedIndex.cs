@@ -9,7 +9,7 @@ namespace PolarBasedRDF
     public class FixedIndex<Tkey>
     {
         // Использовать надо следующим образом:
-        public class SubjPred 
+        public class SubjPred :IComparable
         { 
             public string subj, pred;
             public int CompareTo(object sp)
@@ -35,7 +35,7 @@ namespace PolarBasedRDF
                 new NamedType("o", new PType(PTypeEnumeration.sstring))
             ));
             // инициализация таблицы
-            PaCell directCell = new PaCell(objectTriplets, "path", false); 
+            var directCell = new PaCell(objectTriplets, "path", false); 
             // Более компактный способ заполнения ячейки
             directCell.Clear();
             directCell.Fill(new object[0]);
