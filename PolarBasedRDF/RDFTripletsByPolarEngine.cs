@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Xml;
 using PolarBasedEngine;
 using PolarDB;
@@ -27,7 +22,8 @@ namespace PolarBasedRDF
             ));
 
         private PaCell directCell, dataCell;
-        private string directCellPath, dataCellPath;
+        private readonly string directCellPath;
+        private readonly string dataCellPath;
 
         public RDFTripletsByPolarEngine(DirectoryInfo path)
         {
@@ -52,15 +48,13 @@ namespace PolarBasedRDF
             dataSerialFlow.S();
             int i = 0;
             for (int j = 0; j < filesPaths.Length && i < tripletsCountLimit; j++)
-            {
-               i+=ReadFile(filesPaths[j], (id, property, value, isObj, lang) =>
-               {
-                   if (isObj)
-                       directSerialFlow.V(new object[] {id, property, value});
-                   else dataSerialFlow.V(new object[] {id, property, value, lang ?? ""});
-               },
+                i += ReadFile(filesPaths[j], (id, property, value, isObj, lang) =>
+                {
+                    if (isObj)
+                        directSerialFlow.V(new object[] {id, property, value});
+                    else dataSerialFlow.V(new object[] {id, property, value, lang ?? ""});
+                },
                     tripletsCountLimit);
-            }
             directSerialFlow.Se();
             dataSerialFlow.Se();
             directSerialFlow.EndSerialFlow();
@@ -82,8 +76,8 @@ namespace PolarBasedRDF
             return 0;
         }
 
-        private static readonly Regex nsRegex = new Regex(@"^@prefix\s+(\w+):\s+<(.+)>\.$", RegexOptions.Compiled|RegexOptions.Singleline);
-        private static readonly Regex tripletsRegex = new Regex("^(\\S+)\\s+(\\S+)\\s+(\"(.+)\"(@(\\S*))?|(.+))\\.$", RegexOptions.Compiled|RegexOptions.Singleline);
+        private static readonly Regex NsRegex = new Regex(@"^@prefix\s+(\w+):\s+<(.+)>\.$", RegexOptions.Compiled|RegexOptions.Singleline);
+        private static readonly Regex TripletsRegex = new Regex("^(\\S+)\\s+(\\S+)\\s+(\"(.+)\"(@(\\S*))?|(.+))\\.$", RegexOptions.Compiled|RegexOptions.Singleline);
 
        /// <summary>
        /// TODO ns
@@ -96,7 +90,7 @@ namespace PolarBasedRDF
             using (var reader = new StreamReader(filePath))
             {
                 Match nsReg;
-                while ((nsReg = nsRegex.Match(reader.ReadLine())).Success)
+                while ((nsReg = NsRegex.Match(reader.ReadLine())).Success)
                 {
                     // nsReg.Groups[1]
                     //nsReg.Groups[2]
@@ -115,7 +109,7 @@ namespace PolarBasedRDF
         private static bool String2Quard(QuadAction quadAction, string readLine)
         {
             Match lineMatch;
-            if (!(lineMatch = tripletsRegex.Match(readLine)).Success) return false;
+            if (!(lineMatch = TripletsRegex.Match(readLine)).Success) return false;
             var dMatch = lineMatch.Groups[4];
             if (dMatch.Success)
                 quadAction(lineMatch.Groups[1].Value, lineMatch.Groups[2].Value, dMatch.Value, false,
@@ -127,9 +121,9 @@ namespace PolarBasedRDF
 
         #region Read XML
 
-        public static string langAttributeName = "xml:lang",
-            rdfAbout = "rdf:about",
-            rdfResource = "rdf:resource",
+        public static string LangAttributeName = "xml:lang",
+            RDFAbout = "rdf:about",
+            RDFResource = "rdf:resource",
             NS = "http://fogid.net/o/";
 
 
@@ -141,23 +135,23 @@ namespace PolarBasedRDF
         /// <param name="tripletsCountLimit"></param>
         private static int ReadXML2Quad(string url, QuadAction quadAction, int tripletsCountLimit)
         {
-            string resource;
-            bool isObj;
             string id = string.Empty;
             int i = 0;
             using (var xml = new XmlTextReader(url))
                 while (i < tripletsCountLimit && xml.Read())
                     if (xml.IsStartElement())
-                        if (xml.Depth == 1 && (id = xml[rdfAbout]) != null)
+                        if (xml.Depth == 1 && (id = xml[RDFAbout]) != null)
                         {
                             quadAction(id, ONames.rdftypestring, NS + xml.Name);
                             i++;
                         }
                         else if (xml.Depth == 2 && id != null)
                         {
+                            string resource = xml[RDFResource];
+                            bool isObj = (resource) != null;
                             quadAction(id, NS + xml.Name,
-                                isObj: isObj = (resource = xml[rdfResource]) != null,
-                                lang: isObj ? null : xml[langAttributeName],
+                                isObj: isObj,
+                                lang: isObj ? null : xml[LangAttributeName],
                                 value: isObj ? resource : xml.ReadString());
                             i++;
                         }
