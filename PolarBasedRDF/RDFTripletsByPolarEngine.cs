@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using PolarBasedEngine;
@@ -24,24 +25,52 @@ namespace PolarBasedRDF
         private PaCell directCell, dataCell;
         private readonly string directCellPath;
         private readonly string dataCellPath;
+        private FixedIndex<string> sDirectIndex, oIndex, sDataIndex;
+        private FixedIndex<FixedIndex<string>.SubjPred> spDirectIndex, opIndex, spDataIndex;
 
         public RDFTripletsByPolarEngine(DirectoryInfo path)
         {
             if (!path.Exists) path.Create();
             directCell = new PaCell(ptDirects, directCellPath = Path.Combine(path.FullName, "rdf.direct.pac"), File.Exists(directCellPath));
             dataCell = new PaCell(ptData, dataCellPath = Path.Combine(path.FullName, "rdf.data.pac"), File.Exists(dataCellPath));
+            CreateIndexes();
         }
+
+        private void CreateIndexes()
+        {
+            sDataIndex = new FixedIndex<string>("s of data", dataCell.Root, entry => (string) entry.Field(0).Get());
+            sDirectIndex = new FixedIndex<string>("s of direct", directCell.Root, entry => (string) entry.Field(0).Get());
+            oIndex = new FixedIndex<string>("o of direct", directCell.Root, entry => (string) entry.Field(2).Get());
+            spDataIndex = new FixedIndex<FixedIndex<string>.SubjPred>("s and p of data", dataCell.Root,
+                entry =>
+                    new FixedIndex<string>.SubjPred {subj = (string) entry.Field(0).Get(), pred = (string) entry.Field(1).Get()});
+            spDirectIndex = new FixedIndex<FixedIndex<string>.SubjPred>("s and p of direct", directCell.Root,
+                entry =>
+                    new FixedIndex<string>.SubjPred {subj = (string) entry.Field(0).Get(), pred = (string) entry.Field(1).Get()});
+            opIndex = new FixedIndex<FixedIndex<string>.SubjPred>("o and p of direct", directCell.Root,
+                entry =>
+                    new FixedIndex<string>.SubjPred {subj = (string) entry.Field(2).Get(), pred = (string) entry.Field(1).Get()});
+        }
+
+        #region Load
+
         public void Load(int tripletsCountLimit, params string[] filesPaths)
         {
             directCell.Close();
             dataCell.Close();
+            sDataIndex.Close();
+            sDirectIndex.Close();
+            oIndex.Close();
+            spDataIndex.Close();
+            spDirectIndex.Close();
+            opIndex.Close();
             File.Delete(dataCellPath);
             File.Delete(directCellPath);
             directCell = new PaCell(ptDirects, directCellPath, false);
-            dataCell = new PaCell(ptData, dataCellPath,false);
+            dataCell = new PaCell(ptData, dataCellPath, false);
 
-            var directSerialFlow = (ISerialFlow)directCell;
-            var dataSerialFlow = (ISerialFlow)dataCell;
+            var directSerialFlow = (ISerialFlow) directCell;
+            var dataSerialFlow = (ISerialFlow) dataCell;
             directSerialFlow.StartSerialFlow();
             dataSerialFlow.StartSerialFlow();
             directSerialFlow.S();
@@ -59,10 +88,23 @@ namespace PolarBasedRDF
             dataSerialFlow.Se();
             directSerialFlow.EndSerialFlow();
             dataSerialFlow.EndSerialFlow();
+            CreateIndexes();
+            LoadIndexes();
         }
-        
+
+        private void LoadIndexes()
+        {
+            sDataIndex.Load(null);
+            sDirectIndex.Load(null);
+            oIndex.Load(null);
+            var subjPredComparer = new FixedIndex<string>.SubjPredComparer();
+            spDataIndex.Load(subjPredComparer);
+            spDirectIndex.Load(subjPredComparer);
+            opIndex.Load(subjPredComparer);
+        }
+
         internal delegate void QuadAction(string id, string property,
-             string value, bool isObj = true, string lang = null);
+            string value, bool isObj = true, string lang = null);
 
         internal static int ReadFile(string filePath, QuadAction quadAction, int tripletsCountLimit)
         {
@@ -70,22 +112,25 @@ namespace PolarBasedRDF
             if (extension == null || !File.Exists(filePath)) return 0;
             extension = extension.ToLower();
             if (extension == ".xml")
-               return ReadXML2Quad(filePath, quadAction, tripletsCountLimit);
+                return ReadXML2Quad(filePath, quadAction, tripletsCountLimit);
             else if (extension == ".nt2")
-               return ReadTSV(filePath, quadAction, tripletsCountLimit);
+                return ReadTSV(filePath, quadAction, tripletsCountLimit);
             return 0;
         }
 
-        private static readonly Regex NsRegex = new Regex(@"^@prefix\s+(\w+):\s+<(.+)>\.$", RegexOptions.Compiled|RegexOptions.Singleline);
-        private static readonly Regex TripletsRegex = new Regex("^(\\S+)\\s+(\\S+)\\s+(\"(.+)\"(@(\\S*))?|(.+))\\.$", RegexOptions.Compiled|RegexOptions.Singleline);
+        private static readonly Regex NsRegex = new Regex(@"^@prefix\s+(\w+):\s+<(.+)>\.$",
+            RegexOptions.Compiled | RegexOptions.Singleline);
 
-       /// <summary>
-       /// TODO ns
-       /// </summary>
-       /// <param name="filePath"></param>
-       /// <param name="quadAction"></param>
-       /// <param name="tripletsCountLimit"></param>
-        static int ReadTSV(string filePath, QuadAction quadAction, int tripletsCountLimit)
+        private static readonly Regex TripletsRegex = new Regex("^(\\S+)\\s+(\\S+)\\s+(\"(.+)\"(@(\\S*))?|(.+))\\.$",
+            RegexOptions.Compiled | RegexOptions.Singleline);
+
+        /// <summary>
+        /// TODO ns
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="quadAction"></param>
+        /// <param name="tripletsCountLimit"></param>
+        private static int ReadTSV(string filePath, QuadAction quadAction, int tripletsCountLimit)
         {
             using (var reader = new StreamReader(filePath))
             {
@@ -95,14 +140,14 @@ namespace PolarBasedRDF
                     // nsReg.Groups[1]
                     //nsReg.Groups[2]
                 }
-                int tryCount=0;
+                int tryCount = 0;
                 const int tryLinesCountMax = 10;
-                string readLine=string.Empty;
+                string readLine = string.Empty;
                 int i;
                 for (i = 0; i < tripletsCountLimit && !reader.EndOfStream; i++, readLine = string.Empty, tryCount = 0)
                     while (tryCount < tryLinesCountMax && !String2Quard(quadAction, readLine += reader.ReadLine()))
                         tryCount++;
-                return i+1;
+                return i + 1;
             }
         }
 
@@ -160,5 +205,20 @@ namespace PolarBasedRDF
 
         #endregion
 
+        #endregion
+
+        public string GetItem(string id)
+        {
+            return
+                sDirectIndex.GetAllByKey(id)
+                    .Select(spo => spo.Type.Interpret(spo.Get()))
+                    .Aggregate((all, one) => all + one) +
+                oIndex.GetAllByKey(id)
+                    .Select(spo => spo.Type.Interpret(spo.Get()))
+                    .Aggregate((all, one) => all + one) +
+                sDataIndex.GetAllByKey(id)
+                    .Select(spo => spo.Type.Interpret(spo.Get()))
+                    .Aggregate((all, one) => all + one);
+        }
     }
 }

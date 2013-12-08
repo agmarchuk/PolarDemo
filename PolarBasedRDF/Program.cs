@@ -22,6 +22,8 @@ namespace PolarBasedRDF
                 graph.Load(10000000,freebase);
                // graph.FinishFillDb();
             }
+           string result= graph.GetItem("ns:m.0102c1j");
+            Console.WriteLine(result);
 
             //var query = graph.SearchByName("марчук");
             //foreach (XElement rec in query)
