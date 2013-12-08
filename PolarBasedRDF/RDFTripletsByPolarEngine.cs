@@ -239,7 +239,7 @@ namespace PolarBasedRDF
 
         public XElement GetItemByIdBasic(string id, bool addinverse)
         {
-            XElement res = new XElement("record", new XAttribute("id", id), new XAttribute("type", spDirectIndex.GetFirstByKey(new FixedIndex<string>.SubjPred{pred = "rdf:type", subj = id})),
+            XElement res = new XElement("record", new XAttribute("id", id), new XAttribute("type", spDirectIndex.GetFirstByKey(new FixedIndex<string>.SubjPred{pred = "rdf:type", subj = id}).Get()),
                 sDataIndex.GetAllByKey(id).Select(entry => entry.Get()).Cast<object[]>().Select(v3 =>
                     new XElement("field", new XAttribute("prop", v3[1]),
                         string.IsNullOrEmpty((string) v3[3]) ? null : new XAttribute(ONames.xmllang, v3[3]),
