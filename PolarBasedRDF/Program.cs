@@ -6,14 +6,14 @@ using PolarBasedEngine;
 
 namespace PolarBasedRDF
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             string path = @"..\..\..\Databases\";
             Console.WriteLine("Start");
             RDFTripletsByPolarEngine graph = new RDFTripletsByPolarEngine(new DirectoryInfo(path));
-            bool toload = false;
+            bool toload = true;
             if (toload)
             {
                 // var freebase = "F:\\freebase-rdf-2013-02-10-00-00.nt2";
@@ -23,7 +23,7 @@ namespace PolarBasedRDF
             //string result= graph.GetItem("ns:m.0102c1j");
             //Console.WriteLine(result);
 
-   System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
+            System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
             string[] ids = new[]
             {
                 "svet_100616111408_10844",

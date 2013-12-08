@@ -97,21 +97,20 @@ namespace PolarBasedRDF
         {
             PaEntry entry = table.Element(0);
             PaEntry entry2 = table.Element(0); // сделан, потому что может entry во внешнем и внутренниц циклах проинтерферируют?
-            var candidate = i_cell.Root.BinarySearchAll(ent =>
+            return i_cell.Root.BinarySearchAll(ent =>
             {
-                long off = (long)ent.Get();
-                entry.offset = off;
+                long off1 = (long)ent.Get();
+                entry.offset = off1;
                 return ((IComparable)keyProducer(entry)).CompareTo(key);
             }) // здесь мы имеем множество найденных входов в ячейку i_cell
-            .Select(ent =>
-            {
-                entry2.offset = (long)ent.Get(); // вход в запись таблицы
-                return entry2;
-            }) // множество входов, удовлетворяющих условиям
-            .Where(t_ent => !(bool)t_ent.Field(0).Get()) // остаются только неуничтоженные
-            .DefaultIfEmpty(PaEntry.Empty) // а вдруг не останется ни одного, тогда - пустышка
-            .First(); // обязательно есть хотя бы пустышка
-            return candidate;
+                .Select(ent =>
+                {
+                    entry2.offset = (long)ent.Get(); // вход в запись таблицы
+                    return entry2;
+                }) // множество входов, удовлетворяющих условиям
+                //  .Where(t_ent => !(bool)t_ent.Field(0).Get()) // остаются только неуничтоженные
+                .DefaultIfEmpty(PaEntry.Empty) // а вдруг не останется ни одного, тогда - пустышка
+                .First();
         }
         private PaEntry GetFirstFrom(PaCell i_cell, Func<PaEntry, int> elementDepth)
         {
