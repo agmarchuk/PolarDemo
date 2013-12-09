@@ -6,9 +6,9 @@ using PolarBasedEngine;
 
 namespace PolarBasedRDF
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             string path = @"..\..\..\Databases\";
             Console.WriteLine("Start");
@@ -23,7 +23,7 @@ namespace PolarBasedRDF
             //string result= graph.GetItem("ns:m.0102c1j");
             //Console.WriteLine(result);
 
-   System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
+            System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
             string[] ids = new[]
             {
                 "svet_100616111408_10844",
