@@ -13,7 +13,7 @@ namespace PolarBasedRDF
             string path = @"..\..\..\Databases\";
             Console.WriteLine("Start");
             RDFTripletsByPolarEngine graph = new RDFTripletsByPolarEngine(new DirectoryInfo(path));
-            bool toload = false;
+            bool toload = true;
             if (toload)
             {
                 // var freebase = "F:\\freebase-rdf-2013-02-10-00-00.nt2";
