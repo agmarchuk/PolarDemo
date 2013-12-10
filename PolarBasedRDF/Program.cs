@@ -1,8 +1,8 @@
 ﻿
 using System;
 using System.IO;
-using System.Xml.Linq;
-using PolarBasedEngine;
+using System.Linq;
+using PolarDB;
 
 namespace PolarBasedRDF
 {
@@ -11,6 +11,21 @@ namespace PolarBasedRDF
         private static void Main(string[] args)
         {
             string path = @"..\..\..\Databases\";
+
+            if (File.Exists(path + "test")) File.Delete(path + "test");
+            PaCell test=new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)),  path+"test",false);
+            test.Fill(new object[0]);
+            test.Close();
+            Random r=new Random();
+            for (int i = 0; i < 10; i++)
+            {
+                test.Root.AppendElement((object) r.Next(10));
+                Console.WriteLine(test.Root.Element(i).Get());
+            }
+            test.Root.SortByKey(o => (int)o);
+            for (int i = 0; i < 10; i++)
+                Console.WriteLine(test.Root.Element(i).Get());
+            return;
             Console.WriteLine("Start");
             RDFTripletsByPolarEngine graph = new RDFTripletsByPolarEngine(new DirectoryInfo(path));
             bool toload = true;

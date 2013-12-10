@@ -18,19 +18,16 @@ namespace Sorting
         {
             string path = @"..\..\..\Databases\";
 
-            // Совсем простой тест
-            PaCell cell_simple = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)), path + "simple.pac", false);
-            object[] arr = { 99, 98, 97, 1, 2, 3, 9, 8, 7, 6, 5, 4, 0 };
-            cell_simple.Clear();
-            cell_simple.Fill(arr);
-            cell_simple.Flush();
-
-            cell_simple.Root.SortByKey<int>(i_obj => (int)i_obj);
-
-            Console.WriteLine("count=" + cell_simple.Root.Count());
-            Console.WriteLine(cell_simple.Type.Interpret(cell_simple.Root.Get()));
-            cell_simple.Close();
-            return;
+            //// Тестирование сортировки по ключу со слиянием
+            //PaCell cell_simple = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)), path + "cimple.pac",  false);
+            //cell_simple.Clear();
+            //object[] arr = { 97, 1, 3, 2, 4, 9, 8, 7, 6, 0, 5, 99, 98 };
+            //cell_simple.Fill(arr);
+            //cell_simple.Flush();
+            //Console.WriteLine(cell_simple.Type.Interpret(cell_simple.Root.Get()));
+            //cell_simple.Root.SortByKey<int>(i_key => (int)i_key);
+            //Console.WriteLine(cell_simple.Type.Interpret(cell_simple.Root.Get()));
+            //return;
 
             PType tp_seq = new PTypeSequence(new PTypeRecord(
                 new NamedType("name", new PType(PTypeEnumeration.sstring)),
