@@ -48,6 +48,7 @@ namespace BigDbTest
             cell.Clear();
             int portion = 200;
             cell.Fill(new object[0]);
+            cell.Root.AppendElement(1234567890);
             for (int i = 0; i < numb / portion; i++)
             {
                 if (i % 1000 == 0) Console.WriteLine("{0}%", (double)i * 100.0 / (double)numb * (double)portion);
