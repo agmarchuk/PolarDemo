@@ -45,16 +45,18 @@ namespace BigDbTest
         // Проверка метода AppendElement
         public void Load2(int numb)
         {
+            PaEntry.bufferBytes = 400000000;
+            Random rnd = new Random();
             cell.Clear();
             int portion = 200;
             cell.Fill(new object[0]);
             cell.Root.AppendElement(1234567890);
             for (int i = 0; i < numb / portion; i++)
             {
-                if (i % 1000 == 0) Console.WriteLine("{0}%", (double)i * 100.0 / (double)numb * (double)portion);
+                if (i % 10000 == 0) Console.WriteLine("{0}%", (double)i * 100.0 / (double)numb * (double)portion);
                 for (int j = 0; j < portion; j++)
                 {
-                    int value = i * portion + j; // rnd.Next();
+                    int value = rnd.Next(); //i * portion + j; // rnd.Next();
                     cell.Root.AppendElement(value);
                 }
             }
