@@ -1,0 +1,98 @@
+start freebase 3 000 000 triplets
+load db 17 722 2150
+load indexes 188 840 2529
+<record id="ns:m.0102c1j">
+  <field prop="key:authority.musicbrainz.name">TRACK3391038</field>
+  <field prop="rdfs:label" xml:lang="en">In the City</field>
+  <field prop="key:authority.musicbrainz">4e83b197-afbd-4bb2-9157-bc0f067a2295</field>
+  <field prop="ns:type.object.key">/authority/musicbrainz/name/TRACK3391038</field>
+  <field prop="ns:type.object.name" xml:lang="en">In the City</field>
+  <field prop="ns:type.object.key">/authority/musicbrainz/4e83b197-afbd-4bb2-9157-bc0f067a2295</field>
+  <direct prop="ns:type.object.type">
+    <record id="ns:common.topic" />
+  </direct>
+  <direct prop="rdf:type">
+    <record id="ns:music.recording" />
+  </direct>
+  <direct prop="ns:common.topic.topic_equivalent_webpage">
+    <record id="&lt;http://mb-redir.freebaseapps.com/redir/4e83b197-afbd-4bb2-9157-bc0f067a2295&gt;" />
+  </direct>
+  <direct prop="ns:music.recording.length">
+    <record id="304.933" />
+  </direct>
+  <direct prop="ns:type.object.type">
+    <record id="ns:music.recording" />
+  </direct>
+  <direct prop="ns:music.recording.canonical_version">
+    <record id="ns:m.0dxfrs0" />
+  </direct>
+  <direct prop="ns:music.recording.tracks">
+    <record id="ns:m.0k_6smg" />
+  </direct>
+  <direct prop="ns:music.recording.releases">
+    <record id="ns:m.0327p5w" />
+  </direct>
+  <direct prop="rdf:type">
+    <record id="ns:common.topic" />
+  </direct>
+  <direct prop="ns:music.recording.artist">
+    <record id="ns:m.01lcr2t" />
+  </direct>
+</record>
+47 0360
+many ids get time = 57 9960
+
+start 30 000 000
+load db 286 934 5503
+load indexes 1920 343 9017
+item.ToString() 42 8033
+many ids get time = 40 8474
+
+start 3 000 000
+load db 351207098
+bufferBYtes=1000load indexes 170 929 2794
+bufferBYtes=400 000load indexes 168 042 3802
+bufferBYtes=1000 000 load indexes 163 309 5279
+bufferBYtes=400 000 000load indexes 167 707 1596
+
+start 30000000
+load db 244 812 8607
+bufferBYtes=1000load indexes 2750 562 0931
+bufferBYtes=400000load indexes 2078 465 7653
+bufferBYtes=1000000load indexes 2159 185 3308
+bufferBYtes=400000000load indexes 2198 515 5597
+
+start 3000 000 sorteddictionary + writelog each merge;
+load db 572960859
+bufferBYtes= maxload indexes 228 468 3744
+bufferBYtes=1000load indexes 961 972 5958
+bufferBYtes=400000load indexes 457 793 5735
+bufferBYtes=1000000load indexes 388 693 1144
+bufferBYtes=400000000load indexes 231 316 4088
+
+start 3000 000  sorteddictionary 
+load db 565305588
+bufferBYtes= maxload indexes 2188824403
+bufferBYtes=1000load indexes 9267294668
+bufferBYtes=400000load indexes 4372546632
+bufferBYtes=1000000load indexes 3700807559
+bufferBYtes=400000000load indexes 2253237988
+
+start 3 000 000
+load db 46 439 2748
+bufferBYtes=max load indexes 185 594 9346
+bufferBYtes=1000load indexes 1163 853 9127
+bufferBYtes=400000load indexes 571 376 2653
+bufferBYtes=1000000load indexes 453 391 9410
+bufferBYtes=400000000load indexes 179 577 6364
+
+
+start 3000000
+load db 580953042
+bufferBYtes= maxload indexes 1842272233
+start 3000000
+load db 442422637
+bufferBYtes= maxload indexes 2074086008
+start 3000000
+load db 509484987
+bufferBYtes= maxload indexes 1802371329
