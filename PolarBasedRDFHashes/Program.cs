@@ -90,7 +90,7 @@ namespace PolarBasedRDF
                 //Console.WriteLine(item.ToString());
                 //Console.WriteLine(watch.ElapsedTicks);
                 using (StreamWriter log = new StreamWriter("../../log.txt", true))
-                    log.WriteLine(item.ToString() + watch.Elapsed.Ticks);
+                    log.WriteLine("item.ToString()" + watch.Elapsed.Ticks);
 
                 watch.Restart();
                 foreach (string id in ids)

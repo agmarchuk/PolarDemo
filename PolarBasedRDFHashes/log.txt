@@ -40,3 +40,31 @@ bufferBYtes= max load indexes 85 277 9038
   </direct>
 </record>64 0459
 many ids get time = 46 3255
+start 3000000
+load db 199208723
+bufferBYtes= max load indexes 855877966
+item.ToString()586673
+many ids get time = 393688
+start 3000000
+load db 245670895
+bufferBYtes= max load indexes 79 074 9579
+item.ToString()562562
+many ids get time = 426767
+
+
+
+start 3000000
+load db 239467081
+bufferBYtes= max load indexes 861510920
+item.ToString()682026
+many ids get time = 443050
+start 3000000
+load db 303362675
+bufferBYtes= max load indexes 101 876 6170
+item.ToString()834405
+many ids get time = 521605
+start 3000000
+load db 236949614
+bufferBYtes= max load indexes 87 0692144
+item.ToString()667552
+many ids get time = 445525

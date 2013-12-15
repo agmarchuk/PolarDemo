@@ -20,20 +20,16 @@ namespace PolarBasedRDF
         private readonly PType ptData = new PTypeSequence(new PTypeRecord(
             new NamedType("s", new PType(PTypeEnumeration.integer)),
             new NamedType("p", new PType(PTypeEnumeration.integer)),
-            new NamedType("d", new PType(PTypeEnumeration.sstring)),
+            new NamedType("d", new PType(PTypeEnumeration.integer)),
             new NamedType("l", new PType(PTypeEnumeration.sstring))
             ));
-        private  readonly  PType ptIds=new PTypeSequence(new PTypeRecord(
+        private  readonly  PType ptHashValue=new PTypeSequence(new PTypeRecord(
             new NamedType("hash of id", new PType(PTypeEnumeration.integer)),
             new NamedType("id", new PType(PTypeEnumeration.sstring))));
 
-        private readonly PType ptPred = new PTypeSequence(new PTypeRecord(
-            new NamedType("hash of predicate", new PType(PTypeEnumeration.integer)),
-            new NamedType("predicate", new PType(PTypeEnumeration.sstring))));
-
-        private PaCell directCell, dataCell, predDataCell, predObjell, idCell;
-        private readonly string directCellPath, dataCellPath, predDataCellPath, predObjellPath, idCellPath;
-        private FixedIndex<int> sDirectIndex, oIndex, sDataIndex, predicateDataIndex, predicateObjIndex, idIndex;
+        private PaCell directCell, dataCell, predDataCell, predObjell, idCell, textCell;
+        private readonly string directCellPath, dataCellPath, predDataCellPath, predObjellPath, idCellPath, textCellPath;
+        private FixedIndex<int> sDirectIndex, oIndex, sDataIndex, predicateDataIndex, predicateObjIndex, idIndex, textIndex;
         private  FixedIndex<SubjPred<int>> spDirectIndex, opIndex, spDataIndex;
 
         public RDFTripletsByPolarEngine(DirectoryInfo path)
@@ -43,12 +39,13 @@ namespace PolarBasedRDF
                 File.Exists(directCellPath));
             dataCell = new PaCell(ptData, dataCellPath = Path.Combine(path.FullName, "rdf.hashed.data.pac"),
                 File.Exists(dataCellPath));
-            predDataCell = new PaCell(ptPred, predDataCellPath = Path.Combine(path.FullName, "data predicates.pac"),
+            predDataCell = new PaCell(ptHashValue, predDataCellPath = Path.Combine(path.FullName, "data predicates.pac"),
                 File.Exists(predDataCellPath));
-            predObjell = new PaCell(ptPred, predObjellPath = Path.Combine(path.FullName, "object  predicates.pac"),
+            predObjell = new PaCell(ptHashValue, predObjellPath = Path.Combine(path.FullName, "object  predicates.pac"),
                File.Exists(predObjellPath));
-            idCell = new PaCell(ptIds, idCellPath = Path.Combine(path.FullName, "ids.pac"),
+            idCell = new PaCell(ptHashValue, idCellPath = Path.Combine(path.FullName, "ids.pac"),
                File.Exists(idCellPath));
+            textCell = new PaCell(ptHashValue, textCellPath = Path.Combine(path.FullName, "texts.pac"), File.Exists(textCellPath));
             if (dataCell.IsEmpty || directCell.IsEmpty) return;
             CreateIndexes();
         }
@@ -62,6 +59,7 @@ namespace PolarBasedRDF
             predicateObjIndex = new FixedIndex<int>("predicate of object", predObjell.Root, entry => (int)entry.Field(0).Get());
             predicateDataIndex = new FixedIndex<int>("predicate of data", predDataCell.Root, entry => (int)entry.Field(0).Get());
             idIndex = new FixedIndex<int>("id", idCell.Root, entry => (int)entry.Field(0).Get());
+            textIndex = new FixedIndex<int>("text", textCell.Root, entry => (int)entry.Field(0).Get());
 
             spDataIndex = new FixedIndex<SubjPred<int>> ("s and p of data", dataCell.Root,
                 entry =>
@@ -83,35 +81,42 @@ namespace PolarBasedRDF
             predDataCell.Close();
             predObjell.Close();
             idCell.Close();
+            textCell.Close();
 
             File.Delete(dataCellPath);
             File.Delete(directCellPath);
             File.Delete(predDataCellPath);
             File.Delete(predObjellPath);
             File.Delete(idCellPath);
+            File.Delete(textCellPath);
 
             directCell = new PaCell(ptDirects, directCellPath, false);
             dataCell = new PaCell(ptData, dataCellPath, false);
-            predDataCell = new PaCell(ptPred, predDataCellPath, false);
-            predObjell = new PaCell(ptPred, predObjellPath, false);
-            idCell = new PaCell(ptIds, idCellPath, false);
+            predDataCell = new PaCell(ptHashValue, predDataCellPath, false);
+            predObjell = new PaCell(ptHashValue, predObjellPath, false);
+            idCell = new PaCell(ptHashValue, idCellPath, false);
+            textCell = new PaCell(ptHashValue, textCellPath, false);
 
             var directSerialFlow = (ISerialFlow) directCell;
             var dataSerialFlow = (ISerialFlow) dataCell;
             var idSerialFlow = (ISerialFlow)idCell;
             var predObjSerialFlow = (ISerialFlow)predObjell;
             var predDataSerialFlow = (ISerialFlow)predDataCell;
+            var textSerialFlow = (ISerialFlow)textCell;
             directSerialFlow.StartSerialFlow();
             dataSerialFlow.StartSerialFlow();
             idSerialFlow.StartSerialFlow();
             predObjSerialFlow.StartSerialFlow();
             predDataSerialFlow.StartSerialFlow();
+            textSerialFlow.StartSerialFlow();
             directSerialFlow.S();
             dataSerialFlow.S();
             idSerialFlow.S();
+            textSerialFlow.S();
             predObjSerialFlow.S();
             predDataSerialFlow.S();
             var existsId = new ArrayIntMax<bool>();
+            var existsText = new ArrayIntMax<bool>();
             var existsPredicate = new ArrayIntMax<bool>();
             int i = 0;
             for (int j = 0; j < filesPaths.Length && i < tripletsCountLimit; j++)
@@ -146,18 +151,26 @@ namespace PolarBasedRDF
                             predDataSerialFlow.V(new object[] {hProperty, property});
                             existsPredicate[hProperty] = true;
                         }
-                        dataSerialFlow.V(new object[] {hashId, hProperty, value, lang ?? ""});
+                        int hashText = value.GetHashCode();
+                        if (!existsText[hashText])
+                        {
+                            textSerialFlow.V(new object[] { hashText, value });
+                            existsText[hashText] = true;
+                        }
+                        dataSerialFlow.V(new object[] { hashId, hProperty, hashText, lang ?? "" });
                     }
                 },
                     tripletsCountLimit);
             directSerialFlow.Se();
             dataSerialFlow.Se();
             idSerialFlow.Se();
+            textSerialFlow.Se();
             predObjSerialFlow.Se();
             predDataSerialFlow.Se();
             directSerialFlow.EndSerialFlow();
             dataSerialFlow.EndSerialFlow();
             idSerialFlow.EndSerialFlow();
+            textSerialFlow.EndSerialFlow();
             predObjSerialFlow.EndSerialFlow();
             predDataSerialFlow.EndSerialFlow();
         }
@@ -175,6 +188,7 @@ namespace PolarBasedRDF
                 predicateDataIndex.Close();
                 predicateObjIndex.Close();
                 idIndex.Close();
+                textIndex.Close();
             }
             CreateIndexes();
             sDataIndex.Load(null);
@@ -188,6 +202,7 @@ namespace PolarBasedRDF
             predicateDataIndex.Load(null);
             predicateObjIndex.Load(null);
             idIndex.Load(null);
+            textIndex.Load(null);
         }
 
         internal delegate void QuadAction(string id, string property,
@@ -316,7 +331,7 @@ namespace PolarBasedRDF
                 sDataIndex.GetAllByKey(hid).Select(entry => entry.Get()).Cast<object[]>().Select(v3 =>
                     new XElement("field", new XAttribute("prop", predicateDataIndex.GetFirstByKey((int)v3[1]).Field(1).Get()),
                         string.IsNullOrEmpty((string) v3[3]) ? null : new XAttribute(ONames.xmllang, v3[3]),
-                        v3[2])),
+                       textIndex.GetFirstByKey((int)v3[2]).Field(1).Get())),
                  sDirectIndex.GetAllByKey(hid).Select(entry => entry.Get()).Cast<object[]>().Select(v2 =>
                     new XElement("direct", new XAttribute("prop", predicateObjIndex.GetFirstByKey((int)v2[1]).Field(1).Get()),
                         new XElement("record", new XAttribute("id", idIndex.GetFirstByKey((int)v2[2]).Field(1).Get())))),

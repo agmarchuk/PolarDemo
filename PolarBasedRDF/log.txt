@@ -86,13 +86,3 @@ bufferBYtes=400000load indexes 571 376 2653
 bufferBYtes=1000000load indexes 453 391 9410
 bufferBYtes=400000000load indexes 179 577 6364
 
-
-start 3000000
-load db 580953042
-bufferBYtes= maxload indexes 1842272233
-start 3000000
-load db 442422637
-bufferBYtes= maxload indexes 2074086008
-start 3000000
-load db 509484987
-bufferBYtes= maxload indexes 1802371329
