@@ -18,11 +18,15 @@ namespace NameTable
             Console.WriteLine("Start");
             DateTime tt0 = DateTime.Now;
 
+            sic.MakeIndexed();
+            Console.WriteLine("Indexes ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            return;
+
             List<string> ids = null;
-            for (int j = 0; j < 10; j++)
+            for (int j = 0; j < 25; j++)
             {
                 ids = new List<string>();
-                for (int i = 0; i < 1000000; i++)
+                for (int i = 0; i < 2000000; i++)
                 {
                     ids.Add(Guid.NewGuid().ToString());
                 }
