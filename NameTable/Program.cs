@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using PolarDB;
@@ -10,31 +11,46 @@ namespace NameTable
 {
     public class Program
     {
+        private static readonly Regex TripletsRegex = new Regex("^(\\S+)\\s+(\\S+)\\s+(\"(.+)\"(@(\\S*))?|(.+))\\.$",
+            RegexOptions.Compiled | RegexOptions.Singleline);
         public static void Main(string[] args)
         {
             string path = @"..\..\..\Databases\";
+            System.IO.StreamReader sr = new System.IO.StreamReader(path + "freebase.nt2");
+
             StringIntCoding sic = new StringIntCoding(path);
 
             Console.WriteLine("Start");
             DateTime tt0 = DateTime.Now;
 
-            sic.MakeIndexed();
-            Console.WriteLine("Indexes ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            return;
+            string line = "";
+
 
             List<string> ids = null;
-            for (int j = 0; j < 25; j++)
+            for (int j = 0; j < 200; j++)
             {
                 ids = new List<string>();
-                for (int i = 0; i < 2000000; i++)
+                for (int i = 0; i < 1000000; i++)
                 {
-                    ids.Add(Guid.NewGuid().ToString());
+                    line = sr.ReadLine();
+                    if (line == null) break;
+                    if (line.Length == 0) continue;
+                    if (line[0] == '@') continue;
+                    string[] parts = line.Split('\t');
+                    if (parts.Length != 3) continue;
+                    ids.Add(parts[0]);
+                    //ids.Add(parts[1]);
+                    if (parts[2][0] != '\"' && parts[2][0] != '<') 
+                        ids.Add(parts[2].Substring(0, parts[2].Length - 1));
+                    
+                    //ids.Add(Guid.NewGuid().ToString());
                 }
                 var dic = sic.InsertPortion(ids);
                 Console.WriteLine("InsertPortion ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                if (line == null) break;
             }
             sic.MakeIndexed();
-            Console.WriteLine("Indexes ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            Console.WriteLine("Indexes ok. Count=" + sic.Count() + " duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             //Console.WriteLine("dic count=" + dic.Count());
 
