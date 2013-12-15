@@ -19,7 +19,7 @@ namespace NameTable
             DateTime tt0 = DateTime.Now;
 
             List<string> ids = null;
-            for (int j = 0; j < 12; j++)
+            for (int j = 0; j < 10; j++)
             {
                 ids = new List<string>();
                 for (int i = 0; i < 1000000; i++)
@@ -29,7 +29,8 @@ namespace NameTable
                 var dic = sic.InsertPortion(ids);
                 Console.WriteLine("InsertPortion ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             }
-            //Console.WriteLine("ids list ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            sic.MakeIndexed();
+            Console.WriteLine("Indexes ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             //Console.WriteLine("dic count=" + dic.Count());
 
