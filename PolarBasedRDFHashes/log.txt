@@ -1,0 +1,42 @@
+start 3000000
+load db 21 328 7266
+bufferBYtes= max load indexes 85 277 9038
+<record id="ns:m.0102c1j">
+  <field prop="ns:type.object.key">/authority/musicbrainz/name/TRACK3391038</field>
+  <field prop="ns:type.object.name" xml:lang="en">In the City</field>
+  <field prop="rdfs:label" xml:lang="en">In the City</field>
+  <field prop="ns:type.object.key">/authority/musicbrainz/4e83b197-afbd-4bb2-9157-bc0f067a2295</field>
+  <field prop="key:authority.musicbrainz.name">TRACK3391038</field>
+  <field prop="key:authority.musicbrainz">4e83b197-afbd-4bb2-9157-bc0f067a2295</field>
+  <direct prop="ns:type.object.type">
+    <record id="ns:common.topic" />
+  </direct>
+  <direct prop="ns:common.topic.topic_equivalent_webpage">
+    <record id="&lt;http://mb-redir.freebaseapps.com/redir/4e83b197-afbd-4bb2-9157-bc0f067a2295&gt;" />
+  </direct>
+  <direct prop="ns:type.object.type">
+    <record id="ns:music.recording" />
+  </direct>
+  <direct prop="ns:music.recording.artist">
+    <record id="ns:m.01lcr2t" />
+  </direct>
+  <direct prop="ns:music.recording.releases">
+    <record id="ns:m.0327p5w" />
+  </direct>
+  <direct prop="ns:music.recording.canonical_version">
+    <record id="ns:m.0dxfrs0" />
+  </direct>
+  <direct prop="ns:music.recording.length">
+    <record id="304.933" />
+  </direct>
+  <direct prop="ns:music.recording.tracks">
+    <record id="ns:m.0k_6smg" />
+  </direct>
+  <direct prop="rdf:type">
+    <record id="ns:music.recording" />
+  </direct>
+  <direct prop="rdf:type">
+    <record id="ns:common.topic" />
+  </direct>
+</record>64 0459
+many ids get time = 46 3255

@@ -70,13 +70,13 @@ bufferBYtes=400000load indexes 457 793 5735
 bufferBYtes=1000000load indexes 388 693 1144
 bufferBYtes=400000000load indexes 231 316 4088
 
-start 3000 000  sorteddictionary 
+start 3 000 000  sorteddictionary 
 load db 565305588
-bufferBYtes= maxload indexes 2188824403
-bufferBYtes=1000load indexes 9267294668
-bufferBYtes=400000load indexes 4372546632
-bufferBYtes=1000000load indexes 3700807559
-bufferBYtes=400000000load indexes 2253237988
+bufferBYtes= maxload indexes 218 882 4403
+bufferBYtes=1000load indexes 926 729 4668
+bufferBYtes=400000load indexes 437 254 6632
+bufferBYtes=1000000load indexes 370 080 7559
+bufferBYtes=400000000load indexes 225 323 7988
 
 start 3 000 000
 load db 46 439 2748
