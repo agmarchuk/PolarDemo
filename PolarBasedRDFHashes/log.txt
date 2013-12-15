@@ -1,0 +1,70 @@
+start 3000000
+load db 21 328 7266
+bufferBYtes= max load indexes 85 277 9038
+<record id="ns:m.0102c1j">
+  <field prop="ns:type.object.key">/authority/musicbrainz/name/TRACK3391038</field>
+  <field prop="ns:type.object.name" xml:lang="en">In the City</field>
+  <field prop="rdfs:label" xml:lang="en">In the City</field>
+  <field prop="ns:type.object.key">/authority/musicbrainz/4e83b197-afbd-4bb2-9157-bc0f067a2295</field>
+  <field prop="key:authority.musicbrainz.name">TRACK3391038</field>
+  <field prop="key:authority.musicbrainz">4e83b197-afbd-4bb2-9157-bc0f067a2295</field>
+  <direct prop="ns:type.object.type">
+    <record id="ns:common.topic" />
+  </direct>
+  <direct prop="ns:common.topic.topic_equivalent_webpage">
+    <record id="&lt;http://mb-redir.freebaseapps.com/redir/4e83b197-afbd-4bb2-9157-bc0f067a2295&gt;" />
+  </direct>
+  <direct prop="ns:type.object.type">
+    <record id="ns:music.recording" />
+  </direct>
+  <direct prop="ns:music.recording.artist">
+    <record id="ns:m.01lcr2t" />
+  </direct>
+  <direct prop="ns:music.recording.releases">
+    <record id="ns:m.0327p5w" />
+  </direct>
+  <direct prop="ns:music.recording.canonical_version">
+    <record id="ns:m.0dxfrs0" />
+  </direct>
+  <direct prop="ns:music.recording.length">
+    <record id="304.933" />
+  </direct>
+  <direct prop="ns:music.recording.tracks">
+    <record id="ns:m.0k_6smg" />
+  </direct>
+  <direct prop="rdf:type">
+    <record id="ns:music.recording" />
+  </direct>
+  <direct prop="rdf:type">
+    <record id="ns:common.topic" />
+  </direct>
+</record>64 0459
+many ids get time = 46 3255
+start 3000000
+load db 199208723
+bufferBYtes= max load indexes 855877966
+item.ToString()586673
+many ids get time = 393688
+start 3000000
+load db 245670895
+bufferBYtes= max load indexes 79 074 9579
+item.ToString()562562
+many ids get time = 426767
+
+
+
+start 3000000
+load db 239467081
+bufferBYtes= max load indexes 861510920
+item.ToString()682026
+many ids get time = 443050
+start 3000000
+load db 303362675
+bufferBYtes= max load indexes 101 876 6170
+item.ToString()834405
+many ids get time = 521605
+start 3000000
+load db 236949614
+bufferBYtes= max load indexes 87 0692144
+item.ToString()667552
+many ids get time = 445525

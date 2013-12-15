@@ -37,6 +37,7 @@ namespace PolarBasedRDF
                 File.Exists(directCellPath));
             dataCell = new PaCell(ptData, dataCellPath = Path.Combine(path.FullName, "rdf.data.pac"),
                 File.Exists(dataCellPath));
+            if (dataCell.IsEmpty || directCell.IsEmpty) return;
             CreateIndexes();
         }
 
@@ -74,14 +75,10 @@ namespace PolarBasedRDF
         {
             directCell.Close();
             dataCell.Close();
-            sDataIndex.Close();
-            sDirectIndex.Close();
-            oIndex.Close();
-            spDataIndex.Close();
-            spDirectIndex.Close();
-            opIndex.Close();
+        
             File.Delete(dataCellPath);
-            File.Delete(directCellPath);
+                File.Delete(directCellPath);
+           
             directCell = new PaCell(ptDirects, directCellPath, false);
             dataCell = new PaCell(ptData, dataCellPath, false);
 
@@ -104,12 +101,20 @@ namespace PolarBasedRDF
             dataSerialFlow.Se();
             directSerialFlow.EndSerialFlow();
             dataSerialFlow.EndSerialFlow();
-            CreateIndexes();
-            LoadIndexes();
         }
 
-        private void LoadIndexes()
+        internal void LoadIndexes()
         {
+            if (sDataIndex != null)
+            {
+                sDataIndex.Close();
+                sDirectIndex.Close();
+                oIndex.Close();
+                spDataIndex.Close();
+                spDirectIndex.Close();
+                opIndex.Close();
+                CreateIndexes();
+            }
             sDataIndex.Load(null);
             sDirectIndex.Load(null);
             oIndex.Load(null);
