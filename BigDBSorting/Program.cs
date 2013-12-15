@@ -8,6 +8,19 @@ namespace BigDBSorting
     {
         static void Main(string[] args)
         {
+            string fb_path = @"F:\FactographData\freebase-rdf-2013-02-10-00-00.nt2";
+            //System.IO.FileStream fs = new System.IO.FileStream(fb_path, System.IO.FileMode.Open);
+            System.IO.StreamReader sr = new System.IO.StreamReader(fb_path);
+            System.IO.StreamWriter sw = new System.IO.StreamWriter(@"F:\FactographData\freebase.nt2");
+            for (int i = 0; i < 100000; i++)
+            {
+                string line = sr.ReadLine();
+                sw.WriteLine(line);
+            }
+            sw.Close();
+            sr.Close();
+            return;
+            
             string path = @"..\..\..\Databases\";
             //string path = @"C:\Users\Marchuk\Polar\";
             DateTime tt0 = DateTime.Now;
