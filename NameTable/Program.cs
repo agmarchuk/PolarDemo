@@ -16,7 +16,7 @@ namespace NameTable
         public static void Main(string[] args)
         {
             string path = @"..\..\..\Databases\";
-            System.IO.StreamReader sr = new System.IO.StreamReader(path + "freebase.nt2");
+            System.IO.StreamReader sr = new System.IO.StreamReader(@"F:\FactographData\freebase-rdf-2013-02-10-00-00.nt2");
 
             StringIntCoding sic = new StringIntCoding(path);
 
@@ -24,15 +24,17 @@ namespace NameTable
             DateTime tt0 = DateTime.Now;
 
             string line = "";
-
+            int linecnt = 0;
+            int nportion = 10000000;
 
             List<string> ids = null;
-            for (int j = 0; j < 200; j++)
+            for (int j = 0; j < 600; j++)
             {
-                ids = new List<string>();
-                for (int i = 0; i < 1000000; i++)
+                ids = new List<string>(nportion * 2);
+                for (int i = 0; i < nportion; i++)
                 {
-                    line = sr.ReadLine();
+                    line = sr.ReadLine(); linecnt++;
+                    //if (linecnt % 1000 == 0) Console.Write(" " + linecnt);
                     if (line == null) break;
                     if (line.Length == 0) continue;
                     if (line[0] == '@') continue;
@@ -40,14 +42,20 @@ namespace NameTable
                     if (parts.Length != 3) continue;
                     ids.Add(parts[0]);
                     //ids.Add(parts[1]);
-                    if (parts[2][0] != '\"' && parts[2][0] != '<') 
-                        ids.Add(parts[2].Substring(0, parts[2].Length - 1));
+                    char fc = parts[2][0];
+                    if (fc != '\"' && fc != '<' && fc != '-' && !char.IsDigit(fc))
+                    {
+                        string ss = parts[2].Substring(0, parts[2].Length - 1);
+                        if (ss != "true" && ss != "false") ids.Add(ss);
+                    }
                     
                     //ids.Add(Guid.NewGuid().ToString());
                 }
                 var dic = sic.InsertPortion(ids);
-                Console.WriteLine("InsertPortion ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                Console.WriteLine("InsertPortion ok. curr. line=" + (linecnt/1000000) + " duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 if (line == null) break;
+                // Сборка мусора
+                GC.Collect();
             }
             sic.MakeIndexed();
             Console.WriteLine("Indexes ok. Count=" + sic.Count() + " duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;

@@ -93,9 +93,26 @@ namespace NameTable
         }
         public Dictionary<string, int> InsertPortion(IEnumerable<string> portion)
         {
-            //DateTime tt0 = DateTime.Now;
+            DateTime tt0 = DateTime.Now;
             //SortedSet<string> ss = new SortedSet<string>(new string[] { "test" }); // new SortedSet<string>(portion);
-            SortedSet<string> ss = new SortedSet<string>(portion);
+            string[] arr = portion.ToArray();
+            //Console.WriteLine("Before SortedSet (" + arr.Length + "). duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            //SortedSet<string> ss = new SortedSet<string>(portion);
+            Array.Sort<string>(arr);
+            string current = null;
+            int nunique = 0;
+            foreach (string s in arr) if (s != current) { current = s; nunique++; }
+            List<string> ss = new List<string>(nunique);
+            current = null;
+            foreach (string s in arr)
+            {
+                if (s != current)
+                {
+                    current = s;
+                    ss.Add(current);
+                }
+            }
+            //Console.WriteLine("Sort and compress ok ("+ ss.Count +"). duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             string[] ssa = ss.ToArray();
             ss = null;
             //string[] ssa = portion.ToArray();
@@ -124,7 +141,7 @@ namespace NameTable
             ssa_ind++;
             
             // Для накопления пар  
-            List<object[]> accumulator = new List<object[]>();
+            List<KeyValuePair<string, int>> accumulator = new List<KeyValuePair<string, int>>(nunique);
 
             // Очередной (новый) код (индекс)
             //long nn = source.Root.Count();
@@ -141,11 +158,11 @@ namespace NameTable
                         object[] v = new object[] { code_new, ssa_current };
                         long off = target.Root.AppendElement(v); // При равенстве, новый элемент игнорируется
                         code_new++;
-                        accumulator.Add(v);
+                        accumulator.Add(new KeyValuePair<string, int>((string)v[1], (int)v[0]));
                     }
                     else
                     { // используется существующий код
-                        accumulator.Add(val);
+                        accumulator.Add(new KeyValuePair<string, int>((string)val[1], (int)val[0]));
                     }
                     if (ssa_ind < ssa.Length)
                     {
@@ -167,7 +184,7 @@ namespace NameTable
                     object[] v = new object[] { code_new, ssa_current };
                     long off = target.Root.AppendElement(v); // При равенстве, новый элемент игнорируется
                     code_new++;
-                    accumulator.Add(v);
+                    accumulator.Add(new KeyValuePair<string, int>((string)v[1], (int)v[0]));
                     if (ssa_ind < ssa.Length) ssa_current = ssa[ssa_ind];
                     ssa_ind++;
                 }
@@ -179,9 +196,10 @@ namespace NameTable
             System.IO.File.Move(sourceCell, tmpCell);
             this.Open(); // парный к thi.Close() оператор
             // Финальный аккорд: формирование и выдача словаря
-            Dictionary<string, int> dic = accumulator.ToDictionary(
-                (object[] pair) => (string)pair[1],
-                (object[] pair) => (int)pair[0]);
+            //Dictionary<string, int> dic = accumulator.ToDictionary(
+            //    (object[] pair) => (string)pair[1],
+            //    (object[] pair) => (int)pair[0]);
+            Dictionary<string, int> dic = new Dictionary<string, int>();
             return dic;
         }
         public void MakeIndexed()
