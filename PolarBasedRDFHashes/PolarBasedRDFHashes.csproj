@@ -59,6 +59,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArrayIntMax.cs" />
     <Compile Include="FixedIndex.cs" />
     <Compile Include="FlexIndex.cs" />
     <Compile Include="Program.cs">
