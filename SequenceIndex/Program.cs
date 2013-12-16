@@ -1,28 +1,43 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using PolarDB;
 
 namespace SequenceIndex
 {
     class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             string path = @"..\..\..\Databases\";
-            var seq = new AllInt(path + "seq1", false);
-            seq.FillData(new Dictionary<int, long>() { { 10, 10 }, { 100, 100 }, { -10, -10 }, { 100000, 100000 } }.ToArray());
-            //  var seq = new DexTree(path + "dt", false);
-            //  seq.Fill(Enumerable.Range(0,1000000).Select(i=>new KeyValuePair<int,long>(i,(long)i)).ToArray());
+           // File.Delete(path+"teststrings.pac");
+            PaCell testCell=new PaCell(new PTypeSequence(new PType(PTypeEnumeration.sstring)), path+"teststrings.pac", false );
+            if (true)
+            {
+                testCell.Fill(new object[0]);
+                for (long i = 0; i < (long) 1000*1000*1000; i++)
+                {
+                    var s = Guid.NewGuid().ToString();
+                    testCell.Root.AppendElement(s);
+                }
 
-            Stopwatch s = new Stopwatch(); s.Start();
-            long resчапр = seq.Search(10);
-            s.Stop();
-            Console.WriteLine(resчапр + " " + s.Elapsed.Ticks);
-            s.Restart();
-            long варапр = seq.Search(100000);
-            s.Stop();
-            Console.WriteLine(варапр + " " + s.Elapsed.Ticks);           
+                testCell.Flush();
+            }
+            string testString = (string)testCell.Root.Elements().Last().Get();
+            HashIndex<string> index = new HashIndex<string>(path, testCell, entry => (string)entry.Get());
+            Stopwatch stopwatch=new Stopwatch();
+            stopwatch.Start();
+            index.Load();
+            stopwatch.Stop();
+            using (StreamWriter log = new StreamWriter("../../log.txt"))
+                log.WriteLine("load " + (double) stopwatch.Elapsed.Ticks/10000);
+            stopwatch.Restart();
+            var res = index.GetFirst(testString);
+           stopwatch.Stop();
+            if(res.offset==long.MinValue) throw new Exception("fail");
+            using (StreamWriter log = new StreamWriter("../../log.txt"))
+                log.WriteLine("find " + res.Get() + Environment.NewLine + (double) stopwatch.Elapsed.Ticks/10000);
         }
     }
 }
