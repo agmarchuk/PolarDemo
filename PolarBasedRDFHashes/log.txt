@@ -53,18 +53,18 @@ many ids get time = 426767
 
 
 
-start 3000000
-load db 239467081
-bufferBYtes= max load indexes 861510920
-item.ToString()682026
-many ids get time = 443050
-start 3000000
-load db 303362675
+start 3 000 000
+load db 23 946 7081
+bufferBYtes= max load indexes 86 151 0920
+item.ToString()68 2026
+many ids get time = 44 3050
+start 3 000 000
+load db 30 336 2675
 bufferBYtes= max load indexes 101 876 6170
-item.ToString()834405
-many ids get time = 521605
-start 3000000
-load db 236949614
-bufferBYtes= max load indexes 87 0692144
-item.ToString()667552
-many ids get time = 445525
+item.ToString()83 4405
+many ids get time = 52 1605
+start 3000 000
+load db 23 694 9614
+bufferBYtes= max load indexes 87 069 2144
+item.ToString()66 7552
+many ids get time = 44 5525
