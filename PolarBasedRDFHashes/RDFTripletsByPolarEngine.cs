@@ -232,7 +232,7 @@ namespace PolarBasedRDF
         /// <param name="filePath"></param>
         /// <param name="quadAction"></param>
         /// <param name="tripletsCountLimit"></param>
-        private static int ReadTSV(string filePath, QuadAction quadAction, int tripletsCountLimit)
+        public static int ReadTSV(string filePath, QuadAction quadAction, long tripletsCountLimit)
         {
             using (var reader = new StreamReader(filePath))
             {

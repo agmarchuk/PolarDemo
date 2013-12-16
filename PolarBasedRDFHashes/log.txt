@@ -68,3 +68,12 @@ load db 23 694 9614
 bufferBYtes= max load indexes 87 069 2144
 item.ToString()66 7552
 many ids get time = 44 5525
+start 3000000
+load db 387617470
+start 3000000
+load db 10046927588
+bufferBYtes= max load indexes 1393017664
+item.ToString()2520572
+many ids get time = 447768
+start 3000000
+start 3000000
