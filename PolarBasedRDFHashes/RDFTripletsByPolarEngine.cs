@@ -220,11 +220,9 @@ namespace PolarBasedRDF
             return 0;
         }
 
-        private static readonly Regex NsRegex = new Regex(@"^@prefix\s+(\w+):\s+<(.+)>\.$",
-            RegexOptions.Compiled | RegexOptions.Singleline);
+        private static readonly Regex NsRegex = new Regex(@"^@prefix\s+(\w+):\s+<(.+)>\.$", RegexOptions.Singleline);
 
-        private static readonly Regex TripletsRegex = new Regex("^(\\S+)\\s+(\\S+)\\s+(\"(.+)\"(@(\\S*))?|(.+))\\.$",
-            RegexOptions.Compiled | RegexOptions.Singleline);
+        private static readonly Regex TripletsRegex = new Regex(@"^(\S+)\t(\S+)\t(""(.+)""(@(\S*))?|(.+))\.$",RegexOptions.Singleline);
 
         /// <summary>
         /// TODO ns
@@ -246,24 +244,23 @@ namespace PolarBasedRDF
                 const int tryLinesCountMax = 10;
                 string readLine = string.Empty;
                 int i;
+                Match lineMatch;
+                Group dMatch;
                 for (i = 0; i < tripletsCountLimit && !reader.EndOfStream; i++, readLine = string.Empty, tryCount = 0)
-                    while (tryCount < tryLinesCountMax && !String2Quard(quadAction, readLine += reader.ReadLine()))
-                        tryCount++;
+                    while ((readLine += reader.ReadLine()).Length > 0 && readLine[0] != '@' &&
+                           tryCount++ < tryLinesCountMax)
+                    {
+                        if (!(lineMatch = TripletsRegex.Match(readLine)).Success) continue;
+                        dMatch = lineMatch.Groups[4];
+                        if (dMatch.Success && (dMatch.Value != "true" && dMatch.Value != "false"))
+                            quadAction(lineMatch.Groups[1].Value, lineMatch.Groups[2].Value, dMatch.Value, false,
+                                lineMatch.Groups[6].Value);
+                        else
+                            quadAction(lineMatch.Groups[1].Value, lineMatch.Groups[2].Value, lineMatch.Groups[7].Value);
+                        break;
+                    }
                 return i + 1;
             }
-        }
-
-        private static bool String2Quard(QuadAction quadAction, string readLine)
-        {
-            Match lineMatch;
-            if (!(lineMatch = TripletsRegex.Match(readLine)).Success) return false;
-            var dMatch = lineMatch.Groups[4];
-            if (dMatch.Success)
-                quadAction(lineMatch.Groups[1].Value, lineMatch.Groups[2].Value, dMatch.Value, false,
-                    lineMatch.Groups[6].Value);
-            else
-                quadAction(lineMatch.Groups[1].Value, lineMatch.Groups[2].Value, lineMatch.Groups[7].Value);
-            return true;
         }
 
         #region Read XML

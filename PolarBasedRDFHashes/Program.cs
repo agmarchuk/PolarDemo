@@ -13,13 +13,15 @@ namespace PolarBasedRDF
             string path = @"..\..\..\Databases\";
             System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
             Console.WriteLine("Start");
-            long tripletsCount = 1000*1000*1000;
+            long tripletsCount = 1000*1000*10;
             var db = "F:\\freebase-rdf-2013-02-10-00-00.nt2";
             watch.Restart();
+            DateTime dt = DateTime.Now;
                     RDFTripletsByPolarEngine.ReadTSV(db, (id, property, value, obj, lang) => { }, tripletsCount);
-                    watch.Stop();
+            var dtm = DateTime.Now - dt;
+            watch.Stop();
                     using (StreamWriter log = new StreamWriter("../../log.txt", true))
-                        log.WriteLine("read freebase " + tripletsCount + " triplets time= " + watch.Elapsed.TotalMinutes);    
+                        log.WriteLine("read freebase " + tripletsCount + " triplets time= " + dtm.TotalSeconds+"sec.");    
                     return;
             RDFTripletsByPolarEngine graph = new RDFTripletsByPolarEngine(new DirectoryInfo(path));
             foreach (var count in new[] { 3 * 1000 * 1000 })//3 * 1000 * 1000, 
