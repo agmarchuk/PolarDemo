@@ -91,32 +91,33 @@ namespace NameTable
             nc_entry.offset = (long)qu.Get();
             return (string)nc_entry.Field(1).Get();
         }
-        public Dictionary<string, int> InsertPortion(IEnumerable<string> portion)
+        public Dictionary<string, int> InsertPortion(string[] sorted_arr) //(IEnumerable<string> portion)
         {
             DateTime tt0 = DateTime.Now;
-            //SortedSet<string> ss = new SortedSet<string>(new string[] { "test" }); // new SortedSet<string>(portion);
-            string[] arr = portion.ToArray();
-            //Console.WriteLine("Before SortedSet (" + arr.Length + "). duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            //SortedSet<string> ss = new SortedSet<string>(portion);
-            Array.Sort<string>(arr);
-            string current = null;
-            int nunique = 0;
-            foreach (string s in arr) if (s != current) { current = s; nunique++; }
-            List<string> ss = new List<string>(nunique);
-            current = null;
-            foreach (string s in arr)
-            {
-                if (s != current)
-                {
-                    current = s;
-                    ss.Add(current);
-                }
-            }
-            //Console.WriteLine("Sort and compress ok ("+ ss.Count +"). duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            string[] ssa = ss.ToArray();
-            ss = null;
+            ////SortedSet<string> ss = new SortedSet<string>(new string[] { "test" }); // new SortedSet<string>(portion);
+            //string[] arr = portion.ToArray();
+            ////Console.WriteLine("Before SortedSet (" + arr.Length + "). duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            ////SortedSet<string> ss = new SortedSet<string>(portion);
+            //Array.Sort<string>(arr);
+            //string current = null;
+            //int nunique = 0;
+            //foreach (string s in arr) if (s != current) { current = s; nunique++; }
+            //List<string> ss = new List<string>(nunique);
+            //current = null;
+            //foreach (string s in arr)
+            //{
+            //    if (s != current)
+            //    {
+            //        current = s;
+            //        ss.Add(current);
+            //    }
+            //}
+            //string[] ssa = ss.ToArray();
+            //ss = null;
+            string[] ssa = sorted_arr;
             //string[] ssa = portion.ToArray();
             if (ssa.Length == 0) return new Dictionary<string, int>();
+            //Console.WriteLine("Sort and compress ok ("+ ssa.Length +"). duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             this.Close();
             // Подготовим основную ячейку для работы
@@ -133,7 +134,8 @@ namespace NameTable
             PaCell target = new PaCell(tp_nc, originalCell, false);
             if (!target.IsEmpty) target.Clear();
             target.Fill(new object[0]);
-            
+
+            //Console.WriteLine("подготовка ячеек ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             int ssa_ind = 0;
             bool ssa_notempty = true;
@@ -141,7 +143,7 @@ namespace NameTable
             ssa_ind++;
             
             // Для накопления пар  
-            List<KeyValuePair<string, int>> accumulator = new List<KeyValuePair<string, int>>(nunique);
+            List<KeyValuePair<string, int>> accumulator = new List<KeyValuePair<string, int>>(ssa.Length);
 
             // Очередной (новый) код (индекс)
             //long nn = source.Root.Count();
@@ -200,6 +202,7 @@ namespace NameTable
             //    (object[] pair) => (string)pair[1],
             //    (object[] pair) => (int)pair[0]);
             Dictionary<string, int> dic = new Dictionary<string, int>();
+            //Console.WriteLine("Слияние ok (" + ssa.Length + "). duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             return dic;
         }
         public void MakeIndexed()

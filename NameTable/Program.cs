@@ -25,12 +25,15 @@ namespace NameTable
 
             string line = "";
             int linecnt = 0;
-            int nportion = 10000000;
+            int nportion = 20000000;
 
             List<string> ids = null;
+            HashSet<string> hs = new HashSet<string>();
             for (int j = 0; j < 600; j++)
             {
+                tt0 = DateTime.Now;
                 ids = new List<string>(nportion * 2);
+                hs.Clear();
                 for (int i = 0; i < nportion; i++)
                 {
                     line = sr.ReadLine(); linecnt++;
@@ -40,23 +43,33 @@ namespace NameTable
                     if (line[0] == '@') continue;
                     string[] parts = line.Split('\t');
                     if (parts.Length != 3) continue;
-                    ids.Add(parts[0]);
+                    //ids.Add(parts[0]);
                     //ids.Add(parts[1]);
+                    hs.Add(parts[0]);
                     char fc = parts[2][0];
                     if (fc != '\"' && fc != '<' && fc != '-' && !char.IsDigit(fc))
                     {
                         string ss = parts[2].Substring(0, parts[2].Length - 1);
-                        if (ss != "true" && ss != "false") ids.Add(ss);
+                        //if (ss != "true" && ss != "false") ids.Add(ss);
+                        if (ss != "true" && ss != "false") hs.Add(ss);
                     }
                     
                     //ids.Add(Guid.NewGuid().ToString());
                 }
-                var dic = sic.InsertPortion(ids);
-                Console.WriteLine("InsertPortion ok. curr. line=" + (linecnt/1000000) + " duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //Console.WriteLine("idlist ok. line="+ (linecnt / 1000000) +" HashSet.Size=" + hs.Count + " duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                string[] arr = new string[hs.Count];
+                hs.CopyTo(arr);
+                Array.Sort<string>(arr);
+                //Console.WriteLine("Sorting ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                var dic = sic.InsertPortion(arr);
+                Console.WriteLine("InsertPortion ok. line=" + (linecnt / 1000000) + " HashSet.Size=" + hs.Count + " duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 if (line == null) break;
+                tt0 = DateTime.Now;
                 // Сборка мусора
                 GC.Collect();
+                //Console.WriteLine("GC ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             }
+            tt0 = DateTime.Now;
             sic.MakeIndexed();
             Console.WriteLine("Indexes ok. Count=" + sic.Count() + " duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
