@@ -139,11 +139,9 @@ namespace PolarBasedRDF
             return 0;
         }
 
-        private static readonly Regex NsRegex = new Regex(@"^@prefix\s+(\w+):\s+<(.+)>\.$",
-            RegexOptions.Compiled | RegexOptions.Singleline);
+        private static readonly Regex NsRegex = new Regex(@"^@prefix\s+(\w+):\s+<(.+)>\.$");
 
-        private static readonly Regex TripletsRegex = new Regex("^(\\S+)\\s+(\\S+)\\s+(\"(.+)\"(@(\\S*))?|(.+))\\.$",
-            RegexOptions.Compiled | RegexOptions.Singleline);
+        private static readonly Regex TripletsRegex = new Regex(@"^(\S+)\t(\S+)\t(""(.+)""(@(\S*))?|(.+))\.$");
 
         /// <summary>
         /// TODO ns
@@ -177,7 +175,7 @@ namespace PolarBasedRDF
             Match lineMatch;
             if (!(lineMatch = TripletsRegex.Match(readLine)).Success) return false;
             var dMatch = lineMatch.Groups[4];
-            if (dMatch.Success)
+            if (dMatch.Success && (dMatch.Value != "true" && dMatch.Value != "false"))
                 quadAction(lineMatch.Groups[1].Value, lineMatch.Groups[2].Value, dMatch.Value, false,
                     lineMatch.Groups[6].Value);
             else

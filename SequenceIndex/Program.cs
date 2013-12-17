@@ -10,6 +10,7 @@ namespace SequenceIndex
     {
         private static void Main(string[] args)
         {
+            
             string path = @"..\..\..\Databases\";
            // File.Delete(path+"teststrings.pac");
             PaCell testCell=new PaCell(new PTypeSequence(new PType(PTypeEnumeration.sstring)), path+"teststrings.pac", false );

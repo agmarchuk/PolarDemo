@@ -11,18 +11,28 @@ namespace PolarBasedRDF
         private static void Main(string[] args)
         {
             string path = @"..\..\..\Databases\";
+            System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
             Console.WriteLine("Start");
+            long tripletsCount = 1000*1000*10;
+            var db = "F:\\freebase-rdf-2013-02-10-00-00.nt2";
+            watch.Restart();
+            DateTime dt = DateTime.Now;
+                    RDFTripletsByPolarEngine.ReadTSV(db, (id, property, value, obj, lang) => { }, tripletsCount);
+            var dtm = DateTime.Now - dt;
+            watch.Stop();
+                    using (StreamWriter log = new StreamWriter("../../log.txt", true))
+                        log.WriteLine("read freebase " + tripletsCount + " triplets time= " + dtm.TotalSeconds+"sec.");    
+                    return;
             RDFTripletsByPolarEngine graph = new RDFTripletsByPolarEngine(new DirectoryInfo(path));
             foreach (var count in new[] { 3 * 1000 * 1000 })//3 * 1000 * 1000, 
             {
-                System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
                 using (StreamWriter log = new StreamWriter("../../log.txt", true))
                     log.WriteLine("start " + count);
                 bool toload = true;
                 if (toload)
                 {
-                    var db = "F:\\freebase-rdf-2013-02-10-00-00.nt2";
                     //string db = path + "0001.xml";
+                   
                     watch.Restart();
                     graph.Load(count, db);
                     watch.Stop();

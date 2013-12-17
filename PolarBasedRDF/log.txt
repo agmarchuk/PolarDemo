@@ -55,7 +55,7 @@ bufferBYtes=400 000load indexes 168 042 3802
 bufferBYtes=1000 000 load indexes 163 309 5279
 bufferBYtes=400 000 000load indexes 167 707 1596
 
-start 30000000
+start 30 000 000
 load db 244 812 8607
 bufferBYtes=1000load indexes 2750 562 0931
 bufferBYtes=400000load indexes 2078 465 7653

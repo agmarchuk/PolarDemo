@@ -41,7 +41,7 @@ bufferBYtes= max load indexes 85 277 9038
 </record>64 0459
 many ids get time = 46 3255
 start 3000000
-load db 199208723
+load db 19 920 8723
 bufferBYtes= max load indexes 855877966
 item.ToString()586673
 many ids get time = 393688
@@ -68,3 +68,24 @@ load db 23 694 9614
 bufferBYtes= max load indexes 87 069 2144
 item.ToString()66 7552
 many ids get time = 44 5525
+start 3000000
+load db 387617470
+start 3000000
+load db 10046927588
+bufferBYtes= max load indexes 1393017664
+item.ToString()2520572
+many ids get time = 447768
+start 3000000
+read freebase 10000000 triplets time= 0,639348228333333min.
+read freebase 10000000 triplets time= 367643772ticks.
+read freebase 10000000 triplets time= 36,1615307sec.
+read freebase 10000000 triplets time= 37,2340084sec.
+read freebase 10000000 triplets time= 41,720934sec.
+read freebase 10000000 triplets time= 41,6558423sec.
+read freebase 10000000 triplets time= 41,6945639sec.
+read freebase 10000000 triplets time= 416897201ticks.
+read freebase 10000000 triplets time= 162385121ticks.
+read freebase 10000000 triplets time= 41,3672651sec.
+read freebase 10000000 triplets time= 47,601554sec.
+read freebase 10000000 triplets time= 42,537344sec.
+read freebase 10000000 triplets time= 42,2813272sec.
