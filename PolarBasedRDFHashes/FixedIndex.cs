@@ -5,8 +5,8 @@ using System.Linq;
 using PolarDB;
 
 namespace PolarBasedRDF
-{  
-    public class SubjPred<Tkey> :IComparable where Tkey:IComparable
+{
+    public struct SubjPred<Tkey> : IComparable where Tkey : IComparable
         {
             public SubjPred(Tkey subj, Tkey pred)
             {
@@ -21,7 +21,7 @@ namespace PolarBasedRDF
             }
         }
 
-    public class SubjPredCoparer<Tkey> : IComparer<SubjPred<Tkey>> where Tkey:IComparable
+    public struct SubjPredCoparer<Tkey> : IComparer<SubjPred<Tkey>> where Tkey : IComparable
     {
         public int Compare(SubjPred<Tkey> x, SubjPred<Tkey> y)
         {

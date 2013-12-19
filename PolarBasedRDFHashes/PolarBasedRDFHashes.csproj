@@ -45,6 +45,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>PolarBasedRDF.Program</StartupObject>
@@ -74,6 +75,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="analize.txt" />
     <Content Include="log.txt" />
   </ItemGroup>
   <ItemGroup>

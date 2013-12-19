@@ -2,7 +2,7 @@
 
     class ArrayIntMax<T>
     {
-        const int MaxArrayIndex = 2146435071;
+        const int MaxArrayIndex = Int32.MaxValue/2;//2146435071;
         const int LastCount = Int32.MaxValue - MaxArrayIndex; 
         private readonly T[] negativeLast, negativeFirst, positiveFirst, positiveLast;
 
@@ -33,3 +33,4 @@
             }
         }
     }
+

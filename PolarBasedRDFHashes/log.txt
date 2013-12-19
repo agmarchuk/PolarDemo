@@ -75,17 +75,195 @@ load db 10046927588
 bufferBYtes= max load indexes 1393017664
 item.ToString()2520572
 many ids get time = 447768
-start 3000000
-read freebase 10000000 triplets time= 0,639348228333333min.
-read freebase 10000000 triplets time= 367643772ticks.
-read freebase 10000000 triplets time= 36,1615307sec.
-read freebase 10000000 triplets time= 37,2340084sec.
-read freebase 10000000 triplets time= 41,720934sec.
-read freebase 10000000 triplets time= 41,6558423sec.
-read freebase 10000000 triplets time= 41,6945639sec.
-read freebase 10000000 triplets time= 416897201ticks.
-read freebase 10000000 triplets time= 162385121ticks.
-read freebase 10000000 triplets time= 41,3672651sec.
-read freebase 10000000 triplets time= 47,601554sec.
-read freebase 10000000 triplets time= 42,537344sec.
-read freebase 10000000 triplets time= 42,2813272sec.
+
+
+start 10 000 000 триплетов из freebase
+load db 73 023,3594мс.
+load indexes 353 967,7670мс.
+get item 690,3755мс.
+many ids get time = 108,0215мс.
+create array of bool 15 8698ticks
+create array of bool 15 1085ticks
+create array of bool 16 5038ticks
+create array of bool 20 1572ticks
+create array of bool 17 4524ticks
+start 10000000
+load db 805192077
+load indexes 3444932828
+item.ToString()4322552
+many ids get time = 567966
+start 10 000 000
+load db 87 653 2345
+load indexes 323 063 5376
+item.ToString()782966
+many ids get time = 131 5152
+
+
+start 10000000
+load db 84 301 6704
+load indexes 3843615757
+item.ToString()632965
+many ids get time = 672139
+
+start 10000000
+load db 77 185 4870
+load indexes 3193983786
+item.ToString()648304
+many ids get time = 568877
+
+start 10000000
+load db 710345276
+load indexes 3157907478
+item.ToString()648659
+many ids get time = 573191
+start 10000000
+
+start 10000000
+load db 628141751
+load indexes 320 916 8748
+item.ToString()1576863
+many ids get time = 610441
+start 10000000
+load db 816564885
+load indexes 3133722249
+item.ToString()675739
+many ids get time = 604578
+
+
+start 10000000
+load db 850130613
+load indexes 3163092955
+item.ToString()682347
+many ids get time = 541197
+start 10000000
+load db 655817845
+load indexes 3118863128
+item.ToString()639775
+many ids get time = 558858
+start 10000000
+load db 750393893
+load indexes 3519827692
+item.ToString()996244
+many ids get time = 621925
+start 10000000
+load db 971001684
+start 10000000
+load db 1112560042
+start 10000000
+load db 1036589302
+start 10000000
+load db 1008172039
+start 10000000
+load db 869769803
+load indexes 2061657630
+item.ToString()406364
+many ids get time = 203080
+
+start 10000000
+load db 1119767925
+load indexes 1897777835
+item.ToString()384580
+many ids get time = 185761
+start 10000000
+load db 1087908152
+start 10000000
+load db 1021029302
+load indexes 2077317804
+<record id="ns:m.0102c1j" />371752
+many ids get time = 238365
+start 10000000
+start 10000000
+load db 1071316292
+load indexes 3013370880
+
+start 10000000
+load db 1038565508
+load indexes 2067195001
+<record id="ns:m.0102c1j" />387034
+many ids get time = 225376
+start 10000000
+load db 876877397
+load indexes 1984182044
+<record id="ns:m.0102c1j" />378084
+many ids get time = 187090
+start 10000000
+load db 665469655
+load indexes 2085840715
+<record id="ns:m.0102c1j" />385677
+many ids get time = 232591
+start 10000000
+load db 709789788
+load indexes 2073389811
+<record id="ns:m.0102c1j" />390275
+many ids get time = 220901
+start 10000000
+load db 686891833
+load indexes 1898740850
+<record id="ns:m.0102c1j" />494999
+many ids get time = 176767
+
+struct
+
+start 10000000
+load db 567364849
+load indexes 1902455739
+<record id="ns:m.0102c1j" />398712
+many ids get time = 203853
+start 10000000
+load db 581542611
+load indexes 1904165672
+<record id="ns:m.0102c1j" />487118
+many ids get time = 193708
+
+start 10000000
+load db 561141451
+load indexes 1865024208
+<record id="ns:m.0102c1j" />440555
+many ids get time = 191336
+
+class
+start 10000000
+load db 523478291
+load indexes 1951002765
+<record id="ns:m.0102c1j" />331932
+many ids get time = 178931
+start 10000000
+load db 537286688
+load indexes 1937008138
+<record id="ns:m.0102c1j" />425683
+many ids get time = 200457
+
+int/class
+start 10000000
+load db 519298111
+load indexes 1785149515
+<record id="ns:m.0102c1j" />361373
+many ids get time = 759728
+start 10000000
+load db 562460051
+load indexes 1884993472
+<record id="ns:m.0102c1j" />539092
+many ids get time = 721570
+start 10000000
+load db 554330622
+load indexes 1860158890
+<record id="ns:m.0102c1j" />533974
+many ids get time = 893967
+
+int/structstart 10000000
+load db 550401705
+load indexes 1850171976
+<record id="ns:m.0102c1j" />490878
+many ids get time = 1648565
+start 10000000
+load db 533549574
+load indexes 1728831212
+<record id="ns:m.0102c1j" />393653
+many ids get time = 238194
+
+
+start 10 000 000
+load db 51 624 3276
+load indexes 144 727 3637
+<record id="ns:m.0102c1j" />499071
+many ids get time = 1395794
