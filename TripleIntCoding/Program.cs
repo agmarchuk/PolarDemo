@@ -44,12 +44,14 @@ namespace TripleIntCoding
                 subject_index.Clear();
                 oprops.Fill(new object[0]);
                 subject_index.Fill(new object[0]);
-                for (int i = 0; i < 10000000; i++)
+                for (int i = 0; i < 100000000; i++)
                 {
                     object[] valu = new object[] { rnd.Next(), rnd.Next(), 999 };
                     long offset = oprops.Root.AppendElement(valu);
                     subject_index.Root.AppendElement(offset);
+                    if (i % 1000000 == 0) Console.Write(" " + i);
                 }
+                Console.WriteLine();
                 int[][] samples = 
 { new int[] { 777, 21 }, new int[] { 777, 19 }, new int[] { 777, 22 }, new int[] { 7777777, 21 }, new int[] { 777, 18 } };
                 foreach (int[] sa in samples)
@@ -61,6 +63,8 @@ namespace TripleIntCoding
                 oprops.Flush();
                 subject_index.Flush();
                 Console.WriteLine("Loading ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
+                PaEntry.bufferBytes = 400000000;
                 PaEntry oentry = oprops.Root.Element(0);
 
                 //subject_index.Root.SortByKey<int>(off =>
