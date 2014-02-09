@@ -51,7 +51,7 @@ namespace TrueRdfViewer
             int i = 0;
             foreach (var triple in Turtle.LoadGraph(filepath))
             {
-                if (i % 10000 == 0) Console.Write("{0} ", i);
+                if (i % 10000 == 0) Console.Write("{0} ", i / 10000);
                 i++;
                 if (triple is OTriple)
                 {

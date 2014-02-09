@@ -35,11 +35,12 @@ namespace TrueRdfViewer
             Console.WriteLine("Start");
             string path = "../../../Databases/";
             TripleStore ts = new TripleStore(path);
-            bool toload = true;
+            bool toload = false;
             if (toload)
             {
                 //ts.LoadXML(path + "0001.xml");
                 //Console.WriteLine("LoadXML ok.");
+                PolarDB.PaEntry.bufferBytes = 20000000;
                 ts.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset10m.ttl");
                 Console.WriteLine("LoadTurtle ok.");
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
