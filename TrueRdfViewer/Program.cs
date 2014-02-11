@@ -23,23 +23,26 @@ namespace TrueRdfViewer
                 //"p0011098",
                 //"svet_100616111408_14354"
 
-                "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature13",
-                "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature4",
-                "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature8",
-                "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature11",
-                "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature3",
+                //"http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature13",
+                //"http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature4",
+                //"http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature8",
+                //"http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature11",
+                //"http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature3",
                 "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature19",
+                //"http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature19",
+                //"http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature19",
             };
 
             DateTime tt0 = DateTime.Now;
             Console.WriteLine("Start");
             string path = "../../../Databases/";
             TripleStore ts = new TripleStore(path);
-            bool toload = true;
+            bool toload = false;
             if (toload)
             {
                 //ts.LoadXML(path + "0001.xml");
                 //Console.WriteLine("LoadXML ok.");
+                PolarDB.PaEntry.bufferBytes = 20000000;
                 ts.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset10m.ttl");
                 Console.WriteLine("LoadTurtle ok.");
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
@@ -55,8 +58,8 @@ namespace TrueRdfViewer
             {
                 var query = 
                     ts.GetSubjectByObjPred(id, "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature")
-                    .Where(_product => ts.ChkOSubjPredObj(_product, "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature", "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature8"))
-                    .Where(_product => ts.ChkOSubjPredObj(_product, "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductType1"))
+                    //.Where(_product => ts.ChkOSubjPredObj(_product, "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature", "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature8"))
+                    //.Where(_product => ts.ChkOSubjPredObj(_product, "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductType1"))
                     .SelectMany(_product => ts.GetDataBySubjPred(_product, "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productPropertyNumeric1"))
                     ;
                 int cnt = query.Count();
