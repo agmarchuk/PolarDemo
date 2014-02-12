@@ -128,7 +128,7 @@ namespace TrueRdfViewer
         private Scale2 scale = null;
         public void CreateScale()
         {
-            scale = new Scale2(23);
+            scale = new Scale2(26);
             foreach (object[] tr in otriples.Root.ElementValues())
             {
                 string subj = (string)tr[0];

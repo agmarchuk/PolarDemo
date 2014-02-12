@@ -11,7 +11,7 @@ namespace TrueRdfViewer
         public static void Main(string[] args)
         {
 
-            string[] ids = new string []
+            string[] ids = new string[]
             {
                 //"svet_100616111408_10844",
                 //"pavl_100531115859_2020",
@@ -49,7 +49,7 @@ namespace TrueRdfViewer
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 return;
             }
-            
+
             ts.CreateScale();
             Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             ts.ShowScale();
@@ -58,11 +58,11 @@ namespace TrueRdfViewer
             var qu = ts.GetItem("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature19");
             Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             //if (qu != null) Console.WriteLine(qu.ToString());
-        
+
             tt0 = DateTime.Now;
             foreach (string id in ids)
             {
-                var query = 
+                var query =
                     ts.GetSubjectByObjPred(id, "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature")
                     .Where(_product => ts.ChkOSubjPredObj(_product, "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature", "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature8"))
                     .Where(_product => ts.ChkOSubjPredObj(_product, "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductType1"))
@@ -77,6 +77,19 @@ namespace TrueRdfViewer
                 //}
             }
             Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            // Контрольный расчет
+            {
+                string id = "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature19";
+                var query =
+                    ts.GetSubjectByObjPred(id, "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature")
+                    .Where(_product => ts.ChkOSubjPredObj(_product, "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature", "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature8"))
+                    .Where(_product => ts.ChkOSubjPredObj(_product, "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductType1"))
+                    .SelectMany(_product => ts.GetDataBySubjPred(_product, "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productPropertyNumeric1"))
+                    ;
+                int cnt = query.Count();
+            }
+            Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
         }
     }
 }
