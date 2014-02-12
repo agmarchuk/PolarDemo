@@ -125,6 +125,36 @@ namespace TrueRdfViewer
             op_o_index.Load(null);
         }
 
+        private Scale2 scale = null;
+        public void CreateScale()
+        {
+            scale = new Scale2(23);
+            foreach (object[] tr in otriples.Root.ElementValues())
+            {
+                string subj = (string)tr[0];
+                string pred = (string)tr[1];
+                string obj = (string)tr[2];
+                int code = scale.Code(subj, pred, obj);
+                int twobits = scale[code];
+                if (twobits > 1) continue; // Уже "плохо"
+                scale[code] = twobits + 1;
+            }
+        }
+        public void ShowScale()
+        {
+            int c = scale.Count();
+            int c0 = 0, c1 = 0, c2 = 0, cerr = 0; 
+            for (int i=0; i<c; i++)
+            {
+                int tb = scale[i];
+                if (tb == 0) c0++;
+                else if (tb == 1) c1++;
+                else if (tb == 2) c2++;
+                else cerr++;
+            }
+            Console.WriteLine("{0} {1} {2} {3} err: {4}", c, c0, c1, c2, cerr);
+        }
+
         public IEnumerable<string> GetSubjectByObjPred(string obj, string pred)
         {
             return op_o_index.GetAll(ent => 
@@ -177,6 +207,13 @@ namespace TrueRdfViewer
         }
         public bool ChkOSubjPredObj(string subj, string pred, string obj)
         {
+            if (scale != null)
+            {
+                int tb = scale[scale.Code(subj, pred, obj)];
+                if (tb == 0) return false;
+                else if (tb == 1) return true;
+                // else надо считаль длинно, см. далее
+            }
             return !spo_o_index.GetFirst(ent =>
             {
                 string su = (string)ent.Field(0).Get();
