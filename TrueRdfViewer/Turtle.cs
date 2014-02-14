@@ -59,7 +59,7 @@ namespace TrueRdfViewer
                     bool isDatatype = rest_line[0] == '\"';
                     // объект может быть entity или данное, у данного может быть языковый спецификатор или тип
                     string entity = null;
-                    string data = null;
+                    string sdata = null;
                     string datatype = null;
                     string lang = null;
                     if (isDatatype)
@@ -68,7 +68,7 @@ namespace TrueRdfViewer
                         int lastqu = rest_line.LastIndexOf('\"');
 
                         // Значение данных
-                        data = rest_line.Substring(1, lastqu - 1);
+                        sdata = rest_line.Substring(1, lastqu - 1);
 
                         // Языковый специализатор:
                         int dog = rest_line.LastIndexOf('@');
@@ -89,11 +89,24 @@ namespace TrueRdfViewer
                                 datatype = GetEntity(namespaces, qname);
                             }
                         }
+                        Literal d = null;
+                        if (datatype == "http://www.w3.org/2001/XMLSchema#integer")
+                            d = new Literal() { vid = LiteralVidEnumeration.integer, value = int.Parse(sdata) };
+                        else if (datatype == "http://www.w3.org/2001/XMLSchema#date")
+                            d = new Literal() { vid = LiteralVidEnumeration.date, value = DateTime.Parse(sdata).ToBinary() };
+                        else
+                            d = new Literal() { vid = LiteralVidEnumeration.text, value = new Text() { s = sdata, l = "en" } };
                         yield return new DTriple()
                         {
                             sublect = subject,
                             predicate = predicate,
-                            data = new Literal() { vid = LiteralVidEnumeration.text, value = data }
+                            data = d
+                                //datatype == "http://www.w3.org/2001/XMLSchema#integer" ? 
+                                //    new Literal() { vid = LiteralVidEnumeration.integer, value = int.Parse(sdata) } :
+                                //(datatype == "http://www.w3.org/2001/XMLSchema#date" ?
+                                //    new Literal() { vid = LiteralVidEnumeration.date, value = DateTime.Parse(sdata).ToBinary() } :
+                                //(new Literal() { vid = LiteralVidEnumeration.text, value = new Text() { s = sdata, l = "en" } }));
+
                         };
                     }
                     else

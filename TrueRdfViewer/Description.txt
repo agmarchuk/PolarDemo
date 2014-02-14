@@ -122,6 +122,31 @@ spo является фильтром. Этот метод определяет 
 или не вычисляющая эти значения. 
 Объединение - некоторый разветвитель, обеспечивающий выполнение дизъюнкции наборов вариантов.
 
+Попробую, что-ли...
+
+Попробовал, получилось! Есть еще недоделки, но код вида:
+
+                string bsbm = "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/";
+                string bsbm_inst = "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/";
+                // query 1
+                object[] row = new object[3];
+                int _produc = 0, _value1 = 1, _label = 2;
+                var quer = Enumerable.Repeat<RPack>(new RPack(row, ts), 1)
+                    .Spo(_produc, bsbm + "productFeature", bsbm_inst + "ProductFeature19")
+                    .spo(_produc, bsbm + "productFeature", bsbm_inst + "ProductFeature8")
+                    .spo(_produc, "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", bsbm_inst + "ProductType1")
+                    .spD(_produc, bsbm + "productPropertyNumeric1", _value1)
+                    ;
+
+вполне похож на Sparql-прототип. И вполне легко формируется на основе прототипа. При этом, исполняется на
+домашнем компьютере (на 1 млн.) за 61 мс.
+ 
+Я несколько приостановился на типах данных (литералов). В принципе, в разделе Triple определен класс Literal,
+которым надо пользоваться в этих местах. Соответственно, для spD аргумент данных должен быть оформлен следующим
+образом: либо это целый индекс, либо значение класса Literal. В массиве хранения данных row, позиция значения
+переменной поля будет занимать значение типа Literal. Надо сначала вернуться к вводу данных и задействовать 
+тип, если он указан.
+
   
 
 

@@ -46,6 +46,7 @@
     <Compile Include="ONames.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RPack.cs" />
     <Compile Include="Scale2.cs" />
     <Compile Include="Triple.cs" />
     <Compile Include="TripleStore.cs" />
