@@ -75,7 +75,9 @@ namespace TrueRdfViewer
                     ;
                 //foreach (var vv in quer)
                 //{
-                //    Console.WriteLine("?product={0} ?value1={1}", vv.Get(0), vv.Get(1));
+                //    var a = vv.Get(0);
+                //    var b = vv.Get(1);
+                //    Console.WriteLine("?product={0} ?value1={1}", a, b); //vv.Get(0), vv.Get(1));
                 //}
                 Console.WriteLine(quer.Count());
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;

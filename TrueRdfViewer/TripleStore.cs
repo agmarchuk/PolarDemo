@@ -62,9 +62,21 @@ namespace TrueRdfViewer
                 else
                 {
                     var tr = (DTriple)triple;
-                    //Console.WriteLine("{0} {1}", tr.data.vid, tr.data.value);
-                    dtriples.Root.AppendElement(new object[] { tr.sublect, tr.predicate, 
-                        new object[] { 2, new object[] { tr.data.value, "en" } } });
+                    Literal lit = tr.data;
+                    object[] da;
+                    if (lit.vid == LiteralVidEnumeration.integer)
+                        da = new object[] { 1, lit.value };
+                    else if (lit.vid == LiteralVidEnumeration.date)
+                        da = new object[] { 3, lit.value };
+                    else if (lit.vid == LiteralVidEnumeration.text)
+                    {
+                        Text t = (Text)lit.value;
+                        da = new object[] { 2, new object[] { t.s, t.l } };
+                    }
+                    else
+                        da = new object[] { 0, null };
+                    dtriples.Root.AppendElement(new object[] { tr.sublect, tr.predicate, da });
+                        //new object[] { 2, new object[] { tr.data.value, "en" } } });
                 }
             }
             Console.WriteLine();

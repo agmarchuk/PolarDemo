@@ -17,11 +17,15 @@ namespace TrueRdfViewer
             this.row = row;
             this.ts = ts;
         }
-        public string Get(object si)
+        public object Get(object si)
+        {
+            return si is int ? row[(int)si] : si;
+        }
+        public string Ges(object si)
         {
             return si is int ? (string)row[(int)si] : (string)si;
         }
-        public void Set(object si, string valu)
+        public void Set(object si, object valu)
         {
             if (!(si is int)) throw new Exception("argument must be an index");
             int ind = (int)si;
@@ -32,13 +36,13 @@ namespace TrueRdfViewer
     {
         public static IEnumerable<RPack> spo(this IEnumerable<RPack> pack, object subj, object pred, object obj)
         {
-            return pack.Where(pk => pk.Store.ChkOSubjPredObj(pk.Get(subj), pk.Get(pred), pk.Get(obj)));
+            return pack.Where(pk => pk.Store.ChkOSubjPredObj(pk.Ges(subj), pk.Ges(pred), pk.Ges(obj)));
         }
         public static IEnumerable<RPack> Spo(this IEnumerable<RPack> pack, object subj, object pred, object obj)
         {
             if (!(subj is int)) throw new Exception("subject must be an index");
             return pack.SelectMany(pk => pk.Store
-                .GetSubjectByObjPred(pk.Get(obj), pk.Get(pred))
+                .GetSubjectByObjPred(pk.Ges(obj), pk.Ges(pred))
                 .Select(su => 
                 {
                     pk.Set(subj, su);
@@ -49,7 +53,7 @@ namespace TrueRdfViewer
         {
             if (!(obj is int)) throw new Exception("object must be an index");
             return pack.SelectMany(pk => pk.Store
-                .GetObjBySubjPred(pk.Get(subj), pk.Get(pred))
+                .GetObjBySubjPred(pk.Ges(subj), pk.Ges(pred))
                 .Select(ob =>
                 {
                     pk.Set(obj, ob);
@@ -60,10 +64,10 @@ namespace TrueRdfViewer
         {
             if (!(dat is int)) throw new Exception("data must be an index");
             return pack.SelectMany(pk => pk.Store
-                .GetDataBySubjPred(pk.Get(subj), pk.Get(pred))
+                .GetDataBySubjPred(pk.Ges(subj), pk.Ges(pred))
                 .Select(da =>
                 {
-                    pk.Set(dat, ((Text)da.value).s);
+                    pk.Set(dat, da); //((Text)da.value).s);
                     return new RPack(pk.row, pk.Store);
                 }));
         }
