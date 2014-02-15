@@ -44,7 +44,7 @@ namespace TrueRdfViewer
                 //ts.LoadXML(path + "0001.xml");
                 //Console.WriteLine("LoadXML ok.");
                 PolarDB.PaEntry.bufferBytes = 20000000;
-                ts.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset1m.ttl");
+                ts.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset1M.ttl");
                 Console.WriteLine("LoadTurtle ok.");
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 return;
@@ -54,32 +54,38 @@ namespace TrueRdfViewer
             Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             ts.ShowScale();
             Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-
-            bool pseudosparql = true;
+            bool runpseudosoalqltests = true;
+            if (runpseudosoalqltests)
+            {
+                var query1 = BerlinTests.Query1(ts);
+                var query2 = BerlinTests.Query2(ts);
+                var query3 = BerlinTests.Query3(ts);
+                var query6 = BerlinTests.Query6(ts);
+                tt0 = DateTime.Now;
+                Console.WriteLine(query1.Count());
+                Console.WriteLine("1 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                Console.WriteLine(query2.Count());
+                Console.WriteLine("2 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                Console.WriteLine(query3.Count());
+                Console.WriteLine("3 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                Console.WriteLine(query6.Count());
+                Console.WriteLine("6 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                return;
+            }
+            bool pseudosparql = false;
             if (pseudosparql)
             {
-                //var qu = ts.GetItem("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature19");
-                //Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-                //if (qu != null) Console.WriteLine(qu.ToString());
-
-                string bsbm = "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/";
-                string bsbm_inst = "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/";
-                // query 1
-                object[] row = new object[3];
-                int _produc = 0, _value1 = 1, _label = 2;
-                var quer = Enumerable.Repeat<RPack>(new RPack(row, ts), 1)
-                    .Spo(_produc, bsbm + "productFeature", bsbm_inst + "ProductFeature19")
-                    .spo(_produc, bsbm + "productFeature", bsbm_inst + "ProductFeature8")
-                    .spo(_produc, "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", bsbm_inst + "ProductType1")
-                    .spD(_produc, bsbm + "productPropertyNumeric1", _value1)
-                    ;
-                //foreach (var vv in quer)
-                //{
-                //    var a = vv.Get(0);
-                //    var b = vv.Get(1);
-                //    Console.WriteLine("?product={0} ?value1={1}", a, b); //vv.Get(0), vv.Get(1));
-                //}
-                Console.WriteLine(quer.Count());
+                var query = BerlinTests.Query6(ts);
+                foreach (var pack in query)
+                {
+                    var row = pack.row;
+                    foreach (var val in row)
+                    {
+                        Console.Write("{0} ", val);
+                    }
+                    Console.WriteLine();
+                }
+                Console.WriteLine(query.Count());
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 return;
             }

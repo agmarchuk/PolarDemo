@@ -21,7 +21,7 @@ namespace TrueRdfViewer
                 case LiteralVidEnumeration.text:
                     {
                         Text txt = (Text)value;
-                        return txt.s + "@" + txt.l;
+                        return "\"" + txt.s + "\"@" + txt.l;
                     }
                 default: return value.ToString();
             }

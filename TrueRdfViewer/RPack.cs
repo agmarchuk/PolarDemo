@@ -25,6 +25,16 @@ namespace TrueRdfViewer
         {
             return si is int ? (string)row[(int)si] : (string)si;
         }
+        public Literal Val(int ind)
+        {
+            return (Literal)row[ind];
+        }
+        public int Vai(int ind)
+        {
+            Literal lit = (Literal)row[ind];
+            if (lit.vid != LiteralVidEnumeration.integer) throw new Exception("Wrong literal vid in Vai method");
+            return (int)lit.value;
+        }
         public void Set(object si, object valu)
         {
             if (!(si is int)) throw new Exception("argument must be an index");

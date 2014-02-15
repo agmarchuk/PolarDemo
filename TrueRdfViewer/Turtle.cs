@@ -89,23 +89,23 @@ namespace TrueRdfViewer
                                 datatype = GetEntity(namespaces, qname);
                             }
                         }
-                        Literal d = null;
-                        if (datatype == "http://www.w3.org/2001/XMLSchema#integer")
-                            d = new Literal() { vid = LiteralVidEnumeration.integer, value = int.Parse(sdata) };
-                        else if (datatype == "http://www.w3.org/2001/XMLSchema#date")
-                            d = new Literal() { vid = LiteralVidEnumeration.date, value = DateTime.Parse(sdata).ToBinary() };
-                        else
-                            d = new Literal() { vid = LiteralVidEnumeration.text, value = new Text() { s = sdata, l = "en" } };
+                        //Literal d = null;
+                        //if (datatype == "http://www.w3.org/2001/XMLSchema#integer")
+                        //    d = new Literal() { vid = LiteralVidEnumeration.integer, value = int.Parse(sdata) };
+                        //else if (datatype == "http://www.w3.org/2001/XMLSchema#date")
+                        //    d = new Literal() { vid = LiteralVidEnumeration.date, value = DateTime.Parse(sdata).ToBinary() };
+                        //else
+                        //    d = new Literal() { vid = LiteralVidEnumeration.text, value = new Text() { s = sdata, l = "en" } };
                         yield return new DTriple()
                         {
                             sublect = subject,
                             predicate = predicate,
-                            data = d
-                                //datatype == "http://www.w3.org/2001/XMLSchema#integer" ? 
-                                //    new Literal() { vid = LiteralVidEnumeration.integer, value = int.Parse(sdata) } :
-                                //(datatype == "http://www.w3.org/2001/XMLSchema#date" ?
-                                //    new Literal() { vid = LiteralVidEnumeration.date, value = DateTime.Parse(sdata).ToBinary() } :
-                                //(new Literal() { vid = LiteralVidEnumeration.text, value = new Text() { s = sdata, l = "en" } }));
+                            data = // d
+                                datatype == "http://www.w3.org/2001/XMLSchema#integer" ?
+                                    new Literal() { vid = LiteralVidEnumeration.integer, value = int.Parse(sdata) } :
+                                (datatype == "http://www.w3.org/2001/XMLSchema#date" ?
+                                    new Literal() { vid = LiteralVidEnumeration.date, value = DateTime.Parse(sdata).ToBinary() } :
+                                (new Literal() { vid = LiteralVidEnumeration.text, value = new Text() { s = sdata, l = "en" } }))
 
                         };
                     }
