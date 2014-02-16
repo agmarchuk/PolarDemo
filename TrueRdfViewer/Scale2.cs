@@ -32,10 +32,18 @@ namespace TrueRdfViewer
                 arr[ind >> 4] = arr[ind >> 4] & (~(3 << ((ind & 15) << 1))) | ((value & 3) << ((ind & 15) << 1));
             }
         }
-        public int Code(string subj, string pred, string obj)
+        // Методы для получения занчения шкалы из внешнего массива целых (файла последовательности целых)
+        public static int GetArrIndex(int ind) { return ind >> 4; }
+        public static int GetFromWord(int w, int ind) { return (w >> ((ind & 15) << 1)) & 3; } 
+
+        public static int Code(int range, string subj, string pred, string obj)
         {
             return (subj.GetHashCode() ^ pred.GetHashCode() ^ obj.GetHashCode()) & ((1 << range) - 1);
         }
         public int Count() { return 1 << range; }
+        public IEnumerable<int> Values()
+        {
+            return arr;
+        }
     }
 }

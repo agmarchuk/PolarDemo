@@ -50,9 +50,9 @@ namespace TrueRdfViewer
                 return;
             }
 
-            ts.CreateScale();
-            Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            ts.ShowScale();
+            //ts.CreateScale();
+            //Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            //ts.ShowScale();
             Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             bool runpseudosoalqltests = true;
             if (runpseudosoalqltests)
