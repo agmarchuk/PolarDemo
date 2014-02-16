@@ -19,6 +19,8 @@ namespace TrueRdfViewer
         private FlexIndexView<SubjPredObj> spo_o_index = null;
         private FlexIndexView<SubjPred> sp_d_index = null;
         private FlexIndexView<SubjPred> op_o_index = null;
+        private PaCell oscale;
+        private int range = 0;
 
         public TripleStore(string path)
         {
@@ -26,10 +28,23 @@ namespace TrueRdfViewer
             InitTypes();
             otriples = new PaCell(tp_otriple_seq, path + "otriples.pac", false);
             dtriples = new PaCell(tp_dtriple_seq, path + "dtriples.pac", false);
+            oscale = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)), path + "oscale.pac", false);
+            if (!oscale.IsEmpty)
+            {
+                CalculateRange();
+            }
             if (!otriples.IsEmpty)
             {
                 OpenCreateIndexes();
             }
+        }
+
+        private void CalculateRange()
+        {
+            long len = oscale.Root.Count() - 1;
+            int r = 1;
+            while (len != 0) { len = len >> 1; r++; }
+            range = r + 3;
         }
 
         private void OpenCreateIndexes()
@@ -90,6 +105,14 @@ namespace TrueRdfViewer
             spo_o_index.Load(null);
             sp_d_index.Load(null);
             op_o_index.Load(null);
+            // Создание шкалы
+            CreateScale();
+            ShowScale();
+            oscale.Clear();
+            oscale.Fill(new object[0]);
+            foreach (int v in scale.Values()) oscale.Root.AppendElement(v);
+            oscale.Flush();
+            CalculateRange(); // Наверное, range считается в CreateScale() 
         }
         public void LoadXML(string filepath)
         {
@@ -135,18 +158,30 @@ namespace TrueRdfViewer
             spo_o_index.Load(null);
             sp_d_index.Load(null);
             op_o_index.Load(null);
+            // Создание шкалы
+            CreateScale();
+            ShowScale();
+            oscale.Clear();
+            oscale.Fill(new object[0]);
+            foreach (int v in scale.Values()) oscale.Root.AppendElement(v);
+            oscale.Flush();
         }
 
         private Scale2 scale = null;
-        public void CreateScale()
+        private void CreateScale()
         {
-            scale = new Scale2(26);
+            long len = otriples.Root.Count() - 1;
+            int r = 1;
+            while (len != 0) { len = len >> 1; r++; }
+
+            int range = r + 4;
+            scale = new Scale2(range);
             foreach (object[] tr in otriples.Root.ElementValues())
             {
                 string subj = (string)tr[0];
                 string pred = (string)tr[1];
                 string obj = (string)tr[2];
-                int code = scale.Code(subj, pred, obj);
+                int code = Scale2.Code(range, subj, pred, obj);
                 int twobits = scale[code];
                 if (twobits > 1) continue; // Уже "плохо"
                 scale[code] = twobits + 1;
@@ -219,9 +254,18 @@ namespace TrueRdfViewer
         }
         public bool ChkOSubjPredObj(string subj, string pred, string obj)
         {
-            if (scale != null)
+            //if (scale != null)
+            //{
+            //    int tb = scale[scale.Code(subj, pred, obj)];
+            //    if (tb == 0) return false;
+            //    else if (tb == 1) return true;
+            //    // else надо считаль длинно, см. далее
+            //}
+            if (range > 0)
             {
-                int tb = scale[scale.Code(subj, pred, obj)];
+                int code = Scale2.Code(range, subj, pred, obj);
+                int word = (int)oscale.Root.Element(Scale2.GetArrIndex(code)).Get();
+                int tb = Scale2.GetFromWord(word, code);
                 if (tb == 0) return false;
                 else if (tb == 1) return true;
                 // else надо считаль длинно, см. далее
