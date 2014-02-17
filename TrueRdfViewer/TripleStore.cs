@@ -182,6 +182,7 @@ namespace TrueRdfViewer
                 string pred = (string)tr[1];
                 string obj = (string)tr[2];
                 int code = Scale2.Code(range, subj, pred, obj);
+                if (code == 709428) Console.WriteLine("Code 709428 exists! {0} {1} {2} {3}", range, subj, pred, obj);
                 int twobits = scale[code];
                 if (twobits > 1) continue; // Уже "плохо"
                 scale[code] = twobits + 1;
@@ -254,14 +255,32 @@ namespace TrueRdfViewer
         }
         public bool ChkOSubjPredObj(string subj, string pred, string obj)
         {
-            //if (scale != null)
-            //{
-            //    int tb = scale[scale.Code(subj, pred, obj)];
-            //    if (tb == 0) return false;
-            //    else if (tb == 1) return true;
-            //    // else надо считаль длинно, см. далее
-            //}
-            if (range > 0)
+            bool test = true;
+            if (test)
+            {
+                int code = Scale2.Code(range, subj, pred, obj);
+                int word = (int)oscale.Root.Element(Scale2.GetArrIndex(code)).Get();
+                int tb = Scale2.GetFromWord(word, code);
+
+                bool correct = !spo_o_index.GetFirst(ent =>
+                {
+                    string su = (string)ent.Field(0).Get();
+                    int cmp = su.CompareTo(subj);
+                    if (cmp != 0) return cmp;
+                    string pr = (string)ent.Field(1).Get();
+                    cmp = pr.CompareTo(pred);
+                    if (cmp != 0) return cmp;
+                    string ob = (string)ent.Field(2).Get();
+                    return ob.CompareTo(obj);
+                }).IsEmpty;
+
+                if (!correct && tb == 1)
+                {
+                    Console.WriteLine("?????? {0} {1} {2} {3} {4} {5}", correct, tb, code, subj, pred, obj);
+                }
+            }
+
+            if (false && range > 0)
             {
                 int code = Scale2.Code(range, subj, pred, obj);
                 int word = (int)oscale.Root.Element(Scale2.GetArrIndex(code)).Get();
