@@ -1,16 +1,13 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
 using PolarDB;
 
 namespace PolarBasedRDF
-{
-    public class FixedIndex<Tkey>
-    {
-        // Использовать надо следующим образом:
-        public class SubjPred :IComparable
-        { 
+{ 
+    public class SubjPred : IComparable
+        {
             public string subj, pred;
             public int CompareTo(object sp)
             {
@@ -26,6 +23,10 @@ namespace PolarBasedRDF
                 return x.CompareTo(y);
             }
         }
+    public class FixedIndex<Tkey>
+    {
+        // Использовать надо следующим образом:
+      
         public static void Test()
         {
             PType objectTriplets = new PTypeSequence(new PTypeRecord(
@@ -35,7 +36,7 @@ namespace PolarBasedRDF
                 new NamedType("o", new PType(PTypeEnumeration.sstring))
             ));
             // инициализация таблицы
-            var directCell = new PaCell(objectTriplets, "path", false); 
+            var directCell = new PaCell(objectTriplets, "path", false);
             // Более компактный способ заполнения ячейки
             directCell.Clear();
             directCell.Fill(new object[0]);
@@ -46,9 +47,9 @@ namespace PolarBasedRDF
             directCell.Flush();
             // Создание индекса
             FixedIndex<SubjPred> sp_index = new FixedIndex<SubjPred>("..sp", directCell.Root, entry =>
-                {
-                    return new SubjPred() { subj = (string)entry.Field(1).Get(), pred = (string)entry.Field(1).Get() };
-                });
+            {
+                return new SubjPred() { subj = (string)entry.Field(1).Get(), pred = (string)entry.Field(1).Get() };
+            });
         }
 
         private PaEntry table;
@@ -160,7 +161,7 @@ namespace PolarBasedRDF
                     entry.offset = (long)ent.Get();
                     return entry;
                 });
-                //.Where(t_ent => !(bool)t_ent.Field(0).Get()); // остаются только неуничтоженные
+            //.Where(t_ent => !(bool)t_ent.Field(0).Get()); // остаются только неуничтоженные
             return query;
         }
         private IEnumerable<PaEntry> GetAllFrom(PaCell cell, Func<PaEntry, int> elementDepth)

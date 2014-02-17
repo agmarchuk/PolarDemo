@@ -8,7 +8,7 @@ using PolarDB;
 
 namespace TripleIntCoding
 {
-    public class PairInt : IComparable
+    public struct PairInt : IComparable
     { 
         public int first, second;
         public int CompareTo(object v2)

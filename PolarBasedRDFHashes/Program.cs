@@ -1,7 +1,9 @@
 ﻿
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using PolarBasedRDFHashes;
 using PolarDB;
 
 namespace PolarBasedRDF
@@ -15,16 +17,8 @@ namespace PolarBasedRDF
             Console.WriteLine("Start");
             long tripletsCount = 1000*1000*10;
             var db = "F:\\freebase-rdf-2013-02-10-00-00.nt2";
-            watch.Restart();
-            DateTime dt = DateTime.Now;
-                    RDFTripletsByPolarEngine.ReadTSV(db, (id, property, value, obj, lang) => { }, tripletsCount);
-            var dtm = DateTime.Now - dt;
-            watch.Stop();
-                    using (StreamWriter log = new StreamWriter("../../log.txt", true))
-                        log.WriteLine("read freebase " + tripletsCount + " triplets time= " + dtm.TotalSeconds+"sec.");    
-                    return;
             RDFTripletsByPolarEngine graph = new RDFTripletsByPolarEngine(new DirectoryInfo(path));
-            foreach (var count in new[] { 3 * 1000 * 1000 })//3 * 1000 * 1000, 
+            foreach (var count in new[] { 10 * 1000 * 1000 })//3 * 1000 * 1000, 
             {
                 using (StreamWriter log = new StreamWriter("../../log.txt", true))
                     log.WriteLine("start " + count);
@@ -43,8 +37,7 @@ namespace PolarBasedRDF
                     graph.LoadIndexes();
                     watch.Stop();
                     using (StreamWriter log = new StreamWriter("../../log.txt", true))
-                        log.WriteLine("bufferBYtes= max " + "load indexes " + watch.Elapsed.Ticks.ToString());
-                   
+                        log.WriteLine("load indexes " + watch.Elapsed.Ticks.ToString());
                 }
                
 
@@ -100,7 +93,7 @@ namespace PolarBasedRDF
                 //Console.WriteLine(item.ToString());
                 //Console.WriteLine(watch.ElapsedTicks);
                 using (StreamWriter log = new StreamWriter("../../log.txt", true))
-                    log.WriteLine("item.ToString()" + watch.Elapsed.Ticks);
+                    log.WriteLine(item.ToString() + watch.Elapsed.Ticks);
 
                 watch.Restart();
                 foreach (string id in ids)
