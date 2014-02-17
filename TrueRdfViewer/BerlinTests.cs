@@ -28,6 +28,21 @@ namespace TrueRdfViewer
                 ;
             return quer;
         }
+        // Тестовый запрос для экспериментов
+        public static IEnumerable<RPack> Query0(TripleStore ts)
+        {
+            object[] row = new object[3];
+            int _produc = 0, _value1 = 1, _label = 2;
+            var quer = Enumerable.Repeat<RPack>(new RPack(row, ts), 1)
+                .Spo(_produc, bsbm + "productFeature", bsbm_inst + "ProductFeature19")
+                //.spo(_produc, bsbm + "productFeature", bsbm_inst + "ProductFeature8")
+                //.spo(_produc, rdf + "type", bsbm_inst + "ProductType1")
+                //.spD(_produc, bsbm + "productPropertyNumeric1", _value1)
+                //.Where(pack => pack.Vai(_value1) > 10)
+                //.spD(_produc, rdfs + "label", _label)
+                ;
+            return quer;
+        }
         // Не выдает результатов, поэтому не доделан
         public static IEnumerable<RPack> Query2(TripleStore ts)
         {

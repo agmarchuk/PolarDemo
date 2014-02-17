@@ -57,11 +57,14 @@ namespace TrueRdfViewer
             bool runpseudosoalqltests = true;
             if (runpseudosoalqltests)
             {
+                //var query0 = BerlinTests.Query0(ts);
                 var query1 = BerlinTests.Query1(ts);
                 var query2 = BerlinTests.Query2(ts);
                 var query3 = BerlinTests.Query3(ts);
                 var query6 = BerlinTests.Query6(ts);
                 tt0 = DateTime.Now;
+                //Console.WriteLine(query0.Count());
+                //Console.WriteLine("query0 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 Console.WriteLine(query1.Count());
                 Console.WriteLine("1 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 Console.WriteLine(query2.Count());

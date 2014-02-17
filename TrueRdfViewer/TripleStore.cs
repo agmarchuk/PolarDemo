@@ -254,22 +254,15 @@ namespace TrueRdfViewer
         }
         public bool ChkOSubjPredObj(string subj, string pred, string obj)
         {
-            //if (scale != null)
+            //if (range > 0)
             //{
-            //    int tb = scale[scale.Code(subj, pred, obj)];
+            //    int code = Scale2.Code(range, subj, pred, obj);
+            //    int word = (int)oscale.Root.Element(Scale2.GetArrIndex(code)).Get();
+            //    int tb = Scale2.GetFromWord(word, code);
             //    if (tb == 0) return false;
             //    else if (tb == 1) return true;
             //    // else надо считаль длинно, см. далее
             //}
-            if (range > 0)
-            {
-                int code = Scale2.Code(range, subj, pred, obj);
-                int word = (int)oscale.Root.Element(Scale2.GetArrIndex(code)).Get();
-                int tb = Scale2.GetFromWord(word, code);
-                if (tb == 0) return false;
-                else if (tb == 1) return true;
-                // else надо считаль длинно, см. далее
-            }
             return !spo_o_index.GetFirst(ent =>
             {
                 string su = (string)ent.Field(0).Get();
