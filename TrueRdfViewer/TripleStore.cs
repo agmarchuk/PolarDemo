@@ -254,15 +254,15 @@ namespace TrueRdfViewer
         }
         public bool ChkOSubjPredObj(string subj, string pred, string obj)
         {
-            //if (range > 0)
-            //{
-            //    int code = Scale2.Code(range, subj, pred, obj);
-            //    int word = (int)oscale.Root.Element(Scale2.GetArrIndex(code)).Get();
-            //    int tb = Scale2.GetFromWord(word, code);
-            //    if (tb == 0) return false;
-            //    else if (tb == 1) return true;
-            //    // else надо считаль длинно, см. далее
-            //}
+            if (range > 0)
+            {
+                int code = Scale2.Code(range, subj, pred, obj);
+                int word = (int)oscale.Root.Element(Scale2.GetArrIndex(code)).Get();
+                int tb = Scale2.GetFromWord(word, code);
+                if (tb == 0) return false;
+                // else if (tb == 1) return true; -- это был источник ошибки
+                // else надо считаль длинно, см. далее
+            }
             return !spo_o_index.GetFirst(ent =>
             {
                 string su = (string)ent.Field(0).Get();
@@ -282,14 +282,14 @@ namespace TrueRdfViewer
             XElement res = new XElement("record", new XAttribute("id", subject));
             //PaEntry dent = dtriples.Root.Element(0);
             //foreach (var ent in subject_d_index.GetAllByKey(subject))
-            foreach (var ent in sp_d_index.GetAll(en => ((string)en.Field(0).Get()).CompareTo(subject)))
-            {
-                object[] tr = (object[])ent.Get();
-                string predicate = (string)tr[1];
-                object[] literal = (object[])tr[2];
-                res.Add(new XElement("field", new XAttribute("prop", predicate),
-                    ((object[])literal[1])[0]));
-            }
+            //foreach (var ent in sp_d_index.GetAll(en => ((string)en.Field(0).Get()).CompareTo(subject)))
+            //{
+            //    object[] tr = (object[])ent.Get();
+            //    string predicate = (string)tr[1];
+            //    object[] literal = (object[])tr[2];
+            //    res.Add(new XElement("field", new XAttribute("prop", predicate),
+            //        ((object[])literal[1])[0]));
+            //}
             string type = null;
             //PaEntry oent = otriples.Root.Element(0);
             //foreach (var ent in subject_o_index.GetAllByKey(subject))

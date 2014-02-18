@@ -45,6 +45,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>PolarBasedRDF.Program</StartupObject>
@@ -74,6 +75,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="analize.txt" />
     <Content Include="log.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -84,6 +86,10 @@
     <ProjectReference Include="..\..\PolarDB\PolarDB.csproj">
       <Project>{907bb4af-fbc9-4a1e-8f80-194af9337aa4}</Project>
       <Name>PolarDB</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ReaderRDF\ReaderRDF.csproj">
+      <Project>{10e3a3c3-1c7c-461c-9ae9-a35555460c50}</Project>
+      <Name>ReaderRDF</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

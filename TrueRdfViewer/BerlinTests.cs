@@ -28,6 +28,21 @@ namespace TrueRdfViewer
                 ;
             return quer;
         }
+        // Вариант первого теста
+        public static IEnumerable<RPack> Query1_1(TripleStore ts)
+        {
+            object[] row = new object[3];
+            int _produc = 0, _value1 = 1, _label = 2;
+            var quer = Enumerable.Repeat<RPack>(new RPack(row, ts), 1)
+                .Spo(_produc, bsbm + "productFeature", bsbm_inst + "ProductFeature17")
+                .spo(_produc, bsbm + "productFeature", bsbm_inst + "ProductFeature7")
+                .spo(_produc, rdf + "type", bsbm_inst + "ProductType1")
+                .spD(_produc, bsbm + "productPropertyNumeric1", _value1)
+                .Where(pack => pack.Vai(_value1) > 10)
+                .spD(_produc, rdfs + "label", _label)
+                ;
+            return quer;
+        }
         // Тестовый запрос для экспериментов
         public static IEnumerable<RPack> Query0(TripleStore ts)
         {
@@ -68,6 +83,23 @@ namespace TrueRdfViewer
             int _p1 = 2, _p3 = 3, _testVar = 4;
             var quer = Enumerable.Repeat<RPack>(new RPack(row, ts), 1)
                 .Spo(_product, bsbm + "productFeature", bsbm_inst + "ProductFeature1")
+                .spD(_product, rdfs + "label", _label)
+                .spo(_product, rdf + "type", bsbm + "Product")
+                .spD(_product, bsbm + "productPropertyNumeric1", _p1)
+                .Where(pack => pack.Vai(_p1) > 1)
+                .spD(_product, bsbm + "productPropertyNumeric3", _p3)
+                .Where(pack => pack.Vai(_p3) < 100000)
+                ;
+            return quer;
+        }
+        // Вариант третьего теста
+        public static IEnumerable<RPack> Query3_1(TripleStore ts)
+        {
+            object[] row = new object[5];
+            int _product = 0, _label = 1;
+            int _p1 = 2, _p3 = 3, _testVar = 4;
+            var quer = Enumerable.Repeat<RPack>(new RPack(row, ts), 1)
+                .Spo(_product, bsbm + "productFeature", bsbm_inst + "ProductFeature2")
                 .spD(_product, rdfs + "label", _label)
                 .spo(_product, rdf + "type", bsbm + "Product")
                 .spD(_product, bsbm + "productPropertyNumeric1", _p1)

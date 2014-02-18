@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace TrueRdfViewer
 {
@@ -24,6 +25,7 @@ namespace TrueRdfViewer
                 //"p0011098",
                 //"svet_100616111408_14354"
 
+                //"http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature19",
                 "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature13",
                 "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature4",
                 "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature8",
@@ -31,13 +33,22 @@ namespace TrueRdfViewer
                 "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature3",
                 "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature19",
                 //"http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature19",
-                //"http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature19",
             };
 
-            DateTime tt0 = DateTime.Now;
             Console.WriteLine("Start");
             string path = "../../../Databases/";
             TripleStore ts = new TripleStore(path);
+
+            DateTime tt0 = DateTime.Now;
+
+            foreach (string id in ids)
+            {
+                 XElement el = ts.GetItem(id);
+                 Console.WriteLine(el.Elements().Count());
+                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            }
+            return;
+
             bool toload = false;
             if (toload)
             {
@@ -59,8 +70,10 @@ namespace TrueRdfViewer
             {
                 //var query0 = BerlinTests.Query0(ts);
                 var query1 = BerlinTests.Query1(ts);
+                //var query1 = BerlinTests.Query1_1(ts);
                 var query2 = BerlinTests.Query2(ts);
-                var query3 = BerlinTests.Query3(ts);
+                //var query3 = BerlinTests.Query3(ts);
+                var query3 = BerlinTests.Query3_1(ts);
                 var query6 = BerlinTests.Query6(ts);
                 tt0 = DateTime.Now;
                 //Console.WriteLine(query0.Count());
