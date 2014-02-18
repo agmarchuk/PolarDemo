@@ -20,7 +20,7 @@ namespace GraphTesting
             gr = new Graph(path);
             
             // Следующая строчка закомментаривается для проверки работы базы данных с уже имеющейся загрузкой
-            gr.Load(new string[] { path + "0001.xml" });
+            //gr.Load(new string[] { @"D:\Home\FactographDatabases\0001.xml" });
             
             //XElement formats = XElement.Load(path + "ApplicationProfile.xml").Element("formats");
 
@@ -45,7 +45,7 @@ namespace GraphTesting
             string id = "w20070417_5_8436";
             //var item = engine.GetItemByIdBasic(id, true);
             var item1 = gr.GetItemById(id, format);
-            if (item1 != null) Console.WriteLine(item1.ToString());
+            //if (item1 != null) Console.WriteLine(item1.ToString());
 
 
             string[] probes = new string[] {
