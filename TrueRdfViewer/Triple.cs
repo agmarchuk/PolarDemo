@@ -6,9 +6,17 @@ using System.Threading.Tasks;
 
 namespace TrueRdfViewer
 {
-    public abstract class Triple { public string sublect, predicate; }
-    public class OTriple : Triple { public string obj; }
-    public class DTriple : Triple { public Literal data; }
+    public interface ICodable<in Entity>
+    {
+        Entity CodeString(string s);
+        public static string DecodeEntity(Entity e);
+        // Объектное представление - возможно методы не нужены, если Entity имеет прямое представление как объект Поляра
+        public static object PObj(Entity e);
+        public static Entity EObj(object p);
+    }
+    public abstract class Triple<Entity> { public Entity subject, predicate; }
+    public class OTriple<Entity> : Triple<Entity> { public Entity obj; }
+    public class DTriple<Entity> : Triple<Entity> { public Literal data; }
     public enum LiteralVidEnumeration { unknown, integer, text, date }
     public class Literal 
     { 
@@ -29,22 +37,22 @@ namespace TrueRdfViewer
     } 
     public class Text { public string s, l; }
 
-    public class SubjPred : IComparable
+    public class SubjPred<Entity> : IComparable where Entity : IComparable
     {
-        public string subj, pred;
+        public Entity subj, pred;
         public int CompareTo(object sp)
         {
-            int cmp = subj.CompareTo(((SubjPred)sp).subj);
+            int cmp = subj.CompareTo(((SubjPred<Entity>)sp).subj);
             if (cmp != 0) return cmp;
-            return pred.CompareTo(((SubjPred)sp).pred);
+            return pred.CompareTo(((SubjPred<Entity>)sp).pred);
         }
     }
-    public class SubjPredObj : IComparable
+    public class SubjPredObj<Entity> : IComparable where Entity : IComparable
     {
-        public string subj, pred, obj;
+        public Entity subj, pred, obj;
         public int CompareTo(object sp)
         {
-            SubjPredObj target = (SubjPredObj)sp;
+            SubjPredObj<Entity> target = (SubjPredObj<Entity>)sp;
             int cmp = subj.CompareTo(target.subj);
             if (cmp != 0) return cmp;
             cmp = pred.CompareTo(target.pred);

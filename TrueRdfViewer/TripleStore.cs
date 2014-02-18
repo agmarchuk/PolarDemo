@@ -9,16 +9,16 @@ using sema2012m;
 
 namespace TrueRdfViewer
 {
-    public class TripleStore
+    public class TripleStore<Entity> where Entity : IComparable, ICodable<Entity>
     {
         private string path;
         private PType tp_otriple_seq;
         private PType tp_dtriple_seq;
         private PaCell otriples;
         private PaCell dtriples;
-        private FlexIndexView<SubjPredObj> spo_o_index = null;
-        private FlexIndexView<SubjPred> sp_d_index = null;
-        private FlexIndexView<SubjPred> op_o_index = null;
+        private FlexIndexView<SubjPredObj<Entity>> spo_o_index = null;
+        private FlexIndexView<SubjPred<Entity>> sp_d_index = null;
+        private FlexIndexView<SubjPred<Entity>> op_o_index = null;
         private PaCell oscale;
         private int range = 0;
 
@@ -49,12 +49,12 @@ namespace TrueRdfViewer
 
         private void OpenCreateIndexes()
         {
-            spo_o_index = new FlexIndexView<SubjPredObj>(path + "spo_o_index", otriples.Root,
-                ent => new SubjPredObj() { subj = (string)ent.Field(0).Get(), pred = (string)ent.Field(1).Get(), obj = (string)ent.Field(2).Get() });
-            sp_d_index = new FlexIndexView<SubjPred>(path + "subject_d_index", dtriples.Root,
-                ent => new SubjPred() { subj = (string)ent.Field(0).Get(), pred = (string)ent.Field(1).Get() });
-            op_o_index = new FlexIndexView<SubjPred>(path + "obj_o_index", otriples.Root,
-                ent => new SubjPred() { subj = (string)ent.Field(2).Get(), pred = (string)ent.Field(1).Get() });
+            spo_o_index = new FlexIndexView<SubjPredObj<Entity>>(path + "spo_o_index", otriples.Root,
+                ent => new SubjPredObj<Entity>() { subj = (Entity)ent.Field(0).Get(), pred = (Entity)ent.Field(1).Get(), obj = (string)ent.Field(2).Get() });
+            sp_d_index = new FlexIndexView<SubjPred<Entity>>(path + "subject_d_index", dtriples.Root,
+                ent => new SubjPred<Entity>() { subj = (Entity)ent.Field(0).Get(), pred = (Entity)ent.Field(1).Get() });
+            op_o_index = new FlexIndexView<SubjPred<Entity>>(path + "obj_o_index", otriples.Root,
+                ent => new SubjPred<Entity>() { subj = (Entity)ent.Field(2).Get(), pred = (Entity)ent.Field(1).Get() });
         }
 
         public void LoadTurtle(string filepath)
@@ -68,15 +68,21 @@ namespace TrueRdfViewer
             {
                 if (i % 10000 == 0) Console.Write("{0} ", i / 10000);
                 i++;
-                if (triple is OTriple)
+                if (triple is OTriple<Entity>)
                 {
-                    var tr = (OTriple)triple;
+                    var tr = (OTriple<Entity>)triple;
                     //Console.WriteLine(tr.obj);
-                    otriples.Root.AppendElement(new object[] { tr.sublect, tr.predicate, tr.obj });
+                    //otriples.Root.AppendElement(new object[] { tr.subject, tr.predicate, tr.obj });
+                    otriples.Root.AppendElement(new object[] 
+                    { 
+                        ICodable<Entity>.PObj(tr.subject), 
+                        ICodable<Entity>.PObj(tr.predicate), 
+                        ICodable<Entity>.PObj(tr.obj) 
+                    });
                 }
                 else
                 {
-                    var tr = (DTriple)triple;
+                    var tr = (DTriple<Entity>)triple;
                     Literal lit = tr.data;
                     object[] da;
                     if (lit.vid == LiteralVidEnumeration.integer)
@@ -90,8 +96,13 @@ namespace TrueRdfViewer
                     }
                     else
                         da = new object[] { 0, null };
-                    dtriples.Root.AppendElement(new object[] { tr.sublect, tr.predicate, da });
-                        //new object[] { 2, new object[] { tr.data.value, "en" } } });
+                    //dtriples.Root.AppendElement(new object[] { tr.subject, tr.predicate, da });
+                    dtriples.Root.AppendElement(new object[] 
+                    { 
+                        ICodable<Entity>.PObj(tr.subject), 
+                        ICodable<Entity>.PObj(tr.predicate), 
+                        da 
+                    });
                 }
             }
             Console.WriteLine();
@@ -114,58 +125,58 @@ namespace TrueRdfViewer
             oscale.Flush();
             CalculateRange(); // Наверное, range считается в CreateScale() 
         }
-        public void LoadXML(string filepath)
-        {
-            otriples.Clear();
-            otriples.Fill(new object[0]);
-            dtriples.Clear();
-            dtriples.Fill(new object[0]);
-            XElement db = XElement.Load(filepath);
-            foreach (XElement elem in db.Elements())
-            {
-                var id_att = elem.Attribute(ONames.rdfabout);
-                if (id_att == null) continue;
-                string id = id_att.Value;
-                string typ = elem.Name.NamespaceName + elem.Name.LocalName;
-                otriples.Root.AppendElement(
-                    new object[] { id, ONames.rdfnsstring + "type", typ } );
-                foreach (XElement el in elem.Elements())
-                {
-                    string prop = el.Name.NamespaceName + el.Name.LocalName;
-                    var resource_att = el.Attribute(ONames.rdfresource);
-                    if (resource_att != null)
-                    { // Объектная ссылка
-                        otriples.Root.AppendElement(
-                            new object[] { id, prop, resource_att.Value } );
-                    }
-                    else
-                    { // Поле данных
-                        var lang_att = el.Attribute(ONames.xmllang);
-                        string lang = lang_att == null ? "" : lang_att.Value;
-                        dtriples.Root.AppendElement(
-                            new object[] { id, prop, 
-                                new object[] { 2, new object[] { el.Value, lang } } } );
-                    }
-                }
-            }
-            otriples.Flush();
-            dtriples.Flush();
-            // Индексирование
-            if (!otriples.IsEmpty)
-            {
-                OpenCreateIndexes();
-            }
-            spo_o_index.Load(null);
-            sp_d_index.Load(null);
-            op_o_index.Load(null);
-            // Создание шкалы
-            CreateScale();
-            ShowScale();
-            oscale.Clear();
-            oscale.Fill(new object[0]);
-            foreach (int v in scale.Values()) oscale.Root.AppendElement(v);
-            oscale.Flush();
-        }
+        //public void LoadXML(string filepath)
+        //{
+        //    otriples.Clear();
+        //    otriples.Fill(new object[0]);
+        //    dtriples.Clear();
+        //    dtriples.Fill(new object[0]);
+        //    XElement db = XElement.Load(filepath);
+        //    foreach (XElement elem in db.Elements())
+        //    {
+        //        var id_att = elem.Attribute(ONames.rdfabout);
+        //        if (id_att == null) continue;
+        //        string id = id_att.Value;
+        //        string typ = elem.Name.NamespaceName + elem.Name.LocalName;
+        //        otriples.Root.AppendElement(
+        //            new object[] { id, ONames.rdfnsstring + "type", typ } );
+        //        foreach (XElement el in elem.Elements())
+        //        {
+        //            string prop = el.Name.NamespaceName + el.Name.LocalName;
+        //            var resource_att = el.Attribute(ONames.rdfresource);
+        //            if (resource_att != null)
+        //            { // Объектная ссылка
+        //                otriples.Root.AppendElement(
+        //                    new object[] { id, prop, resource_att.Value } );
+        //            }
+        //            else
+        //            { // Поле данных
+        //                var lang_att = el.Attribute(ONames.xmllang);
+        //                string lang = lang_att == null ? "" : lang_att.Value;
+        //                dtriples.Root.AppendElement(
+        //                    new object[] { id, prop, 
+        //                        new object[] { 2, new object[] { el.Value, lang } } } );
+        //            }
+        //        }
+        //    }
+        //    otriples.Flush();
+        //    dtriples.Flush();
+        //    // Индексирование
+        //    if (!otriples.IsEmpty)
+        //    {
+        //        OpenCreateIndexes();
+        //    }
+        //    spo_o_index.Load(null);
+        //    sp_d_index.Load(null);
+        //    op_o_index.Load(null);
+        //    // Создание шкалы
+        //    CreateScale();
+        //    ShowScale();
+        //    oscale.Clear();
+        //    oscale.Fill(new object[0]);
+        //    foreach (int v in scale.Values()) oscale.Root.AppendElement(v);
+        //    oscale.Flush();
+        //}
 
         private Scale2 scale = null;
         private void CreateScale()
@@ -202,17 +213,17 @@ namespace TrueRdfViewer
             Console.WriteLine("{0} {1} {2} {3} err: {4}", c, c0, c1, c2, cerr);
         }
 
-        public IEnumerable<string> GetSubjectByObjPred(string obj, string pred)
+        public IEnumerable<Entity> GetSubjectByObjPred(Entity obj, Entity pred)
         {
             return op_o_index.GetAll(ent => 
             {
-                string ob = (string)ent.Field(2).Get();
+                Entity ob = ICodable<Entity>.EObj(ent.Field(2).Get());
                 int cmp = ob.CompareTo(obj);
                 if (cmp != 0) return cmp;
                 string pr = (string)ent.Field(1).Get();
                 return pr.CompareTo(pred);
             })
-                .Select(en => (string)en.Field(0).Get());
+                .Select(en => ICodable<Entity>.EObj(en.Field(0).Get()));
         }
         public IEnumerable<string> GetObjBySubjPred(string subj, string pred)
         {
