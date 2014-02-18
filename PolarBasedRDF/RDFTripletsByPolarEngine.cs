@@ -4,6 +4,7 @@ using System.Xml.Linq;
 using PolarBasedEngine;
 using PolarDB;
 
+
 namespace PolarBasedRDF
 {
     internal class RDFTripletsByPolarEngine

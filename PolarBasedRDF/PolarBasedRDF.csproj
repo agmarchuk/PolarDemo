@@ -33,10 +33,6 @@
     <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ReaderRDF, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\ReaderRDF\bin\Release\ReaderRDF.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.XML" />
@@ -57,6 +53,10 @@
     <ProjectReference Include="..\..\PolarDB\PolarDB.csproj">
       <Project>{907BB4AF-FBC9-4A1E-8F80-194AF9337AA4}</Project>
       <Name>PolarDB</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ReaderRDF\ReaderRDF.csproj">
+      <Project>{10e3a3c3-1c7c-461c-9ae9-a35555460c50}</Project>
+      <Name>ReaderRDF</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
