@@ -43,15 +43,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BerlinTests.cs" />
+    <Compile Include="BerlinTestsInt.cs" />
     <Compile Include="FlexIndexView.cs" />
     <Compile Include="ONames.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="ProgramInt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RPack.cs" />
+    <Compile Include="RPackInt.cs" />
     <Compile Include="Scale2.cs" />
     <Compile Include="Triple.cs" />
+    <Compile Include="TripleInt.cs" />
     <Compile Include="TripleStore.cs" />
+    <Compile Include="TripleStoreInt.cs" />
     <Compile Include="Turtle.cs" />
+    <Compile Include="TurtleInt.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Description.txt" />

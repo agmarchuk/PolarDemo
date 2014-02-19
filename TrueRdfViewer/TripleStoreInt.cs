@@ -9,20 +9,40 @@ using sema2012m;
 
 namespace TrueRdfViewer
 {
-    public class TripleStore
+    public class TripleStoreInt
     {
-        private string path;
         private PType tp_otriple_seq;
         private PType tp_dtriple_seq;
+        private PType tp_entity;
+        private void InitTypes()
+        {
+            tp_entity = new PType(PTypeEnumeration.integer);
+            PType tp_rliteral = new PTypeUnion(
+                new NamedType("void", new PType(PTypeEnumeration.none)),
+                new NamedType("integer", new PType(PTypeEnumeration.integer)),
+                new NamedType("string", new PTypeRecord(
+                    new NamedType("s", new PType(PTypeEnumeration.sstring)),
+                    new NamedType("l", new PType(PTypeEnumeration.sstring)))),
+                new NamedType("date", new PType(PTypeEnumeration.longinteger)));
+            tp_otriple_seq = new PTypeSequence(new PTypeRecord(
+                    new NamedType("subject", tp_entity),
+                    new NamedType("predicate", tp_entity),
+                    new NamedType("object", tp_entity)));
+            tp_dtriple_seq = new PTypeSequence(new PTypeRecord(
+                    new NamedType("subject", tp_entity),
+                    new NamedType("predicate", tp_entity),
+                    new NamedType("data", tp_rliteral)));
+        }
+        private string path;
         private PaCell otriples;
         private PaCell dtriples;
-        private FlexIndexView<SubjPredObj> spo_o_index = null;
-        private FlexIndexView<SubjPred> sp_d_index = null;
-        private FlexIndexView<SubjPred> op_o_index = null;
+        private FlexIndexView<SubjPredObjInt> spo_o_index = null;
+        private FlexIndexView<SubjPredInt> sp_d_index = null;
+        private FlexIndexView<SubjPredInt> op_o_index = null;
         private PaCell oscale;
         private int range = 0;
 
-        public TripleStore(string path)
+        public TripleStoreInt(string path)
         {
             this.path = path;
             InitTypes();
@@ -49,12 +69,12 @@ namespace TrueRdfViewer
 
         private void OpenCreateIndexes()
         {
-            spo_o_index = new FlexIndexView<SubjPredObj>(path + "spo_o_index", otriples.Root,
-                ent => new SubjPredObj() { subj = (string)ent.Field(0).Get(), pred = (string)ent.Field(1).Get(), obj = (string)ent.Field(2).Get() });
-            sp_d_index = new FlexIndexView<SubjPred>(path + "subject_d_index", dtriples.Root,
-                ent => new SubjPred() { subj = (string)ent.Field(0).Get(), pred = (string)ent.Field(1).Get() });
-            op_o_index = new FlexIndexView<SubjPred>(path + "obj_o_index", otriples.Root,
-                ent => new SubjPred() { subj = (string)ent.Field(2).Get(), pred = (string)ent.Field(1).Get() });
+            spo_o_index = new FlexIndexView<SubjPredObjInt>(path + "spo_o_index", otriples.Root,
+                ent => new SubjPredObjInt() { subj = (int)ent.Field(0).Get(), pred = (int)ent.Field(1).Get(), obj = (int)ent.Field(2).Get() });
+            sp_d_index = new FlexIndexView<SubjPredInt>(path + "subject_d_index", dtriples.Root,
+                ent => new SubjPredInt() { subj = (int)ent.Field(0).Get(), pred = (int)ent.Field(1).Get() });
+            op_o_index = new FlexIndexView<SubjPredInt>(path + "obj_o_index", otriples.Root,
+                ent => new SubjPredInt() { subj = (int)ent.Field(2).Get(), pred = (int)ent.Field(1).Get() });
         }
 
         public void LoadTurtle(string filepath)
@@ -64,13 +84,14 @@ namespace TrueRdfViewer
             dtriples.Clear();
             dtriples.Fill(new object[0]);
             int i = 0;
-            foreach (var triple in Turtle.LoadGraph(filepath))
+            //Entity e = new Entity();
+            foreach (var triple in TurtleInt.LoadGraph(filepath))
             {
                 if (i % 10000 == 0) Console.Write("{0} ", i / 10000);
                 i++;
-                if (triple is OTriple)
+                if (triple is OTripleInt)
                 {
-                    var tr = (OTriple)triple;
+                    var tr = (OTripleInt)triple;
                     //Console.WriteLine(tr.obj);
                     //otriples.Root.AppendElement(new object[] { tr.subject, tr.predicate, tr.obj });
                     otriples.Root.AppendElement(new object[] 
@@ -82,7 +103,7 @@ namespace TrueRdfViewer
                 }
                 else
                 {
-                    var tr = (DTriple)triple;
+                    var tr = (DTripleInt)triple;
                     Literal lit = tr.data;
                     object[] da;
                     if (lit.vid == LiteralVidEnumeration.integer)
@@ -113,17 +134,20 @@ namespace TrueRdfViewer
             {
                 OpenCreateIndexes();
             }
-            spo_o_index.Load(null);
-            sp_d_index.Load(null);
-            op_o_index.Load(null);
-            // Создание шкалы
-            CreateScale();
-            ShowScale();
-            oscale.Clear();
-            oscale.Fill(new object[0]);
-            foreach (int v in scale.Values()) oscale.Root.AppendElement(v);
-            oscale.Flush();
-            CalculateRange(); // Наверное, range считается в CreateScale() 
+            SPOComparer spo_compare = new SPOComparer();
+            spo_o_index.Load(spo_compare);
+
+            SPComparer sp_compare = new SPComparer();
+            sp_d_index.Load(sp_compare);
+            op_o_index.Load(sp_compare);
+            //// Создание шкалы (Надо переделать)
+            //CreateScale();
+            //ShowScale();
+            //oscale.Clear();
+            //oscale.Fill(new object[0]);
+            //foreach (int v in scale.Values()) oscale.Root.AppendElement(v);
+            //oscale.Flush();
+            //CalculateRange(); // Наверное, range считается в CreateScale() 
         }
         //public void LoadXML(string filepath)
         //{
@@ -213,38 +237,38 @@ namespace TrueRdfViewer
             Console.WriteLine("{0} {1} {2} {3} err: {4}", c, c0, c1, c2, cerr);
         }
 
-        public IEnumerable<string> GetSubjectByObjPred(string obj, string pred)
+        public IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
         {
             return op_o_index.GetAll(ent => 
             {
-                string ob = (string)ent.Field(2).Get();
+                int ob = (int)ent.Field(2).Get();
                 int cmp = ob.CompareTo(obj);
                 if (cmp != 0) return cmp;
-                string pr = (string)ent.Field(1).Get();
+                int pr = (int)ent.Field(1).Get();
                 return pr.CompareTo(pred);
             })
-                .Select(en => (string)en.Field(0).Get());
+                .Select(en => (int)en.Field(0).Get());
         }
-        public IEnumerable<string> GetObjBySubjPred(string subj, string pred)
+        public IEnumerable<int> GetObjBySubjPred(int subj, int pred)
         {
             return spo_o_index.GetAll(ent =>
             {
-                string su = (string)ent.Field(0).Get();
+                int su = (int)ent.Field(0).Get();
                 int cmp = su.CompareTo(subj);
                 if (cmp != 0) return cmp;
-                string pr = (string)ent.Field(1).Get();
+                int pr = (int)ent.Field(1).Get();
                 return pr.CompareTo(pred);
             })
-                .Select(en => (string)en.Field(2).Get());
+                .Select(en => (int)en.Field(2).Get());
         }
-        public IEnumerable<Literal> GetDataBySubjPred(string subj, string pred)
+        public IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
         {
             return sp_d_index.GetAll(ent =>
             {
-                string su = (string)ent.Field(0).Get();
+                int su = (int)ent.Field(0).Get();
                 int cmp = su.CompareTo(subj);
                 if (cmp != 0) return cmp;
-                string pr = (string)ent.Field(1).Get();
+                int pr = (int)ent.Field(1).Get();
                 return pr.CompareTo(pred);
             })
                 .Select(en => 
@@ -263,29 +287,31 @@ namespace TrueRdfViewer
                     return lit;
                 });
         }
-        public bool ChkOSubjPredObj(string subj, string pred, string obj)
+        public bool ChkOSubjPredObj(int subj, int pred, int obj)
         {
-            if (range > 0)
-            {
-                int code = Scale2.Code(range, subj, pred, obj);
-                int word = (int)oscale.Root.Element(Scale2.GetArrIndex(code)).Get();
-                int tb = Scale2.GetFromWord(word, code);
-                if (tb == 0) return false;
-                // else if (tb == 1) return true; -- это был источник ошибки
-                // else надо считаль длинно, см. далее
-            }
+            // Шкалу добавлю позднее
+            //if (range > 0)
+            //{
+            //    int code = Scale2.Code(range, subj, pred, obj);
+            //    int word = (int)oscale.Root.Element(Scale2.GetArrIndex(code)).Get();
+            //    int tb = Scale2.GetFromWord(word, code);
+            //    if (tb == 0) return false;
+            //    // else if (tb == 1) return true; -- это был источник ошибки
+            //    // else надо считаль длинно, см. далее
+            //}
             return !spo_o_index.GetFirst(ent =>
             {
-                string su = (string)ent.Field(0).Get();
+                int su = (int)ent.Field(0).Get();
                 int cmp = su.CompareTo(subj);
                 if (cmp != 0) return cmp;
-                string pr = (string)ent.Field(1).Get();
+                int pr = (int)ent.Field(1).Get();
                 cmp = pr.CompareTo(pred);
                 if (cmp != 0) return cmp;
-                string ob = (string)ent.Field(2).Get();
+                int ob = (int)ent.Field(2).Get();
                 return ob.CompareTo(obj);
             }).IsEmpty;
         }
+        //TODO: Надо переделать
         public XElement GetItem(string subject)
         {
             if (otriples.Root.Count() == 0) return null;
@@ -334,23 +360,5 @@ namespace TrueRdfViewer
             return res;
         }
 
-        private void InitTypes()
-        {
-            PType tp_rliteral = new PTypeUnion(
-                new NamedType("void", new PType(PTypeEnumeration.none)),
-                new NamedType("integer", new PType(PTypeEnumeration.integer)),
-                new NamedType("string", new PTypeRecord(
-                    new NamedType("s", new PType(PTypeEnumeration.sstring)),
-                    new NamedType("l", new PType(PTypeEnumeration.sstring)))),
-                new NamedType("date", new PType(PTypeEnumeration.longinteger)));
-            tp_otriple_seq = new PTypeSequence(new PTypeRecord(
-                    new NamedType("subject", new PType(PTypeEnumeration.sstring)),
-                    new NamedType("predicate", new PType(PTypeEnumeration.sstring)),
-                    new NamedType("object", new PType(PTypeEnumeration.sstring))));
-            tp_dtriple_seq = new PTypeSequence(new PTypeRecord(
-                    new NamedType("subject", new PType(PTypeEnumeration.sstring)),
-                    new NamedType("predicate", new PType(PTypeEnumeration.sstring)),
-                    new NamedType("data", tp_rliteral)));
-        }
     }
 }

@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace TrueRdfViewer
 {
-    public class Turtle
+    public class TurtleInt
     {
-        public static IEnumerable<Triple> LoadGraph(string datafile)//EngineVirtuoso engine, string graph, string datafile)
+        public static IEnumerable<TripleInt> LoadGraph(string datafile)//EngineVirtuoso engine, string graph, string datafile)
         {
             int ntriples = 0;
             string subject = null;
@@ -43,7 +43,7 @@ namespace TrueRdfViewer
                 else if (line[0] != ' ')
                 { // Subject
                     line = line.Trim();
-                    subject = GetEntity(namespaces, line);
+                    subject = GetEntityString(namespaces, line);
                     if (subject == null) continue;
                 }
                 else
@@ -52,7 +52,7 @@ namespace TrueRdfViewer
                     int first_blank = line1.IndexOf(' ');
                     if (first_blank == -1) { Console.WriteLine("Err in line: " + line); continue; }
                     string pred_line = line1.Substring(0, first_blank);
-                    string predicate = GetEntity(namespaces, pred_line);
+                    string predicate = GetEntityString(namespaces, pred_line);
                     string rest_line = line1.Substring(first_blank + 1).Trim();
                     // Уберем последний символ
                     rest_line = rest_line.Substring(0, rest_line.Length - 1).Trim();
@@ -86,20 +86,13 @@ namespace TrueRdfViewer
                             }
                             else
                             {
-                                datatype = GetEntity(namespaces, qname);
+                                datatype = GetEntityString(namespaces, qname);
                             }
                         }
-                        //Literal d = null;
-                        //if (datatype == "http://www.w3.org/2001/XMLSchema#integer")
-                        //    d = new Literal() { vid = LiteralVidEnumeration.integer, value = int.Parse(sdata) };
-                        //else if (datatype == "http://www.w3.org/2001/XMLSchema#date")
-                        //    d = new Literal() { vid = LiteralVidEnumeration.date, value = DateTime.Parse(sdata).ToBinary() };
-                        //else
-                        //    d = new Literal() { vid = LiteralVidEnumeration.text, value = new Text() { s = sdata, l = "en" } };
-                        yield return new DTriple()
+                        yield return new DTripleInt()
                         {
-                            subject = subject,
-                            predicate = predicate,
+                            subject = TripleInt.Code(subject),
+                            predicate = TripleInt.Code(predicate),
                             data = // d
                                 datatype == "http://www.w3.org/2001/XMLSchema#integer" ?
                                     new Literal() { vid = LiteralVidEnumeration.integer, value = int.Parse(sdata) } :
@@ -111,8 +104,13 @@ namespace TrueRdfViewer
                     }
                     else
                     { // entity
-                        entity = rest_line[0] == '<' ? rest_line.Substring(1, rest_line.Length-2) : GetEntity(namespaces, rest_line);
-                        yield return new OTriple() { subject = subject, predicate = predicate, obj = entity };
+                        entity = rest_line[0] == '<' ? rest_line.Substring(1, rest_line.Length-2) : GetEntityString(namespaces, rest_line);
+                        yield return new OTripleInt() 
+                        {
+                            subject = TripleInt.Code(subject),
+                            predicate = TripleInt.Code(predicate),
+                            obj = TripleInt.Code(entity) 
+                        };
                     }
                     ntriples++;
                 }
@@ -120,7 +118,7 @@ namespace TrueRdfViewer
             Console.WriteLine("ntriples={0}", ntriples);
         }
 
-        private static string GetEntity(Dictionary<string, string> namespaces, string line)
+        private static string GetEntityString(Dictionary<string, string> namespaces, string line)
         {
             string subject = null; 
             int colon = line.IndexOf(':');

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using BigDbTest;
 
 namespace BigDBSorting
@@ -8,7 +9,8 @@ namespace BigDBSorting
     {
         static void Main(string[] args)
         {
-            string path = @"..\..\..\Databases\";
+            //string path = @"..\..\..\Databases\";
+            string path = @"D:\Home\FactographDatabases\";
             //string path = @"C:\Users\Marchuk\Polar\";
             DateTime tt0 = DateTime.Now;
             BigPolar bp = new BigPolar(path);
@@ -23,17 +25,27 @@ namespace BigDBSorting
             }
 
             Console.WriteLine("N records: " + bp.Count());
-
+            Random rnd = new Random();
+            int[] arr1000 = Enumerable.Range(0, 1000).Select(i => rnd.Next()).ToArray();
+            tt0 = DateTime.Now;
             Stopwatch timer=new Stopwatch(); 
             timer.Start();
             bp.Test4(new int[] { 100, 100000000, 10, 4000000, 108, 90000000, 50000000, 1, int.MaxValue / 16 - 1, 303 });
             timer.Stop();
-            Console.WriteLine("Test5 ok. duration=" + timer.Elapsed.Ticks ); 
+            Console.WriteLine("Test5 ok. duration=" + timer.Elapsed.Ticks );
+            Console.WriteLine("standard duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            // Разогрев
+            int v = 0;
+            foreach (var e in bp.Cell.Root.Elements()) { v = (int)e.Get(); }
+            Console.WriteLine("Worming... standard duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             timer.Restart();
-            bp.Test4(new int[] { 99999999, 88888888, 77777777, 66666666, 55555555, 44444444, 33333333, 22222222, 11111111, 3 });
+            //bp.Test4(new int[] { 99999999, 88888888, 77777777, 66666666, 55555555, 44444444, 33333333, 22222222, 11111111, 3 });
+            //bp.Test4(new int[] { 2039530, 923720000, -921354321, 1445454545, -55555555, 828282828, 1140000000, -22222222, 1030303030, -777777777 });
+            bp.Test4(arr1000);
             timer.Stop();
-            Console.WriteLine("Test5 ok. duration=" + timer.Elapsed.Ticks); 
-          //bp.TestSort(0, 10);
+            Console.WriteLine("Test5 ok. duration=" + timer.Elapsed.Ticks);
+            Console.WriteLine("standard duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            //bp.TestSort(0, 10);
             
         }
     }

@@ -8,6 +8,7 @@ namespace BigDbTest
     {
         private string cellPath;
         private PaCell cell;
+        public PaCell Cell { get { return cell; } }
         public BigPolar(string path)
         {
             this.cellPath = path + @"bigtest.pac";
