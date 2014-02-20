@@ -310,6 +310,7 @@ namespace TrueRdfViewer
                 int ob = (int)ent.Field(2).Get();
                 return ob.CompareTo(obj);
             }).IsEmpty;
+            //return !spo_o_index.GetFirstByKey(new SubjPredObjInt() { subj = subj, pred = pred, obj = obj }).IsEmpty;
         }
         //TODO: Надо переделать
         public XElement GetItem(string subject)

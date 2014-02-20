@@ -44,10 +44,6 @@ namespace TrueRdfViewer
     }
     public static class RPackExtentionInt
     {
-        private static object P(object spo)
-        {
-            return spo is short ? spo : TripleInt.Code((string)spo);
-        }
         // для следующих методов subj, pred, obj или short индекс или целое значение закодированного Entity
         public static IEnumerable<RPackInt> spo(this IEnumerable<RPackInt> pack, object subj, object pred, object obj)
         {

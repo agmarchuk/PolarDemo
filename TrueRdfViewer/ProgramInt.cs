@@ -56,7 +56,7 @@ namespace TrueRdfViewer
                 //ts.LoadXML(path + "0001.xml");
                 //Console.WriteLine("LoadXML ok.");
                 PolarDB.PaEntry.bufferBytes = 20000000;
-                ts.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset.ttl");
+                ts.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset10m.ttl");
                 Console.WriteLine("LoadTurtle ok.");
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 return;
@@ -71,8 +71,8 @@ namespace TrueRdfViewer
             {
                 //var query0 = BerlinTests.Query0(ts);
                 var query1 = BerlinTestsInt.Query1(ts);
-                //var query1 = BerlinTestsInt.Query1_1(ts);
-                var query2 = BerlinTestsInt.Query2(ts);
+                var query2 = BerlinTestsInt.Query1_1(ts);
+                //var query2 = BerlinTestsInt.Query2(ts);
                 //var query3 = BerlinTestsInt.Query3(ts);
                 var query3 = BerlinTestsInt.Query3(ts);
                 var query6 = BerlinTestsInt.Query6(ts);
