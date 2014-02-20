@@ -64,7 +64,7 @@ namespace TrueRdfViewer
             long len = oscale.Root.Count() - 1;
             int r = 1;
             while (len != 0) { len = len >> 1; r++; }
-            range = r + 3;
+            range = r + 4;
         }
 
         private void OpenCreateIndexes()
@@ -75,6 +75,9 @@ namespace TrueRdfViewer
                 ent => new SubjPredInt() { subj = (int)ent.Field(0).Get(), pred = (int)ent.Field(1).Get() });
             op_o_index = new FlexIndexView<SubjPredInt>(path + "obj_o_index", otriples.Root,
                 ent => new SubjPredInt() { subj = (int)ent.Field(2).Get(), pred = (int)ent.Field(1).Get() });
+            CreateScale();
+            long ntriples = otriples.Root.Count();
+            ShowScale(ntriples);
         }
 
         public void LoadTurtle(string filepath)
@@ -140,7 +143,7 @@ namespace TrueRdfViewer
             SPComparer sp_compare = new SPComparer();
             sp_d_index.Load(sp_compare);
             op_o_index.Load(sp_compare);
-            //// Создание шкалы (Надо переделать)
+            // Создание шкалы (Надо переделать)
             //CreateScale();
             //ShowScale();
             //oscale.Clear();
@@ -202,39 +205,34 @@ namespace TrueRdfViewer
         //    oscale.Flush();
         //}
 
-        private Scale2 scale = null;
+        private Scale1 scale = null;
         private void CreateScale()
         {
             long len = otriples.Root.Count() - 1;
             int r = 1;
             while (len != 0) { len = len >> 1; r++; }
 
-            int range = r + 4;
-            scale = new Scale2(range);
+            range = r + 4; // здесь 4 - фактор "разрежения" шкалы, можно меньше
+            scale = new Scale1(range);
             foreach (object[] tr in otriples.Root.ElementValues())
             {
-                string subj = (string)tr[0];
-                string pred = (string)tr[1];
-                string obj = (string)tr[2];
-                int code = Scale2.Code(range, subj, pred, obj);
-                int twobits = scale[code];
-                if (twobits > 1) continue; // Уже "плохо"
-                scale[code] = twobits + 1;
+                int subj = (int)tr[0];
+                int pred = (int)tr[1];
+                int obj = (int)tr[2];
+                int code = Scale1.Code(range, subj, pred, obj);
+                scale[code] = 1;
             }
         }
-        public void ShowScale()
+        public void ShowScale(long ntriples)
         {
             int c = scale.Count();
-            int c0 = 0, c1 = 0, c2 = 0, cerr = 0; 
+            int c1 = 0;
             for (int i=0; i<c; i++)
             {
-                int tb = scale[i];
-                if (tb == 0) c0++;
-                else if (tb == 1) c1++;
-                else if (tb == 2) c2++;
-                else cerr++;
+                int bit = scale[i];
+                if (bit > 0) c1++;
             }
-            Console.WriteLine("{0} {1} {2} {3} err: {4}", c, c0, c1, c2, cerr);
+            Console.WriteLine("{0} {1} {2}", c, c1, ntriples);
         }
 
         public IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
@@ -290,15 +288,16 @@ namespace TrueRdfViewer
         public bool ChkOSubjPredObj(int subj, int pred, int obj)
         {
             // Шкалу добавлю позднее
-            //if (range > 0)
-            //{
-            //    int code = Scale2.Code(range, subj, pred, obj);
-            //    int word = (int)oscale.Root.Element(Scale2.GetArrIndex(code)).Get();
-            //    int tb = Scale2.GetFromWord(word, code);
-            //    if (tb == 0) return false;
-            //    // else if (tb == 1) return true; -- это был источник ошибки
-            //    // else надо считаль длинно, см. далее
-            //}
+            if (range > 0)
+            {
+                int code = Scale1.Code(range, subj, pred, obj);
+                //int word = (int)oscale.Root.Element(Scale1.GetArrIndex(code)).Get();
+                //int tb = Scale1.GetFromWord(word, code);
+                int tb = scale[code];
+                if (tb == 0) return false;
+                // else if (tb == 1) return true; -- это был источник ошибки
+                // else надо считаль длинно, см. далее
+            }
             return !spo_o_index.GetFirst(ent =>
             {
                 int su = (int)ent.Field(0).Get();

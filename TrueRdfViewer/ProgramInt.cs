@@ -71,8 +71,8 @@ namespace TrueRdfViewer
             {
                 //var query0 = BerlinTests.Query0(ts);
                 var query1 = BerlinTestsInt.Query1(ts);
-                var query2 = BerlinTestsInt.Query1_1(ts);
-                //var query2 = BerlinTestsInt.Query2(ts);
+                //var query2 = BerlinTestsInt.Query1_1(ts);
+                var query2 = BerlinTestsInt.Query2(ts);
                 //var query3 = BerlinTestsInt.Query3(ts);
                 var query3 = BerlinTestsInt.Query3(ts);
                 var query6 = BerlinTestsInt.Query6(ts);
