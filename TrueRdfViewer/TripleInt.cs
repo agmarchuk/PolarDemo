@@ -47,6 +47,14 @@ namespace TrueRdfViewer
     public class SubjPredObjInt : IComparable
     {
         public int subj, pred, obj;
+        public SubjPredObjInt() { }
+        public SubjPredObjInt(object pobj)
+        {
+            object[] rec = (object[])pobj;
+            subj = (int)rec[0];
+            pred = (int)rec[1];
+            obj = (int)rec[2];
+        }
         public int CompareTo(object sp)
         {
             SubjPredObjInt target = (SubjPredObjInt)sp;

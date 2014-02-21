@@ -14,6 +14,7 @@ namespace TrueRdfViewer
         private PType tp_otriple_seq;
         private PType tp_dtriple_seq;
         private PType tp_entity;
+        private PType tp_dtriple_spf; 
         private void InitTypes()
         {
             tp_entity = new PType(PTypeEnumeration.integer);
@@ -32,10 +33,18 @@ namespace TrueRdfViewer
                     new NamedType("subject", tp_entity),
                     new NamedType("predicate", tp_entity),
                     new NamedType("data", tp_rliteral)));
+            // Тип для экономного выстраивания индекса s-p для dtriples
+            tp_dtriple_spf = new PTypeSequence(new PTypeRecord(
+                    new NamedType("subject", tp_entity),
+                    new NamedType("predicate", tp_entity),
+                    new NamedType("offset", new PType(PTypeEnumeration.longinteger))));
+
         }
         private string path;
         private PaCell otriples;
+        private PaCell otriples_op; // объектные триплеты, упорядоченные по o-p
         private PaCell dtriples;
+        private PaCell dtriples_sp;
         private FlexIndexView<SubjPredObjInt> spo_o_index = null;
         private FlexIndexView<SubjPredInt> sp_d_index = null;
         private FlexIndexView<SubjPredInt> op_o_index = null;
@@ -47,7 +56,9 @@ namespace TrueRdfViewer
             this.path = path;
             InitTypes();
             otriples = new PaCell(tp_otriple_seq, path + "otriples.pac", false);
+            otriples_op = new PaCell(tp_otriple_seq, path + "otriples_op.pac", false);
             dtriples = new PaCell(tp_dtriple_seq, path + "dtriples.pac", false);
+            dtriples_sp = new PaCell(tp_dtriple_spf, path + "dtriples_spf.pac", false);
             oscale = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)), path + "oscale.pac", false);
             if (!oscale.IsEmpty)
             {
@@ -132,15 +143,45 @@ namespace TrueRdfViewer
             Console.WriteLine();
             otriples.Flush();
             dtriples.Flush();
+            
+            SPOComparer spo_compare = new SPOComparer();
+            SPComparer sp_compare = new SPComparer();
+            // Создание и упорядочивание дополнительных структур
+            otriples_op.Clear();
+            otriples_op.Fill(new object[0]);
+            foreach (object v in otriples.Root.ElementValues()) otriples_op.Root.AppendElement(v);
+            otriples_op.Flush();
+            dtriples_sp.Clear();
+            dtriples_sp.Fill(new object[0]);
+            foreach (PaEntry entry in dtriples.Root.Elements())
+            {
+                int s = (int)entry.Field(0).Get();
+                int p = (int)entry.Field(1).Get();
+                dtriples_sp.Root.AppendElement(new object[] { s, p, entry.offset });
+            }
+            dtriples_sp.Flush();
+            // Упорядочивание otriples по s-p-o
+            otriples.Root.SortByKey<SubjPredObjInt>(rec => new SubjPredObjInt(rec), spo_compare);
+            // Упорядочивание otriples_op по o-p
+            otriples_op.Root.SortByKey<SubjPredInt>(rec => 
+            {
+                object[] r = (object[])rec;
+                return new SubjPredInt() { pred = (int)r[1], subj = (int)r[2] };
+            }, sp_compare);
+            // Упорядочивание dtriples_sp по s-p
+            dtriples_sp.Root.SortByKey<SubjPredInt>(rec =>
+            {
+                object[] r = (object[])rec;
+                return new SubjPredInt() { pred = (int)r[1], subj = (int)r[0] };
+            }, sp_compare);
+
             // Индексирование
             if (spo_o_index == null)
             {
                 OpenCreateIndexes();
             }
-            SPOComparer spo_compare = new SPOComparer();
             spo_o_index.Load(spo_compare);
 
-            SPComparer sp_compare = new SPComparer();
             sp_d_index.Load(sp_compare);
             op_o_index.Load(sp_compare);
             // Создание шкалы (Надо переделать)
@@ -237,6 +278,20 @@ namespace TrueRdfViewer
 
         public IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
         {
+            var query = otriples_op.Root.BinarySearchAll(ent =>
+                {
+                    object[] rec = (object[])ent.Get();
+                    int ob = (int)rec[2];
+                    int cmp = ob.CompareTo(obj);
+                    if (cmp != 0) return cmp;
+                    int pr = (int)rec[1];
+                    return pr.CompareTo(pred);
+                });
+            return query
+                .Select(en => (int)en.Field(0).Get());
+        }
+        public IEnumerable<int> GetSubjectByObjPred0(int obj, int pred)
+        {
             return op_o_index.GetAll(ent => 
             {
                 int ob = (int)ent.Field(2).Get();
@@ -248,6 +303,18 @@ namespace TrueRdfViewer
                 .Select(en => (int)en.Field(0).Get());
         }
         public IEnumerable<int> GetObjBySubjPred(int subj, int pred)
+        {
+            return otriples.Root.BinarySearchAll(ent =>
+            {
+                int su = (int)ent.Field(0).Get();
+                int cmp = su.CompareTo(subj);
+                if (cmp != 0) return cmp;
+                int pr = (int)ent.Field(1).Get();
+                return pr.CompareTo(pred);
+            })
+                .Select(en => (int)en.Field(2).Get());
+        }
+        public IEnumerable<int> GetObjBySubjPred0(int subj, int pred)
         {
             return spo_o_index.GetAll(ent =>
             {
@@ -261,7 +328,9 @@ namespace TrueRdfViewer
         }
         public IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
         {
-            return sp_d_index.GetAll(ent =>
+            if (dtriples.Root.Count() == 0) return Enumerable.Empty<Literal>();
+            PaEntry dtriple_entry = dtriples.Root.Element(0);
+            return dtriples_sp.Root.BinarySearchAll(ent =>
             {
                 int su = (int)ent.Field(0).Get();
                 int cmp = su.CompareTo(subj);
@@ -270,6 +339,33 @@ namespace TrueRdfViewer
                 return pr.CompareTo(pred);
             })
                 .Select(en => 
+                {
+                    dtriple_entry.offset = (long)en.Field(2).Get();
+                    object[] uni = (object[])dtriple_entry.Field(2).Get();
+                    Literal lit = new Literal();
+                    int vid = (int)uni[0];
+                    if (vid == 1) { lit.vid = LiteralVidEnumeration.integer; lit.value = (int)uni[1]; }
+                    if (vid == 3) { lit.vid = LiteralVidEnumeration.date; lit.value = (long)uni[1]; }
+                    else if (vid == 2)
+                    {
+                        lit.vid = LiteralVidEnumeration.text;
+                        object[] txt = (object[])uni[1];
+                        lit.value = new Text() { s = (string)txt[0], l = (string)txt[1] };
+                    }
+                    return lit;
+                });
+        }
+        public IEnumerable<Literal> GetDataBySubjPred0(int subj, int pred)
+        {
+            return sp_d_index.GetAll(ent =>
+            {
+                int su = (int)ent.Field(0).Get();
+                int cmp = su.CompareTo(subj);
+                if (cmp != 0) return cmp;
+                int pr = (int)ent.Field(1).Get();
+                return pr.CompareTo(pred);
+            })
+                .Select(en =>
                 {
                     object[] uni = (object[])en.Field(2).Get();
                     Literal lit = new Literal();
@@ -287,8 +383,24 @@ namespace TrueRdfViewer
         }
         public bool ChkOSubjPredObj(int subj, int pred, int obj)
         {
-            // Шкалу добавлю позднее
             if (range > 0)
+            {
+                int code = Scale1.Code(range, subj, pred, obj);
+                //int word = (int)oscale.Root.Element(Scale1.GetArrIndex(code)).Get();
+                //int tb = Scale1.GetFromWord(word, code);
+                int tb = scale[code];
+                if (tb == 0) return false;
+                // else if (tb == 1) return true; -- это был источник ошибки
+                // else надо считаль длинно, см. далее
+            }
+            SubjPredObjInt key = new SubjPredObjInt() { subj = subj, pred = pred, obj = obj };
+            var entry = otriples.Root.BinarySearchFirst(ent => (new SubjPredObjInt(ent.Get())).CompareTo(key));
+            return !entry.IsEmpty;
+        }
+        public bool ChkOSubjPredObj0(int subj, int pred, int obj)
+        {
+            // Шкалу добавлю позднее
+            if (false && range > 0)
             {
                 int code = Scale1.Code(range, subj, pred, obj);
                 //int word = (int)oscale.Root.Element(Scale1.GetArrIndex(code)).Get();

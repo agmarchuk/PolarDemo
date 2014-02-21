@@ -37,10 +37,10 @@ namespace TrueRdfViewer
             var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
                 .Spo(_produc, E(bsbm + "productFeature"), E(bsbm_inst + "ProductFeature17"))
                 .spo(_produc, E(bsbm + "productFeature"), E(bsbm_inst + "ProductFeature7"))
-                //.spo(_produc, E(rdf + "type"), E(bsbm_inst + "ProductType1"))
-                //.spD(_produc, E(bsbm + "productPropertyNumeric1"), _value1)
-                //.Where(pack => pack.Vai(_value1) > 10)
-                //.spD(_produc, E(rdfs + "label"), _label)
+                .spo(_produc, E(rdf + "type"), E(bsbm_inst + "ProductType1"))
+                .spD(_produc, E(bsbm + "productPropertyNumeric1"), _value1)
+                .Where(pack => pack.Vai(_value1) > 10)
+                .spD(_produc, E(rdfs + "label"), _label)
                 ;
             return quer;
         }
@@ -100,13 +100,33 @@ namespace TrueRdfViewer
             short _product = 0, _label = 1;
             short _p1 = 2, _p3 = 3, _testVar = 4;
             var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
-                .Spo(_product, bsbm + "productFeature", bsbm_inst + "ProductFeature1")
-                .spD(_product, rdfs + "label", _label)
-                .spo(_product, rdf + "type", bsbm + "Product")
-                .spD(_product, bsbm + "productPropertyNumeric1", _p1)
+                .Spo(_product, E(bsbm + "productFeature"), E(bsbm_inst + "ProductFeature1"))
+                .spD(_product, E(rdfs + "label"), _label)
+                .spo(_product, E(rdf + "type"), E(bsbm + "Product"))
+                .spD(_product, E(bsbm + "productPropertyNumeric1"), _p1)
                 .Where(pack => pack.Vai(_p1) > 500)
-                .spD(_product, bsbm + "productPropertyNumeric3", _p3)
+                .spD(_product, E(bsbm + "productPropertyNumeric3"), _p3)
                 .Where(pack => pack.Vai(_p3) < 1000)
+                ;
+            return quer;
+        }
+        public static IEnumerable<RPackInt> Query5(TripleStoreInt ts)
+        {
+            string dataFromProducer1 = "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/";
+            object[] row = new object[7];
+            short _product = 0, _productLabel = 1;
+            short _prodFeature = 2, _origProperty1 = 3, _simProperty1 = 4, _origProperty2 = 5, _simProperty2 = 6;
+            var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
+                .spO(E(dataFromProducer1 + "Product12"), E(bsbm + "productFeature"), _prodFeature)
+                .Spo(_product, E(bsbm + "productFeature"), _prodFeature)
+                .Where(pack => E(dataFromProducer1 + "Product12") != pack.GetE(_product))
+                .spD(_product, E(rdfs + "label"), _productLabel)
+                .spD(E(dataFromProducer1 + "Product12"), E(bsbm + "productPropertyNumeric1"), _origProperty1) 
+                .spD(_product, E(bsbm + "productPropertyNumeric1"), _simProperty1)
+                .Where(pack => pack.Vai(_simProperty1) < (pack.Vai(_origProperty1) + 120) && pack.Vai(_simProperty1) > (pack.Vai(_origProperty1) - 120))
+                .spD(E(dataFromProducer1 + "Product12"), E(bsbm + "productPropertyNumeric2"), _origProperty2)
+                .spD(_product, E(bsbm + "productPropertyNumeric2"), _simProperty2)
+                .Where(pack => pack.Vai(_simProperty2) < (pack.Vai(_origProperty2) + 170) && pack.Vai(_simProperty2) > (pack.Vai(_origProperty2) - 170))
                 ;
             return quer;
         }
