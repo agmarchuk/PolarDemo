@@ -14,6 +14,38 @@ namespace TrueRdfViewer
         public static string bsbm = "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/";
         public static string bsbm_inst = "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/";
         private static int E(string spo) { return TripleInt.Code(spo); }
+        private static OVal rdftype = new OVal() { vid = OValEnumeration.obj, entity = E(rdf + "type") };
+        private static OVal rdfslabel = new OVal() { vid = OValEnumeration.obj, entity = E(rdfs + "label") };
+
+        public static IEnumerable<OValRowInt> Berlin1(TripleStoreInt ts)
+        {
+            short _product = 0, _bsbm_productFeature = 1, _bsbm_inst_ProductFeature19 = 2, _bsbm_inst_ProductFeature8 = 3;
+            short _rdftype = 4, _bsbm_inst_ProductType1 = 5, _bsbm_ProductPropertyNumeric1 = 6;
+            short _value1 = 7, _label = 8, _rdfslabel = 9;
+
+            OVal[] row = new OVal[] {
+                new OVal() { vid = OValEnumeration.obj }, // _product
+                new OVal() { vid = OValEnumeration.obj, entity = E(bsbm + "productFeature") },
+                new OVal() { vid = OValEnumeration.obj, entity = E(bsbm_inst + "ProductFeature19") },
+                new OVal() { vid = OValEnumeration.obj, entity = E(bsbm_inst + "ProductFeature8") },
+                rdftype,
+                new OVal() { vid = OValEnumeration.obj, entity = E(bsbm_inst + "ProductType1") },
+                new OVal() { vid = OValEnumeration.obj, entity = E(bsbm + "productPropertyNumeric1") },
+                new OVal() { vid = OValEnumeration.val }, // _value1
+                new OVal() { vid = OValEnumeration.val }, // _label
+                rdfslabel
+            };
+            OValRowInt ovr = new OValRowInt(ts, row);
+            var quer = Enumerable.Repeat<OValRowInt>(ovr, 1)
+                ._Spo(_product, _bsbm_productFeature, _bsbm_inst_ProductFeature19)
+                //._spo(_product, _bsbm_productFeature, _bsbm_inst_ProductFeature8)
+                //._spo(_product, _rdftype, _bsbm_inst_ProductType1)
+                //._spD(_product, _bsbm_ProductPropertyNumeric1, _value1)
+                //.Where(ovalrow => (int)ovalrow.row[_value1].lit.value > 1000)
+                //._spD(_product, _rdfslabel, _label)
+                ;
+            return quer;
+        }
         //
         public static IEnumerable<RPackInt> Query1(TripleStoreInt ts)
         {
@@ -21,11 +53,11 @@ namespace TrueRdfViewer
             short _produc = 0, _value1 = 1, _label = 2;
             var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
                 .Spo(_produc, E(bsbm + "productFeature"), E(bsbm_inst + "ProductFeature19"))
-                .spo(_produc, E(bsbm + "productFeature"), E(bsbm_inst + "ProductFeature8"))
-                .spo(_produc, E(rdf + "type"), E(bsbm_inst + "ProductType1"))
-                .spD(_produc, E(bsbm + "productPropertyNumeric1"), _value1)
-                .Where(pack => pack.Vai(_value1) > 10)
-                .spD(_produc, E(rdfs + "label"), _label)
+                //.spo(_produc, E(bsbm + "productFeature"), E(bsbm_inst + "ProductFeature8"))
+                //.spo(_produc, E(rdf + "type"), E(bsbm_inst + "ProductType1"))
+                //.spD(_produc, E(bsbm + "productPropertyNumeric1"), _value1)
+                //.Where(pack => pack.Vai(_value1) > 1000)
+                //.spD(_produc, E(rdfs + "label"), _label)
                 ;
             return quer;
         }
@@ -36,11 +68,11 @@ namespace TrueRdfViewer
             short _produc = 0, _value1 = 1, _label = 2;
             var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
                 .Spo(_produc, E(bsbm + "productFeature"), E(bsbm_inst + "ProductFeature17"))
-                .spo(_produc, E(bsbm + "productFeature"), E(bsbm_inst + "ProductFeature7"))
-                .spo(_produc, E(rdf + "type"), E(bsbm_inst + "ProductType1"))
-                .spD(_produc, E(bsbm + "productPropertyNumeric1"), _value1)
-                .Where(pack => pack.Vai(_value1) > 10)
-                .spD(_produc, E(rdfs + "label"), _label)
+                //.spo(_produc, E(bsbm + "productFeature"), E(bsbm_inst + "ProductFeature7"))
+                //.spo(_produc, E(rdf + "type"), E(bsbm_inst + "ProductType1"))
+                //.spD(_produc, E(bsbm + "productPropertyNumeric1"), _value1)
+                //.Where(pack => pack.Vai(_value1) > 10)
+                //.spD(_produc, E(rdfs + "label"), _label)
                 ;
             return quer;
         }
@@ -120,13 +152,14 @@ namespace TrueRdfViewer
                 .spO(E(dataFromProducer1 + "Product12"), E(bsbm + "productFeature"), _prodFeature)
                 .Spo(_product, E(bsbm + "productFeature"), _prodFeature)
                 .Where(pack => E(dataFromProducer1 + "Product12") != pack.GetE(_product))
-                .spD(_product, E(rdfs + "label"), _productLabel)
+                //.spD(_product, E(rdfs + "label"), _productLabel)
                 .spD(E(dataFromProducer1 + "Product12"), E(bsbm + "productPropertyNumeric1"), _origProperty1) 
                 .spD(_product, E(bsbm + "productPropertyNumeric1"), _simProperty1)
                 .Where(pack => pack.Vai(_simProperty1) < (pack.Vai(_origProperty1) + 120) && pack.Vai(_simProperty1) > (pack.Vai(_origProperty1) - 120))
                 .spD(E(dataFromProducer1 + "Product12"), E(bsbm + "productPropertyNumeric2"), _origProperty2)
                 .spD(_product, E(bsbm + "productPropertyNumeric2"), _simProperty2)
                 .Where(pack => pack.Vai(_simProperty2) < (pack.Vai(_origProperty2) + 170) && pack.Vai(_simProperty2) > (pack.Vai(_origProperty2) - 170))
+                .spD(_product, E(rdfs + "label"), _productLabel) // переставлено
                 ;
             return quer;
         }
@@ -138,7 +171,6 @@ namespace TrueRdfViewer
             var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
                 .Spo(_product, E(rdf + "type"), E(bsbm + "Product"))
                 .spD(_product, E(rdfs + "label"), _label)
-                //.Where(pack => ((Text)pack.Val(_label).value).s == "merer")
                 .Where(pack => rx.IsMatch(((Text)pack.Val(_label).value).s))
                 ;
             return quer;
