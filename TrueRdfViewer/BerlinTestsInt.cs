@@ -46,6 +46,65 @@ namespace TrueRdfViewer
                 ;
             return quer;
         }
+        // Концовка теста не доделана
+        public static IEnumerable<OValRowInt> Berlin3(TripleStoreInt ts)
+        {
+            short _product = 0, _label = 1;
+            short _p1 = 2, _p3 = 3;
+            short _bsbm_productFeature = 4, _bsbm_inst_ProductFeature1 = 5, _bsbm_Product = 6;
+            short _rdftype = 7, _bsbm_ProductPropertyNumeric1 = 8, _bsbm_ProductPropertyNumeric3 = 9, _rdfslabel = 10;
+
+            OVal[] row = new OVal[] {
+                new OVal() { vid = OValEnumeration.obj }, // _product
+                new OVal() { vid = OValEnumeration.val }, // _label
+                new OVal() { vid = OValEnumeration.val }, // _p1
+                new OVal() { vid = OValEnumeration.val }, // _p2
+                new OVal() { vid = OValEnumeration.obj, entity = E(bsbm + "productFeature") },
+                new OVal() { vid = OValEnumeration.obj, entity = E(bsbm_inst + "ProductFeature1") },
+                new OVal() { vid = OValEnumeration.obj, entity = E(bsbm + "Product") },
+                rdftype,
+                new OVal() { vid = OValEnumeration.obj, entity = E(bsbm + "productPropertyNumeric1") },
+                new OVal() { vid = OValEnumeration.obj, entity = E(bsbm + "productPropertyNumeric3") },
+                rdfslabel,
+            };
+
+            OValRowInt ovr = new OValRowInt(ts, row);
+            var quer = Enumerable.Repeat<OValRowInt>(ovr, 1)
+                ._Spo(_product, _bsbm_productFeature, _bsbm_inst_ProductFeature1)
+                //._spD(_product, _rdfslabel, _label)
+                ._spo(_product, _rdftype, _bsbm_Product)
+                ._spD(_product, _bsbm_ProductPropertyNumeric1, _p1)
+                .Where(ovalrow => (int)ovalrow.row[_p1].lit.value > 1)
+                ._spD(_product, _bsbm_ProductPropertyNumeric3, _p3)
+                .Where(ovalrow => (int)ovalrow.row[_p1].lit.value < 100000)
+                ._spD(_product, _rdfslabel, _label)
+                ;
+            return quer;
+        }
+        public static IEnumerable<OValRowInt> Berlin6(TripleStoreInt ts)
+        {
+            short _product = 0, _label = 1;
+            short _bsbm_Product = 2;
+            short _rdftype = 3, _rdfslabel = 4;
+
+            OVal[] row = new OVal[] {
+                new OVal() { vid = OValEnumeration.obj }, // _product
+                new OVal() { vid = OValEnumeration.val }, // _label
+                new OVal() { vid = OValEnumeration.obj, entity = E(bsbm + "Product") },
+                rdftype,
+                rdfslabel,
+            };
+            System.Text.RegularExpressions.Regex rx = new System.Text.RegularExpressions.Regex("^s");
+
+            OValRowInt ovr = new OValRowInt(ts, row);
+            var quer = Enumerable.Repeat<OValRowInt>(ovr, 1)
+                ._Spo(_product, _rdftype, _bsbm_Product)
+                ._spD(_product, _rdfslabel, _label)
+                .Where(ovalrow => rx.IsMatch( ((Text)ovalrow.row[_label].lit.value).s ))
+                ;
+            return quer;
+        }
+
         //
         public static IEnumerable<RPackInt> Query1(TripleStoreInt ts)
         {
