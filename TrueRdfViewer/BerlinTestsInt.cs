@@ -38,11 +38,11 @@ namespace TrueRdfViewer
             OValRowInt ovr = new OValRowInt(ts, row);
             var quer = Enumerable.Repeat<OValRowInt>(ovr, 1)
                 ._Spo(_product, _bsbm_productFeature, _bsbm_inst_ProductFeature19)
-                //._spo(_product, _bsbm_productFeature, _bsbm_inst_ProductFeature8)
-                //._spo(_product, _rdftype, _bsbm_inst_ProductType1)
-                //._spD(_product, _bsbm_ProductPropertyNumeric1, _value1)
-                //.Where(ovalrow => (int)ovalrow.row[_value1].lit.value > 1000)
-                //._spD(_product, _rdfslabel, _label)
+                ._spo(_product, _bsbm_productFeature, _bsbm_inst_ProductFeature8)
+                ._spo(_product, _rdftype, _bsbm_inst_ProductType1)
+                ._spD(_product, _bsbm_ProductPropertyNumeric1, _value1)
+                .Where(ovalrow => (int)ovalrow.row[_value1].lit.value > 1000)
+                ._spD(_product, _rdfslabel, _label)
                 ;
             return quer;
         }
@@ -53,11 +53,11 @@ namespace TrueRdfViewer
             short _produc = 0, _value1 = 1, _label = 2;
             var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
                 .Spo(_produc, E(bsbm + "productFeature"), E(bsbm_inst + "ProductFeature19"))
-                //.spo(_produc, E(bsbm + "productFeature"), E(bsbm_inst + "ProductFeature8"))
-                //.spo(_produc, E(rdf + "type"), E(bsbm_inst + "ProductType1"))
-                //.spD(_produc, E(bsbm + "productPropertyNumeric1"), _value1)
-                //.Where(pack => pack.Vai(_value1) > 1000)
-                //.spD(_produc, E(rdfs + "label"), _label)
+                .spo(_produc, E(bsbm + "productFeature"), E(bsbm_inst + "ProductFeature8"))
+                .spo(_produc, E(rdf + "type"), E(bsbm_inst + "ProductType1"))
+                .spD(_produc, E(bsbm + "productPropertyNumeric1"), _value1)
+                .Where(pack => pack.Vai(_value1) > 1000)
+                .spD(_produc, E(rdfs + "label"), _label)
                 ;
             return quer;
         }

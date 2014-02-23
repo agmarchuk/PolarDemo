@@ -52,7 +52,7 @@ namespace TrueRdfViewer
             //}
             //return;
 
-            bool toload = true;
+            bool toload = false;
             if (toload)
             {
                 //ts.LoadXML(path + "0001.xml");
@@ -92,11 +92,11 @@ namespace TrueRdfViewer
 
                 sw.Restart();
                 counter = 0;
-                int pf19 = 23889384; //ids[6].GetHashCode();
-                var query = ts.otriples_op.Root.BinarySearchAll(ent => { counter++; return ((int)ent.Field(2).Get()).CompareTo(pf19); });
-                Console.WriteLine("Test BinarySearchAll: {0}", query.Count());
-                //Diapason diap = ts.otriples_op.Root.BinarySearchDiapason(ent => { counter++; return ((int)ent.Field(2).Get()).CompareTo(pf19); });
-                //Console.WriteLine("Test of Diapason: {0} {1}", diap.start, diap.numb);
+                int pf19 = ids[5].GetHashCode();
+                //var query = ts.otriples_op.Root.BinarySearchAll(ent => { counter++; return ((int)ent.Field(2).Get()).CompareTo(pf19); });
+                //Console.WriteLine("Test BinarySearchAll: {0}", query.Count());
+                Diapason diap = ts.otriples_op.Root.BinarySearchDiapason(ent => { counter++; return ((int)ent.Field(2).Get()).CompareTo(pf19); });
+                Console.WriteLine("Test of Diapason: {0} {1}", diap.start, diap.numb);
                 sw.Stop();
                 Console.WriteLine("Test swduration={0} counter={1}", sw.ElapsedTicks, counter); tt0 = DateTime.Now;
 
