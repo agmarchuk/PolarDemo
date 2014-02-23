@@ -41,8 +41,8 @@ namespace TrueRdfViewer
 
         }
         private string path;
-        private PaCell otriples;
-        private PaCell otriples_op; // объектные триплеты, упорядоченные по o-p
+        public PaCell otriples;
+        public PaCell otriples_op; // объектные триплеты, упорядоченные по o-p
         private PaCell dtriples;
         private PaCell dtriples_sp;
         private FlexIndexView<SubjPredObjInt> spo_o_index = null;
@@ -367,21 +367,34 @@ namespace TrueRdfViewer
             })
                 .Select(en =>
                 {
-                    object[] uni = (object[])en.Field(2).Get();
-                    Literal lit = new Literal();
-                    int vid = (int)uni[0];
-                    if (vid == 1) { lit.vid = LiteralVidEnumeration.integer; lit.value = (int)uni[1]; }
-                    if (vid == 3) { lit.vid = LiteralVidEnumeration.date; lit.value = (long)uni[1]; }
-                    else if (vid == 2)
-                    {
-                        lit.vid = LiteralVidEnumeration.text;
-                        object[] txt = (object[])uni[1];
-                        lit.value = new Text() { s = (string)txt[0], l = (string)txt[1] };
-                    }
-                    return lit;
+                    return PObjToLiteral(en.Field(2).Get());
                 });
         }
+
+        private static Literal PObjToLiteral(object pobj)
+        {
+            object[] uni = (object[])pobj;
+            Literal lit = new Literal();
+            int vid = (int)uni[0];
+            if (vid == 1) { lit.vid = LiteralVidEnumeration.integer; lit.value = (int)uni[1]; }
+            if (vid == 3) { lit.vid = LiteralVidEnumeration.date; lit.value = (long)uni[1]; }
+            else if (vid == 2)
+            {
+                lit.vid = LiteralVidEnumeration.text;
+                object[] txt = (object[])uni[1];
+                lit.value = new Text() { s = (string)txt[0], l = (string)txt[1] };
+            }
+            return lit;
+        }
         public bool ChkOSubjPredObj(int subj, int pred, int obj)
+        {
+            if (!ChkInScale(subj, pred, obj)) return false;
+            SubjPredObjInt key = new SubjPredObjInt() { subj = subj, pred = pred, obj = obj };
+            var entry = otriples.Root.BinarySearchFirst(ent => (new SubjPredObjInt(ent.Get())).CompareTo(key));
+            return !entry.IsEmpty;
+        }
+        // Проверка наличия объектного триплета через шкалу. Если false - точно нет, при true надо продолжать проверку
+        public bool ChkInScale(int subj, int pred, int obj)
         {
             if (range > 0)
             {
@@ -390,12 +403,8 @@ namespace TrueRdfViewer
                 //int tb = Scale1.GetFromWord(word, code);
                 int tb = scale[code];
                 if (tb == 0) return false;
-                // else if (tb == 1) return true; -- это был источник ошибки
-                // else надо считаль длинно, см. далее
             }
-            SubjPredObjInt key = new SubjPredObjInt() { subj = subj, pred = pred, obj = obj };
-            var entry = otriples.Root.BinarySearchFirst(ent => (new SubjPredObjInt(ent.Get())).CompareTo(key));
-            return !entry.IsEmpty;
+            return true;
         }
         public bool ChkOSubjPredObj0(int subj, int pred, int obj)
         {
@@ -470,6 +479,72 @@ namespace TrueRdfViewer
             }
 
             return res;
+        }
+
+        // ================== Семейство методов для OValRowInt - представления (нужно назвать метод или алгоритм) =========
+        // Получение диапазонов
+        public Diapason GetDiap_spo(int subj)
+        {
+            return otriples.Root.BinarySearchDiapason(ent => ((int)ent.Field(0).Get()).CompareTo(subj));
+        }
+        public Diapason GetDiap_op(int obj)
+        {
+            return otriples_op.Root.BinarySearchDiapason(ent => ((int)ent.Field(2).Get()).CompareTo(obj));
+        }
+        public Diapason GetDiap_spd(int subj)
+        {
+            return dtriples_sp.Root.BinarySearchDiapason(ent => ((int)ent.Field(0).Get()).CompareTo(subj));
+        }
+        public bool CheckPredObjInDiap(Diapason di, int pred, int obj)
+        {
+            //Diapason set = otriples.Root.BinarySearchDiapason(di.start, di.numb, ent =>
+            //{
+            //    int cmp = ((int)ent.Field(1).Get()).CompareTo(pred);
+            //    if (cmp != 0) return cmp;
+            //    return ((int)ent.Field(2).Get()).CompareTo(obj);
+            //});
+            //if (set.IsEmpty()) return false;
+            var query = otriples.Root.BinarySearchAll(di.start, di.numb, ent =>
+                {
+                    int cmp = ((int)ent.Field(1).Get()).CompareTo(pred);
+                    if (cmp != 0) return cmp;
+                    return ((int)ent.Field(2).Get()).CompareTo(obj);
+                });
+            if (query.Any()) return true;
+            return false;
+        }
+        public IEnumerable<int> GetObjInDiap(Diapason di, int pred)
+        {
+            return otriples.Root.BinarySearchAll(di.start, di.numb, ent => ((int)ent.Field(1).Get()).CompareTo(pred))
+                .Select(en => (int)en.Field(2).Get());
+        }
+        public IEnumerable<int> GetSubjInDiap(Diapason di, int pred)
+        {
+            //return otriples_op.Root.BinarySearchAll(di.start, di.numb, ent => ((int)ent.Field(1).Get()).CompareTo(pred))
+            //    .Select(en => (int)en.Field(0).Get());
+
+            Diapason internal_diap = otriples_op.Root.BinarySearchDiapason(di.start, di.numb, ent =>
+            {
+                return ((int)ent.Field(1).Get()).CompareTo(pred);
+            });
+            return otriples_op.Root.ElementValues(internal_diap.start, internal_diap.numb)
+                .Select(p_obj => (int)((object[])p_obj)[0]);
+        }
+        public IEnumerable<Literal> GetDatInDiap(Diapason di, int pred)
+        {
+            Diapason internal_diap = dtriples_sp.Root.BinarySearchDiapason(di.start, di.numb, ent =>
+            {
+                return ((int)ent.Field(1).Get()).CompareTo(pred);
+            });
+            PaEntry dtriple_entry = dtriples.Root.Element(0);
+            return dtriples_sp.Root.ElementValues(internal_diap.start, internal_diap.numb)
+                .Select(p_obj => 
+                    {
+                        long off = (long)((object[])p_obj)[2];
+                        dtriple_entry.offset = off;
+                        return PObjToLiteral(dtriple_entry.Field(2).Get());
+                    })
+                ;
         }
 
     }
