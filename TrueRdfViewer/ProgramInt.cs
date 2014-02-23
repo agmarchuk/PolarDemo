@@ -50,7 +50,7 @@ namespace TrueRdfViewer
             //}
             //return;
 
-            bool toload = false;
+            bool toload = true;
             if (toload)
             {
                 //ts.LoadXML(path + "0001.xml");
