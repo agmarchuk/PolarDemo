@@ -91,15 +91,38 @@ namespace TrueRdfViewer
                 Console.WriteLine(query1_1.Count());
                 Console.WriteLine("1_1 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
-                sw.Restart();
-                counter = 0;
+                // ======================= Сравнение бинарного поиска с вычислением диапазона =============
                 int pf19 = ids[5].GetHashCode();
-                //var query = ts.otriples_op.Root.BinarySearchAll(ent => { counter++; return ((int)ent.Field(2).Get()).CompareTo(pf19); });
-                //Console.WriteLine("Test BinarySearchAll: {0}", query.Count());
-                Diapason diap = ts.otriples_op.Root.BinarySearchDiapason(ent => { counter++; return ((int)ent.Field(2).Get()).CompareTo(pf19); });
-                Console.WriteLine("Test of Diapason: {0} {1}", diap.start, diap.numb);
+                List<long> trace = new List<long>();
+                Func<PaEntry, int> fdepth = ent => { counter++; trace.Add(ent.offset); return ((int)ent.Field(2).Get()).CompareTo(pf19); };
+                sw.Restart();
+                counter = 0; trace.Clear();
+                var query = ts.otriples_op.Root.BinarySearchAll(fdepth);
+                int cc = query.Count();
                 sw.Stop();
+                Console.Write("Test BinarySearchAll: {0} ", cc);
                 Console.WriteLine("Test swduration={0} counter={1}", sw.ElapsedTicks, counter); tt0 = DateTime.Now;
+                foreach (int point in trace) Console.Write("{0} ", point); Console.WriteLine();
+                sw.Restart();
+                counter = 0; trace.Clear();
+                Diapason diap = ts.otriples_op.Root.BinarySearchDiapason(fdepth);
+                sw.Stop();
+                Console.Write("Test of Diapason: {0} {1} ", diap.start, diap.numb);
+                Console.WriteLine(" swduration={0} counter={1}", sw.ElapsedTicks, counter); tt0 = DateTime.Now;
+                foreach (int point in trace) Console.Write("{0} ", point); Console.WriteLine();
+                sw.Restart();
+                PaEntry test_ent = ts.otriples_op.Root.Element(0).Field(2);
+                int val = -1;
+                foreach (var point in trace)
+                {
+                    test_ent.offset = point;
+                    val = (int)test_ent.Get();
+                }
+                sw.Stop();
+                Console.Write("Test of series: ");
+                Console.WriteLine("swduration={0}", sw.ElapsedTicks); tt0 = DateTime.Now;
+
+                // ============ Конец сравнения ================
 
                 Console.WriteLine(berlin1.Count());
                 Console.WriteLine("Berlin1 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
