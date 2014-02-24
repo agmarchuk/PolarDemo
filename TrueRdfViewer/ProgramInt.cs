@@ -95,21 +95,41 @@ namespace TrueRdfViewer
                 int pf19 = ids[5].GetHashCode();
                 List<long> trace = new List<long>();
                 Func<PaEntry, int> fdepth = ent => { counter++; trace.Add(ent.offset); return ((int)ent.Field(2).Get()).CompareTo(pf19); };
+
+                sw.Restart();
+                counter = 0; trace.Clear();
+                ts.otriples_op.Root.BinarySearchScan(0, ts.otriples_op.Root.Count(), fdepth);
+                sw.Stop();
+                Console.Write("Test of BinaryScan: ");
+                Console.WriteLine("swduration={0} counter={1}", sw.ElapsedTicks, trace.Count()); tt0 = DateTime.Now;
+                //foreach (int point in trace) Console.Write("{0} ", point); Console.WriteLine();
+
+                sw.Restart();
+                counter = 0; trace.Clear();
+                ts.otriples_op.Root.BinarySearchScan(0, ts.otriples_op.Root.Count(), fdepth);
+                sw.Stop();
+                Console.Write("Test of BinaryScan: ");
+                Console.WriteLine("swduration={0} counter={1}", sw.ElapsedTicks, trace.Count()); tt0 = DateTime.Now;
+                //foreach (int point in trace) Console.Write("{0} ", point); Console.WriteLine();
+
                 sw.Restart();
                 counter = 0; trace.Clear();
                 var query = ts.otriples_op.Root.BinarySearchAll(fdepth);
+                //ts.otriples_op.Root.BinarySearchScan(0, ts.otriples_op.Root.Count(), fdepth);
                 int cc = query.Count();
                 sw.Stop();
                 Console.Write("Test BinarySearchAll: {0} ", cc);
                 Console.WriteLine("Test swduration={0} counter={1}", sw.ElapsedTicks, counter); tt0 = DateTime.Now;
-                foreach (int point in trace) Console.Write("{0} ", point); Console.WriteLine();
+                //foreach (int point in trace) Console.Write("{0} ", point); Console.WriteLine();
+
                 sw.Restart();
                 counter = 0; trace.Clear();
                 Diapason diap = ts.otriples_op.Root.BinarySearchDiapason(fdepth);
                 sw.Stop();
                 Console.Write("Test of Diapason: {0} {1} ", diap.start, diap.numb);
                 Console.WriteLine(" swduration={0} counter={1}", sw.ElapsedTicks, counter); tt0 = DateTime.Now;
-                foreach (int point in trace) Console.Write("{0} ", point); Console.WriteLine();
+                //foreach (int point in trace) Console.Write("{0} ", point); Console.WriteLine();
+                
                 sw.Restart();
                 PaEntry test_ent = ts.otriples_op.Root.Element(0).Field(2);
                 int val = -1;
@@ -130,21 +150,21 @@ namespace TrueRdfViewer
                 Console.WriteLine(query1.Count());
                 Console.WriteLine("1 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 
-                Console.WriteLine(query2.Count());
-                Console.WriteLine("2 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //Console.WriteLine(query2.Count());
+                //Console.WriteLine("2 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
-                Console.WriteLine(berlin3.Count());
-                Console.WriteLine("berlin3 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //Console.WriteLine(berlin3.Count());
+                //Console.WriteLine("berlin3 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 
-                Console.WriteLine(query3.Count());
-                Console.WriteLine("3 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-                Console.WriteLine(query5.Count());
-                Console.WriteLine("5 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //Console.WriteLine(query3.Count());
+                //Console.WriteLine("3 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //Console.WriteLine(query5.Count());
+                //Console.WriteLine("5 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 
-                Console.WriteLine(berlin6.Count());
-                Console.WriteLine("berlin6 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-                Console.WriteLine(query6.Count());
-                Console.WriteLine("6 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //Console.WriteLine(berlin6.Count());
+                //Console.WriteLine("berlin6 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //Console.WriteLine(query6.Count());
+                //Console.WriteLine("6 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
                 //foreach (var rw in query1)
                 //{
