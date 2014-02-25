@@ -47,14 +47,6 @@ namespace TrueRdfViewer
     {
         public static IEnumerable<OValRowInt> _Spo(this IEnumerable<OValRowInt> rows, short subj, short pred, short obj)
         {
-            //return rows.SelectMany(pk => pk.Store
-            //    .GetSubjectByObjPred(pk.row[obj].entity, pk.row[pred].entity)
-            //    .Select(su =>
-            //    {
-            //        pk.row[subj].entity = su; //.Set(subj, su);
-            //        return new OValRowInt(pk.Store, pk.row);
-            //    }));
-
             // Определены объект и предикат, нужно найти множество субъектов, побочным эффектом будет определение 
             // и фиксация диапазона. Если диапазон уже есть, то диапазон не вычисляется, а используется
             var query = rows.SelectMany(rw =>
