@@ -72,12 +72,12 @@ namespace TrueRdfViewer
             var quer = Enumerable.Repeat<OValRowInt>(ovr, 1)
                 ._Spo(_product, _bsbm_productFeature, _bsbm_inst_ProductFeature1)
                 //._spD(_product, _rdfslabel, _label)
-                ._spo(_product, _rdftype, _bsbm_Product)
+                //._spo(_product, _rdftype, _bsbm_Product)
                 ._spD(_product, _bsbm_ProductPropertyNumeric1, _p1)
-                .Where(ovalrow => (int)ovalrow.row[_p1].lit.value > 1)
-                ._spD(_product, _bsbm_ProductPropertyNumeric3, _p3)
-                .Where(ovalrow => (int)ovalrow.row[_p1].lit.value < 100000)
-                ._spD(_product, _rdfslabel, _label)
+                //.Where(ovalrow => (int)ovalrow.row[_p1].lit.value > 1)
+                //._spD(_product, _bsbm_ProductPropertyNumeric3, _p3)
+                //.Where(ovalrow => (int)ovalrow.row[_p1].lit.value < 100000)
+                //._spD(_product, _rdfslabel, _label)
                 ;
             return quer;
         }
