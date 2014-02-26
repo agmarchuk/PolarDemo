@@ -497,21 +497,20 @@ namespace TrueRdfViewer
         }
         public bool CheckPredObjInDiap(Diapason di, int pred, int obj)
         {
-            //Diapason set = otriples.Root.BinarySearchDiapason(di.start, di.numb, ent =>
-            //{
-            //    int cmp = ((int)ent.Field(1).Get()).CompareTo(pred);
-            //    if (cmp != 0) return cmp;
-            //    return ((int)ent.Field(2).Get()).CompareTo(obj);
-            //});
-            //if (set.IsEmpty()) return false;
-            var query = otriples.Root.BinarySearchAll(di.start, di.numb, ent =>
-                {
-                    int cmp = ((int)ent.Field(1).Get()).CompareTo(pred);
-                    if (cmp != 0) return cmp;
-                    return ((int)ent.Field(2).Get()).CompareTo(obj);
-                });
-            if (query.Any()) return true;
-            return false;
+            Diapason set = otriples.Root.BinarySearchDiapason(di.start, di.numb, ent =>
+            {
+                int cmp = ((int)ent.Field(1).Get()).CompareTo(pred);
+                if (cmp != 0) return cmp;
+                return ((int)ent.Field(2).Get()).CompareTo(obj);
+            });
+            return !set.IsEmpty();
+            //var query = otriples.Root.BinarySearchAll(di.start, di.numb, ent =>
+            //    {
+            //        int cmp = ((int)ent.Field(1).Get()).CompareTo(pred);
+            //        if (cmp != 0) return cmp;
+            //        return ((int)ent.Field(2).Get()).CompareTo(obj);
+            //    });
+            //return query.Any();
         }
         public IEnumerable<int> GetObjInDiap(Diapason di, int pred)
         {
