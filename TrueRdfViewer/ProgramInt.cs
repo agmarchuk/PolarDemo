@@ -88,30 +88,30 @@ namespace TrueRdfViewer
                 //Console.WriteLine("query0 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 //return;
 
-                Console.WriteLine(query1_1.Count());
-                Console.WriteLine("1_1 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //Console.WriteLine(query1_1.Count());
+                //Console.WriteLine("1_1 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
                 //TestsOfMethods(ids, ts);
 
                 Console.WriteLine(query1.Count());
                 Console.WriteLine("1 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
-                Console.WriteLine(berlin1.Count());
-                Console.WriteLine("Berlin1 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //Console.WriteLine(berlin1.Count());
+                //Console.WriteLine("Berlin1 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
                 Console.WriteLine(query2.Count());
                 Console.WriteLine("2 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
-                Console.WriteLine(berlin3.Count());
-                Console.WriteLine("berlin3 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //Console.WriteLine(berlin3.Count());
+                //Console.WriteLine("berlin3 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
                 Console.WriteLine(query3.Count());
                 Console.WriteLine("3 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 Console.WriteLine(query5.Count());
                 Console.WriteLine("5 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
-                Console.WriteLine(berlin6.Count());
-                Console.WriteLine("berlin6 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //Console.WriteLine(berlin6.Count());
+                //Console.WriteLine("berlin6 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 Console.WriteLine(query6.Count());
                 Console.WriteLine("6 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
@@ -201,7 +201,7 @@ namespace TrueRdfViewer
             int cc = query.Count();
             sw.Stop();
             Console.Write("Test BinarySearchAll: {0} ", cc);
-            Console.WriteLine("Test swduration={0} duration={2} counter={1}", sw.ElapsedTicks, counter, (DateTime.Now - tt0).Ticks); tt0 = DateTime.Now;
+            Console.WriteLine("Test swduration={0} duration={2} counter={1}", sw.Elapsed.Ticks, counter, (DateTime.Now - tt0).Ticks); tt0 = DateTime.Now;
             //foreach (int point in trace) Console.Write("{0} ", point); Console.WriteLine();
 
             sw.Restart();
