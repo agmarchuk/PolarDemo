@@ -36,13 +36,13 @@ namespace TrueRdfViewer
                 "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature19",
 "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Product",
             };
+            DateTime tt0 = DateTime.Now;
 
             Console.WriteLine("Start");
             string path = "../../../Databases/";
             //TripleStore<EntityS> ts = new TripleStore<EntityS>(path, new PolarDB.PType(PolarDB.PTypeEnumeration.sstring));
             TripleStoreInt ts = new TripleStoreInt(path);
 
-            DateTime tt0 = DateTime.Now;
 
             //foreach (string id in ids)
             //{
