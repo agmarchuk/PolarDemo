@@ -52,8 +52,14 @@ namespace TripleIntCoding
                     if (i % 1000000 == 0) Console.Write(" " + i);
                 }
                 Console.WriteLine();
-                int[][] samples = 
-{ new int[] { 777, 21 }, new int[] { 777, 19 }, new int[] { 777, 22 }, new int[] { 7777777, 21 }, new int[] { 777, 18 } };
+                int[][] samples =
+                {
+                    new int[] { 777, 21 }, 
+                    new int[] { 777, 19 }, 
+                    new int[] { 777, 22 }, 
+                    new int[] { 7777777, 21 }, 
+                    new int[] { 777, 18 }
+                };
                 foreach (int[] sa in samples)
                 {
                     object[] valu = new object[] { sa[0], sa[1], 999 };
