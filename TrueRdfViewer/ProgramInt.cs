@@ -42,7 +42,9 @@ namespace TrueRdfViewer
             string path = "../../../Databases/";
             //TripleStore<EntityS> ts = new TripleStore<EntityS>(path, new PolarDB.PType(PolarDB.PTypeEnumeration.sstring));
             TripleStoreInt ts = new TripleStoreInt(path);
-
+            
+            //ts.WarmUp();
+            //Console.WriteLine("WarmUp duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             //foreach (string id in ids)
             //{
@@ -67,7 +69,6 @@ namespace TrueRdfViewer
             //ts.CreateScale();
             //Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             //ts.ShowScale();
-            Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             bool runpseudosoalqltests = true;
             if (runpseudosoalqltests)
             {
