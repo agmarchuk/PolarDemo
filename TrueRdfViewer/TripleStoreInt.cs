@@ -49,6 +49,8 @@ namespace TrueRdfViewer
         private FlexIndexView<SubjPredInt> sp_d_index = null;
         private FlexIndexView<SubjPredInt> op_o_index = null;
         private PaCell oscale;
+        private bool filescale = true;
+        //private bool memoryscale = false; // Наоборот от filescale
         private int range = 0;
 
         public TripleStoreInt(string path)
@@ -69,7 +71,15 @@ namespace TrueRdfViewer
                 OpenCreateIndexes();
             }
         }
-
+        public void WarmUp()
+        {
+            if (otriples.IsEmpty) return;
+            if (filescale) foreach (var v in otriples.Root.ElementValues()) ;
+            foreach (var v in otriples_op.Root.ElementValues()) ;
+            foreach (var v in dtriples.Root.ElementValues()) ;
+            foreach (var v in dtriples_sp.Root.ElementValues()) ;
+            if (filescale) foreach (var v in oscale.Root.ElementValues()) ;
+        }
         private void CalculateRange()
         {
             long len = oscale.Root.Count() - 1;
@@ -86,9 +96,7 @@ namespace TrueRdfViewer
                 ent => new SubjPredInt() { subj = (int)ent.Field(0).Get(), pred = (int)ent.Field(1).Get() });
             op_o_index = new FlexIndexView<SubjPredInt>(path + "obj_o_index", otriples.Root,
                 ent => new SubjPredInt() { subj = (int)ent.Field(2).Get(), pred = (int)ent.Field(1).Get() });
-            CreateScale();
-            long ntriples = otriples.Root.Count();
-            ShowScale(ntriples);
+            if (!filescale) CreateScale();
         }
 
         public void LoadTurtle(string filepath)
@@ -184,14 +192,17 @@ namespace TrueRdfViewer
 
             sp_d_index.Load(sp_compare);
             op_o_index.Load(sp_compare);
-            // Создание шкалы (Надо переделать)
-            //CreateScale();
-            //ShowScale();
-            //oscale.Clear();
-            //oscale.Fill(new object[0]);
-            //foreach (int v in scale.Values()) oscale.Root.AppendElement(v);
-            //oscale.Flush();
-            //CalculateRange(); // Наверное, range считается в CreateScale() 
+            if (filescale)
+            {
+                // Создание шкалы (Надо переделать)
+                CreateScale();
+                //ShowScale();
+                oscale.Clear();
+                oscale.Fill(new object[0]);
+                foreach (int v in scale.Values()) oscale.Root.AppendElement(v);
+                oscale.Flush();
+                CalculateRange(); // Наверное, range считается в CreateScale() 
+            }
         }
         //public void LoadXML(string filepath)
         //{
@@ -399,10 +410,17 @@ namespace TrueRdfViewer
             if (range > 0)
             {
                 int code = Scale1.Code(range, subj, pred, obj);
-                //int word = (int)oscale.Root.Element(Scale1.GetArrIndex(code)).Get();
-                //int tb = Scale1.GetFromWord(word, code);
-                int tb = scale[code];
-                if (tb == 0) return false;
+                int bit;
+                if (filescale)
+                {
+                    int word = (int)oscale.Root.Element(Scale1.GetArrIndex(code)).Get();
+                    bit = Scale1.GetFromWord(word, code);
+                }
+                else // if (memoryscale)
+                {
+                    bit = scale[code];
+                }
+                if (bit == 0) return false;
             }
             return true;
         }
