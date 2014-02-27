@@ -30,6 +30,7 @@ namespace TrueRdfViewer
             long currentIdOffset = 0;
             bool any = false;
             hashIndex = new DiaposonShot[(int)Math.Pow(2, bytesPerHash)];
+            int count = 0;
             foreach (var entry in sourceCell.Root.Elements())
             {
                 var idCode = keyProducer(entry);
@@ -39,9 +40,10 @@ namespace TrueRdfViewer
                     if (any)
                     {
                       long offsetOnEntity =  EntitiesTable.Root.AppendElement(new object[] {currentIdCode, currentIdOffset, currentCount});
+                        count++;
                         var hashe = Hashe(currentIdCode);
                         if (hashIndex[hashe].Numb == 0)
-                            hashIndex[hashe].Start = offsetOnEntity;
+                            hashIndex[hashe].Start = count; // offsetOnEntity;
                         hashIndex[hashe].Numb++;
                     }
                     else
@@ -73,14 +75,21 @@ namespace TrueRdfViewer
                 entry => (int) entry.Field(0).Get() - idCode);
            return new Diapason{ start = (long)entryRow.Field(1).Get(), numb = (long)entryRow.Field(2).Get()};
         }
+
+        public IEnumerable<PaEntry> SearchByKey(int idCode)
+        {
+            var diapason = GetDiapason(idCode);    
+           return sourceCell.Root.Elements(Convert.ToInt64(diapason.start), Convert.ToInt64(diapason.numb));
+
+        }
     }
 
     struct DiaposonShot
     {
-        public long Start;
+        public int Start;
         public short Numb;
 
-        public DiaposonShot(long start, short numb)
+        public DiaposonShot(int start, short numb)
         {
             Start = start;
             Numb = numb;
