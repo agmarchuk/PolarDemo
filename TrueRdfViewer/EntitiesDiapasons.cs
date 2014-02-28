@@ -9,9 +9,12 @@ namespace TrueRdfViewer
 {
     class EntitiesDiapasons
     {
-        public PType type=new PTypeSequence(new PTypeRecord(new NamedType("id code", new PType(PTypeEnumeration.integer)),
-            new NamedType("start offset", new PType(PTypeEnumeration.longinteger)),new NamedType("count", new PType(PTypeEnumeration.longinteger))));
-       public PaCell EntitiesTable;
+        public PType type = new PTypeSequence(
+            new PTypeRecord(
+                new NamedType("id code", new PType(PTypeEnumeration.integer)),
+                new NamedType("start offset", new PType(PTypeEnumeration.longinteger)),
+                new NamedType("count", new PType(PTypeEnumeration.longinteger))));
+        public PaCell EntitiesTable;
         private readonly PaCell sourceCell;
         private readonly Func<PaEntry, int> keyProducer;
 
@@ -29,7 +32,7 @@ namespace TrueRdfViewer
             int currentIdCode = Int32.MinValue, currentCount = 0;
             long currentIdOffset = 0;
             bool any = false;
-            hashIndex = new DiaposonShot[(int)Math.Pow(2, bytesPerHash)];
+            hashIndex = new DiapasonShot[(int)Math.Pow(2, bytesPerHash)];
             int count = 0;
             foreach (var entry in sourceCell.Root.Elements())
             {
@@ -41,7 +44,7 @@ namespace TrueRdfViewer
                     {
                       long offsetOnEntity =  EntitiesTable.Root.AppendElement(new object[] {currentIdCode, currentIdOffset, currentCount});
                         count++;
-                        var hashe = Hashe(currentIdCode);
+                        var hashe = Hash(currentIdCode);
                         if (hashIndex[hashe].Numb == 0)
                             hashIndex[hashe].Start = count; // offsetOnEntity;
                         hashIndex[hashe].Numb++;
@@ -56,22 +59,21 @@ namespace TrueRdfViewer
             }
             if (any)
                 EntitiesTable.Root.AppendElement(new object[] {currentIdCode, currentIdOffset, currentCount});
-
         }
 
 
         private static short bytesPerHash = 22, hashShift=(short)(32-bytesPerHash);
-        int Hashe(int code)
+        int Hash(int code)
         {
             return code >> hashShift;
         }
 
-        DiaposonShot[] hashIndex=new DiaposonShot[(int)Math.Pow(2,bytesPerHash)];
+        DiapasonShot[] hashIndex=new DiapasonShot[(int)Math.Pow(2,bytesPerHash)];
         public Diapason GetDiapason(int idCode)
         {
-            var hashDiapason = hashIndex[Hashe(idCode)];
+            var hashDiapason = hashIndex[Hash(idCode)];
             if (hashDiapason.Numb == 0) return Diapason.Empty;
-           PaEntry entryRow= EntitiesTable.Root.BinarySearchFirst(hashDiapason.Start, Convert.ToInt64(hashDiapason.Numb),
+           PaEntry entryRow = EntitiesTable.Root.BinarySearchFirst(hashDiapason.Start, Convert.ToInt64(hashDiapason.Numb),
                 entry => (int) entry.Field(0).Get() - idCode);
            return new Diapason{ start = (long)entryRow.Field(1).Get(), numb = (long)entryRow.Field(2).Get()};
         }
@@ -79,17 +81,16 @@ namespace TrueRdfViewer
         public IEnumerable<PaEntry> SearchByKey(int idCode)
         {
             var diapason = GetDiapason(idCode);    
-           return sourceCell.Root.Elements(Convert.ToInt64(diapason.start), Convert.ToInt64(diapason.numb));
-
+            return sourceCell.Root.Elements(Convert.ToInt64(diapason.start), Convert.ToInt64(diapason.numb));
         }
     }
 
-    struct DiaposonShot
+    struct DiapasonShot
     {
         public int Start;
         public short Numb;
 
-        public DiaposonShot(int start, short numb)
+        public DiapasonShot(int start, short numb)
         {
             Start = start;
             Numb = numb;
