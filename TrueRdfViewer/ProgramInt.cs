@@ -65,6 +65,8 @@ namespace TrueRdfViewer
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 return;
             }
+            TestEntities(ts);
+            return;
 
             //ts.CreateScale();
             //Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
@@ -259,6 +261,14 @@ namespace TrueRdfViewer
 
             // ============ Конец сравнения ================
             return tt0;
+        }
+
+        private static void TestEntities(TripleStoreInt ts)
+        {
+            PaKeyValueTable Spo = new PaKeyValueTable(ts.otriples, entry => (int)entry.Field(0).Get());
+            PaKeyValueTable spO = new PaKeyValueTable(ts.otriples_op, entry => (int)entry.Field(2).Get());
+            Entities entities = new Entities(@"../../", Spo, spO);
+            entities.Load();
         }
     }
 }
