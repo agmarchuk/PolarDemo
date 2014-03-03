@@ -15,9 +15,9 @@ namespace TrueRdfViewer
                                       
         private readonly Entities entities;
         private readonly Dictionary<int, Diapason> diapasonsTable;
-        public PaEntry GetDiapason(int idCode)
-        {
+        //public PaEntry GetDiapason(int idCode)
+        //{
             
-        }
+        //}
     }
 }

@@ -240,3 +240,4 @@ pip-log.txt
 /Databases/look.xml
 /Databases/*.nt2
 /Databases/0001.xml
+/TrueRdfViewer/*.pac

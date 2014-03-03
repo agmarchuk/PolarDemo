@@ -44,7 +44,7 @@ namespace TrueRdfViewer
         public PaCell otriples;
         public PaCell otriples_op; // объектные триплеты, упорядоченные по o-p
         private PaCell dtriples;
-        private PaCell dtriples_sp;
+        public PaCell dtriples_sp;
         private FlexIndexView<SubjPredObjInt> spo_o_index = null;
         private FlexIndexView<SubjPredInt> sp_d_index = null;
         private FlexIndexView<SubjPredInt> op_o_index = null;

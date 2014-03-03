@@ -65,7 +65,17 @@ namespace TrueRdfViewer
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 return;
             }
+            Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             TestEntities(ts);
+            Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            EntitiesWideTable ewt = new EntitiesWideTable(path, new DiapasonScanner<int>[] 
+            {
+                new DiapasonScanner<int>(ts.otriples, ent => (int)ent.Field(0).Get()),
+                new DiapasonScanner<int>(ts.otriples_op, ent => (int)ent.Field(2).Get()),
+                new DiapasonScanner<int>(ts.dtriples_sp, ent => (int)ent.Field(0).Get())
+            });
+            ewt.Load();
+            Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             return;
 
             //ts.CreateScale();
