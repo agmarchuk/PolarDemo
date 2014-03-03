@@ -45,8 +45,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BerlinTestsInt.cs" />
+    <Compile Include="DiapasonScanner.cs" />
     <Compile Include="Entities.cs" />
     <Compile Include="EntitiesDiapasons.cs" />
+    <Compile Include="EntitiesWideTable.cs" />
     <Compile Include="FlexIndexView.cs" />
     <Compile Include="OValRowInt.cs" />
     <Compile Include="ONames.cs" />
