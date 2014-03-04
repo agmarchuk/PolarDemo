@@ -69,35 +69,8 @@ namespace TrueRdfViewer
             
             //TestEntities(ts);
             //Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            
-            Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-               EntitiesMemoryHashTable hashTable =new EntitiesMemoryHashTable(ts.ewt);
-            hashTable.Load();
-            // Проверка построенной ewt
-            Console.WriteLine("n_entities={0}", ts.ewt.EWTable.Root.Count());
-            bool notfirst = false;
-            int code = Int32.MinValue;
-            long cnt_otriples = 0;
-            foreach (object[] row in ts.ewt.EWTable.Root.ElementValues())
-            {
-                int cd = (int)row[0];
-                // Проверка на возрастание значений кода
-                if (notfirst && cd <= code) { Console.WriteLine("ERROR!"); }
-                code = cd;
-                notfirst = true;
-                // Проверка на то, что коды в диапазонах индексов совпадают с cd. Подсчитывается количество
-                object[] odia = (object[])row[1];
-                long start = (long)odia[0];
-                long number = (long)odia[1];
-                foreach (object[] tri in ts.otriples.Root.ElementValues(start, number))
-                {
-                    int c = (int)tri[0];
-                    if (c != cd) Console.WriteLine("ERROR2!");
-                }
-                cnt_otriples += number;
-            }
-            if (cnt_otriples != ts.otriples.Root.Count()) Console.WriteLine("ERROR3!");
-            Console.WriteLine("Проверка ewt OK. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
+            //TestEWT(ts);
 
          
                
@@ -219,6 +192,38 @@ namespace TrueRdfViewer
             //}
             //Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
+        }
+
+        private static void TestEWT(TripleStoreInt ts)
+        {
+            DateTime tt0 = DateTime.Now;
+            EntitiesMemoryHashTable hashTable = new EntitiesMemoryHashTable(ts.ewt);
+            hashTable.Load();
+            // Проверка построенной ewt
+            Console.WriteLine("n_entities={0}", ts.ewt.EWTable.Root.Count());
+            bool notfirst = false;
+            int code = Int32.MinValue;
+            long cnt_otriples = 0;
+            foreach (object[] row in ts.ewt.EWTable.Root.ElementValues())
+            {
+                int cd = (int)row[0];
+                // Проверка на возрастание значений кода
+                if (notfirst && cd <= code) { Console.WriteLine("ERROR!"); }
+                code = cd;
+                notfirst = true;
+                // Проверка на то, что коды в диапазонах индексов совпадают с cd. Подсчитывается количество
+                object[] odia = (object[])row[1];
+                long start = (long)odia[0];
+                long number = (long)odia[1];
+                foreach (object[] tri in ts.otriples.Root.ElementValues(start, number))
+                {
+                    int c = (int)tri[0];
+                    if (c != cd) Console.WriteLine("ERROR2!");
+                }
+                cnt_otriples += number;
+            }
+            if (cnt_otriples != ts.otriples.Root.Count()) Console.WriteLine("ERROR3!");
+            Console.WriteLine("Проверка ewt OK. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
         }
 
         private static DateTime TestsOfMethods(string[] ids, TripleStoreInt ts)

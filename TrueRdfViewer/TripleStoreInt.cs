@@ -71,7 +71,7 @@ namespace TrueRdfViewer
             {
                 OpenCreateIndexes();
             }
-          ewt = new EntitiesWideTable(path, new DiapasonScanner<int>[]  
+            ewt = new EntitiesWideTable(path, new DiapasonScanner<int>[]  
             {
                 new DiapasonScanner<int>(otriples, ent => (int)((object[])ent.Get())[0]),
                 new DiapasonScanner<int>(otriples_op, ent => (int)((object[])ent.Get())[2]),
@@ -306,7 +306,7 @@ namespace TrueRdfViewer
                 int cmp = ob.CompareTo(obj);
                 return cmp;
             });
-            if (Equals(itemEntriry, PaEntry.Empty)) return Enumerable.Empty<int>();
+            if (itemEntriry.IsEmpty) return Enumerable.Empty<int>();
             var diapason = (object[])itemEntriry.Field(2).Get();
 
             return otriples_op.Root.Elements((long)diapason[0], (long)diapason[1])
@@ -350,7 +350,7 @@ namespace TrueRdfViewer
                 int cmp = ob.CompareTo(subj);
                 return cmp;
             });
-            if (Equals(itemEntriry, PaEntry.Empty)) return Enumerable.Empty<int>();
+            if (itemEntriry.IsEmpty) return Enumerable.Empty<int>();
             var diapason = (object[]) itemEntriry.Field(1).Get();
             return otriples.Root.Elements((long)diapason[0], (long)diapason[1])
                 .Where(entry => pred == (int) ((object[]) entry.Get())[1])
@@ -392,8 +392,8 @@ namespace TrueRdfViewer
                 int cmp = ob.CompareTo(subj);
                 return cmp;
             });
-            if (Equals(itemEntriry, PaEntry.Empty)) return Enumerable.Empty<Literal>();
-            var diapason = (object[])itemEntriry.Field(2).Get();
+            if (itemEntriry.IsEmpty) return Enumerable.Empty<Literal>();
+            var diapason = (object[])itemEntriry.Field(3).Get();
             
             if (dtriples_sp.Root.Count() == 0) return Enumerable.Empty<Literal>();
             PaEntry dtriple_entry = dtriples.Root.Element(0);
