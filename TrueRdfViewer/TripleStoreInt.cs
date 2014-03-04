@@ -14,7 +14,8 @@ namespace TrueRdfViewer
         private PType tp_otriple_seq;
         private PType tp_dtriple_seq;
         private PType tp_entity;
-        private PType tp_dtriple_spf; 
+        private PType tp_dtriple_spf;
+        private EntitiesWideTable ewt; 
         private void InitTypes()
         {
             tp_entity = new PType(PTypeEnumeration.integer);
@@ -70,6 +71,12 @@ namespace TrueRdfViewer
             {
                 OpenCreateIndexes();
             }
+          ewt = new EntitiesWideTable(path, new DiapasonScanner<int>[]  
+            {
+                new DiapasonScanner<int>(otriples, ent => (int)((object[])ent.Get())[0]),
+                new DiapasonScanner<int>(otriples_op, ent => (int)((object[])ent.Get())[2]),
+                new DiapasonScanner<int>(dtriples_sp, ent => (int)((object[])ent.Get())[0])
+            });
         }
         public void WarmUp()
         {
@@ -177,7 +184,7 @@ namespace TrueRdfViewer
                 return new SubjPredInt() { pred = (int)r[1], subj = (int)r[2] };
             }, sp_compare);
             // Упорядочивание dtriples_sp по s-p
-            dtriples_sp.Root.SortByKey<SubjPredInt>(rec =>
+            dtriples_sp.Root.SortByKey(rec =>
             {
                 object[] r = (object[])rec;
                 return new SubjPredInt() { pred = (int)r[1], subj = (int)r[0] };
@@ -203,6 +210,8 @@ namespace TrueRdfViewer
                 oscale.Flush();
                 CalculateRange(); // Наверное, range считается в CreateScale() 
             }
+
+            ewt.Load();  
         }
         //public void LoadXML(string filepath)
         //{
@@ -289,18 +298,35 @@ namespace TrueRdfViewer
 
         public IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
         {
-            var query = otriples_op.Root.BinarySearchAll(ent =>
-                {
-                    object[] rec = (object[])ent.Get();
-                    int ob = (int)rec[2];
-                    int cmp = ob.CompareTo(obj);
-                    if (cmp != 0) return cmp;
-                    int pr = (int)rec[1];
-                    return pr.CompareTo(pred);
-                });
-            return query
-                .Select(en => (int)en.Field(0).Get());
+            if (otriples_op.IsEmpty) return Enumerable.Empty<int>();      
+            var itemEntriry = ewt.EWTable.Root.BinarySearchFirst(ent =>
+            {
+                var rec = (object[]) ent.Get();
+                int ob = (int) rec[0];
+                int cmp = ob.CompareTo(obj);
+                return cmp;
+            });
+            if (Equals(itemEntriry, PaEntry.Empty)) return Enumerable.Empty<int>();
+            var diapason = (long[])itemEntriry.Field(2).Get();
+         
+              return otriples_op.Root.Elements(diapason[0], diapason[1])
+                  .Where(entry => pred ==(int)((object[])entry.Get())[1])
+                  .Select(en => (int)((object[])en.Get())[0]);
         }
+
+        public IEnumerable<int> GetSubjectByObjPred1(int obj, int pred)
+        {
+            var query = otriples_op.Root.BinarySearchAll(ent =>
+             {
+                 object[] rec = (object[])ent.Get();
+                 int ob = (int)rec[2];
+                 int cmp = ob.CompareTo(obj);
+                 if (cmp != 0) return cmp;
+                 int pr = (int)rec[1];
+                 return pr.CompareTo(pred);
+             });
+            return query.Select(en => (int)en.Field(0).Get());
+        }      
         public IEnumerable<int> GetSubjectByObjPred0(int obj, int pred)
         {
             return op_o_index.GetAll(ent => 
@@ -313,7 +339,25 @@ namespace TrueRdfViewer
             })
                 .Select(en => (int)en.Field(0).Get());
         }
+
         public IEnumerable<int> GetObjBySubjPred(int subj, int pred)
+        {
+            if (otriples.IsEmpty) return Enumerable.Empty<int>();
+            var itemEntriry = ewt.EWTable.Root.BinarySearchFirst(ent =>
+            {
+                var rec = (object[]) ent.Get();
+                int ob = (int) rec[0];
+                int cmp = ob.CompareTo(subj);
+                return cmp;
+            });
+            if (Equals(itemEntriry, PaEntry.Empty)) return Enumerable.Empty<int>();
+            var diapason = (long[]) itemEntriry.Field(1).Get();
+            return otriples.Root.Elements(diapason[0], diapason[1])
+                .Where(entry => pred == (int) ((object[]) entry.Get())[1])
+                .Select(en => (int) ((object[]) en.Get())[2]);
+        }
+
+        public IEnumerable<int> GetObjBySubjPred1(int subj, int pred)
         {
             return otriples.Root.BinarySearchAll(ent =>
             {
@@ -337,7 +381,50 @@ namespace TrueRdfViewer
             })
                 .Select(en => (int)en.Field(2).Get());
         }
+
         public IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
+        {
+            if (dtriples_sp.IsEmpty) return Enumerable.Empty<Literal>();
+            var itemEntriry = ewt.EWTable.Root.BinarySearchFirst(ent =>
+            {
+                var rec = (object[])ent.Get();
+                int ob = (int)rec[0];
+                int cmp = ob.CompareTo(subj);
+                return cmp;
+            });
+            if (Equals(itemEntriry, PaEntry.Empty)) return Enumerable.Empty<Literal>();
+            var diapason = (long[])itemEntriry.Field(2).Get();
+            
+            if (dtriples_sp.Root.Count() == 0) return Enumerable.Empty<Literal>();
+            PaEntry dtriple_entry = dtriples.Root.Element(0);
+            return dtriples_sp.Root.Elements(diapason[0], diapason[1])
+                .Where(entry => pred == (int)((object[])entry.Get())[1])
+                .Select(en =>
+                {
+                    dtriple_entry.offset = (long)en.Field(2).Get();
+                    object[] uni = (object[]) dtriple_entry.Field(2).Get();
+                    Literal lit = new Literal();
+                    int vid = (int) uni[0];
+                    if (vid == 1)
+                    {
+                        lit.vid = LiteralVidEnumeration.integer;
+                        lit.value = (int) uni[1];
+                    }
+                    if (vid == 3)
+                    {
+                        lit.vid = LiteralVidEnumeration.date;
+                        lit.value = (long) uni[1];
+                    }
+                    else if (vid == 2)
+                    {
+                        lit.vid = LiteralVidEnumeration.text;
+                        object[] txt = (object[]) uni[1];
+                        lit.value = new Text() {s = (string) txt[0], l = (string) txt[1]};
+                    }
+                    return lit;
+                });
+        }
+        public IEnumerable<Literal> GetDataBySubjPred1(int subj, int pred)
         {
             if (dtriples.Root.Count() == 0) return Enumerable.Empty<Literal>();
             PaEntry dtriple_entry = dtriples.Root.Element(0);
