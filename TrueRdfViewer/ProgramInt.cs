@@ -60,22 +60,51 @@ namespace TrueRdfViewer
                 //ts.LoadXML(path + "0001.xml");
                 //Console.WriteLine("LoadXML ok.");
                 PolarDB.PaEntry.bufferBytes = 20000000;
-                ts.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset10m.ttl");
+                ts.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset1m.ttl");
                 Console.WriteLine("LoadTurtle ok.");
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 return;
             }
             Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            TestEntities(ts);
-            Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            
+            //TestEntities(ts);
+            //Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            
             EntitiesWideTable ewt = new EntitiesWideTable(path, new DiapasonScanner<int>[] 
             {
-                new DiapasonScanner<int>(ts.otriples, ent => (int)ent.Field(0).Get()),
-                new DiapasonScanner<int>(ts.otriples_op, ent => (int)ent.Field(2).Get()),
-                new DiapasonScanner<int>(ts.dtriples_sp, ent => (int)ent.Field(0).Get())
+                new DiapasonScanner<int>(ts.otriples, ent => (int)((object[])ent.Get())[0]),
+                new DiapasonScanner<int>(ts.otriples_op, ent => (int)((object[])ent.Get())[2]),
+                new DiapasonScanner<int>(ts.dtriples_sp, ent => (int)((object[])ent.Get())[0])
             });
             ewt.Load();
             Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
+            // Проверка построенной ewt
+            Console.WriteLine("n_entities={0}", ewt.EWTable.Root.Count());
+            bool notfirst = false;
+            int code = Int32.MinValue;
+            long cnt_otriples = 0;
+            foreach (object[] row in ewt.EWTable.Root.ElementValues())
+            {
+                int cd = (int)row[0];
+                // Проверка на возрастание значений кода
+                if (notfirst && cd <= code) { Console.WriteLine("ERROR!"); }
+                code = cd;
+                notfirst = true;
+                // Проверка на то, что коды в диапазонах индексов совпадают с cd. Подсчитывается количество
+                object[] odia = (object[])row[1];
+                long start = (long)odia[0];
+                long number = (long)odia[1];
+                foreach (object[] tri in ts.otriples.Root.ElementValues(start, number))
+                {
+                    int c = (int)tri[0];
+                    if (c != cd) Console.WriteLine("ERROR2!");
+                }
+                cnt_otriples += number;
+            }
+            if (cnt_otriples != ts.otriples.Root.Count()) Console.WriteLine("ERROR3!");
+            Console.WriteLine("Проверка ewt OK. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
             return;
 
             //ts.CreateScale();
