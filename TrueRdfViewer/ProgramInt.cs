@@ -70,22 +70,15 @@ namespace TrueRdfViewer
             //TestEntities(ts);
             //Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             
-            EntitiesWideTable ewt = new EntitiesWideTable(path, new DiapasonScanner<int>[] 
-            {
-                new DiapasonScanner<int>(ts.otriples, ent => (int)((object[])ent.Get())[0]),
-                new DiapasonScanner<int>(ts.otriples_op, ent => (int)((object[])ent.Get())[2]),
-                new DiapasonScanner<int>(ts.dtriples_sp, ent => (int)((object[])ent.Get())[0])
-            });
-            ewt.Load();
             Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-               EntitiesMemoryHashTable hashTable =new EntitiesMemoryHashTable(ewt);
+               EntitiesMemoryHashTable hashTable =new EntitiesMemoryHashTable(ts.ewt);
             hashTable.Load();
             // Проверка построенной ewt
-            Console.WriteLine("n_entities={0}", ewt.EWTable.Root.Count());
+            Console.WriteLine("n_entities={0}", ts.ewt.EWTable.Root.Count());
             bool notfirst = false;
             int code = Int32.MinValue;
             long cnt_otriples = 0;
-            foreach (object[] row in ewt.EWTable.Root.ElementValues())
+            foreach (object[] row in ts.ewt.EWTable.Root.ElementValues())
             {
                 int cd = (int)row[0];
                 // Проверка на возрастание значений кода
@@ -106,8 +99,8 @@ namespace TrueRdfViewer
             if (cnt_otriples != ts.otriples.Root.Count()) Console.WriteLine("ERROR3!");
             Console.WriteLine("Проверка ewt OK. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
-            return;
-
+         
+               
             //ts.CreateScale();
             //Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             //ts.ShowScale();

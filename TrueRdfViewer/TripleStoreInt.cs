@@ -15,7 +15,7 @@ namespace TrueRdfViewer
         private PType tp_dtriple_seq;
         private PType tp_entity;
         private PType tp_dtriple_spf;
-        private EntitiesWideTable ewt; 
+        internal EntitiesWideTable ewt; 
         private void InitTypes()
         {
             tp_entity = new PType(PTypeEnumeration.integer);
@@ -307,9 +307,9 @@ namespace TrueRdfViewer
                 return cmp;
             });
             if (Equals(itemEntriry, PaEntry.Empty)) return Enumerable.Empty<int>();
-            var diapason = (long[])itemEntriry.Field(2).Get();
-         
-              return otriples_op.Root.Elements(diapason[0], diapason[1])
+            var diapason = (object[])itemEntriry.Field(2).Get();
+
+            return otriples_op.Root.Elements((long)diapason[0], (long)diapason[1])
                   .Where(entry => pred ==(int)((object[])entry.Get())[1])
                   .Select(en => (int)((object[])en.Get())[0]);
         }
@@ -351,8 +351,8 @@ namespace TrueRdfViewer
                 return cmp;
             });
             if (Equals(itemEntriry, PaEntry.Empty)) return Enumerable.Empty<int>();
-            var diapason = (long[]) itemEntriry.Field(1).Get();
-            return otriples.Root.Elements(diapason[0], diapason[1])
+            var diapason = (object[]) itemEntriry.Field(1).Get();
+            return otriples.Root.Elements((long)diapason[0], (long)diapason[1])
                 .Where(entry => pred == (int) ((object[]) entry.Get())[1])
                 .Select(en => (int) ((object[]) en.Get())[2]);
         }
@@ -393,11 +393,11 @@ namespace TrueRdfViewer
                 return cmp;
             });
             if (Equals(itemEntriry, PaEntry.Empty)) return Enumerable.Empty<Literal>();
-            var diapason = (long[])itemEntriry.Field(2).Get();
+            var diapason = (object[])itemEntriry.Field(2).Get();
             
             if (dtriples_sp.Root.Count() == 0) return Enumerable.Empty<Literal>();
             PaEntry dtriple_entry = dtriples.Root.Element(0);
-            return dtriples_sp.Root.Elements(diapason[0], diapason[1])
+            return dtriples_sp.Root.Elements((long)diapason[0], (long)diapason[1])
                 .Where(entry => pred == (int)((object[])entry.Get())[1])
                 .Select(en =>
                 {
