@@ -21,7 +21,7 @@ namespace TrueRdfViewer
         {
             this.cell = sequ;
             this.keyFunction = keyFunction;
-            this.count = sequ.Root.Count();
+            this.count = sequ.IsEmpty ? 0 : sequ.Root.Count();
             i_current = 0;
             if (count > 0)
             {
