@@ -15,7 +15,8 @@ namespace TrueRdfViewer
         private PType tp_dtriple_seq;
         private PType tp_entity;
         private PType tp_dtriple_spf;
-        internal EntitiesWideTable ewt; 
+        internal EntitiesWideTable ewt;
+        internal EntitiesMemoryHashTable ewtHash;
         private void InitTypes()
         {
             tp_entity = new PType(PTypeEnumeration.integer);
@@ -77,6 +78,8 @@ namespace TrueRdfViewer
                 new DiapasonScanner<int>(otriples_op, ent => (int)((object[])ent.Get())[2]),
                 new DiapasonScanner<int>(dtriples_sp, ent => (int)((object[])ent.Get())[0])
             });
+            ewtHash = new EntitiesMemoryHashTable(ewt);
+            ewtHash.Load();
         }
         public void WarmUp()
         {
@@ -211,7 +214,8 @@ namespace TrueRdfViewer
                 CalculateRange(); // Наверное, range считается в CreateScale() 
             }
 
-            ewt.Load();  
+            ewt.Load();
+            ewtHash.Load();
         }
         //public void LoadXML(string filepath)
         //{
@@ -298,6 +302,17 @@ namespace TrueRdfViewer
 
         public IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
         {
+
+            if (otriples_op.IsEmpty) return Enumerable.Empty<int>();
+            var itemEntriry = ewtHash.GetEntity(obj);
+            if (itemEntriry.IsEmpty) return Enumerable.Empty<int>();
+            var diapason = (object[])itemEntriry.Field(2).Get();
+            return otriples_op.Root.Elements((long)diapason[0], (long)diapason[1])
+                  .Where(entry => pred == (int)((object[])entry.Get())[1])
+                  .Select(en => (int)((object[])en.Get())[0]);
+        }
+        public IEnumerable<int> GetSubjectByObjPred2(int obj, int pred)
+        {
             if (otriples_op.IsEmpty) return Enumerable.Empty<int>();      
             var itemEntriry = ewt.EWTable.Root.BinarySearchFirst(ent =>
             {
@@ -343,6 +358,16 @@ namespace TrueRdfViewer
         public IEnumerable<int> GetObjBySubjPred(int subj, int pred)
         {
             if (otriples.IsEmpty) return Enumerable.Empty<int>();
+            var itemEntriry = ewtHash.GetEntity(subj);
+            if (itemEntriry.IsEmpty) return Enumerable.Empty<int>();
+            var diapason = (object[])itemEntriry.Field(1).Get();
+            return otriples.Root.Elements((long)diapason[0], (long)diapason[1])
+                .Where(entry => pred == (int)((object[])entry.Get())[1])
+                .Select(en => (int)((object[])en.Get())[2]);
+        }
+        public IEnumerable<int> GetObjBySubjPred2(int subj, int pred)
+        {
+            if (otriples.IsEmpty) return Enumerable.Empty<int>();
             var itemEntriry = ewt.EWTable.Root.BinarySearchFirst(ent =>
             {
                 var rec = (object[]) ent.Get();
@@ -385,13 +410,7 @@ namespace TrueRdfViewer
         public IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
         {
             if (dtriples_sp.IsEmpty) return Enumerable.Empty<Literal>();
-            var itemEntriry = ewt.EWTable.Root.BinarySearchFirst(ent =>
-            {
-                var rec = (object[])ent.Get();
-                int ob = (int)rec[0];
-                int cmp = ob.CompareTo(subj);
-                return cmp;
-            });
+            var itemEntriry = ewtHash.GetEntity(subj);         
             if (itemEntriry.IsEmpty) return Enumerable.Empty<Literal>();
             var diapason = (object[])itemEntriry.Field(3).Get();
             
@@ -420,6 +439,48 @@ namespace TrueRdfViewer
                         lit.vid = LiteralVidEnumeration.text;
                         object[] txt = (object[]) uni[1];
                         lit.value = new Text() {s = (string) txt[0], l = (string) txt[1]};
+                    }
+                    return lit;
+                });
+        }
+        public IEnumerable<Literal> GetDataBySubjPred2(int subj, int pred)
+        {
+            if (dtriples_sp.IsEmpty) return Enumerable.Empty<Literal>();
+            var itemEntriry = ewt.EWTable.Root.BinarySearchFirst(ent =>
+            {
+                var rec = (object[])ent.Get();
+                int ob = (int)rec[0];
+                int cmp = ob.CompareTo(subj);
+                return cmp;
+            });
+            if (itemEntriry.IsEmpty) return Enumerable.Empty<Literal>();
+            var diapason = (object[])itemEntriry.Field(3).Get();
+
+            if (dtriples_sp.Root.Count() == 0) return Enumerable.Empty<Literal>();
+            PaEntry dtriple_entry = dtriples.Root.Element(0);
+            return dtriples_sp.Root.Elements((long)diapason[0], (long)diapason[1])
+                .Where(entry => pred == (int)((object[])entry.Get())[1])
+                .Select(en =>
+                {
+                    dtriple_entry.offset = (long)en.Field(2).Get();
+                    object[] uni = (object[])dtriple_entry.Field(2).Get();
+                    Literal lit = new Literal();
+                    int vid = (int)uni[0];
+                    if (vid == 1)
+                    {
+                        lit.vid = LiteralVidEnumeration.integer;
+                        lit.value = (int)uni[1];
+                    }
+                    if (vid == 3)
+                    {
+                        lit.vid = LiteralVidEnumeration.date;
+                        lit.value = (long)uni[1];
+                    }
+                    else if (vid == 2)
+                    {
+                        lit.vid = LiteralVidEnumeration.text;
+                        object[] txt = (object[])uni[1];
+                        lit.value = new Text() { s = (string)txt[0], l = (string)txt[1] };
                     }
                     return lit;
                 });
