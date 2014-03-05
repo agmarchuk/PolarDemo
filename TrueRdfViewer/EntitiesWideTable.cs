@@ -29,7 +29,9 @@ namespace TrueRdfViewer
         {
             ewtable.Clear();
             ewtable.Fill(new object[0]);
-
+            foreach (var scanner in scanners)            
+                scanner.Start();
+            
             while (NotFinished(scanners))
             {
                 int key = Least(scanners);

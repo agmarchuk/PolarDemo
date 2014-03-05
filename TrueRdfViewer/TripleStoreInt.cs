@@ -307,9 +307,15 @@ namespace TrueRdfViewer
             var itemEntriry = ewtHash.GetEntity(obj);
             if (itemEntriry.IsEmpty) return Enumerable.Empty<int>();
             var diapason = (object[])itemEntriry.Field(2).Get();
-            return otriples_op.Root.Elements((long)diapason[0], (long)diapason[1])
-                  .Where(entry => pred == (int)((object[])entry.Get())[1])
-                  .Select(en => (int)((object[])en.Get())[0]);
+            long num= (long)diapason[1];
+            if(num<500)
+            return otriples_op.Root.ElementValues((long)diapason[0],num)
+                .Cast<object[]>()
+                  .Where(spo => pred == (int)spo[1])
+                  .Select(spo => (int)spo[0]);
+            return otriples_op.Root.BinarySearchAll((long)diapason[0], num,
+                entry=>((int)entry.Field(1).Get()).CompareTo(pred))
+                  .Select(entry => (int)entry.Field(0).Get());
         }
         public IEnumerable<int> GetSubjectByObjPred2(int obj, int pred)
         {
@@ -324,9 +330,10 @@ namespace TrueRdfViewer
             if (itemEntriry.IsEmpty) return Enumerable.Empty<int>();
             var diapason = (object[])itemEntriry.Field(2).Get();
 
-            return otriples_op.Root.Elements((long)diapason[0], (long)diapason[1])
-                  .Where(entry => pred ==(int)((object[])entry.Get())[1])
-                  .Select(en => (int)((object[])en.Get())[0]);
+            return otriples_op.Root.ElementValues((long)diapason[0], (long)diapason[1])
+                .Cast<object[]>()
+                  .Where(spo => pred == (int)spo[1])
+                  .Select(spo => (int)spo[0]);
         }
 
         public IEnumerable<int> GetSubjectByObjPred1(int obj, int pred)
@@ -361,9 +368,10 @@ namespace TrueRdfViewer
             var itemEntriry = ewtHash.GetEntity(subj);
             if (itemEntriry.IsEmpty) return Enumerable.Empty<int>();
             var diapason = (object[])itemEntriry.Field(1).Get();
-            return otriples.Root.Elements((long)diapason[0], (long)diapason[1])
-                .Where(entry => pred == (int)((object[])entry.Get())[1])
-                .Select(en => (int)((object[])en.Get())[2]);
+            return otriples.Root.ElementValues((long)diapason[0], (long)diapason[1])
+                .Cast<object[]>()
+                .Where(spo => pred == (int)spo[1])
+                .Select(spo => (int)spo[2]);
         }
         public IEnumerable<int> GetObjBySubjPred2(int subj, int pred)
         {
@@ -416,7 +424,9 @@ namespace TrueRdfViewer
             
             if (dtriples_sp.Root.Count() == 0) return Enumerable.Empty<Literal>();
             PaEntry dtriple_entry = dtriples.Root.Element(0);
-            return dtriples_sp.Root.Elements((long)diapason[0], (long)diapason[1])
+            long num=(long)diapason[1];
+            if(num < 500)
+            return dtriples_sp.Root.Elements((long)diapason[0], num)
                 .Where(entry => pred == (int)((object[])entry.Get())[1])
                 .Select(en =>
                 {
@@ -439,6 +449,34 @@ namespace TrueRdfViewer
                         lit.vid = LiteralVidEnumeration.text;
                         object[] txt = (object[]) uni[1];
                         lit.value = new Text() {s = (string) txt[0], l = (string) txt[1]};
+                    }
+                    return lit;
+                });
+            else 
+                return
+                    dtriples_sp.Root.BinarySearchAll((long)diapason[0], num,
+                entry => ((int)((object[])entry.Get())[1]).CompareTo(pred))
+                .Select(en =>
+                {
+                    dtriple_entry.offset = (long)en.Field(2).Get();
+                    object[] uni = (object[])dtriple_entry.Field(2).Get();
+                    Literal lit = new Literal();
+                    int vid = (int)uni[0];
+                    if (vid == 1)
+                    {
+                        lit.vid = LiteralVidEnumeration.integer;
+                        lit.value = (int)uni[1];
+                    }
+                    if (vid == 3)
+                    {
+                        lit.vid = LiteralVidEnumeration.date;
+                        lit.value = (long)uni[1];
+                    }
+                    else if (vid == 2)
+                    {
+                        lit.vid = LiteralVidEnumeration.text;
+                        object[] txt = (object[])uni[1];
+                        lit.value = new Text() { s = (string)txt[0], l = (string)txt[1] };
                     }
                     return lit;
                 });

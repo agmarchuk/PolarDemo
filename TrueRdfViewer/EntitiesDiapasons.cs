@@ -26,7 +26,8 @@ private EntitiesWideTable entites;
         Diapason[] diapasons;
         public void Load()
         {
-            if(entites.EWTable.IsEmpty) return;
+            if (entites.EWTable.IsEmpty) return;
+            if (entites.EWTable.Root.Count()==0) return;
             diapasons=new Diapason[ArraySize];
             Diapason diapason = new Diapason() { start = 0, numb = 1 };
             int hashCurrent = GetHash((int)entites.EWTable.Root.Element(0).Field(0).Get());

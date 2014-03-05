@@ -10,7 +10,7 @@ namespace TrueRdfViewer
     public class DiapasonScanner<Key> where Key: IComparable
     {
         private PaCell cell;
-        private long count;
+        private long count = Int64.MinValue;
         private long i_current; // i_current == count - конец файла
         private Key key_current;
         public bool HasValue { get { return i_current < count; } }
@@ -21,7 +21,11 @@ namespace TrueRdfViewer
         {
             this.cell = sequ;
             this.keyFunction = keyFunction;
-            this.count = sequ.IsEmpty ? 0 : sequ.Root.Count();
+            if (!this.cell.IsEmpty) Start();
+        }
+        public void Start()
+        {
+            this.count = cell.Root.Count();
             i_current = 0;
             if (count > 0)
             {
@@ -30,6 +34,7 @@ namespace TrueRdfViewer
         }
         public Diapason Scan()
         {
+            //if (count == Int64.MinValue) Start();
             long i_start = i_current;
             //long numb = 1;
             Key key_scanned = key_current;

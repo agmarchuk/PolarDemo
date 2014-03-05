@@ -60,17 +60,17 @@ namespace TrueRdfViewer
                 //ts.LoadXML(path + "0001.xml");
                 //Console.WriteLine("LoadXML ok.");
                 PolarDB.PaEntry.bufferBytes = 20000000;
-                ts.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset1m.ttl");
+                ts.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset10m.ttl");
                 Console.WriteLine("LoadTurtle ok.");
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 return;
             }
             Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            
-            //TestEntities(ts);
+           // ts.ewtHash.Test();
+           // TestEntities(ts);
             //Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
-            //TestEWT(ts);
+          // TestEWT(ts);
 
          
                
@@ -222,7 +222,7 @@ namespace TrueRdfViewer
                 }
                 cnt_otriples += number;
             }
-            if (cnt_otriples != ts.otriples.Root.Count()) Console.WriteLine("ERROR3!");
+            if (cnt_otriples != ts.otriples.Root.Count()) Console.WriteLine("ERROR3! cnt_triples={0} otriples.Root.Count()={1}", cnt_otriples, ts.otriples.Root.Count());
             Console.WriteLine("Проверка ewt OK. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
         }
 
