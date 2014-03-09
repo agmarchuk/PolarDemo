@@ -60,7 +60,7 @@ namespace TrueRdfViewer
                 //ts.LoadXML(path + "0001.xml");
                 //Console.WriteLine("LoadXML ok.");
                 PolarDB.PaEntry.bufferBytes = 20000000;
-                ts.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset10m.ttl");
+                ts.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset1m.ttl");
                 Console.WriteLine("LoadTurtle ok.");
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 return;
@@ -72,12 +72,20 @@ namespace TrueRdfViewer
 
           // TestEWT(ts);
 
-         
+
+            bool run148q5 = true;
+            if (run148q5)
+            {
+                foreach (var sprod in BerlinTestsInt.sarr)
+                {
+                    //var query5param = BerlinTestsInt.Query5parameter(ts, sprod);
+                    //Console.WriteLine("55555 {0} d={1}", query5param.Count(), (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                    var query2param = BerlinTestsInt.Query2param(ts, sprod);
+                    Console.WriteLine("22222 {0} d={1}", query2param.Count(), (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                }
+            }
                
-            //ts.CreateScale();
-            //Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            //ts.ShowScale();
-            bool runpseudosoalqltests = true;
+            bool runpseudosoalqltests = false;
             if (runpseudosoalqltests)
             {
                 var berlin1 = BerlinTestsInt.Berlin1(ts);

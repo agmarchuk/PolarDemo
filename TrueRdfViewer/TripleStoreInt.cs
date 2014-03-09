@@ -115,6 +115,10 @@ namespace TrueRdfViewer
             otriples.Fill(new object[0]);
             dtriples.Clear();
             dtriples.Fill(new object[0]);
+
+            // Только для специальных целей:
+            TurtleInt.sarr = new List<string>();
+
             int i = 0;
             //Entity e = new Entity();
             foreach (var triple in TurtleInt.LoadGraph(filepath))
@@ -124,8 +128,6 @@ namespace TrueRdfViewer
                 if (triple is OTripleInt)
                 {
                     var tr = (OTripleInt)triple;
-                    //Console.WriteLine(tr.obj);
-                    //otriples.Root.AppendElement(new object[] { tr.subject, tr.predicate, tr.obj });
                     otriples.Root.AppendElement(new object[] 
                     { 
                         tr.subject, 
@@ -149,7 +151,6 @@ namespace TrueRdfViewer
                     }
                     else
                         da = new object[] { 0, null };
-                    //dtriples.Root.AppendElement(new object[] { tr.subject, tr.predicate, da });
                     dtriples.Root.AppendElement(new object[] 
                     { 
                         tr.subject, 
@@ -161,6 +162,16 @@ namespace TrueRdfViewer
             Console.WriteLine();
             otriples.Flush();
             dtriples.Flush();
+
+            // Только для специальных целей:
+            int ii = 0;
+            foreach (string s in TurtleInt.sarr)
+            {
+                if (ii % 20 == 0) Console.WriteLine("\"{0}\", ", s);
+                ii++;
+            }
+            Console.WriteLine("sarr.Count() = {0}", TurtleInt.sarr.Count());
+
             
             SPOComparer spo_compare = new SPOComparer();
             SPComparer sp_compare = new SPComparer();
