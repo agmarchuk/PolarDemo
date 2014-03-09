@@ -436,40 +436,68 @@ namespace TrueRdfViewer
             if (dtriples_sp.Root.Count() == 0) return Enumerable.Empty<Literal>();
             PaEntry dtriple_entry = dtriples.Root.Element(0);
             long num=(long)diapason[1];
-            if(num < 500)
-            return dtriples_sp.Root.Elements((long)diapason[0], num)
-                .Where(entry => pred == (int)((object[])entry.Get())[1])
-                .Select(en =>
+            //if (num < 500)
+            //    return dtriples_sp.Root.Elements((long)diapason[0], num)
+            //        .Where(entry => pred == (int)((object[])entry.Get())[1])
+            //        .Select(en =>
+            //        {
+            //            dtriple_entry.offset = (long)en.Field(2).Get();
+            //            object[] uni = (object[])dtriple_entry.Field(2).Get();
+            //            Literal lit = new Literal();
+            //            int vid = (int)uni[0];
+            //            if (vid == 1)
+            //            {
+            //                lit.vid = LiteralVidEnumeration.integer;
+            //                lit.value = (int)uni[1];
+            //            }
+            //            else if (vid == 3)
+            //            {
+            //                lit.vid = LiteralVidEnumeration.date;
+            //                lit.value = (long)uni[1];
+            //            }
+            //            else if (vid == 2)
+            //            {
+            //                lit.vid = LiteralVidEnumeration.text;
+            //                object[] txt = (object[])uni[1];
+            //                lit.value = new Text() { s = (string)txt[0], l = (string)txt[1] };
+            //            }
+            //            return lit;
+            //        });
+            //else
+            //    return
+            //        dtriples_sp.Root.BinarySearchAll((long)diapason[0], num,
+            //    entry => ((int)((object[])entry.Get())[1]).CompareTo(pred))
+            //    .Select(en =>
+            //    {
+            //        dtriple_entry.offset = (long)en.Field(2).Get();
+            //        object[] uni = (object[])dtriple_entry.Field(2).Get();
+            //        Literal lit = new Literal();
+            //        int vid = (int)uni[0];
+            //        if (vid == 1)
+            //        {
+            //            lit.vid = LiteralVidEnumeration.integer;
+            //            lit.value = (int)uni[1];
+            //        }
+            //        if (vid == 3)
+            //        {
+            //            lit.vid = LiteralVidEnumeration.date;
+            //            lit.value = (long)uni[1];
+            //        }
+            //        else if (vid == 2)
+            //        {
+            //            lit.vid = LiteralVidEnumeration.text;
+            //            object[] txt = (object[])uni[1];
+            //            lit.value = new Text() { s = (string)txt[0], l = (string)txt[1] };
+            //        }
+            //        return lit;
+            //    });
+
+            var query = dtriples_sp.Root.ElementValues((long)diapason[0], num)
+                .Cast<object[]>()
+                .Where(ve => (int)ve[1] == pred)
+                .Select(ve =>
                 {
-                    dtriple_entry.offset = (long)en.Field(2).Get();
-                    object[] uni = (object[]) dtriple_entry.Field(2).Get();
-                    Literal lit = new Literal();
-                    int vid = (int) uni[0];
-                    if (vid == 1)
-                    {
-                        lit.vid = LiteralVidEnumeration.integer;
-                        lit.value = (int) uni[1];
-                    }
-                    if (vid == 3)
-                    {
-                        lit.vid = LiteralVidEnumeration.date;
-                        lit.value = (long) uni[1];
-                    }
-                    else if (vid == 2)
-                    {
-                        lit.vid = LiteralVidEnumeration.text;
-                        object[] txt = (object[]) uni[1];
-                        lit.value = new Text() {s = (string) txt[0], l = (string) txt[1]};
-                    }
-                    return lit;
-                });
-            else 
-                return
-                    dtriples_sp.Root.BinarySearchAll((long)diapason[0], num,
-                entry => ((int)((object[])entry.Get())[1]).CompareTo(pred))
-                .Select(en =>
-                {
-                    dtriple_entry.offset = (long)en.Field(2).Get();
+                    dtriple_entry.offset = (long)ve[2];
                     object[] uni = (object[])dtriple_entry.Field(2).Get();
                     Literal lit = new Literal();
                     int vid = (int)uni[0];
@@ -478,7 +506,7 @@ namespace TrueRdfViewer
                         lit.vid = LiteralVidEnumeration.integer;
                         lit.value = (int)uni[1];
                     }
-                    if (vid == 3)
+                    else if (vid == 3)
                     {
                         lit.vid = LiteralVidEnumeration.date;
                         lit.value = (long)uni[1];
@@ -491,6 +519,7 @@ namespace TrueRdfViewer
                     }
                     return lit;
                 });
+            return query;
         }
         public IEnumerable<Literal> GetDataBySubjPred2(int subj, int pred)
         {

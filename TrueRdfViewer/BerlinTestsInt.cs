@@ -180,10 +180,13 @@ namespace TrueRdfViewer
                 .spD(E(sprod), E(rdfs + "label"), _label)
                 .spD(E(sprod), E(rdfs + "comment"), _comment)
                 .spO(E(sprod), E(bsbm + "producer"), _p)
+
                 .spD(_p, E(rdfs + "label"), _producer)
                 .spo(E(sprod), E(dc + "publisher"), _p)
                 .spO(E(sprod), E(bsbm + "productFeature"), _f)
                 .spD(_f, E(rdfs + "label"), _productFeature)
+                
+                // Следующая группа может быть переставлена из конца в середину, будет быстрее
                 .spD(E(sprod), E(bsbm + "productPropertyTextual1"), _propertyTextual1)
                 .spD(E(sprod), E(bsbm + "productPropertyTextual2"), _propertyTextual2)
                 .spD(E(sprod), E(bsbm + "productPropertyTextual3"), _propertyTextual3)
@@ -256,15 +259,14 @@ namespace TrueRdfViewer
             var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
                 .spO(E(dataFromProducer1), E(bsbm + "productFeature"), _prodFeature)
                 .Spo(_product, E(bsbm + "productFeature"), _prodFeature)
+                .spD(_product, E(rdfs + "label"), _productLabel) // переставлено
                 .Where(pack => E(dataFromProducer1) != pack.GetE(_product))
-                //.spD(_product, E(rdfs + "label"), _productLabel)
                 .spD(E(dataFromProducer1), E(bsbm + "productPropertyNumeric1"), _origProperty1)
                 .spD(_product, E(bsbm + "productPropertyNumeric1"), _simProperty1)
                 .Where(pack => pack.Vai(_simProperty1) < (pack.Vai(_origProperty1) + 120) && pack.Vai(_simProperty1) > (pack.Vai(_origProperty1) - 120))
                 .spD(E(dataFromProducer1), E(bsbm + "productPropertyNumeric2"), _origProperty2)
                 .spD(_product, E(bsbm + "productPropertyNumeric2"), _simProperty2)
                 .Where(pack => pack.Vai(_simProperty2) < (pack.Vai(_origProperty2) + 170) && pack.Vai(_simProperty2) > (pack.Vai(_origProperty2) - 170))
-                .spD(_product, E(rdfs + "label"), _productLabel) // переставлено
                 ;
             return quer;
         }
