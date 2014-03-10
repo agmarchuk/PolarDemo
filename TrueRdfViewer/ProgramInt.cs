@@ -60,7 +60,7 @@ namespace TrueRdfViewer
                 //ts.LoadXML(path + "0001.xml");
                 //Console.WriteLine("LoadXML ok.");
                 PolarDB.PaEntry.bufferBytes = 20000000;
-                ts.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset1m.ttl");
+                ts.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset10m.ttl");
                 Console.WriteLine("LoadTurtle ok.");
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 return;
@@ -73,7 +73,7 @@ namespace TrueRdfViewer
           // TestEWT(ts);
 
 
-            bool run148q5 = true;
+            bool run148q5 = false;
             if (run148q5)
             {
                 DateTime tt00 = DateTime.Now;
@@ -89,7 +89,7 @@ namespace TrueRdfViewer
                     cnt, dur, (double)dur / (double)cnt, cnt * 1000 / dur);
             }
                
-            bool runpseudosoalqltests = false;
+            bool runpseudosoalqltests = true;
             if (runpseudosoalqltests)
             {
                 var berlin1 = BerlinTestsInt.Berlin1(ts);
@@ -112,7 +112,7 @@ namespace TrueRdfViewer
                 //Console.WriteLine(query1_1.Count());
                 //Console.WriteLine("1_1 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
-                //TestsOfMethods(ids, ts);
+                TestsOfMethods(ids, ts);
 
                 Console.WriteLine(query1.Count());
                 Console.WriteLine("1 duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;

@@ -59,6 +59,7 @@ namespace TrueRdfViewer
         public Dictionary<int, object[]> GroupedEntitiesHash()
         {
             Dictionary<int, object[]> res = new Dictionary<int, object[]>();
+            if (getable.IsEmpty) return res;
             getable.Root.Scan(row =>
             {
                 object[] r = (object[])row;

@@ -163,7 +163,7 @@ namespace TrueRdfViewer
             var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
                 .spD(E(bsbm_inst + "ProductType1"), E(rdfs + "label"), _label)
                 .spD(E(bsbm_inst + "ProductType1"), E(rdfs + "comment"), _comment)
-                .spD(E(bsbm_inst + "ProductType1"), E(bsbm + "producer"), _p)
+                .spO(E(bsbm_inst + "ProductType1"), E(bsbm + "producer"), _p)
                 ;
             return quer;
         }
@@ -259,7 +259,6 @@ namespace TrueRdfViewer
             var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
                 .spO(E(dataFromProducer1), E(bsbm + "productFeature"), _prodFeature)
                 .Spo(_product, E(bsbm + "productFeature"), _prodFeature)
-                .spD(_product, E(rdfs + "label"), _productLabel) // переставлено
                 .Where(pack => E(dataFromProducer1) != pack.GetE(_product))
                 .spD(E(dataFromProducer1), E(bsbm + "productPropertyNumeric1"), _origProperty1)
                 .spD(_product, E(bsbm + "productPropertyNumeric1"), _simProperty1)
@@ -267,6 +266,7 @@ namespace TrueRdfViewer
                 .spD(E(dataFromProducer1), E(bsbm + "productPropertyNumeric2"), _origProperty2)
                 .spD(_product, E(bsbm + "productPropertyNumeric2"), _simProperty2)
                 .Where(pack => pack.Vai(_simProperty2) < (pack.Vai(_origProperty2) + 170) && pack.Vai(_simProperty2) > (pack.Vai(_origProperty2) - 170))
+                .spD(_product, E(rdfs + "label"), _productLabel) // переставлено
                 ;
             return quer;
         }
