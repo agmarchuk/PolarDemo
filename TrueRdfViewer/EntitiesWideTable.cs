@@ -12,8 +12,10 @@ namespace TrueRdfViewer
         private PaCell ewtable;
         public PaCell EWTable { get { return ewtable; } }
         private DiapasonScanner<int>[] scanners;
+        private string path;
         public EntitiesWideTable(string path, DiapasonScanner<int>[] scanners) 
         {
+            this.path = path;
             this.scanners = scanners;
             PType DiaRec = new PTypeRecord(
                 new NamedType("start", new PType(PTypeEnumeration.longinteger)),
@@ -51,12 +53,12 @@ namespace TrueRdfViewer
             }
             ewtable.Flush();
         }
-        public static bool NotFinished(DiapasonScanner<int>[] scanners)
+        private static bool NotFinished(DiapasonScanner<int>[] scanners)
         {
             var query = scanners.Any(ds => ds.HasValue);
             return query;
         }
-        public static int Least(DiapasonScanner<int>[] scanners)
+        private static int Least(DiapasonScanner<int>[] scanners)
         {
             var keyCurrent = scanners
                 .Where(ds => ds.HasValue)

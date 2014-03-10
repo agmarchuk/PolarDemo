@@ -79,8 +79,8 @@ namespace TrueRdfViewer
                 DateTime tt00 = DateTime.Now;
                 foreach (var sprod in BerlinTestsInt.sarr)
                 {
-                    //var query = BerlinTestsInt.Query5parameter(ts, sprod);
-                    var query = BerlinTestsInt.Query2param(ts, sprod);
+                    var query = BerlinTestsInt.Query5parameter(ts, sprod);
+                    //var query = BerlinTestsInt.Query2param(ts, sprod);
                     Console.WriteLine("22222 {0} d={1}", query.Count(), (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 }
                 int cnt = BerlinTestsInt.sarr.Count();

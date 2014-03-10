@@ -54,6 +54,8 @@ namespace TrueRdfViewer
         private bool filescale = true;
         //private bool memoryscale = false; // Наоборот от filescale
         private int range = 0;
+        private GroupedEntities getable;
+        private Dictionary<int, object[]> geHash;
 
         public TripleStoreInt(string path)
         {
@@ -79,7 +81,10 @@ namespace TrueRdfViewer
                 new DiapasonScanner<int>(dtriples_sp, ent => (int)((object[])ent.Get())[0])
             });
             ewtHash = new EntitiesMemoryHashTable(ewt);
-            ewtHash.Load();
+            //ewtHash.Load();
+            getable = new GroupedEntities(path);
+            //getable.CheckGroupedEntities();
+            geHash = getable.GroupedEntitiesHash();
         }
         public void WarmUp()
         {
@@ -164,13 +169,17 @@ namespace TrueRdfViewer
             dtriples.Flush();
 
             // Только для специальных целей:
-            int ii = 0;
-            foreach (string s in TurtleInt.sarr)
+            bool specialpurposes = false;
+            if (specialpurposes)
             {
-                if (ii % 20 == 0) Console.WriteLine("\"{0}\", ", s);
-                ii++;
+                int ii = 0;
+                foreach (string s in TurtleInt.sarr)
+                {
+                    if (ii % 20 == 0) Console.WriteLine("\"{0}\", ", s);
+                    ii++;
+                }
+                Console.WriteLine("sarr.Count() = {0}", TurtleInt.sarr.Count());
             }
-            Console.WriteLine("sarr.Count() = {0}", TurtleInt.sarr.Count());
 
             
             SPOComparer spo_compare = new SPOComparer();
@@ -225,8 +234,13 @@ namespace TrueRdfViewer
                 CalculateRange(); // Наверное, range считается в CreateScale() 
             }
 
-            ewt.Load();
-            ewtHash.Load();
+            //ewt.Load();
+            //ewtHash.Load();
+            
+            getable.ConstructGroupedEntities(new DiapLinksScanner[] {
+                new DiapLinksScanner(otriples, 0),
+                new DiapLinksScanner(otriples_op, 2),
+                new DiapLinksScanner(dtriples_sp, 0)});
         }
         //public void LoadXML(string filepath)
         //{
@@ -313,6 +327,19 @@ namespace TrueRdfViewer
 
         public IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
         {
+            object[] diapason = GetDiapasonFromHash(obj, pred, 1);
+            if (diapason == null) return Enumerable.Empty<int>();
+
+            //return otriples_op.Root.Elements((long)diapason[0], (long)diapason[1])
+            //    //.Where(entry => pred == (int)((object[])entry.Get())[1])
+            //    .Select(en => (int)((object[])en.Get())[2]);
+            return otriples_op.Root.ElementValues((long)diapason[0], (long)diapason[1])
+                .Cast<object[]>()
+                  //.Where(spo => pred == (int)spo[1])
+                  .Select(spo => (int)spo[0]);
+        }
+        public IEnumerable<int> GetSubjectByObjPred3(int obj, int pred)
+        {
 
             if (otriples_op.IsEmpty) return Enumerable.Empty<int>();
             var itemEntriry = ewtHash.GetEntity(obj);
@@ -375,6 +402,18 @@ namespace TrueRdfViewer
 
         public IEnumerable<int> GetObjBySubjPred(int subj, int pred)
         {
+            object[] diapason = GetDiapasonFromHash(subj, pred, 0);
+            if (diapason == null) return Enumerable.Empty<int>();
+            //return otriples.Root.Elements((long)diapason[0], (long)diapason[1])
+            //    //.Where(entry => pred == (int)((object[])entry.Get())[1])
+            //    .Select(en => (int)((object[])en.Get())[2]);
+            return otriples.Root.ElementValues((long)diapason[0], (long)diapason[1])
+                .Cast<object[]>()
+                  .Where(spo => pred == (int)spo[1])
+                  .Select(spo => (int)spo[2]);
+        }
+        public IEnumerable<int> GetObjBySubjPred3(int subj, int pred)
+        {
             if (otriples.IsEmpty) return Enumerable.Empty<int>();
             var itemEntriry = ewtHash.GetEntity(subj);
             if (itemEntriry.IsEmpty) return Enumerable.Empty<int>();
@@ -426,7 +465,60 @@ namespace TrueRdfViewer
                 .Select(en => (int)en.Field(2).Get());
         }
 
+        private object[] GetDiapasonFromHash(int key, int pred, int direction)
+        {
+            object[] row = null;
+            if (!geHash.TryGetValue(key, out row)) return null;//new object[] { 0L, 0L };
+            object[] predList = (object[])((object[])row[1 + direction])[1];
+            object[] diap = null;
+            foreach (object[] preddiap in predList)
+            {
+                int pre = (int)preddiap[0];
+                if (pre == pred)
+                {
+                    diap = (object[])preddiap[1];
+                    break;
+                }
+            }
+            if (diap == null) return null;//new object[] { 0L, 0L };
+            return diap;
+        }
         public IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
+        {
+            object[] diapason = GetDiapasonFromHash(subj, pred, 2);
+            if (diapason == null) return Enumerable.Empty<Literal>();
+
+            PaEntry dtriple_entry = dtriples.Root.Element(0);
+            return dtriples_sp.Root.Elements((long)diapason[0], (long)diapason[1])
+                //.Where(entry => pred == (int)((object[])entry.Get())[1])
+                .Select(en =>
+                {
+                    dtriple_entry.offset = (long)en.Field(2).Get();
+                    object[] uni = (object[])dtriple_entry.Field(2).Get();
+                    Literal lit = new Literal();
+                    int vid = (int)uni[0];
+                    if (vid == 1)
+                    {
+                        lit.vid = LiteralVidEnumeration.integer;
+                        lit.value = (int)uni[1];
+                    }
+                    if (vid == 3)
+                    {
+                        lit.vid = LiteralVidEnumeration.date;
+                        lit.value = (long)uni[1];
+                    }
+                    else if (vid == 2)
+                    {
+                        lit.vid = LiteralVidEnumeration.text;
+                        object[] txt = (object[])uni[1];
+                        lit.value = new Text() { s = (string)txt[0], l = (string)txt[1] };
+                    }
+                    return lit;
+                });
+        }
+
+
+        public IEnumerable<Literal> GetDataBySubjPred3(int subj, int pred)
         {
             if (dtriples_sp.IsEmpty) return Enumerable.Empty<Literal>();
             var itemEntriry = ewtHash.GetEntity(subj);         

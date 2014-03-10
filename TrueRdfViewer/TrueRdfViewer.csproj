@@ -46,9 +46,11 @@
   <ItemGroup>
     <Compile Include="BerlinTestsInt.cs" />
     <Compile Include="DiapasonScanner.cs" />
+    <Compile Include="DiapLinksScanner.cs" />
     <Compile Include="EntitiesDiapasons.cs" />
     <Compile Include="EntitiesWideTable.cs" />
     <Compile Include="FlexIndexView.cs" />
+    <Compile Include="GroupedEntities.cs" />
     <Compile Include="OValRowInt.cs" />
     <Compile Include="ONames.cs" />
     <Compile Include="PaKeyValueTable.cs" />
