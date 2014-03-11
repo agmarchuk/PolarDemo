@@ -73,7 +73,7 @@ namespace TrueRdfViewer
           // TestEWT(ts);
 
 
-            bool run148q5 = false;
+            bool run148q5 = true;
             if (run148q5)
             {
                 DateTime tt00 = DateTime.Now;
@@ -89,7 +89,7 @@ namespace TrueRdfViewer
                     cnt, dur, (double)dur / (double)cnt, cnt * 1000 / dur);
             }
                
-            bool runpseudosoalqltests = true;
+            bool runpseudosoalqltests = false;
             if (runpseudosoalqltests)
             {
                 var berlin1 = BerlinTestsInt.Berlin1(ts);

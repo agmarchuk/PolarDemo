@@ -324,23 +324,31 @@ namespace TrueRdfViewer
             }
             Console.WriteLine("{0} {1} {2}", c, c1, ntriples);
         }
-
+        private Dictionary<KeyValuePair<int, int>, int[]> SpoCache = new Dictionary<KeyValuePair<int, int>, int[]>();
         public IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
+        {
+            int[] res;
+            var key = new KeyValuePair<int, int>(obj, pred);
+            if (SpoCache.TryGetValue(key, out res)) return res;
+            object[] diapason = GetDiapasonFromHash(obj, pred, 1);
+            if (diapason == null) return Enumerable.Empty<int>();
+            res = otriples_op.Root.ElementValues((long)diapason[0], (long)diapason[1])
+                .Cast<object[]>()
+                  .Select(spo => (int)spo[0]).ToArray();
+            SpoCache.Add(key, res);
+            return res;
+        }
+
+        public IEnumerable<int> GetSubjectByObjPred4(int obj, int pred)
         {
             object[] diapason = GetDiapasonFromHash(obj, pred, 1);
             if (diapason == null) return Enumerable.Empty<int>();
-
-            //return otriples_op.Root.Elements((long)diapason[0], (long)diapason[1])
-            //    //.Where(entry => pred == (int)((object[])entry.Get())[1])
-            //    .Select(en => (int)((object[])en.Get())[2]);
             return otriples_op.Root.ElementValues((long)diapason[0], (long)diapason[1])
                 .Cast<object[]>()
-                  //.Where(spo => pred == (int)spo[1])
                   .Select(spo => (int)spo[0]);
         }
         public IEnumerable<int> GetSubjectByObjPred3(int obj, int pred)
         {
-
             if (otriples_op.IsEmpty) return Enumerable.Empty<int>();
             var itemEntriry = ewtHash.GetEntity(obj);
             if (itemEntriry.IsEmpty) return Enumerable.Empty<int>();
@@ -400,7 +408,21 @@ namespace TrueRdfViewer
                 .Select(en => (int)en.Field(0).Get());
         }
 
+        private Dictionary<KeyValuePair<int, int>, int[]> spOCache = new Dictionary<KeyValuePair<int, int>, int[]>();
         public IEnumerable<int> GetObjBySubjPred(int subj, int pred)
+        {
+            int[] res;
+            var key = new KeyValuePair<int, int>(subj, pred);
+            if (spOCache.TryGetValue(key, out res)) return res;
+            object[] diapason = GetDiapasonFromHash(subj, pred, 0);
+            if (diapason == null) return Enumerable.Empty<int>();
+            res = otriples.Root.ElementValues((long)diapason[0], (long)diapason[1])
+                .Cast<object[]>()
+                .Select(spo => (int)spo[2]).ToArray();
+            spOCache.Add(key, res);
+            return res;
+        }
+        public IEnumerable<int> GetObjBySubjPred4(int subj, int pred)
         {
             object[] diapason = GetDiapasonFromHash(subj, pred, 0);
             if (diapason == null) return Enumerable.Empty<int>();
@@ -483,7 +505,46 @@ namespace TrueRdfViewer
             if (diap == null) return null;//new object[] { 0L, 0L };
             return diap;
         }
+        private Dictionary<KeyValuePair<int, int>, Literal[]> spDCache = new Dictionary<KeyValuePair<int, int>, Literal[]>();
         public IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
+        {
+            Literal[] res;
+            var key = new KeyValuePair<int, int>(subj, pred);
+            if (spDCache.TryGetValue(key, out res)) return res;
+
+            object[] diapason = GetDiapasonFromHash(subj, pred, 2);
+            if (diapason == null) return Enumerable.Empty<Literal>();
+
+            PaEntry dtriple_entry = dtriples.Root.Element(0);
+            res = dtriples_sp.Root.Elements((long)diapason[0], (long)diapason[1])
+                .Select(en =>
+                {
+                    dtriple_entry.offset = (long)en.Field(2).Get();
+                    object[] uni = (object[])dtriple_entry.Field(2).Get();
+                    Literal lit = new Literal();
+                    int vid = (int)uni[0];
+                    if (vid == 1)
+                    {
+                        lit.vid = LiteralVidEnumeration.integer;
+                        lit.value = (int)uni[1];
+                    }
+                    if (vid == 3)
+                    {
+                        lit.vid = LiteralVidEnumeration.date;
+                        lit.value = (long)uni[1];
+                    }
+                    else if (vid == 2)
+                    {
+                        lit.vid = LiteralVidEnumeration.text;
+                        object[] txt = (object[])uni[1];
+                        lit.value = new Text() { s = (string)txt[0], l = (string)txt[1] };
+                    }
+                    return lit;
+                }).ToArray();
+            spDCache.Add(key, res);
+            return res;
+        }
+        public IEnumerable<Literal> GetDataBySubjPred4(int subj, int pred)
         {
             object[] diapason = GetDiapasonFromHash(subj, pred, 2);
             if (diapason == null) return Enumerable.Empty<Literal>();
