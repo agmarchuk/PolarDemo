@@ -261,12 +261,12 @@ namespace TrueRdfViewer
                 .Spo(_product, E(bsbm + "productFeature"), _prodFeature)
                 .Where(pack => E(dataFromProducer1) != pack.GetE(_product))
                 .spD(E(dataFromProducer1), E(bsbm + "productPropertyNumeric1"), _origProperty1)
-                //.spD(_product, E(bsbm + "productPropertyNumeric1"), _simProperty1)
-                //.Where(pack => pack.Vai(_simProperty1) < (pack.Vai(_origProperty1) + 120) && pack.Vai(_simProperty1) > (pack.Vai(_origProperty1) - 120))
-                //.spD(E(dataFromProducer1), E(bsbm + "productPropertyNumeric2"), _origProperty2)
-                //.spD(_product, E(bsbm + "productPropertyNumeric2"), _simProperty2)
-                //.Where(pack => pack.Vai(_simProperty2) < (pack.Vai(_origProperty2) + 170) && pack.Vai(_simProperty2) > (pack.Vai(_origProperty2) - 170))
-                //.spD(_product, E(rdfs + "label"), _productLabel) // переставлено
+                .spD(_product, E(bsbm + "productPropertyNumeric1"), _simProperty1)
+                .Where(pack => pack.Vai(_simProperty1) < (pack.Vai(_origProperty1) + 120) && pack.Vai(_simProperty1) > (pack.Vai(_origProperty1) - 120))
+                .spD(E(dataFromProducer1), E(bsbm + "productPropertyNumeric2"), _origProperty2)
+                .spD(_product, E(bsbm + "productPropertyNumeric2"), _simProperty2)
+                .Where(pack => pack.Vai(_simProperty2) < (pack.Vai(_origProperty2) + 170) && pack.Vai(_simProperty2) > (pack.Vai(_origProperty2) - 170))
+                .spD(_product, E(rdfs + "label"), _productLabel) // переставлено
                 ;
             return quer;
         }
