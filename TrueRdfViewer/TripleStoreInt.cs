@@ -221,10 +221,9 @@ namespace TrueRdfViewer
             {
                 OpenCreateIndexes();
             }
-            spo_o_index.Load(spo_compare);
-
-            sp_d_index.Load(sp_compare);
-            op_o_index.Load(sp_compare);
+            //spo_o_index.Load(spo_compare);
+            //sp_d_index.Load(sp_compare);
+            //op_o_index.Load(sp_compare);
             if (filescale)
             {
                 // Создание шкалы (Надо переделать)

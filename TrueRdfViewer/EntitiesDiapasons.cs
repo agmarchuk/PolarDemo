@@ -32,9 +32,9 @@ namespace TrueRdfViewer
             diapasons = new Diapason[ArraySize];
             Diapason diapason = new Diapason() { start = 0, numb = 1 };
             int hashCurrent = GetHash((int)entites.EWTable.Root.Element(0).Field(0).Get());
-            foreach (var hashNew in entites.EWTable.Root.Elements()
+            foreach (var hashNew in entites.EWTable.Root.ElementValues()
                 .Skip(1)
-                .Select(e => e.Field(0).Get())
+                .Select(v => ((object[])v)[0])
                 .Cast<int>()
                 .Select(GetHash))
             {
