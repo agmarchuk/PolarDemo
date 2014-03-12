@@ -79,7 +79,7 @@ namespace TrueRdfViewer
                 int cnt = BerlinTestsInt.sarr.Count();
                 long dur;
                 DateTime tt00 = DateTime.Now;
-                bool secondtest = false;
+                bool secondtest = true;
                 if (secondtest)
                 {
                     foreach (var sprod in BerlinTestsInt.sarr)
@@ -92,7 +92,7 @@ namespace TrueRdfViewer
                         cnt, dur, (double)dur / (double)cnt, cnt * 1000 / dur);
                     tt00 = DateTime.Now;
                 }
-                bool fifthtest = true;
+                bool fifthtest = false;
                 if (fifthtest)
                 {
                     foreach (var sprod in BerlinTestsInt.sarr)
