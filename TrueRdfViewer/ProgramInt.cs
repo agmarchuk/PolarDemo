@@ -42,18 +42,8 @@ namespace TrueRdfViewer
             string path = "../../../Databases/";
             //TripleStore<EntityS> ts = new TripleStore<EntityS>(path, new PolarDB.PType(PolarDB.PTypeEnumeration.sstring));
             TripleStoreInt ts = new TripleStoreInt(path);
+            Console.WriteLine("InitTripleStore duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             
-            ts.WarmUp();
-            //Console.WriteLine("WarmUp duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-
-            //foreach (string id in ids)
-            //{
-            //     XElement el = ts.GetItem(id);
-            //     Console.WriteLine(el.Elements().Count());
-            //     Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            //}
-            //return;
-
             bool toload = false;
             if (toload)
             {
@@ -65,13 +55,9 @@ namespace TrueRdfViewer
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 return;
             }
-            Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-           // ts.ewtHash.Test();
-           // TestEntities(ts);
-            //Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
-          // TestEWT(ts);
-
+            //ts.WarmUp();
+            //Console.WriteLine("WarmUp duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             bool run148q5 = true;
             if (run148q5)
@@ -79,7 +65,7 @@ namespace TrueRdfViewer
                 int cnt = BerlinTestsInt.sarr.Count();
                 long dur;
                 DateTime tt00 = DateTime.Now;
-                bool secondtest = true;
+                bool secondtest = false;
                 if (secondtest)
                 {
                     foreach (var sprod in BerlinTestsInt.sarr)
@@ -92,7 +78,7 @@ namespace TrueRdfViewer
                         cnt, dur, (double)dur / (double)cnt, cnt * 1000 / dur);
                     tt00 = DateTime.Now;
                 }
-                bool fifthtest = false;
+                bool fifthtest = true;
                 if (fifthtest)
                 {
                     foreach (var sprod in BerlinTestsInt.sarr)
