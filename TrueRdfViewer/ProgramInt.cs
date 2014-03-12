@@ -43,7 +43,7 @@ namespace TrueRdfViewer
             //TripleStore<EntityS> ts = new TripleStore<EntityS>(path, new PolarDB.PType(PolarDB.PTypeEnumeration.sstring));
             TripleStoreInt ts = new TripleStoreInt(path);
             
-            //ts.WarmUp();
+            ts.WarmUp();
             //Console.WriteLine("WarmUp duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             //foreach (string id in ids)
@@ -76,17 +76,37 @@ namespace TrueRdfViewer
             bool run148q5 = true;
             if (run148q5)
             {
+                int cnt = BerlinTestsInt.sarr.Count();
+                long dur;
                 DateTime tt00 = DateTime.Now;
+                //foreach (var sprod in BerlinTestsInt.sarr)
+                //{
+                //    var query = BerlinTestsInt.Query2param(ts, sprod);
+                //    Console.WriteLine("22222 {0} d={1}", query.Count(), (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //}
+                //dur = (DateTime.Now - tt00).Ticks / 10000L;
+                //Console.WriteLine("Total time for {0} queries: {1}. Everage: {2}. QpS: {3}",
+                //    cnt, dur, (double)dur / (double)cnt, cnt * 1000 / dur);
+                //tt00 = DateTime.Now;
                 foreach (var sprod in BerlinTestsInt.sarr)
                 {
-                    //var query = BerlinTestsInt.Query5parameter(ts, sprod);
-                    var query = BerlinTestsInt.Query2param(ts, sprod);
+                    var query = BerlinTestsInt.Query5parameter(ts, sprod);
+                    //var query = BerlinTestsInt.Query2param(ts, sprod);
                     Console.WriteLine("22222 {0} d={1}", query.Count(), (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 }
-                int cnt = BerlinTestsInt.sarr.Count();
-                var dur = (DateTime.Now - tt00).Ticks / 10000L;
+                dur = (DateTime.Now - tt00).Ticks / 10000L;
                 Console.WriteLine("Total time for {0} queries: {1}. Everage: {2}. QpS: {3}",
                     cnt, dur, (double)dur / (double)cnt, cnt * 1000 / dur);
+                //tt00 = DateTime.Now;
+                //foreach (var sprod in BerlinTestsInt.sarr)
+                //{
+                //    var query = BerlinTestsInt.Query5parameter(ts, sprod);
+                //    //var query = BerlinTestsInt.Query2param(ts, sprod);
+                //    Console.WriteLine("22222 {0} d={1}", query.Count(), (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //}
+                //dur = (DateTime.Now - tt00).Ticks / 10000L;
+                //Console.WriteLine("Total time for {0} queries: {1}. Everage: {2}. QpS: {3}",
+                //    cnt, dur, (double)dur / (double)cnt, cnt * 1000 / dur);
             }
                
             bool runpseudosoalqltests = false;

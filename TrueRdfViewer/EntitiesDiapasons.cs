@@ -7,7 +7,7 @@ namespace TrueRdfViewer
 {
     class EntitiesMemoryHashTable
     {
-private EntitiesWideTable entites;
+        private EntitiesWideTable entites;
 
         public EntitiesMemoryHashTable(EntitiesWideTable entites)
         {
@@ -28,19 +28,21 @@ private EntitiesWideTable entites;
         {
             if (entites.EWTable.IsEmpty) return;
             if (entites.EWTable.Root.Count()==0) return;
-            diapasons=new Diapason[ArraySize];
+
+            diapasons = new Diapason[ArraySize];
             Diapason diapason = new Diapason() { start = 0, numb = 1 };
             int hashCurrent = GetHash((int)entites.EWTable.Root.Element(0).Field(0).Get());
             foreach (var hashNew in entites.EWTable.Root.Elements()
                 .Skip(1)
-                .Select(e=>e.Field(0).Get())
+                .Select(e => e.Field(0).Get())
                 .Cast<int>()
                 .Select(GetHash))
             {
                 if (hashNew == hashCurrent) diapason.numb++;
-                else {
+                else
+                {
                     diapasons[hashCurrent] = diapason;
-                    diapason = new Diapason { start = diapason.start + diapason.numb, numb=1 };
+                    diapason = new Diapason { start = diapason.start + diapason.numb, numb = 1 };
                     hashCurrent = hashNew;
                 }
             }
