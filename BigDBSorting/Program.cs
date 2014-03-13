@@ -2,20 +2,54 @@
 using System.Diagnostics;
 using System.Linq;
 using BigDbTest;
+using PolarDB;
 
 namespace BigDBSorting
 {
     class Program
     {
+        // Поверка "разогрева" WarmUp
         static void Main(string[] args)
         {
-            //string path = @"..\..\..\Databases\";
-            string path = @"D:\Home\FactographDatabases\";
-            //string path = @"C:\Users\Marchuk\Polar\";
+            string path = @"..\..\..\Databases\";
+            DateTime tt0 = DateTime.Now;
+            Random rnd = new Random();
+            PaCell icell = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)), path + "icell.pax", false);
+
+            bool toload = false;
+            int nvalues = 100000000;
+            if (toload)
+            {
+                icell.Clear();
+                icell.Fill(new object[0]);
+                for (int i = 0; i < nvalues; i++)
+                {
+                    icell.Root.AppendElement(rnd.Next());
+                }
+                icell.Flush();
+                Console.WriteLine("Load2 ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                PaEntry.bufferBytes = 200000000;
+                icell.Root.SortByKey<int>(ob => (int)ob); ;
+                Console.WriteLine("Sort ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            }
+            
+            //foreach (var v in icell.Root.ElementValues()) ;
+            //Console.WriteLine("WarmUp ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            
+            for (int i = 0; i < 1000; i++)
+            {
+                int r = rnd.Next(nvalues - 1);
+                int v = (int)icell.Root.Element(r).Get();
+            }
+            Console.WriteLine("ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+        }
+        static void Main0(string[] args)
+        {
+            string path = @"..\..\..\Databases\";
             DateTime tt0 = DateTime.Now;
             BigPolar bp = new BigPolar(path);
 
-            bool toload = false;
+            bool toload = true;
             if (toload)
             {
                 bp.Load2(100000000);

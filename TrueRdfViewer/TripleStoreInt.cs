@@ -95,8 +95,9 @@ namespace TrueRdfViewer
             foreach (var v in otriples_op.Root.ElementValues()) ;
             foreach (var v in dtriples.Root.ElementValues()) ;
             foreach (var v in dtriples_sp.Root.ElementValues()) ;
-            if (filescale) foreach (var v in oscale.Root.ElementValues()) ;
-            //foreach (var v in ewt.EWTable.Root.ElementValues()) ; // этая ячейка "подогревается" при начале программы
+            if (filescale) 
+                foreach (var v in oscale.Root.ElementValues()) ;
+            foreach (var v in ewt.EWTable.Root.ElementValues()) ; // этая ячейка "подогревается" при начале программы
         }
         private void CalculateRange()
         {
