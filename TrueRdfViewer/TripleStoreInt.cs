@@ -545,7 +545,7 @@ namespace TrueRdfViewer
             PaEntry dtriple_entry = dtriples.Root.Element(0);
             res = dtriples_sp.Root.Elements((long)diapason[0], (long)diapason[1])
                 .Where(entry => pred == (int)((object[])entry.Get())[1])
-                .Select(en =>
+                .Select(en => 
                 {
                     dtriple_entry.offset = (long)en.Field(2).Get();
                     object[] uni = (object[])dtriple_entry.Field(2).Get();

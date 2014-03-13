@@ -65,7 +65,7 @@ namespace TrueRdfViewer
                 int cnt = BerlinTestsInt.sarr.Count();
                 long dur;
                 DateTime tt00 = DateTime.Now;
-                bool secondtest = false;
+                bool secondtest = true;
                 if (secondtest)
                 {
                     foreach (var sprod in BerlinTestsInt.sarr)
@@ -78,7 +78,7 @@ namespace TrueRdfViewer
                         cnt, dur, (double)dur / (double)cnt, cnt * 1000 / dur);
                     tt00 = DateTime.Now;
                 }
-                bool fifthtest = true;
+                bool fifthtest = false;
                 if (fifthtest)
                 {
                     foreach (var sprod in BerlinTestsInt.sarr)
@@ -165,8 +165,10 @@ namespace TrueRdfViewer
             if (pseudosparql)
             {
                 var query = BerlinTestsInt.Query3_1(ts);
+                int count = 0;
                 foreach (var pack in query)
                 {
+                    count++;
                     var row = pack.row;
                     foreach (var val in row)
                     {
@@ -174,7 +176,8 @@ namespace TrueRdfViewer
                     }
                     Console.WriteLine();
                 }
-                Console.WriteLine(query.Count());
+                Console.Write("{0} ", count);
+                Console.WriteLine();
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 return;
             }
