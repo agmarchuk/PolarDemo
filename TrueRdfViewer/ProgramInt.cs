@@ -56,8 +56,8 @@ namespace TrueRdfViewer
                 return;
             }
 
-            //ts.WarmUp();
-            //Console.WriteLine("WarmUp duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            ts.WarmUp();
+            Console.WriteLine("WarmUp duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             bool run148q5 = true;
             if (run148q5)
@@ -90,6 +90,7 @@ namespace TrueRdfViewer
                     dur = (DateTime.Now - tt00).Ticks / 10000L;
                     Console.WriteLine("Total time for {0} queries: {1}. Everage: {2}. QpS: {3}",
                         cnt, dur, (double)dur / (double)cnt, cnt * 1000 / dur);
+                    tt00 = DateTime.Now;
                 }
                 //tt00 = DateTime.Now;
                 //foreach (var sprod in BerlinTestsInt.sarr)
