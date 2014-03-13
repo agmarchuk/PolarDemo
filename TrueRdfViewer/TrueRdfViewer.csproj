@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="allproducts.cs" />
     <Compile Include="BerlinTestsInt.cs" />
     <Compile Include="DiapasonScanner.cs" />
     <Compile Include="DiapLinksScanner.cs" />

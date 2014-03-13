@@ -49,8 +49,9 @@ namespace TrueRdfViewer
             {
                 //ts.LoadXML(path + "0001.xml");
                 //Console.WriteLine("LoadXML ok.");
-                PolarDB.PaEntry.bufferBytes = 20000000;
-                ts.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset10m.ttl");
+                PolarDB.PaEntry.bufferBytes = 2*1000*1000*1000;
+                ts.LoadTurtle(@"D:\deployed\dataset_100M.ttl");
+                //ts.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset10m.ttl");
                 Console.WriteLine("LoadTurtle ok.");
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 return;
@@ -62,7 +63,7 @@ namespace TrueRdfViewer
             bool run148q5 = true;
             if (run148q5)
             {
-                int cnt = BerlinTestsInt.sarr.Count();
+                int cnt = 500;//BerlinTestsInt.sarr.Count();
                 long dur;
                 DateTime tt00 = DateTime.Now;
                 bool secondtest = false;
@@ -81,11 +82,20 @@ namespace TrueRdfViewer
                 bool fifthtest = true;
                 if (fifthtest)
                 {
-                    foreach (var sprod in BerlinTestsInt.sarr)
+                    foreach (var sprod in Allproducts.Products.Take(2000))
+                    {
+                        var query = BerlinTestsInt.Query5parameter(ts, sprod);
+                        query.Count();
+                    }
+
+                    tt00 = DateTime.Now;
+                        foreach (var sprod in Allproducts.Products.Skip(2000).Take(cnt))
+
                     {
                         var query = BerlinTestsInt.Query5parameter(ts, sprod);
                         //var query = BerlinTestsInt.Query2param(ts, sprod);
-                        Console.WriteLine("55555 {0} d={1}", query.Count(), (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                    //    Console.WriteLine("55555 {0} d={1}", query.Count(), (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                        query.Count();
                     }
                     dur = (DateTime.Now - tt00).Ticks / 10000L;
                     Console.WriteLine("Total time for {0} queries: {1}. Everage: {2}. QpS: {3}",
