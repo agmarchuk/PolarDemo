@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{21037F60-37C7-4776-8481-E334A232A6E2}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PObjectives</RootNamespace>
     <AssemblyName>PObjectives</AssemblyName>
@@ -29,6 +29,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -39,11 +42,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Collection.cs" />
+    <Compile Include="Database.cs" />
+    <Compile Include="Element.cs" />
+    <Compile Include="Experiment.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Subclasses.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Description.txt" />
+    <Content Include="Diary.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\PolarBasedEngine\PolarBasedEngine.csproj">
+      <Project>{b5ff9b2d-cdaf-4b1a-95e9-346754466794}</Project>
+      <Name>PolarBasedEngine</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\PolarDB\PolarDB.csproj">
+      <Project>{907bb4af-fbc9-4a1e-8f80-194af9337aa4}</Project>
+      <Name>PolarDB</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

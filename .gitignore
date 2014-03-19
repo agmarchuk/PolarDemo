@@ -241,3 +241,4 @@ pip-log.txt
 /Databases/*.nt2
 /Databases/0001.xml
 /TrueRdfViewer/*.pac
+Databases
