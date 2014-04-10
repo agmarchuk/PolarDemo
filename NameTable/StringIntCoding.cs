@@ -196,7 +196,7 @@ namespace NameTable
             target.Close();
             source.Close();
             System.IO.File.Move(sourceCell, tmpCell);
-            this.Open(); // парный к thi.Close() оператор
+            this.Open(); // парный к this.Close() оператор
             // Финальный аккорд: формирование и выдача словаря
             //Dictionary<string, int> dic = accumulator.ToDictionary(
             //    (object[] pair) => (string)pair[1],
