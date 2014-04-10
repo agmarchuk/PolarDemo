@@ -135,8 +135,6 @@ namespace NameTable
             if (!target.IsEmpty) target.Clear();
             target.Fill(new object[0]);
 
-            //Console.WriteLine("подготовка ячеек ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-
             int ssa_ind = 0;
             bool ssa_notempty = true;
             string ssa_current = ssa_notempty ? ssa[ssa_ind] : null;

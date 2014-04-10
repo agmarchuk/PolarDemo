@@ -29,7 +29,7 @@ namespace NameTable
 
             List<string> ids = null;
             HashSet<string> hs = new HashSet<string>();
-            for (int j = 0; j < 600; j++)
+            for (int j = 0; j < 10; j++)
             {
                 tt0 = DateTime.Now;
                 ids = new List<string>(nportion * 2);
