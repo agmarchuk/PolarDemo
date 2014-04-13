@@ -21,8 +21,8 @@ namespace NameTable
             DateTime tt0 = DateTime.Now;
             DateTime tt00 = tt0;
 
-            int portion_size = 10000000;
-            int n_portions = 10;
+            int portion_size = 5000000;
+            int n_portions = 20;
 
             sic.Clear();
             HashSet<string> hs = new HashSet<string>();
