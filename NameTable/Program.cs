@@ -11,6 +11,25 @@ namespace NameTable
 {
     public class Program
     {
+        public static void MainNew(string[] args)
+        {
+            string path = @"..\..\..\Databases\";
+            string src_path = @"D:\home\FactographDatabases\dataset\dataset1M.ttl";
+
+            StringIntCoding sic = new StringIntCoding(path);
+
+            Console.WriteLine("Start");
+            DateTime tt0 = DateTime.Now;
+            DateTime tt00 = tt0;
+
+            int portion_size = 1000000;
+            int n_portions = 10;
+
+            sic.Clear();
+            HashSet<string> hs = new HashSet<string>();
+
+        }
+        // Тест преобразования Guid'ов
         public static void Main(string[] args)
         {
             string path = @"..\..\..\Databases\";
@@ -21,7 +40,7 @@ namespace NameTable
             DateTime tt0 = DateTime.Now;
             DateTime tt00 = tt0;
 
-            int portion_size = 10000000;
+            int portion_size = 1000000;
             int n_portions = 10;
 
             sic.Clear();
