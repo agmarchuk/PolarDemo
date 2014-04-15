@@ -51,7 +51,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReaderRDF", "ReaderRDF\Read
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PObjectives", "PObjectives\PObjectives.csproj", "{21037F60-37C7-4776-8481-E334A232A6E2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparqlParser", "..\ANTLR-Test\ANTLR Test\ANTLR Test\SparqlParser.csproj", "{B3F85355-685E-428F-B9E8-303AEAA8FF2A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparqlParser", "SparqlParser\SparqlParser.csproj", "{B3F85355-685E-428F-B9E8-303AEAA8FF2A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
