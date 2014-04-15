@@ -50,15 +50,15 @@ namespace TrueRdfViewer
                     if (subject == null) continue;
                 }
                 else
-                { // Predicate and object
-                    string line1 = line.Trim();
+                { // Predicate and object  
+                    string line1 = line.Trim();  
                     int first_blank = line1.IndexOf(' ');
                     if (first_blank == -1) { Console.WriteLine("Err in line: " + line); continue; }
                     string pred_line = line1.Substring(0, first_blank);
                     string predicate = GetEntityString(namespaces, pred_line);
                     string rest_line = line1.Substring(first_blank + 1).Trim();
                     // Уберем последний символ
-                    rest_line = rest_line.Substring(0, rest_line.Length - 1).Trim();
+                    rest_line = rest_line.Substring(0, rest_line.Length - 1).Trim(); 
                     bool isDatatype = rest_line[0] == '\"';
                     // объект может быть entity или данное, у данного может быть языковый спецификатор или тип
                     string entity = null;
@@ -91,18 +91,21 @@ namespace TrueRdfViewer
                             {
                                 datatype = GetEntityString(namespaces, qname);
                             }
-                        }
+                        }                 
                         yield return new DTripleInt()
                         {
                             subject = TripleInt.Code(subject),
                             predicate = TripleInt.Code(predicate),
                             data = // d
-                                datatype == "http://www.w3.org/2001/XMLSchema#integer" ?
-                                    new Literal() { vid = LiteralVidEnumeration.integer, value = int.Parse(sdata) } :
-                                (datatype == "http://www.w3.org/2001/XMLSchema#date" ?
-                                    new Literal() { vid = LiteralVidEnumeration.date, value = DateTime.Parse(sdata).ToBinary() } :
-                                (new Literal() { vid = LiteralVidEnumeration.text, value = new Text() { s = sdata, l = "en" } }))
-
+                                datatype == "http://www.w3.org/2001/XMLSchema#integer" || datatype == "http://www.w3.org/2001/XMLSchema#float" || datatype == "http://www.w3.org/2001/XMLSchema#double" ?
+                                    new Literal(LiteralVidEnumeration.integer) { Value = int.Parse(sdata) } :
+                                datatype == "http://www.w3.org/2001/XMLSchema#boolean" ?
+                                    new Literal(LiteralVidEnumeration.date) { Value = bool.Parse(sdata) } :
+                                datatype == "http://www.w3.org/2001/XMLSchema#dateTime" || datatype == "http://www.w3.org/2001/XMLSchema#date" ?
+                                    new Literal(LiteralVidEnumeration.date) { Value = DateTime.Parse(sdata).ToBinary() } :
+                                     datatype == null || datatype == "http://www.w3.org/2001/XMLSchema#string" ?
+                                new Literal(LiteralVidEnumeration.text) {Value = new Text() { Value = sdata, Lang = lang ?? "en"} } :
+                                new Literal(LiteralVidEnumeration.typedObject) { Value = new TypedObject() { Value = sdata, Type = datatype} }
                         };
                     }
                     else

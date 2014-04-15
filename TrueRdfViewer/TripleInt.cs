@@ -1,39 +1,145 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace TrueRdfViewer
+namespace  TrueRdfViewer
 {
     public abstract class TripleInt 
     { 
         public int subject, predicate;
-        public static int Code(string s) { return s.GetHashCode(); }
+        public static int Code(string s)
+        {
+            return s.GetHashCode();
+        }
         public static string Decode(int e) { return "noname" + e; }
     }
     public class OTripleInt : TripleInt { public int obj; }
     public class DTripleInt : TripleInt { public Literal data; }
-    public enum LiteralVidEnumeration { unknown, integer, text, date }
+    public enum LiteralVidEnumeration { typedObject, integer, text, date, boolean, nil }
     public class Literal 
-    { 
-        public LiteralVidEnumeration vid; 
-        public object value;
-        public override string ToString()
+    {
+        protected bool Equals(Literal other)
         {
-            switch (vid)
+            return vid == other.vid && Equals(Value, other.Value);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
             {
-                case LiteralVidEnumeration.text:
-                    {
-                        Text txt = (Text)value;
-                        return "\"" + txt.s + "\"@" + txt.l;
-                    }
-                default: return value.ToString();
+                return ((int) vid*397) ^ (Value != null ? Value.GetHashCode() : 0);
             }
         }
-    } 
-    public class Text { public string s, l; }
 
+        public readonly LiteralVidEnumeration vid;
+
+        public Literal(LiteralVidEnumeration vid)
+        {
+            this.vid = vid;
+        }
+
+        public object Value { get; set; }
+
+        public bool HasValue
+        {
+            get
+            {
+                return Value is Double && Value == (object) double.MinValue
+                       || Value is long && (long) Value == DateTime.MinValue.ToBinary()
+                       || Value is Text && !string.IsNullOrEmpty(((Text) Value).Value);
+            }
+        }
+
+        public override string ToString()
+        {
+            return Value.ToString();  
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Literal) obj);
+        }                               
+    }
+
+    public class TypedObject
+    {
+        protected bool Equals(TypedObject other)
+        {
+            return string.Equals(Value, other.Value) && string.Equals(Type, other.Type);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((Value != null ? Value.GetHashCode() : 0)*397) ^ (Type != null ? Type.GetHashCode() : 0);
+            }
+        }
+
+        public string Value { get; set; }
+        public string Type { get; set; }
+        public override string ToString()
+        {
+            string result = "\"" + Value + "\"";       
+            if (!string.IsNullOrWhiteSpace(Type))
+                result += "^^" + Type;
+            return result;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((TypedObject) obj);
+        }
+
+        public object Clone()
+        {
+            return new TypedObject() { Type = Type, Value = Value };
+        }
+    }
+       public class Text :ICloneable
+    {
+           protected bool Equals(Text other)
+           {
+               return string.Equals(Value, other.Value) && string.Equals(Lang, other.Lang);
+           }
+
+           public override int GetHashCode()
+           {
+               unchecked
+               {
+                   return ((Value != null ? Value.GetHashCode() : 0)*397) ^ (Lang != null ? Lang.GetHashCode() : 0);
+               }
+           }
+
+           public string Value { get; set; }
+        public string Lang { get; set; }
+           public override string ToString()
+           {
+               string result ="\"" +  Value + "\"";
+               if (!string.IsNullOrWhiteSpace(Lang))
+                   result += "@" + Lang;         
+               return result;
+           }
+
+           public override bool Equals(object obj)
+           {
+               if (ReferenceEquals(null, obj)) return false;
+               if (ReferenceEquals(this, obj)) return true;
+               if (obj.GetType() != this.GetType()) return false;
+               return Equals((Text) obj);
+           }
+
+           public object Clone()
+           {
+               return new Text() {Lang = Lang, Value = Value};
+           }
+    }
+             
     public class SubjPredInt
     {
         public int subj, pred;
