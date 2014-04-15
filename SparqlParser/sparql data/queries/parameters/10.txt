@@ -1,0 +1,1 @@
+1143370914, "9530.55"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD

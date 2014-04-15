@@ -1,0 +1,140 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Antlr4.4.2.0-alpha001\build\Antlr4.props" Condition="Exists('..\packages\Antlr4.4.2.0-alpha001\build\Antlr4.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B3F85355-685E-428F-B9E8-303AEAA8FF2A}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SparqlParser</RootNamespace>
+    <AssemblyName>SparqlParser</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Antlr4.Runtime.v4.5">
+      <HintPath>bin\Debug\Antlr4.Runtime.v4.5.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="GraphIsDataProperty.cs" />
+    <Compile Include="obj\Debug\sparql2PacBaseListener.cs" />
+    <Compile Include="obj\Debug\sparql2PacBaseVisitor.cs" />
+    <Compile Include="obj\Debug\sparql2PacLexer.cs" />
+    <Compile Include="obj\Debug\sparql2PacListener.cs" />
+    <Compile Include="obj\Debug\sparql2PacParser.cs" />
+    <Compile Include="obj\Debug\sparql2PacVisitor.cs" />
+    <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="Query.cs" />
+    <Compile Include="OValRowInt.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RPackComplexExtensionInt.cs" />
+    <Compile Include="sparq.cs" />
+    <Compile Include="sparql data\queries\parameters\Sarr.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <Antlr4 Include="sparql2XML.g4">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>ANTLR_Test</CustomToolNamespace>
+      <Listener>True</Listener>
+      <Visitor>True</Visitor>
+    </Antlr4>
+    <None Include="packages.config" />
+    <None Include="sparql data\queries\parameters\1.rq" />
+    <None Include="sparql data\queries\parameters\10.rq" />
+    <None Include="sparql data\queries\parameters\11.rq" />
+    <None Include="sparql data\queries\parameters\12.rq" />
+    <None Include="sparql data\queries\parameters\2.rq" />
+    <None Include="sparql data\queries\parameters\3.rq" />
+    <None Include="sparql data\queries\parameters\4.rq" />
+    <None Include="sparql data\queries\parameters\5.rq" />
+    <None Include="sparql data\queries\parameters\6.rq" />
+    <None Include="sparql data\queries\parameters\7.rq" />
+    <None Include="sparql data\queries\parameters\8.rq" />
+    <None Include="sparql data\queries\parameters\9.rq" />
+    <Antlr4 Include="sparql2Pac.g4">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>ANTLR_Test</CustomToolNamespace>
+    </Antlr4>
+    <None Include="sparql data\queries\with constants\1.rq" />
+    <None Include="sparql data\queries\with constants\10.rq" />
+    <None Include="sparql data\queries\with constants\11.rq" />
+    <None Include="sparql data\queries\with constants\12.rq" />
+    <None Include="sparql data\queries\with constants\2.rq" />
+    <None Include="sparql data\queries\with constants\3.rq" />
+    <None Include="sparql data\queries\with constants\4.rq" />
+    <None Include="sparql data\queries\with constants\5.rq" />
+    <None Include="sparql data\queries\with constants\6.rq" />
+    <None Include="sparql data\queries\with constants\7.rq" />
+    <None Include="sparql data\queries\with constants\8.rq" />
+    <None Include="sparql data\queries\with constants\9.rq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Input.txt" />
+    <Content Include="output.xml" />
+    <Content Include="sparql data\queries\parameters\1.txt" />
+    <Content Include="sparql data\queries\parameters\10.txt" />
+    <Content Include="sparql data\queries\parameters\11.txt" />
+    <Content Include="sparql data\queries\parameters\12.txt" />
+    <Content Include="sparql data\queries\parameters\2.txt" />
+    <Content Include="sparql data\queries\parameters\3.txt" />
+    <Content Include="sparql data\queries\parameters\4.txt" />
+    <Content Include="sparql data\queries\parameters\5.txt" />
+    <Content Include="sparql data\queries\parameters\6.txt" />
+    <Content Include="sparql data\queries\parameters\7.txt" />
+    <Content Include="sparql data\queries\parameters\8.txt" />
+    <Content Include="sparql data\queries\parameters\9.txt" />
+    <Content Include="sparql data\queries\parameters\titlewords.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\PolarDB\PolarDB.csproj">
+      <Project>{907bb4af-fbc9-4a1e-8f80-194af9337aa4}</Project>
+      <Name>PolarDB</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TrueRdfViewer\TrueRdfViewer.csproj">
+      <Project>{2053b201-18a6-4b4c-b1ec-1fe2b2d77f15}</Project>
+      <Name>TrueRdfViewer</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\Antlr4.4.2.0-alpha001\build\Antlr4.targets" Condition="Exists('..\packages\Antlr4.4.2.0-alpha001\build\Antlr4.targets')" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
