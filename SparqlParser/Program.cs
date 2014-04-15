@@ -104,7 +104,7 @@ namespace ANTLR_Test
                     //.Save(Path.ChangeExtension(file.FullName,".xml"));
                 }
             }
-            Console.WriteLine(string.Join(", ", results));
+            Console.WriteLine(string.Join(", ", results.Select(l => l/500)));
             
         }
         private static void RunBerlinsWithConstants(TripleStoreInt ts)
