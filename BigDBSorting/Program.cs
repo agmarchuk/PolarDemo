@@ -12,11 +12,12 @@ namespace BigDBSorting
         static void Main(string[] args)
         {
             string path = @"..\..\..\Databases\";
+            //string path = @"G:\Home\Databases\";
             DateTime tt0 = DateTime.Now;
             Random rnd = new Random();
-            PaCell icell = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)), path + "icell.pax", false);
+            PaCell icell = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)), path + "icell.pac", false);
 
-            bool toload = false;
+            bool toload = true;
             int nvalues = 100000000;
             if (toload)
             {

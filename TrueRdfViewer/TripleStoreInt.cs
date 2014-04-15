@@ -122,19 +122,98 @@ namespace TrueRdfViewer
 
         public void LoadTurtle(string filepath)
         {
+            DateTime tt0 = DateTime.Now;
+
+            Load(filepath);
+            Console.WriteLine("Load ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
+
+            
+            PrepareArrays();
+            Console.WriteLine("PrepareArrays ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
+            
+            // Упорядочивание otriples по s-p-o
+            otriples.Root.SortByKey<SubjPredObjInt>(rec => new SubjPredObjInt(rec), spo_compare);
+            Console.WriteLine("otriples.Root.Sort ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
+
+            //SPOComparer spo_compare = new SPOComparer();
+            SPComparer sp_compare = new SPComparer();
+            // Упорядочивание otriples_op по o-p
+            otriples_op.Root.SortByKey<SubjPredInt>(rec => 
+            {
+                object[] r = (object[])rec;
+                return new SubjPredInt() { pred = (int)r[1], subj = (int)r[2] };
+            }, sp_compare);
+            Console.WriteLine("otriples_op Sort ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
+
+            // Упорядочивание dtriples_sp по s-p
+            dtriples_sp.Root.SortByKey(rec =>
+            {
+                object[] r = (object[])rec;
+                return new SubjPredInt() { pred = (int)r[1], subj = (int)r[0] };
+            }, sp_compare);
+            Console.WriteLine("dtriples_sp.Root.Sort ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
+
+
+            if (filescale)
+            {
+                // Создание шкалы (Надо переделать)
+                CreateScale();
+                //ShowScale();
+                oscale.Clear();
+                oscale.Fill(new object[0]);
+                foreach (int v in scale.Values()) oscale.Root.AppendElement(v);
+                oscale.Flush();
+                CalculateRange(); // Наверное, range считается в CreateScale() 
+            }
+            Console.WriteLine("CreateScale ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
+
+            // Создание "широкой" таблицы
+            ewt.Load();
+            Console.WriteLine("ewt.Load() ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
+            
+            // Вычисление кеша. Это можно не делать, все равно - кеш в оперативной памяти
+            ewtHash.Load();
+            Console.WriteLine("ewtHash.Load() ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
+            
+        }
+
+        private void PrepareArrays()
+        {
+            // Создание и упорядочивание дополнительных структур
+            otriples_op.Clear();
+            otriples_op.Fill(new object[0]);
+            foreach (object v in otriples.Root.ElementValues()) otriples_op.Root.AppendElement(v);
+            otriples_op.Flush();
+            dtriples_sp.Clear();
+            dtriples_sp.Fill(new object[0]);
+            //foreach (PaEntry entry in dtriples.Root.Elements())
+            //{
+            //    int s = (int)entry.Field(0).Get();
+            //    int p = (int)entry.Field(1).Get();
+            //    dtriples_sp.Root.AppendElement(new object[] { s, p, entry.offset });
+            //}
+            dtriples.Root.Scan((off, pobj) =>
+            {
+                object[] tri = (object[])pobj;
+                int s = (int)tri[0];
+                int p = (int)tri[1];
+                dtriples_sp.Root.AppendElement(new object[] { s, p, off });
+                return true;
+            });
+            dtriples_sp.Flush();
+        }
+
+        private void Load(string filepath)
+        {
             otriples.Clear();
             otriples.Fill(new object[0]);
             dtriples.Clear();
             dtriples.Fill(new object[0]);
-
-            // Только для специальных целей:
-            TurtleInt.sarr = new List<string>();
-
             int i = 0;
             //Entity e = new Entity();
             foreach (var triple in TurtleInt.LoadGraph(filepath))
             {
-                if (i % 10000 == 0) Console.Write("{0} ", i / 10000);
+                if (i % 100000 == 0) Console.Write("{0} ", i / 100000);
                 i++;
                 if (triple is OTripleInt)
                 {
@@ -167,7 +246,7 @@ namespace TrueRdfViewer
                         {
                             Text t = (Text)lit.Value;
                             da = new object[] { 2, new object[] { t.Value, t.Lang } };
-                        }
+                    }
                             break;
                         case LiteralVidEnumeration.typedObject:
                             {
@@ -176,7 +255,7 @@ namespace TrueRdfViewer
                             }
                             break;              
                         default:
-                            da = new object[] { 0, null };
+                        da = new object[] { 0, null };
                             break;
                     }
                     dtriples.Root.AppendElement(new object[] 
@@ -187,84 +266,8 @@ namespace TrueRdfViewer
                     });
                 }
             }
-            Console.WriteLine();
             otriples.Flush();
             dtriples.Flush();
-
-            // Только для специальных целей:
-            bool specialpurposes = false;
-            if (specialpurposes)
-            {
-                int ii = 0;
-                foreach (string s in TurtleInt.sarr)
-                {
-                    if (ii % 20 == 0) Console.WriteLine("\"{0}\", ", s);
-                    ii++;
-                }
-                Console.WriteLine("sarr.Count() = {0}", TurtleInt.sarr.Count());
-            }
-
-            
-            SPOComparer spo_compare = new SPOComparer();
-            SPComparer sp_compare = new SPComparer();
-            // Создание и упорядочивание дополнительных структур
-            otriples_op.Clear();
-            otriples_op.Fill(new object[0]);
-            foreach (object v in otriples.Root.ElementValues()) otriples_op.Root.AppendElement(v);
-            otriples_op.Flush();
-            dtriples_sp.Clear();
-            dtriples_sp.Fill(new object[0]);
-            foreach (PaEntry entry in dtriples.Root.Elements())
-            {
-                int s = (int)entry.Field(0).Get();
-                int p = (int)entry.Field(1).Get();
-                dtriples_sp.Root.AppendElement(new object[] { s, p, entry.offset });
-            }
-            dtriples_sp.Flush();
-            // Упорядочивание otriples по s-p-o
-            otriples.Root.SortByKey<SubjPredObjInt>(rec => new SubjPredObjInt(rec), spo_compare);
-            // Упорядочивание otriples_op по o-p
-            otriples_op.Root.SortByKey<SubjPredInt>(rec => 
-            {
-                object[] r = (object[])rec;
-                return new SubjPredInt() { pred = (int)r[1], subj = (int)r[2] };
-            }, sp_compare);
-            // Упорядочивание dtriples_sp по s-p
-            dtriples_sp.Root.SortByKey(rec =>
-            {
-                object[] r = (object[])rec;
-                return new SubjPredInt() { pred = (int)r[1], subj = (int)r[0] };
-            }, sp_compare);
-
-            // Индексирование
-            if (spo_o_index == null)
-            {
-                OpenCreateIndexes();
-            }
-            //spo_o_index.Load(spo_compare);
-            //sp_d_index.Load(sp_compare);
-            //op_o_index.Load(sp_compare);
-            if (filescale)
-            {
-                // Создание шкалы (Надо переделать)
-                CreateScale();
-                //ShowScale();
-                oscale.Clear();
-                oscale.Fill(new object[0]);
-                foreach (int v in scale.Values()) oscale.Root.AppendElement(v);
-                oscale.Flush();
-                CalculateRange(); // Наверное, range считается в CreateScale() 
-            }
-
-            ewt.Load();
-            ewtHash.Load();
-
-           
-            
-            //getable.ConstructGroupedEntities(new DiapLinksScanner[] {
-            //    new DiapLinksScanner(otriples, 0),
-            //    new DiapLinksScanner(otriples_op, 2),
-            //    new DiapLinksScanner(dtriples_sp, 0)});
         }
         //public void LoadXML(string filepath)
         //{
@@ -326,7 +329,7 @@ namespace TrueRdfViewer
             int r = 1;
             while (len != 0) { len = len >> 1; r++; }
 
-            range = r + 4; // здесь 4 - фактор "разрежения" шкалы, можно меньше
+            range = r + 2; //r + 4; // здесь 4 - фактор "разрежения" шкалы, можно меньше
             scale = new Scale1(range);
             foreach (object[] tr in otriples.Root.ElementValues())
             {
@@ -488,7 +491,7 @@ namespace TrueRdfViewer
             return otriples.Root.Elements((long)diapason[0], (long)diapason[1])
                 .Where(entry => pred == (int) ((object[]) entry.Get())[1])
                 .Select(en => (int) ((object[]) en.Get())[2]);
-        }        
+        }
         public IEnumerable<int> GetObjBySubjPred1(int subj, int pred)
         {
             return otriples.Root.BinarySearchAll(ent =>
@@ -512,7 +515,7 @@ namespace TrueRdfViewer
                 return pr.CompareTo(pred);
             })
                 .Select(en => (int)en.Field(2).Get());
-        }         
+        }
         private object[] GetDiapasonFromHash(int key, int pred, int direction)
         {
             var itemEntry = ewtHash.GetEntity(key);
@@ -578,14 +581,14 @@ namespace TrueRdfViewer
         {
             Literal lit = null;
             int vid = (int) uni[0];
-            if (vid == 1)
-            {
+                    if (vid == 1)
+                    {
                 lit = new Literal(LiteralVidEnumeration.integer) {Value = Convert.ToDouble(uni[1])};
-            }
-            if (vid == 3)
-            {
+                    }
+                    if (vid == 3)
+                    {
                 lit = new Literal(LiteralVidEnumeration.date) {Value = (long) uni[1]};
-            }
+                    }
             else if (vid == 4)
             {
                 lit = new Literal(LiteralVidEnumeration.boolean) {Value = (bool) uni[1]};
@@ -598,15 +601,15 @@ namespace TrueRdfViewer
                     Value = new TypedObject() {Value = (string) txt[0], Type = (string) txt[1]}
                 };
             }
-            else if (vid == 2)
-            {
+                    else if (vid == 2)
+                    {
                 object[] txt = (object[]) uni[1];
                 lit = new Literal(LiteralVidEnumeration.text)
                 {
                     Value = new Text() {Value = (string) txt[0], Lang = (string) txt[1]}
                 };
-            }
-            return lit;
+                    }
+                    return lit;
         }
 
         public IEnumerable<Literal> GetDataBySubjPred4(int subj, int pred)
@@ -622,7 +625,7 @@ namespace TrueRdfViewer
                     dtriple_entry.offset = (long)en.Field(2).Get();
                     return ToLiteral((object[])dtriple_entry.Field(2).Get());                  
                 });
-        }             
+        }
         public IEnumerable<Literal> GetDataBySubjPred3(int subj, int pred)
         {
             if (dtriples_sp.IsEmpty) return Enumerable.Empty<Literal>();

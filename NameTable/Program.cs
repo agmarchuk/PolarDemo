@@ -11,9 +11,61 @@ namespace NameTable
 {
     public class Program
     {
-        private static readonly Regex TripletsRegex = new Regex("^(\\S+)\\s+(\\S+)\\s+(\"(.+)\"(@(\\S*))?|(.+))\\.$",
-            RegexOptions.Compiled | RegexOptions.Singleline);
+        public static void MainNew(string[] args)
+        {
+            string path = @"..\..\..\Databases\";
+            string src_path = @"D:\home\FactographDatabases\dataset\dataset1M.ttl";
+
+            StringIntCoding sic = new StringIntCoding(path);
+
+            Console.WriteLine("Start");
+            DateTime tt0 = DateTime.Now;
+            DateTime tt00 = tt0;
+
+            int portion_size = 1000000;
+            int n_portions = 10;
+
+            sic.Clear();
+            HashSet<string> hs = new HashSet<string>();
+
+        }
+        // Тест преобразования Guid'ов
         public static void Main(string[] args)
+        {
+            string path = @"..\..\..\Databases\";
+
+            StringIntCoding sic = new StringIntCoding(path);
+
+            Console.WriteLine("Start");
+            DateTime tt0 = DateTime.Now;
+            DateTime tt00 = tt0;
+
+            int portion_size = 5000000;
+            int n_portions = 20;
+
+            sic.Clear();
+            HashSet<string> hs = new HashSet<string>();
+            //SortedSet<string> hs = new SortedSet<string>();
+            for (int j = 0; j < n_portions; j++)
+            {
+                tt0 = DateTime.Now;
+                hs.Clear();
+                for (int i = 0; i < portion_size; i++)
+                {
+                    string id = (Guid.NewGuid()).ToString();
+                    hs.Add(id);
+                }
+                Console.WriteLine("Set ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                string[] arr = new string[hs.Count];
+                hs.CopyTo(arr);
+                Array.Sort<string>(arr);
+                Console.WriteLine("Sorting ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                var dic = sic.InsertPortion(arr);
+                Console.WriteLine("InsertPortion ok. portion=" + j + " HashSet.Size=" + hs.Count + " duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            }
+            Console.WriteLine("Total: {0}", (DateTime.Now - tt00).Ticks / 10000L);
+        }
+        public static void Main2(string[] args)
         {
             string path = @"..\..\..\Databases\";
             System.IO.StreamReader sr = new System.IO.StreamReader(@"F:\FactographData\freebase-rdf-2013-02-10-00-00.nt2");
@@ -29,7 +81,7 @@ namespace NameTable
 
             List<string> ids = null;
             HashSet<string> hs = new HashSet<string>();
-            for (int j = 0; j < 600; j++)
+            for (int j = 0; j < 10; j++)
             {
                 tt0 = DateTime.Now;
                 ids = new List<string>(nportion * 2);

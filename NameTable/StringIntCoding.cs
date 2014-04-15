@@ -54,15 +54,22 @@ namespace NameTable
         }
         public void Open()
         {
-            nc_cell = new PaCell(tp_nc, originalCell);
-            n_index = new PaCell(tp_ind, niCell);
-            c_index = new PaCell(tp_ind, ciCell);
+            //TODO: надо разобраться с readOnly модой 
+            nc_cell = new PaCell(tp_nc, originalCell, false);
+            n_index = new PaCell(tp_ind, niCell, false);
+            c_index = new PaCell(tp_ind, ciCell, false);
         }
         public void Close()
         {
             nc_cell.Close();
             n_index.Close();
             c_index.Close();
+        }
+        public void Clear()
+        {
+            nc_cell.Clear();
+            n_index.Clear();
+            c_index.Clear();
         }
         public int GetCode(string name)
         {
@@ -93,49 +100,26 @@ namespace NameTable
         }
         public Dictionary<string, int> InsertPortion(string[] sorted_arr) //(IEnumerable<string> portion)
         {
-            DateTime tt0 = DateTime.Now;
-            ////SortedSet<string> ss = new SortedSet<string>(new string[] { "test" }); // new SortedSet<string>(portion);
-            //string[] arr = portion.ToArray();
-            ////Console.WriteLine("Before SortedSet (" + arr.Length + "). duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            ////SortedSet<string> ss = new SortedSet<string>(portion);
-            //Array.Sort<string>(arr);
-            //string current = null;
-            //int nunique = 0;
-            //foreach (string s in arr) if (s != current) { current = s; nunique++; }
-            //List<string> ss = new List<string>(nunique);
-            //current = null;
-            //foreach (string s in arr)
-            //{
-            //    if (s != current)
-            //    {
-            //        current = s;
-            //        ss.Add(current);
-            //    }
-            //}
-            //string[] ssa = ss.ToArray();
-            //ss = null;
+            //DateTime tt0 = DateTime.Now;
             string[] ssa = sorted_arr;
-            //string[] ssa = portion.ToArray();
             if (ssa.Length == 0) return new Dictionary<string, int>();
-            //Console.WriteLine("Sort and compress ok ("+ ssa.Length +"). duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             this.Close();
             // Подготовим основную ячейку для работы
+            if (System.IO.File.Exists(sourceCell)) System.IO.File.Delete(sourceCell);
             System.IO.File.Move(originalCell, sourceCell);
-            if (!System.IO.File.Exists(tmpCell))
-            {
-                PaCell tmp = new PaCell(tp_nc, tmpCell, false);
-                tmp.Fill(new object[0]);
-                tmp.Close();
-            }
-            System.IO.File.Move(tmpCell, originalCell);
+            //if (!System.IO.File.Exists(tmpCell))
+            //{
+            //    PaCell tmp = new PaCell(tp_nc, tmpCell, false);
+            //    tmp.Fill(new object[0]);
+            //    tmp.Close();
+            //}
+            //System.IO.File.Move(tmpCell, originalCell);
 
             PaCell source = new PaCell(tp_nc, sourceCell);
             PaCell target = new PaCell(tp_nc, originalCell, false);
-            if (!target.IsEmpty) target.Clear();
+            //if (!target.IsEmpty) target.Clear();
             target.Fill(new object[0]);
-
-            //Console.WriteLine("подготовка ячеек ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             int ssa_ind = 0;
             bool ssa_notempty = true;
@@ -146,37 +130,40 @@ namespace NameTable
             List<KeyValuePair<string, int>> accumulator = new List<KeyValuePair<string, int>>(ssa.Length);
 
             // Очередной (новый) код (индекс)
-            //long nn = source.Root.Count();
-            int code_new = (int)source.Root.Count();
-            foreach (object[] val in source.Root.ElementValues())
+            int code_new = 0;
+            if (!source.IsEmpty)
             {
-                // Пропускаю элементы из нового потока, которые меньше текущего сканированного элемента 
-                string s = (string)val[1];
-                int cmp = 0;
-                while (ssa_notempty && (cmp = ssa_current.CompareTo(s)) <= 0)
+                code_new = (int)source.Root.Count();
+                foreach (object[] val in source.Root.ElementValues())
                 {
-                    if (cmp < 0)
-                    { // добавляется новый код
-                        object[] v = new object[] { code_new, ssa_current };
-                        long off = target.Root.AppendElement(v); // При равенстве, новый элемент игнорируется
-                        code_new++;
-                        accumulator.Add(new KeyValuePair<string, int>((string)v[1], (int)v[0]));
-                    }
-                    else
-                    { // используется существующий код
-                        accumulator.Add(new KeyValuePair<string, int>((string)val[1], (int)val[0]));
-                    }
-                    if (ssa_ind < ssa.Length)
+                    // Пропускаю элементы из нового потока, которые меньше текущего сканированного элемента 
+                    string s = (string)val[1];
+                    int cmp = 0;
+                    while (ssa_notempty && (cmp = ssa_current.CompareTo(s)) <= 0)
                     {
-                        ssa_current = ssa[ssa_ind]; //ssa.ElementAt<string>(ssa_ind);
-                        ssa_ind++;
+                        if (cmp < 0)
+                        { // добавляется новый код
+                            object[] v = new object[] { code_new, ssa_current };
+                            long off = target.Root.AppendElement(v); // При равенстве, новый элемент игнорируется
+                            code_new++;
+                            accumulator.Add(new KeyValuePair<string, int>((string)v[1], (int)v[0]));
+                        }
+                        else
+                        { // используется существующий код
+                            accumulator.Add(new KeyValuePair<string, int>((string)val[1], (int)val[0]));
+                        }
+                        if (ssa_ind < ssa.Length)
+                        {
+                            ssa_current = ssa[ssa_ind]; //ssa.ElementAt<string>(ssa_ind);
+                            ssa_ind++;
+                        }
+                        else
+                        {
+                            ssa_notempty = false;
+                        }
                     }
-                    else
-                    {
-                        ssa_notempty = false;
-                    }
+                    target.Root.AppendElement(val); // переписывается тот же объект
                 }
-                target.Root.AppendElement(val); // переписывается тот же объект
             }
             // В массиве ssa могут остаться элементы, их надо просто добавить
             if (ssa_notempty) 
@@ -184,7 +171,7 @@ namespace NameTable
                 do
                 {
                     object[] v = new object[] { code_new, ssa_current };
-                    long off = target.Root.AppendElement(v); // При равенстве, новый элемент игнорируется
+                    long off = target.Root.AppendElement(v);
                     code_new++;
                     accumulator.Add(new KeyValuePair<string, int>((string)v[1], (int)v[0]));
                     if (ssa_ind < ssa.Length) ssa_current = ssa[ssa_ind];
@@ -195,8 +182,8 @@ namespace NameTable
             
             target.Close();
             source.Close();
-            System.IO.File.Move(sourceCell, tmpCell);
-            this.Open(); // парный к thi.Close() оператор
+            System.IO.File.Delete(sourceCell);
+            this.Open(); // парный к this.Close() оператор
             // Финальный аккорд: формирование и выдача словаря
             //Dictionary<string, int> dic = accumulator.ToDictionary(
             //    (object[] pair) => (string)pair[1],

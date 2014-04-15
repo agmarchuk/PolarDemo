@@ -18,7 +18,7 @@ namespace TrueRdfViewer
             string subject = null;
             Dictionary<string, string> namespaces = new Dictionary<string, string>();
             StreamReader sr = new StreamReader(datafile);
-            int count = 200000000;
+            int count = 2000000000;
             for (int i = 0; i < count; i++)
             {
                 string line = sr.ReadLine();
