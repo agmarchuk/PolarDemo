@@ -1,15 +1,18 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Antlr4.Runtime;
 using Sparql;
 using SparqlParser;
 using TrueRdfViewer;
+using VirtuosoBigData;
 
 namespace ANTLR_Test
 {
     class Program
     {
+        private static int Millions = 1;
         private static int tripletsCount;
         static void Main(string[] args)
         {
@@ -30,11 +33,11 @@ namespace ANTLR_Test
             PolarDB.PaEntry.bufferBytes = 1*1000*1000*100;
 
             // ts.LoadTurtle(@"C:\deployed\dataset1M.ttl");
-            int millions = 1;
-            tripletsCount = millions * 1000 * 1000;
+            Millions = 1;
+            tripletsCount = Millions * 1000 * 1000;
             TripleStoreInt ts =
-                new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + millions + @"mln\");
-           //  ts.LoadTurtle(@"C:\deployed\" + millions + "M.ttl");       //30мин.
+                new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
+           //  ts.LoadTurtle(@"C:\deployed\" + Millions + "M.ttl");       //30мин.
            
            
 
@@ -70,37 +73,42 @@ namespace ANTLR_Test
                 }
                 .Select(s => new FileInfo(s))
                 .ToArray();
-            for (int j = 0; j < 500; j++)
+            var paramvaluesFilePath = string.Format(@"..\..\sparql data\queries\parameters\param values for{0} m.txt",Millions);
+            //using (StreamWriter streamQueryParameters=new StreamWriter(paramvaluesFilePath)) for (int j = 0; j < 500; j++)
+              //      foreach (var file in fileInfos.Select(info => File.ReadAllText(info.FullName)))
+                //        QueryWriteParameters(file, streamQueryParameters,ts);
+            
+
+            using (StreamReader streamQueryParameters = new StreamReader(paramvaluesFilePath))
+                for (int j = 0; j < 500; j++)
             {
                 
                 foreach (var file in fileInfos)
                 {
-                    var readAllText = File.ReadAllText(file.FullName);
-                   readAllText = QuerySetParameter(readAllText);
-                    var st = DateTime.Now;
-                    var q = Parse(readAllText);
-
-
-                    var resultString = q.Run(ts);
-                    var totalMilliseconds = (long) (DateTime.Now - st).TotalMilliseconds;
+                    //  var st = DateTime.Now;
+                    var queryReadParameters = QueryReadParameters(File.ReadAllText(file.FullName), streamQueryParameters);
+                    var resultString = Parse(queryReadParameters).Run(ts);
+                //    var totalMilliseconds = (long) (DateTime.Now - st).TotalMilliseconds;
                     // results[i++] += totalMilliseconds;
                     //File.WriteAllText(Path.ChangeExtension(file.FullName, ".txt"), resultString);
                     //.Save(Path.ChangeExtension(file.FullName,".xml"));
                 }
             }
-            for (int j = 0; j < 500; j++)
+            using (StreamReader streamQueryParameters = new StreamReader(@"..\..\sparql data\queries\parameters\param values"))
+                for (int j = 0; j < 500; j++)
             {
                 i = 0;
                 foreach (var file in fileInfos)
                 {
                     var readAllText = File.ReadAllText(file.FullName);
-                    readAllText = QuerySetParameter(readAllText);
+                    readAllText = QueryReadParameters(readAllText, streamQueryParameters);
+
                     var st = DateTime.Now;
                     var q = Parse(readAllText);    
                      var resultString = q.Run(ts);
                     var totalMilliseconds = (DateTime.Now - st).Ticks / 10000L;
                      results[i++] += totalMilliseconds;
-                   // File.WriteAllText(Path.ChangeExtension(file.FullName, ".txt"), resultString);
+                    File.WriteAllText(Path.ChangeExtension(file.FullName, ".txt"), resultString);
                     //.Save(Path.ChangeExtension(file.FullName,".xml"));
                 }
             }
@@ -135,7 +143,7 @@ namespace ANTLR_Test
                 foreach (var file in fileInfos)
                 {
                     var readAllText = File.ReadAllText(file.FullName);
-                    readAllText = QuerySetParameter(readAllText);
+                    
                  //   var st = DateTime.Now;
                     var q = Parse(readAllText);
 
@@ -153,7 +161,6 @@ namespace ANTLR_Test
                 foreach (var file in fileInfos)
                 {
                     var readAllText = File.ReadAllText(file.FullName);
-                    readAllText = QuerySetParameter(readAllText);
                     var st = DateTime.Now;
                     var q = Parse(readAllText);
                     var resultString = q.Run(ts);
@@ -196,30 +203,79 @@ namespace ANTLR_Test
 
         private static string[] words =
             File.ReadAllLines(@"..\..\sparql data\queries\parameters\titlewords.txt");
-       private static string QuerySetParameter(string parameteredQuery)
-       {
-           var product = random.Next(1, tripletsCount / 4000);
-           var reviewer = random.Next(1, tripletsCount / 69000) + 1;
-           var offer = random.Next(1, tripletsCount/1700) + 1 ;
-           return parameteredQuery.Replace("%ProductType%", "bsbm-inst:ProductType" + random.Next(1, tripletsCount / 66300 + 1))
-               .Replace("%ProductFeature1%", "bsbm-inst:ProductFeature" + random.Next(1, tripletsCount / 21000 + 1))
-               .Replace("%ProductFeature2%", "bsbm-inst:ProductFeature" + random.Next(1, tripletsCount / 20100 + 1))
-               .Replace("%ProductFeature3%", "bsbm-inst:ProductFeature" + random.Next(1, tripletsCount / 21000+ 1))
-               .Replace("%x%", random.Next(1, 500).ToString())
-               .Replace("%y%", random.Next(1, 500).ToString())
-               .Replace("%ProductXYZ%", string.Format(
-                   "<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer{0}/Product{1}>",
-                   product / 50 + 1, product))
-               .Replace("%word1%", words[random.Next(0, words.Length)])//
-               .Replace("%currentDate%", "\"" + DateTime.Today.AddYears(-6) + "\"^^<http://www.w3.org/2001/XMLSchema#dateTime>")
-               .Replace("%ReviewXYZ%",
-                   string.Format(
-                       "<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite{0}/Review{1}>",
-                       reviewer / 362 + 1, reviewer))
-               .Replace("%OfferXYZ%",
-                   string.Format(
-                       "<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor{0}/Offer{1}>",
-                       offer / 1941 + 1, offer));
-       }
+
+        private static void QueryWriteParameters(string parameteredQuery, StreamWriter output, TripleStoreInt ts)
+        {         
+            var productsCodes = ts.GetSubjectByObjPred(
+                TripleInt.Code("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Product"),
+                TripleInt.Code("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
+            var codes = productsCodes as int[] ?? productsCodes.ToArray();
+            int productCount = codes.Count();
+            var product = TripleInt.Decode(codes.ElementAt(random.Next(0, productCount)));
+                //Millions == 1000 ? 2855260 : Millions == 100 ? 284826 : Millions == 10 ? 284826 : 2785;
+            int productFeatureCount =
+                Millions == 1000 ? 478840 : Millions == 100 ? 47884 : Millions == 10 ? 47450 : 4745;
+             int productTypesCount =Millions == 1000 ? 20110 : Millions == 100 ? 2011 : Millions == 10 ? 1510 : 151;  
+            //var review = random.Next(1, productCount*10);
+            ////var product = random.Next(1, productCount);
+            ////var productProducer = product/ProductsPerProducer + 1; 
+            //var offer = random.Next(1, productCount*OffersPerProduct);
+            //var vendor = offer/OffersPerVendor + 1;
+             var offersCodes = ts.GetSubjectByObjPred(
+               TripleInt.Code("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Offer"),
+               TripleInt.Code("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
+             codes = offersCodes as int[] ?? offersCodes.ToArray();
+            var offer = TripleInt.Decode(codes[random.Next(0, codes.Length)]);
+            var reviewsCodes = ts.GetSubjectByObjPred(
+           TripleInt.Code("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Review"),
+           TripleInt.Code("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
+            codes = reviewsCodes as int[] ?? reviewsCodes.ToArray();
+            var review = TripleInt.Decode(codes[random.Next(0, codes.Length)]);
+            if (parameteredQuery.Contains("%ProductType%"))
+                output.WriteLine("bsbm-inst:ProductType" + random.Next(1, productTypesCount));
+            if (parameteredQuery.Contains("%ProductFeature1%"))
+                output.WriteLine("bsbm-inst:ProductFeature" + random.Next(1, productFeatureCount));
+            if (parameteredQuery.Contains("%ProductFeature2%"))
+                output.WriteLine("bsbm-inst:ProductFeature" + random.Next(1, productFeatureCount));
+            if (parameteredQuery.Contains("%ProductFeature3%"))
+                output.WriteLine("bsbm-inst:ProductFeature" + random.Next(1, productFeatureCount));
+            if (parameteredQuery.Contains("%x%")) output.WriteLine(random.Next(1, 500).ToString());
+            if (parameteredQuery.Contains("%y%")) output.WriteLine(random.Next(1, 500).ToString());
+            if (parameteredQuery.Contains("%ProductXYZ%"))
+                output.WriteLine(product);//"<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer{0}/Product{1}>",productProducer, product);
+            if (parameteredQuery.Contains("%word1%")) output.WriteLine(words[random.Next(0, words.Length)]);
+            if (parameteredQuery.Contains("%currentDate%"))
+                output.WriteLine("\"" + DateTime.Today.AddYears(-6) + "\"^^<http://www.w3.org/2001/XMLSchema#dateTime>");
+            if (parameteredQuery.Contains("%ReviewXYZ%"))
+                output.WriteLine(review);//"<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite{0}/Review{1}>",review/10000 + 1, review);
+            if (parameteredQuery.Contains("%OfferXYZ%"))
+                output.WriteLine(offer);
+                    //"<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor{0}/Offer{1}>", vendor, offer);
+        }
+
+        private static string QueryReadParameters(string parameteredQuery, StreamReader input)
+        {
+            if(parameteredQuery.Contains("%ProductType%"))
+                parameteredQuery = parameteredQuery.Replace("%ProductType%", input.ReadLine());
+            if (parameteredQuery.Contains("%ProductFeature1%"))
+                parameteredQuery = parameteredQuery.Replace("%ProductFeature1%", input.ReadLine());
+            if (parameteredQuery.Contains("%ProductFeature2%"))
+                parameteredQuery = parameteredQuery.Replace("%ProductFeature2%", input.ReadLine());
+            if (parameteredQuery.Contains("%ProductFeature3%"))
+                parameteredQuery = parameteredQuery.Replace("%ProductFeature3%", input.ReadLine());
+            if (parameteredQuery.Contains("%x%"))
+                parameteredQuery = parameteredQuery.Replace("%x%", input.ReadLine());
+            if (parameteredQuery.Contains("%y%"))
+                parameteredQuery = parameteredQuery.Replace("%y%", input.ReadLine());
+            if (parameteredQuery.Contains("%ProductXYZ%"))
+                parameteredQuery = parameteredQuery.Replace("%ProductXYZ%", "<" + input.ReadLine()+">");
+            if (parameteredQuery.Contains("%word1%"))
+                parameteredQuery = parameteredQuery.Replace("%word1%", input.ReadLine());
+            if (parameteredQuery.Contains("%ReviewXYZ%"))
+                parameteredQuery = parameteredQuery.Replace("%ReviewXYZ%", "<"+input.ReadLine()+">");
+            if (parameteredQuery.Contains("%OfferXYZ%"))
+                parameteredQuery = parameteredQuery.Replace("%OfferXYZ%", "<"+input.ReadLine()+">");    
+            return parameteredQuery;
+        }
     }
 }

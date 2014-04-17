@@ -1,17 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace  TrueRdfViewer
 {
     public abstract class TripleInt 
     { 
         public int subject, predicate;
+        private static Dictionary<int, string> codeHashe=new Dictionary<int, string>();
         public static int Code(string s)
         {
+            int code = s.GetHashCode();
+            if (codeHashe.ContainsKey(code)) return code; 
+          
+            if (s.Contains("Offer") || s.Contains("Review") || s.Contains("Product"))
+            {
+                codeHashe.Add(code, s);
+                return code;
+            }
             return s.GetHashCode();
+            
         }
-        public static string Decode(int e) { return "noname" + e; }
+
+        public static string Decode(int e)
+        {
+            if (codeHashe.ContainsKey(e))
+                return codeHashe[e];
+            return "noname" + e;
+        }
     }
     public class OTripleInt : TripleInt { public int obj; }
     public class DTripleInt : TripleInt { public Literal data; }

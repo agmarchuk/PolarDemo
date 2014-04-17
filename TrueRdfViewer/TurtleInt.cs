@@ -45,7 +45,7 @@ namespace TrueRdfViewer
                 }
                 else if (line[0] != ' ')
                 { // Subject
-                    line = line.Trim();
+                    line = line.Trim();          
                     subject = GetEntityString(namespaces, line);
                     if (subject == null) continue;
                 }
