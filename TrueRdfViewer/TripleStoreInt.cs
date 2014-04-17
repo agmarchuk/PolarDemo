@@ -20,7 +20,7 @@ namespace TrueRdfViewer
             tp_entity = new PType(PTypeEnumeration.integer);
             PType tp_rliteral = new PTypeUnion(
                 new NamedType("void", new PType(PTypeEnumeration.none)),
-                new NamedType("integer", new PType(PTypeEnumeration.integer)),
+                new NamedType("integer", new PType(PTypeEnumeration.real)),
                 new NamedType("string", new PTypeRecord(
                     new NamedType("s", new PType(PTypeEnumeration.sstring)),
                     new NamedType("l", new PType(PTypeEnumeration.sstring)))),
@@ -77,7 +77,7 @@ namespace TrueRdfViewer
             {
                 OpenCreateIndexes();
             }
-            ewt = new EntitiesWideTable(path, new DiapasonScanner<int>[]  
+            ewt = new EntitiesWideTable(path, new[]  
             {
                 new DiapasonScanner<int>(otriples, ent => (int)((object[])ent.Get())[0]),
                 new DiapasonScanner<int>(otriples_op, ent => (int)((object[])ent.Get())[2]),

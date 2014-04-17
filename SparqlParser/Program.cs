@@ -37,18 +37,17 @@ namespace ANTLR_Test
             tripletsCount = Millions * 1000 * 1000;
             TripleStoreInt ts =
                 new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
-           //  ts.LoadTurtle(@"C:\deployed\" + Millions + "M.ttl");       //30мин.
+            ts.LoadTurtle(@"C:\deployed\" + Millions + "M.ttl");       //30мин.
            
            
 
             Console.WriteLine((DateTime.Now - start).TotalMinutes);
 
             //   ts.LoadTurtle(@"C:\deployed\dataset1M.ttl");
-            //  Parse("SELECT * {}");
-          //  RunBerlinsWithConstants( ts);
-            RunBerlinsParameters(ts);
-            //      RunBerlins(queriesDir, ts);
-            //Parse(te, ts);
+          
+            RunBerlinsWithConstants( ts);
+          //  RunBerlinsParameters(ts);
+          
         }
 
         private static void RunBerlinsParameters(TripleStoreInt ts)
@@ -84,17 +83,13 @@ namespace ANTLR_Test
             {
                 
                 foreach (var file in fileInfos)
-                {
-                    //  var st = DateTime.Now;
+                {                                  
                     var queryReadParameters = QueryReadParameters(File.ReadAllText(file.FullName), streamQueryParameters);
                     var resultString = Parse(queryReadParameters).Run(ts);
-                //    var totalMilliseconds = (long) (DateTime.Now - st).TotalMilliseconds;
-                    // results[i++] += totalMilliseconds;
-                    //File.WriteAllText(Path.ChangeExtension(file.FullName, ".txt"), resultString);
-                    //.Save(Path.ChangeExtension(file.FullName,".xml"));
+           
                 }
             }
-            using (StreamReader streamQueryParameters = new StreamReader(@"..\..\sparql data\queries\parameters\param values"))
+            using (StreamReader streamQueryParameters = new StreamReader(paramvaluesFilePath))
                 for (int j = 0; j < 500; j++)
             {
                 i = 0;

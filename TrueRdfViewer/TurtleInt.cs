@@ -83,28 +83,21 @@ namespace TrueRdfViewer
                             //  Тип данных
                             string qname = rest_line.Substring(pp + 2);
                             //  тип данных может быть "префиксным" или полным
-                            if (qname[0] == '<')
-                            {
-                                datatype = qname.Substring(1, qname.Length - 2);
-                            }
-                            else
-                            {
-                                datatype = GetEntityString(namespaces, qname);
-                            }
-                        }                 
+                            datatype = qname[0] == '<' ? qname.Substring(1, qname.Length - 2) : GetEntityString(namespaces, qname);
+                        }
                         yield return new DTripleInt()
                         {
                             subject = TripleInt.Code(subject),
                             predicate = TripleInt.Code(predicate),
                             data = // d
                                 datatype == "http://www.w3.org/2001/XMLSchema#integer" || datatype == "http://www.w3.org/2001/XMLSchema#float" || datatype == "http://www.w3.org/2001/XMLSchema#double" ?
-                                    new Literal(LiteralVidEnumeration.integer) { Value = int.Parse(sdata) } :
+                                    new Literal(LiteralVidEnumeration.integer) { Value = double.Parse(sdata) } :
                                 datatype == "http://www.w3.org/2001/XMLSchema#boolean" ?
                                     new Literal(LiteralVidEnumeration.date) { Value = bool.Parse(sdata) } :
                                 datatype == "http://www.w3.org/2001/XMLSchema#dateTime" || datatype == "http://www.w3.org/2001/XMLSchema#date" ?
                                     new Literal(LiteralVidEnumeration.date) { Value = DateTime.Parse(sdata).ToBinary() } :
                                      datatype == null || datatype == "http://www.w3.org/2001/XMLSchema#string" ?
-                                new Literal(LiteralVidEnumeration.text) {Value = new Text() { Value = sdata, Lang = lang ?? "en"} } :
+                                new Literal(LiteralVidEnumeration.text) {Value = new Text() { Value = sdata, Lang = lang ??string.Empty } } :
                                 new Literal(LiteralVidEnumeration.typedObject) { Value = new TypedObject() { Value = sdata, Type = datatype} }
                         };
                     }
