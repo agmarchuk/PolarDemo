@@ -101,6 +101,8 @@
     <None Include="sparql data\queries\with constants\9.rq" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="bin\Debug\Antlr4.Runtime.v4.5.dll" />
+    <Content Include="bin\Debug\Antlr4.Runtime.v4.5.xml" />
     <Content Include="Input.txt" />
     <Content Include="output.xml" />
     <Content Include="sparql data\queries\parameters\1.txt" />
