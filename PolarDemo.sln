@@ -12,10 +12,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolarDB", "..\PolarDB\PolarDB.csproj", "{907BB4AF-FBC9-4A1E-8F80-194AF9337AA4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F0EA4558-55D8-4243-B62B-A94E42F25D25}"
-	ProjectSection(SolutionItems) = preProject
-		ItalyComments.txt = ItalyComments.txt
-		Links.html = Links.html
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryTree", "BinaryTree\BinaryTree.csproj", "{B2799CDE-5F70-4D73-8168-F7CD91D027E6}"
 EndProject
@@ -286,5 +282,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

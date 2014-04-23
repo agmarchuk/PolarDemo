@@ -185,12 +185,9 @@ namespace NameTable
             System.IO.File.Delete(sourceCell);
             this.Open(); // парный к this.Close() оператор
             // Финальный аккорд: формирование и выдача словаря
-            //Dictionary<string, int> dic = accumulator.ToDictionary(
-            //    (object[] pair) => (string)pair[1],
-            //    (object[] pair) => (int)pair[0]);
-            Dictionary<string, int> dic = new Dictionary<string, int>();
+            //  Dictionary<string, int> dic = new Dictionary<string, int>();
             //Console.WriteLine("Слияние ok (" + ssa.Length + "). duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            return dic;
+            return accumulator.ToDictionary(pair => pair.Key,   pair => pair.Value);
         }
         public void MakeIndexed()
         {

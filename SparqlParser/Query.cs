@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
@@ -55,9 +56,9 @@ namespace SparqlParser
                 var row = new object[Variables.Count];
 
                 if (isReduce) throw new NotImplementedException();
-                IEnumerable<RPackInt> result = Where(Repeat(row, ts)).Select(i => (RPackInt)((ICloneable)i).Clone());
+                IEnumerable<RPackInt> result = Where(Repeat(row, ts));
                 
-                if (solutionModifierOrder != null) result = solutionModifierOrder(result);
+                if (solutionModifierOrder != null) result = solutionModifierOrder(result.Select(i => (RPackInt)((ICloneable)i).Clone()));
                 var selectResult = all
                     ? result.Select(pack => pack.row)
                     //TODO unbounded variables;
@@ -128,9 +129,9 @@ namespace SparqlParser
             ConstructRun = ts =>
             {
                 IEnumerable<RPackInt> result = Where != null
-                    ? Where(Enumerable.Repeat(new RPackInt(Variables.Values.Select(variable => variable.pacElement).ToArray(), ts), 1)).ToArray()
+                    ? Where(Enumerable.Repeat(new RPackInt(Variables.Values.Select(variable => variable.pacElement).ToArray(), ts), 1))
                     : Enumerable.Empty<RPackInt>();
-                if (solutionModifierOrder != null) result = solutionModifierOrder(result).ToArray();
+                if (solutionModifierOrder != null) result = solutionModifierOrder(result.ToArray());
                  
                 if (constructTriples == null) return Enumerable.Empty<IEnumerable<string>>();
                 var constructResult = result.SelectMany(constructTemplate);
@@ -307,7 +308,7 @@ namespace SparqlParser
         internal static Expression Call(string name, IEnumerable<Expression> args)
         {   
             if (name == @"http://www.w3.org/2001/XMLSchema#double")
-                return Expression.Call(typeof(double).GetMethod("Parse", new []{ typeof(string)}), Expression.Call(args.First(), typeof(string).GetMethod("Replace", new Type[]{typeof(char),typeof(char)}),Expression.Constant('.'),Expression.Constant(',')));
+                return Expression.Call(typeof(double).GetMethod("Parse", new[] { typeof(string), typeof(NumberStyles), typeof(CultureInfo) }), args.First(), Expression.Constant(NumberStyles.Any), Expression.Constant(new CultureInfo("en-us")));
             throw new NotImplementedException("mathod call " + name);
         }
 

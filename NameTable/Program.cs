@@ -26,8 +26,7 @@ namespace NameTable
             int n_portions = 10;
 
             sic.Clear();
-            HashSet<string> hs = new HashSet<string>();
-
+            HashSet<string> hs = new HashSet<string>();         
         }
         // Тест преобразования Guid'ов
         public static void Main(string[] args)
@@ -52,9 +51,10 @@ namespace NameTable
                 hs.Clear();
                 for (int i = 0; i < portion_size; i++)
                 {
-                    string id = (Guid.NewGuid()).ToString();
+                    string id = Guid.NewGuid().ToString();
                     hs.Add(id);
                 }
+
                 Console.WriteLine("Set ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 string[] arr = new string[hs.Count];
                 hs.CopyTo(arr);
@@ -65,6 +65,8 @@ namespace NameTable
             }
             Console.WriteLine("Total: {0}", (DateTime.Now - tt00).Ticks / 10000L);
         }
+
+
         public static void Main2(string[] args)
         {
             string path = @"..\..\..\Databases\";

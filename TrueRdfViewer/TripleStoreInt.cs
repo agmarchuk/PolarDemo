@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using NameTable;
 using PolarDB;
 using sema2012m;
 
@@ -47,7 +48,7 @@ namespace TrueRdfViewer
         private string path;
         public PaCell otriples;
         public PaCell otriples_op; // объектные триплеты, упорядоченные по o-p
-        internal PaCell dtriples;
+        public PaCell dtriples;
         public PaCell dtriples_sp;
         private FlexIndexView<SubjPredObjInt> spo_o_index = null;
         private FlexIndexView<SubjPredInt> sp_d_index = null;
@@ -64,6 +65,7 @@ namespace TrueRdfViewer
         {
             this.path = path;
             InitTypes();
+            TripleInt.SiCoding = new StringIntCoding(path+"stringsCodes");
             otriples = new PaCell(tp_otriple_seq, path + "otriples.pac", false);
             otriples_op = new PaCell(tp_otriple_seq, path + "otriples_op.pac", false);
             dtriples = new PaCell(tp_dtriple_seq, path + "dtriples.pac", false);
@@ -86,6 +88,7 @@ namespace TrueRdfViewer
             ewtHash = new EntitiesMemoryHashTable(ewt);
             ewtHash.Load();
             
+
             //getable = new GroupedEntities(path); // Это хорошая идея, но нужно менять схему реализации
             //getable.CheckGroupedEntities();
             //geHash = getable.GroupedEntitiesHash();
@@ -211,6 +214,7 @@ namespace TrueRdfViewer
             dtriples.Fill(new object[0]);
             int i = 0;
             //Entity e = new Entity();
+           TripleInt.SiCoding.Clear();
             foreach (var triple in TurtleInt.LoadGraph(filepath))
             {
                 if (i % 100000 == 0) Console.Write("{0} ", i / 100000);

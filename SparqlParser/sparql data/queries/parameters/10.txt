@@ -1,1 +1,8 @@
-1143370914, "9530.55"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+146733, "551.12"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+77779, "877.93"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+108263, "1215.75"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+109415, "1485.73"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+68052, "3102.85"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+113404, "4695.13"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+144081, "5943.65"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+69464, "9794.88"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD

@@ -1,52 +1,30 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
+using System.Linq.Expressions;
+using System.Threading;
 using Antlr4.Runtime;
-using Sparql;
 using SparqlParser;
 using TrueRdfViewer;
-using VirtuosoBigData;
 
 namespace ANTLR_Test
 {
     class Program
     {
         private static int Millions = 1;
-        private static int tripletsCount;
+
         static void Main(string[] args)
         {
-            Func<int, int> s;
-            //В качестве входного потока символов устанавливаем консольный ввод
-
-            //var te = new StreamReader(@"..\..\Input.txt").ReadToEnd();
-            // Console.WriteLine(te);
-            DateTime start = DateTime.Now;
-            //Parse(te);
-            //);  
-
-            //ParseXML(te).Save(@"..\..\output.xml");
-            //  Console.WriteLine((DateTime.Now - start).TotalMilliseconds);
-            //var f= Expression.Lambda<Func<string, double>>(Expression.Convert(Expression.Constant(null), typeof (double)),new ParameterExpression[]{Expression.Parameter(typeof(string))}).Compile();
-
-
-            PolarDB.PaEntry.bufferBytes = 1*1000*1000*100;
-
-            // ts.LoadTurtle(@"C:\deployed\dataset1M.ttl");
+            PolarDB.PaEntry.bufferBytes = 1*1000*1000*100;         
             Millions = 1;
-            tripletsCount = Millions * 1000 * 1000;
+
             TripleStoreInt ts =
                 new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
-            ts.LoadTurtle(@"C:\deployed\" + Millions + "M.ttl");       //30мин.
-           
-           
+          // ts.LoadTurtle(@"C:\deployed\" + Millions + "M.ttl");       //30мин.          
 
-            Console.WriteLine((DateTime.Now - start).TotalMinutes);
-
-            //   ts.LoadTurtle(@"C:\deployed\dataset1M.ttl");
-          
-            RunBerlinsWithConstants( ts);
-          //  RunBerlinsParameters(ts);
+            // RunBerlinsWithConstants( ts);
+          RunBerlinsParameters(ts);                       
           
         }
 
@@ -72,42 +50,45 @@ namespace ANTLR_Test
                 }
                 .Select(s => new FileInfo(s))
                 .ToArray();
-            var paramvaluesFilePath = string.Format(@"..\..\sparql data\queries\parameters\param values for{0} m.txt",Millions);
-            //using (StreamWriter streamQueryParameters=new StreamWriter(paramvaluesFilePath)) for (int j = 0; j < 500; j++)
-              //      foreach (var file in fileInfos.Select(info => File.ReadAllText(info.FullName)))
-                //        QueryWriteParameters(file, streamQueryParameters,ts);
-            
+            var paramvaluesFilePath = string.Format(@"..\..\sparql data\queries\parameters\param values for{0} m.txt", Millions);
+            //using (StreamWriter streamQueryParameters = new StreamWriter(paramvaluesFilePath)) 
+            //    for (int j = 0; j < 1000; j++)
+            //        foreach (var file in fileInfos.Select(info => File.ReadAllText(info.FullName)))
+            //            QueryWriteParameters(file, streamQueryParameters, ts);
 
+         
             using (StreamReader streamQueryParameters = new StreamReader(paramvaluesFilePath))
-                for (int j = 0; j < 500; j++)
             {
-                
-                foreach (var file in fileInfos)
-                {                                  
-                    var queryReadParameters = QueryReadParameters(File.ReadAllText(file.FullName), streamQueryParameters);
-                    var resultString = Parse(queryReadParameters).Run(ts);
-           
-                }
-            }
-            using (StreamReader streamQueryParameters = new StreamReader(paramvaluesFilePath))
                 for (int j = 0; j < 500; j++)
-            {
-                i = 0;
-                foreach (var file in fileInfos)
                 {
-                    var readAllText = File.ReadAllText(file.FullName);
-                    readAllText = QueryReadParameters(readAllText, streamQueryParameters);
 
-                    var st = DateTime.Now;
-                    var q = Parse(readAllText);    
-                     var resultString = q.Run(ts);
-                    var totalMilliseconds = (DateTime.Now - st).Ticks / 10000L;
-                     results[i++] += totalMilliseconds;
-                    File.WriteAllText(Path.ChangeExtension(file.FullName, ".txt"), resultString);
-                    //.Save(Path.ChangeExtension(file.FullName,".xml"));
+                    foreach (var file in fileInfos)
+                    {
+                        var queryReadParameters = QueryReadParameters(File.ReadAllText(file.FullName),
+                            streamQueryParameters);
+                        var resultString = Parse(queryReadParameters).Run(ts);
+
+                    }
+                }
+                for (int j = 0; j < 500; j++)
+                {
+                    i = 0;
+                    foreach (var file in fileInfos)
+                    {
+                        var readAllText = File.ReadAllText(file.FullName);
+                        readAllText = QueryReadParameters(readAllText, streamQueryParameters);
+
+                        var st = DateTime.Now;
+                        var q = Parse(readAllText);
+                        var resultString = q.Run(ts);
+                        var totalMilliseconds = (DateTime.Now - st).Ticks/10000L;
+                        results[i++] += totalMilliseconds;
+                        File.WriteAllText(Path.ChangeExtension(file.FullName, ".txt"), resultString);
+                        //.Save(Path.ChangeExtension(file.FullName,".xml"));
+                    }
                 }
             }
-            Console.WriteLine(string.Join(", ", results.Select(l => l/500)));
+            Console.WriteLine(string.Join(", ", results.Select(l => 500*1000/l)));
             
         }
         private static void RunBerlinsWithConstants(TripleStoreInt ts)
@@ -146,7 +127,7 @@ namespace ANTLR_Test
                     var resultString = q.Run(ts);
                     //var totalMilliseconds = (long)(DateTime.Now - st).TotalMilliseconds;
                     // results[i++] += totalMilliseconds;
-                    //File.WriteAllText(Path.ChangeExtension(file.FullName, ".txt"), resultString);
+                    File.WriteAllText(Path.ChangeExtension(file.FullName, ".txt"), resultString);
                     //.Save(Path.ChangeExtension(file.FullName,".xml"));
                 }
             }
@@ -266,6 +247,8 @@ namespace ANTLR_Test
                 parameteredQuery = parameteredQuery.Replace("%ProductXYZ%", "<" + input.ReadLine()+">");
             if (parameteredQuery.Contains("%word1%"))
                 parameteredQuery = parameteredQuery.Replace("%word1%", input.ReadLine());
+            if (parameteredQuery.Contains("%currentDate%"))
+                parameteredQuery = parameteredQuery.Replace("%currentDate%", input.ReadLine());
             if (parameteredQuery.Contains("%ReviewXYZ%"))
                 parameteredQuery = parameteredQuery.Replace("%ReviewXYZ%", "<"+input.ReadLine()+">");
             if (parameteredQuery.Contains("%OfferXYZ%"))
