@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Threading;
 using Antlr4.Runtime;
 using SparqlParser;
 using TrueRdfViewer;
@@ -16,21 +13,45 @@ namespace ANTLR_Test
 
         static void Main(string[] args)
         {
-            PolarDB.PaEntry.bufferBytes = 1*1000*1000*100;         
+            PolarDB.PaEntry.bufferBytes = 1*1000*1000*1000;
+            
             Millions = 1;
+            Test();
+
+            Millions = 10;
+
+            Test();
+           
+          Millions = 100;
+          Test();
+        }
+
+        private static void Test()
+        {
+            Console.WriteLine(Millions);
 
             TripleStoreInt ts =
                 new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
-          // ts.LoadTurtle(@"C:\deployed\" + Millions + "M.ttl");       //30мин.          
+
+            DateTime start = DateTime.Now;
+            //  ts.LoadTurtle(@"C:\deployed\" + Millions + "M.ttl");       //30мин.          
+            //var spent = (DateTime.Now - start).Ticks/10000;
+            //using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
+            //{
+            //    wr.WriteLine("millions " + Millions);
+            //    wr.WriteLine("total load " + spent + " мс.");
+            //}
 
             // RunBerlinsWithConstants( ts);
-          RunBerlinsParameters(ts);                       
-          
+            RunBerlinsParameters(ts);
         }
 
         private static void RunBerlinsParameters(TripleStoreInt ts)
         {
             long[] results= new long[12];
+            double[] minimums = Enumerable.Repeat(double.MaxValue, 12).ToArray();
+            double[] maximums = new double[12];
+            double maxMemoryUsage = 0;
             Console.WriteLine("antrl parametered");
             int i = 0;             
             var fileInfos = new []
@@ -82,13 +103,30 @@ namespace ANTLR_Test
                         var q = Parse(readAllText);
                         var resultString = q.Run(ts);
                         var totalMilliseconds = (DateTime.Now - st).Ticks/10000L;
-                        results[i++] += totalMilliseconds;
-                        File.WriteAllText(Path.ChangeExtension(file.FullName, ".txt"), resultString);
+                        var memoryUsage = GC.GetTotalMemory(false);
+                        if (memoryUsage > maxMemoryUsage)
+                            maxMemoryUsage = memoryUsage;
+                        if (minimums[i] > totalMilliseconds)
+                            minimums[i] = totalMilliseconds;
+                        if (maximums[i] < totalMilliseconds)
+                            maximums[i] = totalMilliseconds;
+                            results[i++] += totalMilliseconds;
+                          File.WriteAllText(Path.ChangeExtension(file.FullName, ".txt"), resultString);
                         //.Save(Path.ChangeExtension(file.FullName,".xml"));
                     }
                 }
             }
-            Console.WriteLine(string.Join(", ", results.Select(l => 500*1000/l)));
+            using (StreamWriter r = new StreamWriter(@"..\..\output.txt", true))
+            {
+                r.WriteLine("milions " + Millions);
+                r.WriteLine("max memory usage " + maxMemoryUsage);
+                r.WriteLine("average " + string.Join(", ", results.Select(l => 500 * 1000 / l)));
+                r.WriteLine("minimums " + string.Join(", ", minimums));
+                r.WriteLine("maximums " + string.Join(", ", maximums));
+            }
+            Console.WriteLine("average " + string.Join(", ", results.Select(l => 500 * 1000 / l)));
+            Console.WriteLine("minimums " + string.Join(", ", minimums));
+            Console.WriteLine("maximums " + string.Join(", ", maximums));
             
         }
         private static void RunBerlinsWithConstants(TripleStoreInt ts)

@@ -144,7 +144,7 @@ namespace NameTable
                         if (cmp < 0)
                         { // добавляется новый код
                             object[] v = new object[] { code_new, ssa_current };
-                            long off = target.Root.AppendElement(v); // При равенстве, новый элемент игнорируется
+                            target.Root.AppendElement(v);
                             code_new++;
                             accumulator.Add(new KeyValuePair<string, int>((string)v[1], (int)v[0]));
                         }
@@ -153,14 +153,9 @@ namespace NameTable
                             accumulator.Add(new KeyValuePair<string, int>((string)val[1], (int)val[0]));
                         }
                         if (ssa_ind < ssa.Length)
-                        {
-                            ssa_current = ssa[ssa_ind]; //ssa.ElementAt<string>(ssa_ind);
-                            ssa_ind++;
-                        }
+                            ssa_current = ssa[ssa_ind++]; //ssa.ElementAt<string>(ssa_ind);
                         else
-                        {
                             ssa_notempty = false;
-                        }
                     }
                     target.Root.AppendElement(val); // переписывается тот же объект
                 }
@@ -171,7 +166,7 @@ namespace NameTable
                 do
                 {
                     object[] v = new object[] { code_new, ssa_current };
-                    long off = target.Root.AppendElement(v);
+                    target.Root.AppendElement(v);
                     code_new++;
                     accumulator.Add(new KeyValuePair<string, int>((string)v[1], (int)v[0]));
                     if (ssa_ind < ssa.Length) ssa_current = ssa[ssa_ind];

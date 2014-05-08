@@ -68,8 +68,17 @@ namespace SparqlParser
 
                 if (isDistinct) selectResult = new HashSet<object[]>(selectResult,new SequenceEqualityComparer<object>());
 
-                if (solutionModifierCount != null) selectResult = solutionModifierCount(selectResult);    
-                return selectResult;
+                if (solutionModifierCount != null) selectResult = solutionModifierCount(selectResult);
+
+                return selectResult.Select(seq => seq.Select(o =>
+                                {
+                                    if (!(o is Int32))
+                                        return o;
+                                    string name;
+                                    if (!decodesCashe.TryGetValue((int)o, out name))
+                                        decodesCashe.Add((int)o, name = TripleInt.Decode((int)o));
+                                    return name;
+                                }));
             };
         }
 
@@ -115,9 +124,18 @@ namespace SparqlParser
                     .Concat(ts.GetDataBySubj(o)
                         .Select(pair => new Object[] { o, pair.Value, pair.Key})));
                 if (solutionModifierCount != null) describeResults = solutionModifierCount(describeResults);
+
                 return
                     describeResults.Select(
-                        objects => objects.Select(o => o is Int32 ? TripleInt.Decode((int) o) : o.ToString()));
+                        objects => objects.Select(o =>
+                        {
+                            if (!(o is Int32))
+                                return o!=null ? o.ToString():"";
+                            string name;
+                            if (!decodesCashe.TryGetValue((int)o, out name))
+                                decodesCashe.Add((int) o, name= TripleInt.Decode((int) o));
+                            return name;
+                        }));
 
             };
         }
@@ -138,7 +156,16 @@ namespace SparqlParser
                 var constructResultSequences = constructResult.Select(tuple => new object[] { tuple.Item1, tuple.Item2, tuple.Item3 });
                 if (solutionModifierCount != null)
                     constructResultSequences = solutionModifierCount(constructResultSequences);
-                return constructResultSequences;
+                return constructResultSequences.Select(seq => seq.Select(o =>
+                {
+                    if (!(o is Int32))
+                        return o;
+                    string name;
+                    if (!decodesCashe.TryGetValue((int)o, out name))
+                        decodesCashe.Add((int)o, name = TripleInt.Decode((int)o));
+                    return name;
+                }
+                    ));
             };
         }
 
@@ -146,6 +173,7 @@ namespace SparqlParser
         internal Func<RPackInt, IEnumerable<Tuple<string, string, string>>> constructTemplate;
 
         internal readonly List<Func<RPackInt, IEnumerable<Tuple<string, string, string>>>> constructTriples = new List<Func<RPackInt, IEnumerable<Tuple<string, string, string>>>>();
+        private static readonly Dictionary<int, string> decodesCashe = new Dictionary<int, string>();
 
         internal void CreateAsqRun()
         {

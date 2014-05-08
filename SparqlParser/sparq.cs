@@ -23,9 +23,7 @@
 #define BYTEMODE
 
 using System;
-using System.IO;
 using System.Text;
-using System.Globalization;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Diagnostics.CodeAnalysis;

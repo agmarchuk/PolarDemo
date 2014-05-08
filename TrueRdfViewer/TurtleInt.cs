@@ -25,14 +25,7 @@ namespace TrueRdfViewer
             int bufferMax = 5*1000*1000;
             using (var sr = new StreamReader(datafile))
                 while (!sr.EndOfStream)
-                {
-                    if (tripletsBuffer.Count == bufferMax)
-                    {
-                        foreach (var tripleInt in TripleIntsCobe(stringsForCode, tripletsBuffer))
-                            yield return tripleInt;
-                        stringsForCode.Clear();
-                        tripletsBuffer.Clear();
-                    }
+                {           
                     string line = sr.ReadLine();
                     //if (i % 10000 == 0) { Console.Write("{0} ", i / 10000); }    
                     if (line == "") continue;
@@ -57,6 +50,13 @@ namespace TrueRdfViewer
                     }
                     else if (line[0] != ' ')
                     {
+                        if (tripletsBuffer.Count >= bufferMax)
+                        {
+                            foreach (var tripleInt in TripleIntsCode(stringsForCode, tripletsBuffer))
+                                yield return tripleInt;
+                            stringsForCode.Clear();
+                            tripletsBuffer.Clear();
+                        }
                         // Subject
                         line = line.Trim();
                         subject = GetEntityString(namespaces, line);
@@ -140,31 +140,40 @@ namespace TrueRdfViewer
                         ntriples++;
                     }
                 }
-            foreach (var tripleInt in TripleIntsCobe(stringsForCode, tripletsBuffer)) yield return tripleInt;
+            foreach (var tripleInt in TripleIntsCode(stringsForCode, tripletsBuffer)) yield return tripleInt;
             TripleInt.SiCoding.MakeIndexed();
             Console.WriteLine("ntriples={0}", ntriples);
         }
 
-        private static IEnumerable<TripleInt> TripleIntsCobe(HashSet<string> stringsForCode, List<Tuple<string, string, object>> tripletsBuffer)
+     //   public static Dictionary<string, int> CodingCashe=new Dictionary<string, int>();
+        private static IEnumerable<TripleInt> TripleIntsCode(HashSet<string> stringsForCode, List<Tuple<string, string, object>> tripletsBuffer)
         {
             string[] arr = new string[stringsForCode.Count];
             stringsForCode.CopyTo(arr);
             Array.Sort(arr);
-            var coding = TripleInt.SiCoding.InsertPortion(arr);
-            return tripletsBuffer.Select(tuple => tuple.Item3 is Literal
-                ? (TripleInt)
-                    new DTripleInt()
-                    {
-                        subject = coding[tuple.Item1],
-                        predicate = coding[tuple.Item2],
-                        data = (Literal) tuple.Item3
-                    }
-                : new OTripleInt()
+            var codes = TripleInt.SiCoding.InsertPortion(arr);
+            return tripletsBuffer.Select(tuple =>
+            {
+                int subject = codes[tuple.Item1];
+                int predicate = codes[tuple.Item2];
+                var data = tuple.Item3 as Literal;
+                if (data != null)
+                    return (TripleInt)
+                        new DTripleInt
+                        {
+                            subject = subject,
+                            predicate = predicate,
+                            data = data
+                        };
+                int @object = codes[(string) tuple.Item3];
+                    
+                return new OTripleInt()
                 {
-                    subject = coding[tuple.Item1],
-                    predicate = coding[tuple.Item2],
-                    obj = coding[(string) tuple.Item3]
-                });
+                    subject = subject,
+                    predicate = predicate,
+                    obj =  @object
+                };
+            });
         }
 
         private static string GetEntityString(Dictionary<string, string> namespaces, string line)
