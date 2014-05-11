@@ -77,7 +77,7 @@ namespace NameTable
         {
             if (string.IsNullOrEmpty(name) || n_index.Root.Count() == 0) return Int32.MinValue;
             PaEntry nc_entry = nc_cell.Root.Element(0);
-                 var newcheckSum = BitConverter.ToUInt64(MD5.Create(name).Hash, 0);
+                 var newcheckSum = BitConverter.ToInt64(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(name)), 0);
             
             //проверка первого
             //if(((long)nc_entry.Field(2).Get()).CompareTo(newcheckSum)<=0)

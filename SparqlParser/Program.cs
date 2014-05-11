@@ -34,16 +34,16 @@ namespace ANTLR_Test
                 new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
 
             DateTime start = DateTime.Now;
-            ts.LoadTurtle(@"C:\deployed\" + Millions + "M.ttl");       //30мин.          
-            var spent = (DateTime.Now - start).Ticks / 10000;
-            using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
-            {
-                wr.WriteLine("millions " + Millions);
-                wr.WriteLine("total load " + spent + " мс.");
-            }
+            //ts.LoadTurtle(@"C:\deployed\" + Millions + "M.ttl");       //30мин.          
+            //var spent = (DateTime.Now - start).Ticks / 10000;
+            //using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
+            //{
+            //    wr.WriteLine("millions " + Millions);
+            //    wr.WriteLine("total load " + spent + " мс.");
+            //}
 
             // RunBerlinsWithConstants( ts);
-            //RunBerlinsParameters(ts);
+            RunBerlinsParameters(ts);
         }
 
         private static void RunBerlinsParameters(TripleStoreInt ts)
