@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,7 +26,8 @@ namespace NameTable
         private PType tp_ind = new PTypeSequence(new PType(PTypeEnumeration.longinteger));
         private PType tp_nc = new PTypeSequence(new PTypeRecord(
                 new NamedType("code", new PType(PTypeEnumeration.integer)),
-                new NamedType("name", new PType(PTypeEnumeration.sstring))));
+                new NamedType("name", new PType(PTypeEnumeration.sstring)),
+                new NamedType("check sum", new PType(PTypeEnumeration.longinteger))));
 
         public StringIntCoding(string path)
         {
@@ -75,10 +77,19 @@ namespace NameTable
         {
             if (string.IsNullOrEmpty(name) || n_index.Root.Count() == 0) return Int32.MinValue;
             PaEntry nc_entry = nc_cell.Root.Element(0);
+                 var newcheckSum = BitConverter.ToUInt64(MD5.Create(name).Hash, 0);
+            
+            //проверка первого
+            //if(((long)nc_entry.Field(2).Get()).CompareTo(newcheckSum)<=0)
+            //    return Int32.MinValue;
+            ////проверка последнего
+            //nc_entry.offset = (long)n_index.Root.Element(n_index.Root.Count()).Get();
+            //if (((long)nc_entry.Field(2).Get()).CompareTo(newcheckSum) > 0)
+            //    return Int32.MinValue;
             var qu = n_index.Root.BinarySearchFirst(ent =>
             {
                 nc_entry.offset = (long)ent.Get();
-                return ((string)nc_entry.Field(1).Get()).CompareTo(name);
+                return ((long)nc_entry.Field(2).Get()).CompareTo(newcheckSum);
             });
             if (qu.IsEmpty) return Int32.MinValue;
             nc_entry.offset = (long)qu.Get();
@@ -131,19 +142,22 @@ namespace NameTable
 
             // Очередной (новый) код (индекс)
             int code_new = 0;
+            var md5 = MD5.Create();
+            var newcheckSum = BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(ssa_current)), 0);
             if (!source.IsEmpty)
             {
                 code_new = (int)source.Root.Count();
                 foreach (object[] val in source.Root.ElementValues())
                 {
                     // Пропускаю элементы из нового потока, которые меньше текущего сканированного элемента 
-                    string s = (string)val[1];
+                    //string s = (string)val[1];
                     int cmp = 0;
-                    while (ssa_notempty && (cmp = ssa_current.CompareTo(s)) <= 0)
+                    var existsCheckSum = (long) val[2];
+                    while (ssa_notempty && (cmp = newcheckSum.CompareTo(existsCheckSum)) <= 0)
                     {
                         if (cmp < 0)
                         { // добавляется новый код
-                            object[] v = new object[] { code_new, ssa_current };
+                            object[] v = new object[] { code_new, ssa_current, newcheckSum };
                             target.Root.AppendElement(v);
                             code_new++;
                             accumulator.Add(new KeyValuePair<string, int>((string)v[1], (int)v[0]));
@@ -153,7 +167,10 @@ namespace NameTable
                             accumulator.Add(new KeyValuePair<string, int>((string)val[1], (int)val[0]));
                         }
                         if (ssa_ind < ssa.Length)
+                        {
                             ssa_current = ssa[ssa_ind++]; //ssa.ElementAt<string>(ssa_ind);
+                            newcheckSum = BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(ssa_current)), 0);
+                        }
                         else
                             ssa_notempty = false;
                     }
@@ -165,11 +182,15 @@ namespace NameTable
             {
                 do
                 {
-                    object[] v = new object[] { code_new, ssa_current };
+                    object[] v = new object[] { code_new, ssa_current, newcheckSum };
                     target.Root.AppendElement(v);
                     code_new++;
                     accumulator.Add(new KeyValuePair<string, int>((string)v[1], (int)v[0]));
-                    if (ssa_ind < ssa.Length) ssa_current = ssa[ssa_ind];
+                    if (ssa_ind < ssa.Length)
+                    {
+                        ssa_current = ssa[ssa_ind];
+                        newcheckSum = BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(ssa_current)), 0);
+                    }
                     ssa_ind++;
                 }
                 while (ssa_ind <= ssa.Length);
