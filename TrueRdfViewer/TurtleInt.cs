@@ -150,7 +150,7 @@ namespace TrueRdfViewer
         {
             string[] arr = new string[stringsForCode.Count];
             stringsForCode.CopyTo(arr);
-            Array.Sort(arr);
+           // Array.Sort(arr);
             var codes = TripleInt.SiCoding.InsertPortion(arr);
             return tripletsBuffer.Select(tuple =>
             {

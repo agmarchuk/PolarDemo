@@ -29,6 +29,8 @@ namespace NameTable
                 new NamedType("name", new PType(PTypeEnumeration.sstring)),
                 new NamedType("check sum", new PType(PTypeEnumeration.longinteger))));
 
+        private MD5 md5 = MD5.Create();
+
         public StringIntCoding(string path)
         {
             this.path = path;
@@ -77,7 +79,7 @@ namespace NameTable
         {
             if (string.IsNullOrEmpty(name) || n_index.Root.Count() == 0) return Int32.MinValue;
             PaEntry nc_entry = nc_cell.Root.Element(0);
-                 var newcheckSum = BitConverter.ToInt64(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(name)), 0);
+                 var newcheckSum = BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(name)), 0);
             
             //проверка первого
             //if(((long)nc_entry.Field(2).Get()).CompareTo(newcheckSum)<=0)
@@ -89,7 +91,8 @@ namespace NameTable
             var qu = n_index.Root.BinarySearchFirst(ent =>
             {
                 nc_entry.offset = (long)ent.Get();
-                return ((long)nc_entry.Field(2).Get()).CompareTo(newcheckSum);
+                long value = ((long)nc_entry.Field(2).Get());
+                return value.CompareTo(newcheckSum);
             });
             if (qu.IsEmpty) return Int32.MinValue;
             nc_entry.offset = (long)qu.Get();
@@ -109,10 +112,13 @@ namespace NameTable
             nc_entry.offset = (long)qu.Get();
             return (string)nc_entry.Field(1).Get();
         }
-        public Dictionary<string, int> InsertPortion(string[] sorted_arr) //(IEnumerable<string> portion)
+        public Dictionary<string, int> InsertPortion(string[] portion)  //   (string[] sorted_arr) 
         {
             //DateTime tt0 = DateTime.Now;
-            string[] ssa = sorted_arr;
+            var hashes_arr=
+            portion.Select(s =>BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(s)), 0)).ToArray();
+            Array.Sort(hashes_arr, portion);
+            var ssa = portion;
             if (ssa.Length == 0) return new Dictionary<string, int>();
 
             this.Close();
@@ -134,16 +140,14 @@ namespace NameTable
 
             int ssa_ind = 0;
             bool ssa_notempty = true;
-            string ssa_current = ssa_notempty ? ssa[ssa_ind] : null;
-            ssa_ind++;
+            string ssa_current = ssa[ssa_ind];
+         
             
             // Для накопления пар  
             List<KeyValuePair<string, int>> accumulator = new List<KeyValuePair<string, int>>(ssa.Length);
 
             // Очередной (новый) код (индекс)
             int code_new = 0;
-            var md5 = MD5.Create();
-            var newcheckSum = BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(ssa_current)), 0);
             if (!source.IsEmpty)
             {
                 code_new = (int)source.Root.Count();
@@ -153,26 +157,20 @@ namespace NameTable
                     //string s = (string)val[1];
                     int cmp = 0;
                     var existsCheckSum = (long) val[2];
-                    while (ssa_notempty && (cmp = newcheckSum.CompareTo(existsCheckSum)) <= 0)
+                    while (ssa_notempty && (cmp = existsCheckSum.CompareTo(hashes_arr[ssa_ind])) <= 0)
                     {
                         if (cmp < 0)
-                        { // добавляется новый код
-                            object[] v = new object[] { code_new, ssa_current, newcheckSum };
-                            target.Root.AppendElement(v);
-                            code_new++;
-                            accumulator.Add(new KeyValuePair<string, int>((string)v[1], (int)v[0]));
-                        }
-                        else
-                        { // используется существующий код
-                            accumulator.Add(new KeyValuePair<string, int>((string)val[1], (int)val[0]));
-                        }
-                        if (ssa_ind < ssa.Length)
                         {
-                            ssa_current = ssa[ssa_ind++]; //ssa.ElementAt<string>(ssa_ind);
-                            newcheckSum = BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(ssa_current)), 0);
+                            // добавляется новый код
+                            var v = new object[] {code_new++, ssa[ssa_ind], hashes_arr[ssa_ind]};
+                            target.Root.AppendElement(v);     
+                            accumulator.Add(new KeyValuePair<string, int>((string) v[1], (int) v[0]));
                         }
-                        else
-                            ssa_notempty = false;
+                        else // используется существующий код
+                            accumulator.Add(new KeyValuePair<string, int>((string) val[1], (int) val[0]));
+                     ssa_ind++;   
+                        if (ssa_ind == ssa.Length)
+                            ssa_notempty = false;   
                     }
                     target.Root.AppendElement(val); // переписывается тот же объект
                 }
@@ -182,18 +180,12 @@ namespace NameTable
             {
                 do
                 {
-                    object[] v = new object[] { code_new, ssa_current, newcheckSum };
-                    target.Root.AppendElement(v);
-                    code_new++;
-                    accumulator.Add(new KeyValuePair<string, int>((string)v[1], (int)v[0]));
-                    if (ssa_ind < ssa.Length)
-                    {
-                        ssa_current = ssa[ssa_ind];
-                        newcheckSum = BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(ssa_current)), 0);
-                    }
+                    var v = new object[] { code_new++, ssa[ssa_ind], hashes_arr[ssa_ind] };
+                    target.Root.AppendElement(v);      
+                    accumulator.Add(new KeyValuePair<string, int>((string)v[1], (int)v[0]));   
                     ssa_ind++;
                 }
-                while (ssa_ind <= ssa.Length);
+                while (ssa_ind < ssa.Length);
             }
             
             target.Close();
