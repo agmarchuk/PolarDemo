@@ -11,19 +11,19 @@ namespace ANTLR_Test
     {
         private static int Millions = 1;
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             PolarDB.PaEntry.bufferBytes = 1*1000*1000*1000;
-            
+
             Millions = 1;
             Test();
 
             Millions = 10;
 
            // Test();
-           
-          Millions = 100;
-          //Test();
+
+            Millions = 100;
+           // Test();
         }
 
         private static void Test()
@@ -33,7 +33,7 @@ namespace ANTLR_Test
             TripleStoreInt ts =
                 new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
 
-            bool load = true;
+            bool load = false;
             if (load)
             {
                 DateTime start = DateTime.Now;
@@ -46,8 +46,8 @@ namespace ANTLR_Test
                 }
                 return;
             }
-            // RunBerlinsWithConstants( ts);
-           RunBerlinsParameters(ts);
+             RunBerlinsWithConstants( ts);
+          // RunBerlinsParameters(ts);
         }
 
         private static void RunBerlinsParameters(TripleStoreInt ts)

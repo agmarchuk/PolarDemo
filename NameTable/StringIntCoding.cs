@@ -103,13 +103,14 @@ namespace NameTable
             long cnt = c_index.Root.Count();
             if (code < 0 || code >= c_index.Root.Count()) return null;
             PaEntry nc_entry = nc_cell.Root.Element(0);
-            var qu = c_index.Root.BinarySearchFirst(ent =>
-            {
-                nc_entry.offset = (long)ent.Get();
-                return ((int)nc_entry.Field(0).Get()).CompareTo(code);
-            });
-            if (qu.IsEmpty) return null;
-            nc_entry.offset = (long)qu.Get();
+           nc_entry.offset = (long)c_index.Root.Element(code).Get();
+            //var qu = c_index.Root.BinarySearchFirst(ent =>
+            //{
+            //    nc_entry.offset = (long)ent.Get();
+            //    return ((int)nc_entry.Field(0).Get()).CompareTo(code);
+            //});
+            //if (qu.IsEmpty) return null;
+            //nc_entry.offset = (long)qu.Get();
             return (string)nc_entry.Field(1).Get();
         }
         public Dictionary<string, int> InsertPortion(string[] portion)  //   (string[] sorted_arr) 
