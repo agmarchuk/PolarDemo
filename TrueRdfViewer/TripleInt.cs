@@ -1,21 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using NameTable;
 
 namespace  TrueRdfViewer
 {
     public abstract class TripleInt 
     { 
         public int subject, predicate;
+        public static StringIntCoding SiCoding;
+        private  static Dictionary<string, int>  CodeCache=new Dictionary<string, int>();
         public static int Code(string s)
         {
-            return s.GetHashCode();
+            int c;
+            if(!CodeCache.TryGetValue(s, out c))
+                CodeCache.Add(s, c = SiCoding.GetCode(s));
+            return c;
+        }              
+        public static string Decode(int e)
+        {
+            return SiCoding.GetName(e);
         }
-        public static string Decode(int e) { return "noname" + e; }
     }
     public class OTripleInt : TripleInt { public int obj; }
     public class DTripleInt : TripleInt { public Literal data; }
     public enum LiteralVidEnumeration { typedObject, integer, text, date, boolean, nil }
-    public class Literal 
+    public class Literal
     {
         protected bool Equals(Literal other)
         {
@@ -26,12 +36,30 @@ namespace  TrueRdfViewer
         {
             unchecked
             {
-                return ((int) vid*397) ^ (Value != null ? Value.GetHashCode() : 0);
+                return ((int)vid * 397) ^ (Value != null ? Value.GetHashCode() : 0);
             }
         }
 
         public readonly LiteralVidEnumeration vid;
 
+        public string GetString()
+        {
+            switch (vid)
+            {
+                case LiteralVidEnumeration.typedObject:
+                    return ((TypedObject)Value).Value;
+                case LiteralVidEnumeration.text:
+                    return ((Text)Value).Value;
+                case LiteralVidEnumeration.date:
+                    return ((DateTime)Value).ToString(CultureInfo.InvariantCulture);
+                case LiteralVidEnumeration.integer:
+                case LiteralVidEnumeration.boolean:
+                    return Value.ToString();
+                case LiteralVidEnumeration.nil:
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
         public Literal(LiteralVidEnumeration vid)
         {
             this.vid = vid;
@@ -43,15 +71,15 @@ namespace  TrueRdfViewer
         {
             get
             {
-                return Value is Double && Value == (object) double.MinValue
-                       || Value is long && (long) Value == DateTime.MinValue.ToBinary()
-                       || Value is Text && !string.IsNullOrEmpty(((Text) Value).Value);
+                return Value is Double && Value == (object)double.MinValue
+                       || Value is long && (long)Value == DateTime.MinValue.ToBinary()
+                       || Value is Text && !string.IsNullOrEmpty(((Text)Value).Value);
             }
         }
 
         public override string ToString()
         {
-            return Value.ToString();  
+            return Value.ToString();
         }
 
         public override bool Equals(object obj)
@@ -59,11 +87,11 @@ namespace  TrueRdfViewer
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((Literal) obj);
-        }                               
+            return Equals((Literal)obj);
+        }
     }
 
-    public class TypedObject
+    public class TypedObject : ICloneable
     {
         protected bool Equals(TypedObject other)
         {
@@ -74,7 +102,7 @@ namespace  TrueRdfViewer
         {
             unchecked
             {
-                return ((Value != null ? Value.GetHashCode() : 0)*397) ^ (Type != null ? Type.GetHashCode() : 0);
+                return ((Value != null ? Value.GetHashCode() : 0) * 397) ^ (Type != null ? Type.GetHashCode() : 0);
             }
         }
 
@@ -82,7 +110,7 @@ namespace  TrueRdfViewer
         public string Type { get; set; }
         public override string ToString()
         {
-            string result = "\"" + Value + "\"";       
+            string result = "\"" + Value + "\"";
             if (!string.IsNullOrWhiteSpace(Type))
                 result += "^^" + Type;
             return result;
@@ -93,7 +121,7 @@ namespace  TrueRdfViewer
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((TypedObject) obj);
+            return Equals((TypedObject)obj);
         }
 
         public object Clone()
@@ -101,43 +129,44 @@ namespace  TrueRdfViewer
             return new TypedObject() { Type = Type, Value = Value };
         }
     }
-       public class Text :ICloneable
+    public class Text : ICloneable
     {
-           protected bool Equals(Text other)
-           {
-               return string.Equals(Value, other.Value) && string.Equals(Lang, other.Lang);
-           }
+        protected bool Equals(Text other)
+        {
+            return string.Equals(Value, other.Value) && string.Equals(Lang, other.Lang);
+        }
 
-           public override int GetHashCode()
-           {
-               unchecked
-               {
-                   return ((Value != null ? Value.GetHashCode() : 0)*397) ^ (Lang != null ? Lang.GetHashCode() : 0);
-               }
-           }
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((Value != null ? Value.GetHashCode() : 0) * 397) ^ (Lang != null ? Lang.GetHashCode() : 0);
+            }
+        }
 
-           public string Value { get; set; }
+        public string Value { get; set; }
         public string Lang { get; set; }
-           public override string ToString()
-           {
-               string result ="\"" +  Value + "\"";
-               if (!string.IsNullOrWhiteSpace(Lang))
-                   result += "@" + Lang;         
-               return result;
-           }
+        public override string ToString()
+        {
+            string result = "\"" + Value + "\"";
+            if (!string.IsNullOrWhiteSpace(Lang))
+                result += "@" + Lang;
+            return result;
+        }
 
-           public override bool Equals(object obj)
-           {
-               if (ReferenceEquals(null, obj)) return false;
-               if (ReferenceEquals(this, obj)) return true;
-               if (obj.GetType() != this.GetType()) return false;
-               return Equals((Text) obj);
-           }
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Text)obj);
+        }
 
-           public object Clone()
-           {
-               return new Text() {Lang = Lang, Value = Value};
-           }
+        public object Clone()
+        {
+            return new Text() { Lang = Lang, Value = Value };
+
+        }
     }
              
     public class SubjPredInt

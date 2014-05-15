@@ -11,6 +11,27 @@ namespace NameTable
 {
     public class Program
     {
+        public static void Main(string[] args)
+        {
+            string path = @"..\..\..\Databases\";
+       
+
+            StringIntCoding sic = new StringIntCoding(path);
+
+            Console.WriteLine("Start");
+            DateTime tt0 = DateTime.Now;
+            DateTime tt00 = tt0;
+
+            int portion_size = 100;
+            int n_portions = 10;
+
+            sic.Clear();
+            sic.InsertPortion((Enumerable.Range(-10, 0).Select(i => i.ToString())).ToArray());
+            sic.InsertPortion((Enumerable.Range(0, 10).Select(i => i.ToString())).ToArray());    
+            sic.MakeIndexed();
+            Console.WriteLine(sic.GetName(4));
+            Console.WriteLine(sic.GetCode("0"));
+        }
         public static void MainNew(string[] args)
         {
             string path = @"..\..\..\Databases\";
@@ -26,11 +47,10 @@ namespace NameTable
             int n_portions = 10;
 
             sic.Clear();
-            HashSet<string> hs = new HashSet<string>();
-
+            HashSet<string> hs = new HashSet<string>();         
         }
         // Тест преобразования Guid'ов
-        public static void Main(string[] args)
+        public static void Main11(string[] args)
         {
             string path = @"..\..\..\Databases\";
 
@@ -52,19 +72,22 @@ namespace NameTable
                 hs.Clear();
                 for (int i = 0; i < portion_size; i++)
                 {
-                    string id = (Guid.NewGuid()).ToString();
+                    string id = Guid.NewGuid().ToString();
                     hs.Add(id);
                 }
+
                 Console.WriteLine("Set ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 string[] arr = new string[hs.Count];
                 hs.CopyTo(arr);
-                Array.Sort<string>(arr);
-                Console.WriteLine("Sorting ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+              //  Array.Sort<string>(arr);
+              //  Console.WriteLine("Sorting ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 var dic = sic.InsertPortion(arr);
                 Console.WriteLine("InsertPortion ok. portion=" + j + " HashSet.Size=" + hs.Count + " duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             }
             Console.WriteLine("Total: {0}", (DateTime.Now - tt00).Ticks / 10000L);
         }
+
+
         public static void Main2(string[] args)
         {
             string path = @"..\..\..\Databases\";
@@ -111,7 +134,7 @@ namespace NameTable
                 //Console.WriteLine("idlist ok. line="+ (linecnt / 1000000) +" HashSet.Size=" + hs.Count + " duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 string[] arr = new string[hs.Count];
                 hs.CopyTo(arr);
-                Array.Sort<string>(arr);
+               // Array.Sort<string>(arr);
                 //Console.WriteLine("Sorting ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 var dic = sic.InsertPortion(arr);
                 Console.WriteLine("InsertPortion ok. line=" + (linecnt / 1000000) + " HashSet.Size=" + hs.Count + " duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;

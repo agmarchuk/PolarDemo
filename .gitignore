@@ -242,3 +242,4 @@ pip-log.txt
 /Databases/0001.xml
 /TrueRdfViewer/*.pac
 Databases
+/SparqlParser/old

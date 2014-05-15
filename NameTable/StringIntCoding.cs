@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,7 +26,10 @@ namespace NameTable
         private PType tp_ind = new PTypeSequence(new PType(PTypeEnumeration.longinteger));
         private PType tp_nc = new PTypeSequence(new PTypeRecord(
                 new NamedType("code", new PType(PTypeEnumeration.integer)),
-                new NamedType("name", new PType(PTypeEnumeration.sstring))));
+                new NamedType("name", new PType(PTypeEnumeration.sstring)),
+                new NamedType("check sum", new PType(PTypeEnumeration.longinteger))));
+
+        private MD5 md5 = MD5.Create();
 
         public StringIntCoding(string path)
         {
@@ -75,10 +79,20 @@ namespace NameTable
         {
             if (string.IsNullOrEmpty(name) || n_index.Root.Count() == 0) return Int32.MinValue;
             PaEntry nc_entry = nc_cell.Root.Element(0);
+                 var newcheckSum = BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(name)), 0);
+            
+            //проверка первого
+            //if(((long)nc_entry.Field(2).Get()).CompareTo(newcheckSum)<=0)
+            //    return Int32.MinValue;
+            ////проверка последнего
+            //nc_entry.offset = (long)n_index.Root.Element(n_index.Root.Count()).Get();
+            //if (((long)nc_entry.Field(2).Get()).CompareTo(newcheckSum) > 0)
+            //    return Int32.MinValue;
             var qu = n_index.Root.BinarySearchFirst(ent =>
             {
                 nc_entry.offset = (long)ent.Get();
-                return ((string)nc_entry.Field(1).Get()).CompareTo(name);
+                long value = ((long)nc_entry.Field(2).Get());
+                return value.CompareTo(newcheckSum);
             });
             if (qu.IsEmpty) return Int32.MinValue;
             nc_entry.offset = (long)qu.Get();
@@ -89,19 +103,23 @@ namespace NameTable
             long cnt = c_index.Root.Count();
             if (code < 0 || code >= c_index.Root.Count()) return null;
             PaEntry nc_entry = nc_cell.Root.Element(0);
-            var qu = c_index.Root.BinarySearchFirst(ent =>
-            {
-                nc_entry.offset = (long)ent.Get();
-                return ((int)nc_entry.Field(0).Get()).CompareTo(code);
-            });
-            if (qu.IsEmpty) return null;
-            nc_entry.offset = (long)qu.Get();
+           nc_entry.offset = (long)c_index.Root.Element(code).Get();
+            //var qu = c_index.Root.BinarySearchFirst(ent =>
+            //{
+            //    nc_entry.offset = (long)ent.Get();
+            //    return ((int)nc_entry.Field(0).Get()).CompareTo(code);
+            //});
+            //if (qu.IsEmpty) return null;
+            //nc_entry.offset = (long)qu.Get();
             return (string)nc_entry.Field(1).Get();
         }
-        public Dictionary<string, int> InsertPortion(string[] sorted_arr) //(IEnumerable<string> portion)
+        public Dictionary<string, int> InsertPortion(string[] portion)  //   (string[] sorted_arr) 
         {
             //DateTime tt0 = DateTime.Now;
-            string[] ssa = sorted_arr;
+            var hashes_arr=
+            portion.Select(s =>BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(s)), 0)).ToArray();
+            Array.Sort(hashes_arr, portion);
+            var ssa = portion;
             if (ssa.Length == 0) return new Dictionary<string, int>();
 
             this.Close();
@@ -123,8 +141,8 @@ namespace NameTable
 
             int ssa_ind = 0;
             bool ssa_notempty = true;
-            string ssa_current = ssa_notempty ? ssa[ssa_ind] : null;
-            ssa_ind++;
+            string ssa_current = ssa[ssa_ind];
+         
             
             // Для накопления пар  
             List<KeyValuePair<string, int>> accumulator = new List<KeyValuePair<string, int>>(ssa.Length);
@@ -137,30 +155,23 @@ namespace NameTable
                 foreach (object[] val in source.Root.ElementValues())
                 {
                     // Пропускаю элементы из нового потока, которые меньше текущего сканированного элемента 
-                    string s = (string)val[1];
+                    //string s = (string)val[1];
                     int cmp = 0;
-                    while (ssa_notempty && (cmp = ssa_current.CompareTo(s)) <= 0)
+                    var existsCheckSum = (long) val[2];
+                    while (ssa_notempty && (cmp = existsCheckSum.CompareTo(hashes_arr[ssa_ind])) <= 0)
                     {
                         if (cmp < 0)
-                        { // добавляется новый код
-                            object[] v = new object[] { code_new, ssa_current };
-                            long off = target.Root.AppendElement(v); // При равенстве, новый элемент игнорируется
-                            code_new++;
-                            accumulator.Add(new KeyValuePair<string, int>((string)v[1], (int)v[0]));
-                        }
-                        else
-                        { // используется существующий код
-                            accumulator.Add(new KeyValuePair<string, int>((string)val[1], (int)val[0]));
-                        }
-                        if (ssa_ind < ssa.Length)
                         {
-                            ssa_current = ssa[ssa_ind]; //ssa.ElementAt<string>(ssa_ind);
-                            ssa_ind++;
+                            // добавляется новый код
+                            var v = new object[] {code_new++, ssa[ssa_ind], hashes_arr[ssa_ind]};
+                            target.Root.AppendElement(v);     
+                            accumulator.Add(new KeyValuePair<string, int>((string) v[1], (int) v[0]));
                         }
-                        else
-                        {
-                            ssa_notempty = false;
-                        }
+                        else // используется существующий код
+                            accumulator.Add(new KeyValuePair<string, int>((string) val[1], (int) val[0]));
+                     ssa_ind++;   
+                        if (ssa_ind == ssa.Length)
+                            ssa_notempty = false;   
                     }
                     target.Root.AppendElement(val); // переписывается тот же объект
                 }
@@ -170,14 +181,12 @@ namespace NameTable
             {
                 do
                 {
-                    object[] v = new object[] { code_new, ssa_current };
-                    long off = target.Root.AppendElement(v);
-                    code_new++;
-                    accumulator.Add(new KeyValuePair<string, int>((string)v[1], (int)v[0]));
-                    if (ssa_ind < ssa.Length) ssa_current = ssa[ssa_ind];
+                    var v = new object[] { code_new++, ssa[ssa_ind], hashes_arr[ssa_ind] };
+                    target.Root.AppendElement(v);      
+                    accumulator.Add(new KeyValuePair<string, int>((string)v[1], (int)v[0]));   
                     ssa_ind++;
                 }
-                while (ssa_ind <= ssa.Length);
+                while (ssa_ind < ssa.Length);
             }
             
             target.Close();
@@ -185,12 +194,9 @@ namespace NameTable
             System.IO.File.Delete(sourceCell);
             this.Open(); // парный к this.Close() оператор
             // Финальный аккорд: формирование и выдача словаря
-            //Dictionary<string, int> dic = accumulator.ToDictionary(
-            //    (object[] pair) => (string)pair[1],
-            //    (object[] pair) => (int)pair[0]);
-            Dictionary<string, int> dic = new Dictionary<string, int>();
+            //  Dictionary<string, int> dic = new Dictionary<string, int>();
             //Console.WriteLine("Слияние ok (" + ssa.Length + "). duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            return dic;
+            return accumulator.ToDictionary(pair => pair.Key,   pair => pair.Value);
         }
         public void MakeIndexed()
         {
