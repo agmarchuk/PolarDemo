@@ -94,38 +94,7 @@ namespace NameTable
                 long value = ((long)nc_entry.Field(2).Get());
                 return value.CompareTo(newcheckSum);
             });
-            if (qu.IsEmpty)
-            {
-
-                long previous = -9116709588998265599;
-                var temp = n_index.Root.ElementValues().Select(off =>
-                {
-                    nc_entry.offset = (long) off;
-                 return (long) nc_entry.Field(2).Get();
-                }).ToArray();
-                bool f = false;
-                for (int i = 1; i < temp.Length; i++)
-                {
-                    var l1 = temp[i];
-                    var l2 = temp[i - 1];
-                    if (l1 < l2)
-                    {
-                        f = true;
-                    }
-                }
-                Console.WriteLine(f);
-                Console.WriteLine(temp[0]);
-                Console.WriteLine(temp[1]);
-                Console.WriteLine(temp[2]);
-                foreach (var element in nc_cell.Root.ElementValues())
-                {
-                    if ((string) ((object[]) element)[1] == name)
-                    {
-                        return (int) ((object[]) element)[0];
-                    }
-                }     
-                            return Int32.MinValue;
-            }
+            if (qu.IsEmpty) return Int32.MinValue;
             nc_entry.offset = (long)qu.Get();
             return (int)nc_entry.Field(0).Get();
         }
