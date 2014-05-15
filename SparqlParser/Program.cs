@@ -16,14 +16,14 @@ namespace ANTLR_Test
             PolarDB.PaEntry.bufferBytes = 1*1000*1000*1000;
 
             Millions = 1;
-            Test();
+          //  Test();
 
             Millions = 10;
 
            // Test();
 
             Millions = 100;
-           // Test();
+            Test();
         }
 
         private static void Test()
@@ -46,8 +46,8 @@ namespace ANTLR_Test
                 }
                 return;
             }
-             RunBerlinsWithConstants( ts);
-          // RunBerlinsParameters(ts);
+           //  RunBerlinsWithConstants( ts);
+           RunBerlinsParameters(ts);
         }
 
         private static void RunBerlinsParameters(TripleStoreInt ts)

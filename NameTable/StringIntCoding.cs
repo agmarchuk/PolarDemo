@@ -94,7 +94,38 @@ namespace NameTable
                 long value = ((long)nc_entry.Field(2).Get());
                 return value.CompareTo(newcheckSum);
             });
-            if (qu.IsEmpty) return Int32.MinValue;
+            if (qu.IsEmpty)
+            {
+
+                long previous = -9116709588998265599;
+                var temp = n_index.Root.ElementValues().Select(off =>
+                {
+                    nc_entry.offset = (long) off;
+                 return (long) nc_entry.Field(2).Get();
+                }).ToArray();
+                bool f = false;
+                for (int i = 1; i < temp.Length; i++)
+                {
+                    var l1 = temp[i];
+                    var l2 = temp[i - 1];
+                    if (l1 < l2)
+                    {
+                        f = true;
+                    }
+                }
+                Console.WriteLine(f);
+                Console.WriteLine(temp[0]);
+                Console.WriteLine(temp[1]);
+                Console.WriteLine(temp[2]);
+                foreach (var element in nc_cell.Root.ElementValues())
+                {
+                    if ((string) ((object[]) element)[1] == name)
+                    {
+                        return (int) ((object[]) element)[0];
+                    }
+                }     
+                            return Int32.MinValue;
+            }
             nc_entry.offset = (long)qu.Get();
             return (int)nc_entry.Field(0).Get();
         }
@@ -116,8 +147,7 @@ namespace NameTable
         public Dictionary<string, int> InsertPortion(string[] portion)  //   (string[] sorted_arr) 
         {
             //DateTime tt0 = DateTime.Now;
-            var hashes_arr=
-            portion.Select(s =>BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(s)), 0)).ToArray();
+            var hashes_arr= portion.Select(s =>BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(s)), 0)).ToArray();
             Array.Sort(hashes_arr, portion);
             var ssa = portion;
             if (ssa.Length == 0) return new Dictionary<string, int>();
@@ -158,7 +188,7 @@ namespace NameTable
                     //string s = (string)val[1];
                     int cmp = 0;
                     var existsCheckSum = (long) val[2];
-                    while (ssa_notempty && (cmp = existsCheckSum.CompareTo(hashes_arr[ssa_ind])) <= 0)
+                    while (ssa_notempty && (cmp = hashes_arr[ssa_ind].CompareTo(existsCheckSum)) <= 0)
                     {
                         if (cmp < 0)
                         {

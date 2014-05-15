@@ -1,0 +1,5 @@
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer5374/Product272249, "achieved"
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer2164/Product108925, "admittances magnified"
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer3936/Product198872, "adsorbing"
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer5269/Product266831, "affecter"
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer3292/Product166405, "affixing deoxidizer haftorahs"
