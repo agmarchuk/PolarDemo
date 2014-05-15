@@ -28,7 +28,7 @@ namespace  TrueRdfViewer
         }              
         public static string Decode(int e)
         {
-            return e.ToString();// SiCoding.GetName(e);
+            return SiCoding.GetName(e);
         }
     }
     public class OTripleInt : TripleInt { public int obj; }

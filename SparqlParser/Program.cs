@@ -16,14 +16,14 @@ namespace ANTLR_Test
             PolarDB.PaEntry.bufferBytes = 1*1000*1000*1000;
 
             Millions = 1;
-         Test();
+    //   Test();
 
             Millions = 10;
 
-           //    Test();
+                 Test();
 
             Millions = 100;
-          //  Test();
+           // Test();
         }
 
         private static void Test()
@@ -33,8 +33,8 @@ namespace ANTLR_Test
             TripleStoreInt ts =
                 new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
 
-         bool load = false;
-            //   bool load = true;
+        //   bool load = false;
+             bool load = true;
             if (load)
             {
                 DateTime start = DateTime.Now;
@@ -47,7 +47,7 @@ namespace ANTLR_Test
                 }
                 return;
             }
-           // RunBerlinsWithConstants( ts);
+         //   RunBerlinsWithConstants( ts);
             RunBerlinsParameters(ts);
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("countCodingUsages {0} totalMilisecondsCodingUsages {1}", TripleInt.CodeCache.Count, TripleInt.totalMilisecondsCodingUsages);

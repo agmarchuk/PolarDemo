@@ -1,7 +1,7 @@
 http://www.w3.org/1999/02/22-rdf-syntax-ns#type, http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Offer, 
 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/offerWebpage, http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor1/Offer1/, 
 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/vendor, http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor1/Vendor1, 
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/product, http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer437/Product21604, 
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/product, http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer46/Product2161, 
 http://purl.org/dc/elements/1.1/publisher, http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor1/Vendor1, 
 http://purl.org/dc/elements/1.1/date, 633492576000000000, 
 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/validTo, 633566880000000000, 
