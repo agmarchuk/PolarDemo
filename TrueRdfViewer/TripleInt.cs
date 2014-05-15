@@ -9,9 +9,13 @@ namespace  TrueRdfViewer
     { 
         public int subject, predicate;
         public static StringIntCoding SiCoding;
+        private  static Dictionary<string, int>  CodeCache=new Dictionary<string, int>();
         public static int Code(string s)
         {
-            return SiCoding.GetCode(s);
+            int c;
+            if(!CodeCache.TryGetValue(s, out c))
+                CodeCache.Add(s, c = SiCoding.GetCode(s));
+            return c;
         }              
         public static string Decode(int e)
         {

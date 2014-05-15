@@ -1,8 +1,0 @@
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor16/Offer30391 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/product http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer42/Product2004
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor16/Offer30391 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/productlabel "reactants dealership photostat"
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor16/Offer30391 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/vendor "managements ignitors"
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor16/Offer30391 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/vendorhomepage http://www.vendor16.com/
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor16/Offer30391 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/offerURL http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor16/Offer30391/
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor16/Offer30391 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/price "8511.40"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor16/Offer30391 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/deliveryDays 5
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor16/Offer30391 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/validuntil 633439872000000000

@@ -21,7 +21,7 @@ namespace NameTable
         {
             string[] arr = new string[Buffer.Count];
             Buffer.Keys.CopyTo(arr, 0);
-            Array.Sort(arr);
+         //   Array.Sort(arr);
             var values = sic.InsertPortion(arr);
             foreach (var keyValue in Buffer)
                 keyValue.Value.Value = values[keyValue.Key];
