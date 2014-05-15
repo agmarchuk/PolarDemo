@@ -1,4 +1,8 @@
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor325/Offer636610, "96.09"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor1125/Offer2210116, "2470.86"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor2461/Offer4854139, "4784.11"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor802/Offer1589633, "8981.27"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+65461, "551.12"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+69446, "877.93"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+101684, "1215.75"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+52978, "1485.73"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+56144, "3102.85"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+81360, "4695.13"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+76155, "5943.65"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+80975, "9794.88"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD

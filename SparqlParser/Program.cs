@@ -16,14 +16,14 @@ namespace ANTLR_Test
             PolarDB.PaEntry.bufferBytes = 1*1000*1000*1000;
 
             Millions = 1;
-          //  Test();
+         Test();
 
             Millions = 10;
 
-           // Test();
+           //    Test();
 
             Millions = 100;
-            Test();
+          //  Test();
         }
 
         private static void Test()
@@ -33,7 +33,8 @@ namespace ANTLR_Test
             TripleStoreInt ts =
                 new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
 
-            bool load = false;
+         bool load = false;
+            //   bool load = true;
             if (load)
             {
                 DateTime start = DateTime.Now;
@@ -46,8 +47,10 @@ namespace ANTLR_Test
                 }
                 return;
             }
-           //  RunBerlinsWithConstants( ts);
-           RunBerlinsParameters(ts);
+           // RunBerlinsWithConstants( ts);
+            RunBerlinsParameters(ts);
+            using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
+                wr.WriteLine("countCodingUsages {0} totalMilisecondsCodingUsages {1}", TripleInt.CodeCache.Count, TripleInt.totalMilisecondsCodingUsages);
         }
 
         private static void RunBerlinsParameters(TripleStoreInt ts)
@@ -155,7 +158,7 @@ namespace ANTLR_Test
                 }
                 .Select(s => new FileInfo(s))
                 .ToArray();
-            for (int j = 0; j < 500; j++)
+            for (int j = 0; j < 1; j++)
             {
 
                 foreach (var file in fileInfos)
@@ -173,7 +176,7 @@ namespace ANTLR_Test
                     //.Save(Path.ChangeExtension(file.FullName,".xml"));
                 }
             }
-            for (int j = 0; j < 500; j++)
+            for (int j = 0; j < 1; j++)
             {
                 i = 0;
                 foreach (var file in fileInfos)
