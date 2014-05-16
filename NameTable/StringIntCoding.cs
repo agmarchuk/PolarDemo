@@ -201,8 +201,7 @@ namespace NameTable
                             // добавляется новый код
                             offset = target.Root.AppendElement(new object[] {code_new, ssa[ssa_ind]});
                             n_index_copy.Root.AppendElement(new object[] { offset, hashes_arr[ssa_ind] });
-                            accumulator.Add(new KeyValuePair<string, int>(ssa[ssa_ind], code_new++));
-                            ssa_ind++;
+                            accumulator.Add(new KeyValuePair<string, int>(ssa[ssa_ind], code_new++));      
                         }
                         else // используется существующий код
                             accumulator.Add(new KeyValuePair<string, int>((string) val[1], (int) val[0]));
