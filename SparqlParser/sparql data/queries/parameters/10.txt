@@ -1,1 +1,0 @@
-1421014942, "5422.60"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD

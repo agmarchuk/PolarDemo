@@ -16,14 +16,14 @@ namespace ANTLR_Test
             PolarDB.PaEntry.bufferBytes = 1*1000*1000*1000;
 
             Millions = 1;
-       //   Test();
+        Test();
          
             Millions = 10;
 
              //  Test();
               
             Millions = 100;
-             Test();
+           //    Test();
         }
 
         private static void Test()
@@ -31,7 +31,7 @@ namespace ANTLR_Test
             Console.WriteLine(Millions);
 
             TripleStoreInt ts =
-                new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\undecoded\" + Millions + @"mln\");
+                new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
 
              bool load = false;
             //      bool load = true;
@@ -91,7 +91,7 @@ namespace ANTLR_Test
          
             using (StreamReader streamQueryParameters = new StreamReader(paramvaluesFilePath))
             {
-                for (int j = 0; j < 500; j++)
+                for (int j = 0; j < 0; j++)
                 {
 
                     foreach (var file in fileInfos)
@@ -102,7 +102,7 @@ namespace ANTLR_Test
 
                     }
                 }
-                for (int j = 0; j < 500; j++)
+                for (int j = 0; j < 1; j++)
                 {
                     i = 0;
                     foreach (var file in fileInfos)
@@ -131,11 +131,11 @@ namespace ANTLR_Test
             {
                 r.WriteLine("milions " + Millions);
                 r.WriteLine("max memory usage " + maxMemoryUsage);
-                r.WriteLine("average " + string.Join(", ", results.Select(l => 500 * 1000 / l)));
+                r.WriteLine("average " + string.Join(", ", results.Select(l => l == 0 ? "inf" : (500 * 1000 / l).ToString())));
                 r.WriteLine("minimums " + string.Join(", ", minimums));
                 r.WriteLine("maximums " + string.Join(", ", maximums));
             }
-            Console.WriteLine("average " + string.Join(", ", results.Select(l => 500 * 1000 / l)));
+            Console.WriteLine("average " + string.Join(", ", results.Select(l => l == 0 ? "inf" : (500 * 1000 / l).ToString())));
             Console.WriteLine("minimums " + string.Join(", ", minimums));
             Console.WriteLine("maximums " + string.Join(", ", maximums));
             

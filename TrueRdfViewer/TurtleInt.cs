@@ -151,8 +151,8 @@ namespace TrueRdfViewer
             string[] arr = new string[stringsForCode.Count];
             stringsForCode.CopyTo(arr);
            // Array.Sort(arr);
-            var codes = arr.ToDictionary(s =>s, s=> s.GetHashCode());
-            //var codes = TripleInt.SiCoding.InsertPortion(arr);
+          //  var codes = arr.ToDictionary(s =>s, s=> s.GetHashCode());
+            var codes = TripleInt.SiCoding.InsertPortion(arr);
             return tripletsBuffer.Select(tuple =>
             {
                 int subject = codes[tuple.Item1];

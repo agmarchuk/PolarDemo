@@ -1,0 +1,521 @@
+milions 100
+average 126, 23, 155, 100, 32, 836, 32, 48, 15, 42, 5, 12
+minimums 3, 10, 3, 4, 4, 0, 4, 3, 0, 5, 8, 5
+maximums 10, 106, 14, 20, 87, 5, 88, 81, 200, 96, 429, 232
+milions 1
+average 284, 150, 246, 167, 103, 132, 50, 81, 96, 110, 261, 209
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 31, 46, 15, 31, 31, 15, 93, 93, 46, 31, 31, 62
+milions 10
+average 144, 50, 152, 134, 83, 606, 101, 94, 26, 72, 9, 23
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 78, 15, 15, 62, 15, 62, 46, 125, 46, 265, 109
+milions 100
+average 123, 23, 145, 90, 33, 512, 32, 48, 15, 42, 5, 12
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0
+maximums 15, 93, 15, 31, 78, 15, 93, 78, 203, 93, 437, 218
+milions 1
+average 330, 149, 289, 164, 104, 138, 53, 80, 103, 114, 273, 227
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 31, 31, 31, 15, 15, 93, 62, 31, 31, 78, 46
+milions 10
+average 127, 48, 158, 146, 93, 564, 98, 103, 25, 70, 9, 23
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 78, 15, 15, 78, 15, 62, 46, 156, 46, 250, 125
+milions 100
+average 120, 23, 139, 92, 33, 469, 32, 49, 15, 44, 5, 12
+minimums 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 15, 15
+maximums 15, 93, 15, 31, 109, 15, 93, 93, 218, 78, 453, 234
+milions 1
+average 308, 166, 264, 163, 107, 144, 52, 79, 97, 132, 273, 184
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 31, 31, 31, 15, 31, 109, 78, 31, 31, 31, 46
+milions 10
+average 144, 47, 146, 138, 94, 628, 97, 102, 26, 71, 9, 23
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 62, 15, 15, 62, 15, 62, 46, 140, 46, 250, 109
+milions 100
+average 119, 23, 143, 89, 33, 555, 32, 50, 15, 43, 5, 12
+minimums 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0
+maximums 15, 109, 15, 31, 93, 15, 93, 78, 203, 93, 437, 234
+milions 1
+average 314, 152, 258, 167, 106, 140, 53, 80, 98, 115, 269, 219
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 46, 31, 46, 31, 15, 93, 109, 46, 31, 31, 31
+milions 10
+average 150, 48, 152, 140, 93, 641, 98, 105, 26, 70, 9, 23
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 78, 15, 15, 62, 15, 46, 46, 140, 46, 265, 109
+milions 100
+average 126, 23, 143, 96, 33, 606, 32, 49, 15, 42, 5, 12
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0
+maximums 15, 109, 15, 31, 109, 15, 78, 78, 203, 78, 437, 234
+millions 1
+total load 17134 мс.
+millions 1
+total load 19984 мс.
+millions 10
+total load 252357 мс.
+milions 100
+average 43, 29, 35, 35, 5, 1, 1, 2, 29, 3, 39, 36
+minimums 1, 2, 1, 1, 18, 594, 1, 5, 0, 6, 0, 0
+maximums 783, 227, 1603, 997, 482, 742, 2055, 1082, 82, 978, 70, 79
+milions 1
+average 1182, 980, 639, 677, 161, 146, 235, 280, 7812, 196, 6329, 2000
+minimums 0, 0, 0, 0, 3, 5, 0, 0, 0, 1, 0, 0
+maximums 4, 5, 6, 8, 18, 22, 11, 11, 1, 12, 1, 2
+milions 1
+average 854, 694, 512, 628, 160, 149, 205, 231, 4166, 181, 4166, 2380
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 15, 15, 15, 15, 31, 31, 31, 15, 31, 15, 15
+milions 10
+average 358, 736, 246, 212, 35, 22, 52, 8, 68, 11, 58, 813
+minimums 0, 0, 0, 0, 0, 31, 0, 0, 0, 0, 0, 0
+maximums 31, 109, 15, 31, 93, 62, 578, 406, 62, 265, 62, 15
+milions 100
+average 45, 29, 35, 34, 5, 1, 1, 2, 30, 3, 40, 36
+minimums 0, 0, 0, 0, 31, 578, 0, 0, 0, 0, 0, 0
+maximums 812, 234, 1609, 999, 515, 750, 2093, 1046, 78, 953, 78, 78
+milions 1
+max memory usage 94918832
+average 952, 606, 555, 617, 170, 148, 182, 262, 11111, 188, 3703, 2222
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 15, 15, 15, 31, 15, 46, 31, 15, 31, 15, 15
+milions 10
+max memory usage 60827400
+average 333, 871, 229, 182, 36, 22, 53, 8, 70, 11, 58, 854
+minimums 0, 0, 0, 0, 0, 31, 0, 0, 0, 0, 0, 0
+maximums 31, 93, 15, 31, 93, 62, 593, 406, 62, 265, 62, 15
+milions 100
+max memory usage 378602072
+average 44, 29, 35, 35, 5, 1, 1, 2, 30, 3, 40, 37
+minimums 0, 0, 0, 0, 15, 562, 0, 15, 0, 0, 0, 0
+maximums 781, 218, 1546, 1031, 562, 765, 2062, 1062, 78, 984, 62, 78
+
+millions 1
+total load 33962 мс.
+millions 10
+total load 337264 мс.
+millions 100
+total load 3073209 мс.
+
+milions 1
+max memory usage 96935232
+average 294, 163, 256, 151, 119, 128, 62, 76, 871, 121, 399, 160
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 31, 46, 31, 46, 15, 31, 93, 93, 62, 31, 31, 46
+
+new decoding
+milions 1
+max memory usage 98596160
+average 326, 134, 268, 177, 105, 152, 57, 84, 1035, 105, 371, 180
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 31, 15, 31, 31, 15, 93, 78, 46, 31, 31, 78
+milions 1
+max memory usage 97692952
+average 326, 156, 254, 160, 117, 131, 61, 76, 1004, 121, 370, 152
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 46, 31, 46, 15, 15, 93, 78, 46, 31, 46, 46
+milions 10
+max memory usage 126720216
+average 118, 45, 161, 123, 28, 15, 3, 5, 38, 22, 38, 22
+minimums 0, 0, 0, 0, 0, 46, 0, 0, 0, 0, 0, 0
+maximums 46, 62, 46, 78, 78, 78, 828, 484, 125, 187, 125, 218
+milions 100
+max memory usage 353388016
+average 29, 32, 46, 30, 6, 1, 1, 2, 12, 3, 13, 7
+minimums 0, 0, 0, 0, 0, 609, 0, 15, 0, 15, 0, 15
+maximums 656, 93, 984, 468, 453, 812, 1750, 968, 203, 781, 218, 390
+
+decoding global hash
+milions 1
+max memory usage 100131752
+average 308, 143, 243, 168, 113, 141, 60, 80, 945, 118, 371, 174
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 46, 15, 31, 15, 15, 93, 78, 62, 31, 31, 62
+milions 10
+max memory usage 126531688
+average 111, 47, 165, 118, 28, 16, 3, 5, 37, 22, 39, 22
+minimums 0, 0, 0, 0, 0, 46, 0, 0, 0, 0, 0, 0
+maximums 46, 62, 62, 93, 93, 78, 859, 468, 109, 203, 125, 203
+milions 100
+max memory usage 377988064
+average 27, 33, 44, 30, 6, 1, 1, 2, 12, 3, 13, 7
+minimums 0, 0, 0, 0, 15, 578, 0, 15, 0, 15, 0, 31
+maximums 671, 93, 1031, 406, 515, 765, 1750, 999, 187, 796, 250, 375
+milions 1
+max memory usage 26503800
+average 166666, 35714, 71428, 62500, 8064, 55555, 62500, 62500, 500000, 55555, 500000, 100000
+minimums 3, 14, 7, 8, 62, 9, 8, 8, 1, 9, 1, 5
+maximums 3, 14, 7, 8, 62, 9, 8, 8, 1, 9, 1, 5
+milions 10
+max memory usage 36441600
+average 100000, 35714, 100000, 100000, 1587, 6493, 38461, 27777, 500000, 55555, 250000, 83333
+minimums 5, 14, 5, 5, 315, 77, 13, 18, 1, 9, 2, 6
+maximums 5, 14, 5, 5, 315, 77, 13, 18, 1, 9, 2, 6
+milions 1
+max memory usage 105018328
+average 268, 152, 217, 164, 102, 137, 49, 77, 554, 109, 603, 179
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 46, 15, 31, 31, 31, 125, 93, 31, 31, 31, 46
+milions 10
+max memory usage 144707296
+average 202, 68, 171, 129, 29, 15, 3, 6, 52, 20, 45, 35
+minimums 0, 0, 0, 0, 0, 46, 0, 0, 0, 0, 0, 0
+maximums 62, 125, 46, 78, 93, 78, 843, 515, 93, 265, 156, 171
+milions 100
+max memory usage 388736256
+average 46, 34, 49, 30, 6, 1, 1, 2, 11, 2, 9, 9
+minimums 0, 0, 0, 0, 0, 593, 15, 0, 0, 0, 0, 0
+maximums 624, 93, 1046, 390, 546, 906, 2234, 921, 234, 1125, 374, 312
+milions 1
+max memory usage 105776680
+average 303, 145, 234, 154, 101, 132, 49, 69, 505, 109, 363, 194
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 31, 15, 31, 46, 15, 109, 203, 15, 46, 78, 46
+milions 10
+max memory usage 148063952
+average 210, 63, 200, 121, 28, 15, 3, 6, 50, 19, 45, 35
+minimums 0, 0, 0, 0, 0, 46, 0, 0, 0, 0, 0, 0
+maximums 46, 203, 46, 93, 125, 78, 843, 468, 203, 281, 140, 265
+milions 100
+max memory usage 402014688
+average 43, 32, 46, 28, 6, 1, 1, 2, 11, 2, 9, 9
+minimums 0, 0, 0, 0, 15, 609, 0, 0, 0, 0, 0, 0
+maximums 687, 187, 1046, 406, 562, 953, 2218, 984, 265, 1171, 343, 281
+milions 1
+max memory usage 101464048
+average 245, 140, 232, 163, 106, 129, 44, 60, 821, 112, 296, 167
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 31, 46, 31, 46, 31, 31, 406, 203, 46, 46, 93, 78
+milions 10
+max memory usage 135273992
+average 210, 60, 183, 111, 28, 15, 3, 6, 36, 28, 33, 31
+minimums 0, 0, 0, 0, 0, 46, 0, 0, 0, 0, 0, 0
+maximums 31, 156, 50, 93, 97, 118, 828, 570, 234, 203, 171, 203
+
+без декорования
+
+milions 1
+max memory usage 102045328
+average 246, 133, 219, 138, 93, 103, 48, 72, 896, 106, 294, 153
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 31, 31, 31, 46, 31, 15, 109, 93, 31, 31, 46, 78
+milions 10
+max memory usage 132825624
+average 220, 58, 158, 113, 23, 12, 3, 6, 37, 28, 35, 30
+minimums 0, 0, 0, 0, 15, 62, 0, 0, 0, 0, 0, 0
+maximums 46, 125, 62, 93, 109, 109, 828, 625, 109, 187, 218, 156
+milions 100
+max memory usage 395201200
+average 41, 30, 43, 26, 4, 1, 1, 2, 12, 3, 13, 10
+minimums 0, 0, 0, 0, 15, 765, 0, 0, 0, 0, 0, 0
+maximums 765, 109, 1140, 453, 609, 984, 1718, 953, 203, 765, 234, 281
+
+с кешем кодирования
+ milions 1
+max memory usage 107254440
+average 529, 489, 347, 279, 129, 150, 57, 85, 469, 144, 499, 324
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 46, 15, 31, 46, 15, 125, 109, 15, 15, 62, 62
+milions 10
+max memory usage 43722016
+average 302, 173, 206, 213, 105, 1101, 168, 112, 25, 101, 13, 30
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 46, 62, 46, 78, 62, 15, 78, 62, 156, 171, 312, 140
+milions 100
+max memory usage 49467832
+average 94, 39, 110, 105, 37, 980, 42, 68, 13, 70, 6, 15
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 124, 140, 140, 78, 140, 15, 156, 125, 203, 124, 468, 312
+milions 1
+max memory usage 107306992
+average 421, 468, 416, 281, 126, 140, 59, 84, 595, 120, 491, 367
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 46, 15, 31, 31, 31, 109, 109, 15, 31, 78, 62
+milions 10
+max memory usage 45215672
+average 306, 168, 185, 206, 99, 1666, 168, 103, 24, 113, 12, 28
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 171, 78, 46, 156, 93, 15, 109, 62, 218, 78, 250, 187
+milions 100
+max memory usage 49115832
+average 95, 40, 115, 106, 37, 854, 42, 70, 14, 69, 6, 15
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0
+maximums 109, 140, 46, 109, 109, 15, 140, 93, 234, 78, 531, 234
+
+md5 CHECk sum
+millions 1
+total load 16585 мс.
+milions 1
+max memory usage 108630848
+average 504, 332, 378, 279, 126, 148, 49, 59, 456, 131, 1666, 641
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 31, 124, 15, 46, 15, 46, 281, 296, 31, 46, 15, 15
+millions 1
+total load 30406 мс.
+millions 10
+total load 267328 мс.
+millions 100
+total load 2619438 мс.
+milions 1
+max memory usage 105318888
+average 476, 405, 339, 313, 123, 152, 56, 67, 1333, 141, 2222, 694
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 46, 31, 46, 15, 15, 171, 171, 15, 31, 15, 15
+milions 10
+max memory usage 43144688
+average 107, 53, 108, 87, 43, 833, 51, 88, 214, 105, 26, 88
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 109, 93, 93, 78, 109, 15, 171, 93, 62, 78, 171, 62
+milions 100
+max memory usage 48100512
+average 154, 263, 138, 108, 157, 1234, 228, 93, 192, 106, 104, 216
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 93, 31, 62, 62, 46, 15, 46, 78, 93, 93, 203, 46
+milions 1
+max memory usage 108807272
+average 396, 358, 333, 229, 122, 111, 55, 74, 925, 141, 1851, 505
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 31, 31, 46, 31, 15, 171, 93, 15, 31, 15, 15
+milions 10
+max memory usage 43948176
+average 108, 51, 109, 84, 46, 1010, 47, 92, 203, 100, 26, 90
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 62, 125, 62, 125, 109, 15, 156, 78, 62, 93, 171, 62
+milions 100
+max memory usage 48515264
+average 165, 243, 136, 106, 152, 925, 233, 98, 185, 107, 105, 212
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 93, 46, 78, 78, 46, 15, 62, 78, 46, 78, 171, 46
+
+7
+milions 1
+max memory usage 106590000
+average 450, 383, 346, 260, 113, 109, 40, 57, 2118, 119, 2976, 894
+minimums 0, 0, 0, 0, 4, 8, 1, 0, 0, 1, 0, 0
+maximums 40, 34, 26, 45, 18, 17, 319, 332, 23, 35, 2, 6
+milions 1
+max memory usage 111592728
+average 485, 412, 352, 256, 113, 109, 84, 192, 3067, 133, 4424, 1018
+minimums 0, 0, 0, 0, 3, 8, 1, 0, 0, 1, 0, 0
+maximums 21, 9, 25, 46, 30, 17, 31, 18, 2, 20, 1, 2
+milions 1
+max memory usage 107562480
+average 509, 438, 366, 271, 115, 109, 95, 196, 2941, 137, 4901, 1086
+minimums 0, 0, 0, 0, 3, 8, 1, 0, 0, 1, 0, 0
+maximums 22, 5, 28, 47, 21, 24, 27, 16, 2, 20, 2, 2
+milions 1
+max memory usage 109203184
+average 483, 377, 357, 257, 111, 106, 49, 71, 2617, 129, 3355, 986
+minimums 0, 0, 1, 0, 4, 8, 1, 0, 0, 1, 0, 0
+maximums 20, 42, 24, 44, 17, 19, 210, 144, 19, 38, 3, 5
+milions 10
+max memory usage 44664696
+average 105, 52, 101, 81, 43, 1533, 48, 93, 206, 98, 26, 90
+minimums 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0
+maximums 67, 87, 100, 107, 132, 4, 97, 65, 186, 77, 160, 100
+milions 100
+max memory usage 49756856
+average 162, 232, 129, 99, 140, 1628, 208, 99, 192, 105, 108, 214
+minimums 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0
+maximums 59, 72, 61, 71, 55, 4, 65, 57, 96, 80, 178, 61
+alone start
+milions 10
+max memory usage 71694040
+average 147, 104, 140, 100, 22, 11, 12, 259, 556, 110, 87, 105
+minimums 0, 0, 0, 0, 0, 62, 0, 0, 0, 0, 0, 0
+maximums 187, 109, 171, 93, 281, 238, 578, 46, 62, 62, 187, 281
+milions 10
+max memory usage 73221952
+average 170, 109, 149, 105, 22, 11, 13, 241, 539, 111, 98, 115
+minimums 0, 0, 0, 0, 0, 78, 0, 0, 0, 0, 0, 0
+maximums 46, 78, 62, 109, 125, 171, 343, 46, 62, 46, 156, 62
+millions 100
+total load 2922488 мс.
+millions 100
+total load 2671056 мс.
+milions 100
+max memory usage 391294760
+average 14, 19, 13, 9, 3, 0, 0, 2, 3, 2, 10, 8
+minimums 0, 0, 0, 15, 46, 843, 0, 0, 0, 15, 15, 15
+maximums 781, 234, 1281, 562, 640, 11250, 2734, 1328, 640, 906, 281, 249
+milions 100
+max memory usage 394687224
+average 13, 19, 12, 8, 3, 0, 0, 2, 3, 2, 10, 8
+minimums 0, 0, 0, 0, 78, 906, 15, 0, 0, 15, 15, 0
+maximums 750, 171, 1156, 562, 671, 12328, 2718, 1374, 562, 937, 249, 265
+millions 10
+total load 344281 мс.
+millions 10
+total load 187355 мс.
+milions 10
+max memory usage 147505352
+average 158, 85, 130, 94, 19, 10, 3, 5, 30, 30, 120, 111
+minimums 0, 0, 0, 0, 15, 78, 0, 0, 0, 0, 0, 0
+maximums 62, 156, 187, 128, 249, 171, 2022, 1618, 350, 375, 203, 140
+millions 1
+total load 29264 мс.
+milions 10
+max memory usage 147098024
+average 166, 94, 155, 94, 24, 14, 3, 6, 32, 32, 131, 106
+minimums 0, 0, 0, 0, 0, 46, 0, 0, 0, 0, 0, 0
+maximums 93, 203, 62, 187, 171, 140, 734, 515, 359, 328, 78, 203
+millions 1
+total load 30869 мс.
+
+без кодирования
+milions 1
+max memory usage 101475768
+average 1168, 586, 568, 559, 123, 104, 116, 202, 8064, 176, 7352, 2164
+minimums 0, 0, 0, 0, 2, 8, 1, 0, 0, 1, 0, 0
+maximums 5, 32, 7, 10, 18, 14, 60, 42, 21, 24, 1, 2
+milions 10
+max memory usage 65510584
+average 657, 1329, 445, 430, 40, 15, 54, 8, 70, 12, 57, 1278
+minimums 0, 0, 0, 0, 7, 59, 0, 0, 0, 2, 0, 0
+maximums 37, 91, 14, 35, 70, 96, 605, 418, 72, 293, 80, 27
+
+с кодированием 15.05 (без рестарта)
+millions 1
+total load 17391 мс.
+milions 1
+
+countCodingUsages 9166 totalMilisecondsCodingUsages 771
+milions 1
+countCodingUsages 9166 totalMilisecondsCodingUsages 839
+
+
+millions 10
+total load 246534 мс.
+
+millions 1
+total load 17237 мс.
+
+
+
+milions 1
+max memory usage 110219112
+average 520, 305, 366, 265, 116, 108, 51, 69, 1960, 119, 1234, 666
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 31, 31, 31, 46, 31, 46, 171, 109, 15, 46, 15, 15
+countCodingUsages 9166 totalMilisecondsCodingUsages 8812
+millions 10
+total load 298437 мс.
+millions 100
+total load 2804356 мс.
+milions 1
+max memory usage 106608744
+average 348, 348, 421, 265, 108, 104, 50, 71, 1101, 126, 1831, 720
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 31, 31, 31, 46, 31, 15, 203, 109, 31, 31, 15, 15
+countCodingUsages 9166 totalMilisecondsCodingUsages 8411
+milions 100
+max memory usage 33117416
+average 1587, 2083, 666, 476, 406, 1234, 1282, 627, 8333, 595, 11111, 1960
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 15, 15, 15, 15, 15, 15, 62, 15, 15, 15, 15
+countCodingUsages 16021 totalMilisecondsCodingUsages 840
+millions 10
+total load 310457 мс.
+milions 1
+max memory usage 109108704
+average 434, 381, 350, 257, 109, 102, 42, 58, 1724, 119, 2923, 884
+minimums 0, 0, 0, 1, 3, 7, 1, 0, 0, 2, 0, 0
+maximums 26, 42, 24, 50, 20, 17, 319, 198, 36, 43, 2, 4
+countCodingUsages 9166 totalMilisecondsCodingUsages 17121
+milions 10
+max memory usage 120510552
+average 1014, 2272, 580, 603, 386, 2906, 1082, 786, 6849, 626, 3521, 1824
+minimums 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0
+maximums 3, 2, 4, 3, 5, 1, 3, 3, 2, 3, 1, 2
+countCodingUsages 23617 totalMilisecondsCodingUsages 18442
+milions 100
+max memory usage 143040184
+average 1089, 1128, 638, 677, 394, 2392, 974, 948, 18518, 700, 15151, 2793
+minimums 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0
+maximums 19, 34, 15, 36, 37, 2, 37, 41, 1, 15, 1, 2
+countCodingUsages 37114 totalMilisecondsCodingUsages 18818
+
+millions 1
+total load 16613 мс.
+millions 10
+total load 189454 мс.
+millions 100
+total load 3423525 мс.
+milions 1
+max memory usage 107043048
+average 489, 475, 369, 269, 131, 128, 44, 61, 1282, 134, 1515, 740
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 31, 31, 31, 46, 46, 15, 312, 171, 15, 31, 15, 15
+countCodingUsages 9166 totalMilisecondsCodingUsages 8450
+milions 10
+max memory usage 141993744
+average 218, 86, 152, 129, 20, 11, 3, 6, 19, 27, 100, 87
+minimums 0, 0, 0, 0, 0, 78, 0, 0, 0, 0, 0, 0
+maximums 62, 187, 140, 109, 203, 250, 999, 734, 359, 265, 109, 109
+countCodingUsages 15479 totalMilisecondsCodingUsages 92101
+milions 100
+max memory usage 379300448
+average 16, 21, 15, 10, 3, 0, 0, 2, 3, 2, 10, 8
+minimums 0, 0, 0, 15, 62, 796, 15, 0, 0, 15, 15, 15
+maximums 734, 156, 1250, 500, 671, 13515, 2968, 1328, 640, 1031, 375, 234
+countCodingUsages 16021 totalMilisecondsCodingUsages 351949
+millions 1
+millions 1
+milions 1
+max memory usage 107240856
+average 505, 391, 370, 248, 133, 120, 55, 72, 1333, 145, 1515, 900
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 31, 31, 46, 15, 46, 140, 140, 15, 31, 15, 15
+countCodingUsages 9166 totalMilisecondsCodingUsages 8344
+total 233250 мс.
+millions 1
+millions 1
+undecoded
+milions 1
+max memory usage 103042008
+average 1157, 781, 568, 604, 146, 139, 136, 210, 6493, 181, 6756, 2604
+minimums 0, 0, 0, 0, 2, 6, 0, 0, 0, 1, 0, 0
+maximums 4, 23, 7, 8, 21, 11, 43, 40, 20, 40, 1, 2
+countCodingUsages 9166 totalMilisecondsCodingUsages 0
+total 95337 мс.
+
+millions 1
+millions 1
+millions 1
+millions 1
+total 14342 мс.
+millions 10
+total 157087 мс.
+millions 100
+total 2062943 мс.
+millions 1
+milions 1
+max memory usage 102204528
+average 1225, 766, 574, 611, 148, 139, 122, 198, 6250, 185, 8196, 2450
+minimums 0, 0, 0, 0, 3, 6, 0, 0, 0, 1, 0, 0
+maximums 4, 26, 7, 10, 14, 19, 89, 66, 12, 20, 1, 2
+countCodingUsages 9166 totalMilisecondsCodingUsages 0
+total 97358 мс.
+millions 10
+milions 10
+max memory usage 142013328
+average 641, 117, 450, 554, 28, 14, 4, 6, 78, 31, 233, 184
+minimums 0, 0, 0, 0, 0, 62, 0, 0, 0, 0, 0, 0
+maximums 15, 187, 15, 31, 156, 109, 703, 531, 187, 171, 62, 109
+countCodingUsages 15479 totalMilisecondsCodingUsages 15
+total 1172129 мс.
+
+
+
+1 запрос
+millions 1
+millions 1
+milions 1
+max memory usage 27260448
+average 2008, 33333, 10869, inf, 33333, inf, 33333, inf, 33333, inf, 33333, 33333
+minimums 249, 15, 46, 0, 15, 0, 15, 0, 15, 0, 15, 15
+maximums 249, 15, 46, 0, 15, 0, 15, 0, 15, 0, 15, 15
+countCodingUsages 54 totalMilisecondsCodingUsages 0
+total 421 мс.

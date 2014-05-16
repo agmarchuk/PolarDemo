@@ -19,8 +19,8 @@ namespace  TrueRdfViewer
             if(!CodeCache.TryGetValue(s, out c))
             {
                 DateTime st = DateTime.Now;
-                //c = SiCoding.GetCode(s);
-                c = s.GetHashCode();
+               c = SiCoding.GetCode(s);
+              //   c = s.GetHashCode();
                 totalMilisecondsCodingUsages += (DateTime.Now - st).Ticks/10000;
                 CodeCache.Add(s, c); //s.GetHashCode() 
                 countCodingUsages++;
@@ -29,7 +29,8 @@ namespace  TrueRdfViewer
         }              
         public static string Decode(int e)
         {
-            return e.ToString();// SiCoding.GetName(e);
+            // return e.ToString();
+            return SiCoding.GetName(e);
         }
     }
     public class OTripleInt : TripleInt { public int obj; }
