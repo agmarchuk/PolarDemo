@@ -247,6 +247,7 @@ namespace NameTable
             c_index = new PaCell(tp_ind, ciCell, false);
             c_index.Clear();
             c_index.Fill(new object[0]);
+            if (nc_cell.IsEmpty) return;
             foreach (PaEntry ent in nc_cell.Root.Elements())
             {
                 long off = ent.offset;

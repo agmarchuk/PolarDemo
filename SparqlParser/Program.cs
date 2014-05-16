@@ -16,14 +16,14 @@ namespace ANTLR_Test
             PolarDB.PaEntry.bufferBytes = 1*1000*1000*1000;
 
             Millions = 1;
-    //   Test();
-
+       //   Test();
+         
             Millions = 10;
 
-                 Test();
-
+             //  Test();
+              
             Millions = 100;
-           // Test();
+             Test();
         }
 
         private static void Test()
@@ -31,26 +31,30 @@ namespace ANTLR_Test
             Console.WriteLine(Millions);
 
             TripleStoreInt ts =
-                new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
+                new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\undecoded\" + Millions + @"mln\");
 
-        //   bool load = false;
-             bool load = true;
+             bool load = false;
+            //      bool load = true;
+            using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
+                wr.WriteLine("millions " + Millions);
+            DateTime start = DateTime.Now;
             if (load)
             {
-                DateTime start = DateTime.Now;
                 ts.LoadTurtle(@"C:\deployed\" + Millions + "M.ttl"); //30мин.          
-                var spent = (DateTime.Now - start).Ticks/10000;
-                using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
-                {
-                    wr.WriteLine("millions " + Millions);
-                    wr.WriteLine("total load " + spent + " мс.");
-                }
-                return;
+
+
             }
-         //   RunBerlinsWithConstants( ts);
-            RunBerlinsParameters(ts);
-            using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
-                wr.WriteLine("countCodingUsages {0} totalMilisecondsCodingUsages {1}", TripleInt.CodeCache.Count, TripleInt.totalMilisecondsCodingUsages);
+            else
+            {
+               //     RunBerlinsWithConstants( ts);
+               RunBerlinsParameters(ts);
+                using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
+                    wr.WriteLine("countCodingUsages {0} totalMilisecondsCodingUsages {1}", TripleInt.CodeCache.Count,
+                        TripleInt.totalMilisecondsCodingUsages);
+            }
+            var spent = (DateTime.Now - start).Ticks/10000;
+            using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))   
+                wr.WriteLine("total " + spent + " мс.");
         }
 
         private static void RunBerlinsParameters(TripleStoreInt ts)
