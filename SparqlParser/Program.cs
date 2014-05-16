@@ -16,10 +16,10 @@ namespace ANTLR_Test
             PolarDB.PaEntry.bufferBytes = 1*1000*1000*1000;
 
             Millions = 1;
-      //  Test();
+     //   Test();
          
             Millions = 10;
-
+       
                Test();
               
             Millions = 100;
@@ -47,10 +47,7 @@ namespace ANTLR_Test
             else
             {
                //     RunBerlinsWithConstants( ts);
-               RunBerlinsParameters(ts);
-                using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
-                    wr.WriteLine("countCodingUsages {0} totalMilisecondsCodingUsages {1}", TripleInt.CodeCache.Count,
-                        TripleInt.totalMilisecondsCodingUsages);
+               RunBerlinsParameters(ts);      
             }
             var spent = (DateTime.Now - start).Ticks/10000;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))   
@@ -59,10 +56,7 @@ namespace ANTLR_Test
 
         private static void RunBerlinsParameters(TripleStoreInt ts)
         {
-            long[] results= new long[12];
-            double[] minimums = Enumerable.Repeat(double.MaxValue, 12).ToArray();
-            double[] maximums = new double[12];
-            double maxMemoryUsage = 0;
+           
             Console.WriteLine("antrl parametered");
             int i = 0;             
             var fileInfos = new []
@@ -88,58 +82,67 @@ namespace ANTLR_Test
             //        foreach (var file in fileInfos.Select(info => File.ReadAllText(info.FullName)))
             //            QueryWriteParameters(file, streamQueryParameters, ts);
 
-         
+
             using (StreamReader streamQueryParameters = new StreamReader(paramvaluesFilePath))
             {
                 for (int j = 0; j < 0; j++)
+                    fileInfos.Select(file => QueryReadParameters(File.ReadAllText(file.FullName),
+                        streamQueryParameters))
+                        .Select(queryReadParameters => Parse(queryReadParameters).Run(ts))
+                        .ToArray();
+                    
+                SubTestRun(ts, fileInfos, streamQueryParameters);
+                SubTestRun(ts, fileInfos, streamQueryParameters);
+                SubTestRun(ts, fileInfos, streamQueryParameters);
+                SubTestRun(ts, fileInfos, streamQueryParameters);
+                SubTestRun(ts, fileInfos, streamQueryParameters);
+            }
+        }
+
+        private static void SubTestRun(TripleStoreInt ts, FileInfo[] fileInfos,  StreamReader streamQueryParameters)
+        {
+            int i; 
+            long[] results = new long[12];
+            double[] minimums = Enumerable.Repeat(double.MaxValue, 12).ToArray();
+            double[] maximums = new double[12];
+            double maxMemoryUsage = 0;
+            for (int j = 0; j < 20; j++)
+            {
+                i = 0;
+                foreach (var file in fileInfos)
                 {
+                    var readAllText = File.ReadAllText(file.FullName);
+                    readAllText = QueryReadParameters(readAllText, streamQueryParameters);
 
-                    foreach (var file in fileInfos)
-                    {
-                        var queryReadParameters = QueryReadParameters(File.ReadAllText(file.FullName),
-                            streamQueryParameters);
-                        var resultString = Parse(queryReadParameters).Run(ts);
-
-                    }
-                }
-                for (int j = 0; j < 1; j++)
-                {
-                    i = 0;
-                    foreach (var file in fileInfos)
-                    {
-                        var readAllText = File.ReadAllText(file.FullName);
-                        readAllText = QueryReadParameters(readAllText, streamQueryParameters);
-
-                        var st = DateTime.Now;
-                        var q = Parse(readAllText);
-                        var resultString = q.Run(ts);
-                        var totalMilliseconds = (DateTime.Now - st).Ticks/10000L;
-                        var memoryUsage = GC.GetTotalMemory(false);
-                        if (memoryUsage > maxMemoryUsage)
-                            maxMemoryUsage = memoryUsage;
-                        if (minimums[i] > totalMilliseconds)
-                            minimums[i] = totalMilliseconds;
-                        if (maximums[i] < totalMilliseconds)
-                            maximums[i] = totalMilliseconds;
-                            results[i++] += totalMilliseconds;
-                          File.WriteAllText(Path.ChangeExtension(file.FullName, ".txt"), resultString);
-                        //.Save(Path.ChangeExtension(file.FullName,".xml"));
-                    }
+                    var st = DateTime.Now;
+                    var q = Parse(readAllText);
+                    var resultString = q.Run(ts);
+                    var totalMilliseconds = (DateTime.Now - st).Ticks/10000L;
+                    var memoryUsage = GC.GetTotalMemory(false);
+                    if (memoryUsage > maxMemoryUsage)
+                        maxMemoryUsage = memoryUsage;
+                    if (minimums[i] > totalMilliseconds)
+                        minimums[i] = totalMilliseconds;
+                    if (maximums[i] < totalMilliseconds)
+                        maximums[i] = totalMilliseconds;
+                    results[i++] += totalMilliseconds;
+                    //  File.WriteAllText(Path.ChangeExtension(file.FullName, ".txt"), resultString);
+                    //.Save(Path.ChangeExtension(file.FullName,".xml"));
                 }
             }
+
             using (StreamWriter r = new StreamWriter(@"..\..\output.txt", true))
             {
                 r.WriteLine("milions " + Millions);
                 r.WriteLine("max memory usage " + maxMemoryUsage);
-                r.WriteLine("average " + string.Join(", ", results.Select(l => l == 0 ? "inf" : (500 * 1000 / l).ToString())));
+                r.WriteLine("average " +
+                            string.Join(", ", results.Select(l => l == 0 ? "inf" : (500*1000/l).ToString())));
                 r.WriteLine("minimums " + string.Join(", ", minimums));
                 r.WriteLine("maximums " + string.Join(", ", maximums));
+                r.WriteLine("countCodingUsages {0} totalMillisecondsCodingUsages {1}", TripleInt.CodeCache.Count, TripleInt.totalMilisecondsCodingUsages);
             }
-            Console.WriteLine("average " + string.Join(", ", results.Select(l => l == 0 ? "inf" : (500 * 1000 / l).ToString())));
-            Console.WriteLine("minimums " + string.Join(", ", minimums));
-            Console.WriteLine("maximums " + string.Join(", ", maximums));
-            
         }
+
         private static void RunBerlinsWithConstants(TripleStoreInt ts)
         {
             long[] results = new long[12];

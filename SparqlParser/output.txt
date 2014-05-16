@@ -525,3 +525,95 @@ minimums 1093, 1531, 1390, 890, 156197, 112890, 5203, 1796, 1031, 1437, 343, 421
 maximums 1093, 1531, 1390, 890, 156197, 112890, 5203, 1796, 1031, 1437, 343, 421
 countCodingUsages 54 totalMilisecondsCodingUsages 3179
 total 284276 мс.
+
+100 запросов
+millions 1
+milions 1
+max memory usage 38421096
+average 280, 192, 350, 252, 72, 313, 15, 26, 60, 71, 284, 220
+minimums 0, 1, 1, 1, 7, 7, 2, 2, 0, 3, 0, 0
+maximums 266, 130, 78, 104, 478, 452, 1366, 608, 361, 342, 99, 183
+countCodingUsages 1579 totalMilisecondsCodingUsages 6383
+total 90706 мс.
+millions 1
+millions 1
+milions 1
+max memory usage 38218000
+average 192, 154, 254, 221, 28, 32, 14, 26, 57, 78, 280, 227
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 1062, 796, 187, 187, 10187, 14593, 1734, 578, 500, 296, 156, 171
+countCodingUsages 1579 totalMilisecondsCodingUsages 7847
+total 118047 мс.
+millions 10
+milions 10
+max memory usage 52265888
+average 71, 66, 62, 54, 2, 4, 3, 7, 10, 12, 44, 39
+minimums 0, 15, 0, 0, 109, 62, 203, 31, 0, 31, 31, 31
+maximums 1031, 1562, 1312, 843, 155763, 113531, 5125, 1812, 1031, 1500, 390, 328
+countCodingUsages 1800 totalMilisecondsCodingUsages 40814
+total 680216 мс.
+
+по 20 запросов 
+milions 1
+max memory usage 29243392
+average 259, 272, 523, 424, 35, 33, 42, 83, 125, 172, 539, 468
+minimums 15, 0, 15, 15, 93, 0, 187, 46, 93, 15, 15, 15
+maximums 1093, 765, 171, 140, 10125, 14687, 1812, 624, 531, 374, 140, 156
+countCodingUsages 383 totalMillisecondsCodingUsages 4471
+milions 1
+max memory usage 31772968
+average 1818, 833, 1428, 1259, 335, 1930, 58, 165, 223, 268, 1204, 957
+minimums 0, 0, 0, 0, 15, 0, 78, 15, 31, 31, 0, 0
+maximums 46, 109, 31, 46, 171, 78, 937, 281, 171, 187, 62, 78
+countCodingUsages 712 totalMillisecondsCodingUsages 5846
+milions 1
+max memory usage 34515328
+average 2347, 959, 2358, 2732, 600, 2202, 74, 129, 441, 429, 2747, 1362
+minimums 0, 0, 0, 0, 15, 0, 46, 15, 15, 0, 0, 0
+maximums 46, 46, 31, 31, 109, 46, 640, 453, 125, 93, 31, 93
+countCodingUsages 1016 totalMillisecondsCodingUsages 6599
+milions 1
+max memory usage 37235288
+average 2512, 2057, 4166, 2958, 1128, 2762, 112, 187, 834, 598, 4098, 4761
+minimums 0, 0, 0, 0, 15, 0, 0, 31, 0, 0, 0, 0
+maximums 31, 46, 15, 46, 46, 31, 390, 265, 78, 125, 31, 15
+countCodingUsages 1301 totalMillisecondsCodingUsages 6900
+milions 1
+max memory usage 37980760
+average 16666, 1639, 8333, 4098, 1567, 4761, 161, 162, 1483, 1253, 2994, 3676
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 62, 15, 31, 46, 15, 421, 296, 62, 62, 31, 31
+countCodingUsages 1579 totalMillisecondsCodingUsages 7142
+total 116578 мс.
+millions 10
+milions 10
+max memory usage 39951296
+average 176, 159, 155, 168, 3, 4, 10, 28, 38, 39, 152, 145
+minimums 31, 62, 46, 62, 375, 78, 500, 187, 406, 93, 78, 109
+maximums 1046, 1546, 1375, 921, 155234, 113594, 5187, 1812, 1000, 1562, 359, 312
+countCodingUsages 393 totalMillisecondsCodingUsages 13004
+milions 10
+max memory usage 46951408
+average 393, 374, 332, 229, 62, 232, 15, 36, 51, 59, 217, 184
+minimums 15, 46, 46, 46, 250, 46, 390, 140, 296, 78, 62, 62
+maximums 93, 109, 140, 406, 734, 187, 3343, 1437, 812, 843, 156, 187
+countCodingUsages 748 totalMillisecondsCodingUsages 20698
+milions 10
+max memory usage 53701824
+average 468, 374, 610, 354, 87, 223, 17, 45, 56, 88, 237, 229
+minimums 0, 31, 0, 31, 203, 62, 218, 187, 265, 46, 46, 62
+maximums 93, 109, 109, 203, 468, 218, 2953, 1374, 703, 531, 156, 171
+countCodingUsages 1096 totalMillisecondsCodingUsages 27160
+milions 10
+max memory usage 53185144
+average 418, 539, 430, 366, 85, 186, 20, 52, 73, 83, 287, 238
+minimums 0, 15, 15, 15, 171, 62, 343, 46, 171, 46, 31, 46
+maximums 156, 109, 109, 140, 406, 437, 2328, 1015, 468, 671, 156, 156
+countCodingUsages 1449 totalMillisecondsCodingUsages 33028
+milions 10
+max memory usage 52527904
+average 568, 436, 648, 408, 107, 243, 24, 54, 78, 90, 312, 284
+minimums 0, 31, 0, 15, 140, 78, 203, 46, 0, 46, 31, 46
+maximums 78, 109, 93, 109, 343, 156, 2656, 906, 484, 562, 156, 140
+countCodingUsages 1800 totalMillisecondsCodingUsages 37955
+total 668424 мс.
