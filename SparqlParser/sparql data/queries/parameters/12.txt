@@ -1,0 +1,8 @@
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor244/Offer482058 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/product 961746606
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor244/Offer482058 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/productlabel "schmaltz unerring swaddled"
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor244/Offer482058 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/vendor "pornos rollicked"
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor244/Offer482058 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/vendorhomepage 2029877681
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor244/Offer482058 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/offerURL -1974717449
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor244/Offer482058 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/price "3136.17"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor244/Offer482058 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/deliveryDays 3
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor244/Offer482058 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/validuntil 633501216000000000
