@@ -510,12 +510,18 @@ total 1172129 мс.
 
 
 1 запрос
-millions 1
-millions 1
 milions 1
-max memory usage 27260448
-average 2008, 33333, 10869, inf, 33333, inf, 33333, inf, 33333, inf, 33333, 33333
-minimums 249, 15, 46, 0, 15, 0, 15, 0, 15, 0, 15, 15
-maximums 249, 15, 46, 0, 15, 0, 15, 0, 15, 0, 15, 15
-countCodingUsages 54 totalMilisecondsCodingUsages 0
-total 421 мс.
+max memory usage 25770728
+average 500, 681, 3205, 2923, 49, 33, 291, 1333, 1033, 2463, 3571, 3205
+minimums 999, 734, 156, 171, 10203, 15093, 1718, 375, 484, 203, 140, 156
+maximums 999, 734, 156, 171, 10203, 15093, 1718, 375, 484, 203, 140, 156
+countCodingUsages 54 totalMilisecondsCodingUsages 1320
+total 30484 мс.
+millions 10
+milions 10
+max memory usage 33718488
+average 457, 326, 359, 561, 3, 4, 96, 278, 484, 347, 1457, 1187
+minimums 1093, 1531, 1390, 890, 156197, 112890, 5203, 1796, 1031, 1437, 343, 421
+maximums 1093, 1531, 1390, 890, 156197, 112890, 5203, 1796, 1031, 1437, 343, 421
+countCodingUsages 54 totalMilisecondsCodingUsages 3179
+total 284276 мс.

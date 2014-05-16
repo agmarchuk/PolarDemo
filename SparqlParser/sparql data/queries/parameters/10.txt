@@ -1,0 +1,4 @@
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor184/Offer364476, "1281.01"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor54/Offer113536, "1791.48"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor190/Offer375364, "6215.13"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor217/Offer426540, "9163.75"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD

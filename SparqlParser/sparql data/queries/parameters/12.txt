@@ -1,0 +1,8 @@
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor8/Offer14259 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/product http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer368/Product17965
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor8/Offer14259 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/productlabel "towline"
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor8/Offer14259 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/vendor "bestializing tridents aborters"
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor8/Offer14259 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/vendorhomepage http://www.vendor8.com/
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor8/Offer14259 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/offerURL http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor8/Offer14259/
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor8/Offer14259 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/price "2535.48"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor8/Offer14259 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/deliveryDays 4
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor8/Offer14259 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/validuntil 633474432000000000
