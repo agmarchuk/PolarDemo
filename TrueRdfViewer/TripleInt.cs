@@ -9,18 +9,29 @@ namespace  TrueRdfViewer
     { 
         public int subject, predicate;
         public static StringIntCoding SiCoding;
-        private  static Dictionary<string, int>  CodeCache=new Dictionary<string, int>();
+        public static Dictionary<string, int> CodeCache = new Dictionary<string, int>();
+     
+        public static long totalMilisecondsCodingUsages = 0;
+        
         public static int Code(string s)
-        {
+        {   
             int c;
             if(!CodeCache.TryGetValue(s, out c))
-                CodeCache.Add(s, c = SiCoding.GetCode(s));
+            {
+                DateTime st = DateTime.Now;
+                   c = SiCoding.GetCode(s);
+           //  c = s.GetHashCode();
+                totalMilisecondsCodingUsages += (DateTime.Now - st).Ticks/10000;
+                CodeCache.Add(s, c); //s.GetHashCode() 
+                
+            }
             return c;
         }              
         public static string Decode(int e)
         {
+          //   return e.ToString();
             return SiCoding.GetName(e);
-        }
+        } 
     }
     public class OTripleInt : TripleInt { public int obj; }
     public class DTripleInt : TripleInt { public Literal data; }

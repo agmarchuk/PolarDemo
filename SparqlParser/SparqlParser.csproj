@@ -124,6 +124,10 @@
       <Project>{907bb4af-fbc9-4a1e-8f80-194af9337aa4}</Project>
       <Name>PolarDB</Name>
     </ProjectReference>
+    <ProjectReference Include="..\NameTable\NameTable.csproj">
+      <Project>{5283693d-68cc-4b7a-b2bb-6e901592a272}</Project>
+      <Name>NameTable</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TrueRdfViewer\TrueRdfViewer.csproj">
       <Project>{2053b201-18a6-4b4c-b1ec-1fe2b2d77f15}</Project>
       <Name>TrueRdfViewer</Name>

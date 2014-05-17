@@ -5,7 +5,7 @@ using PolarDB;
 
 namespace TrueRdfViewer
 {
-    class EntitiesMemoryHashTable
+    public class EntitiesMemoryHashTable
     {
         private EntitiesWideTable entites;
 
@@ -56,12 +56,25 @@ namespace TrueRdfViewer
             return (source >> BitsShift) + ResultIndexShift;
         }
 
+        public static long max = 0;
+        public static long total = 0;
+        public static long count = 0;
+        public static long maxRange = 0;
+        public static long totalRange = 0;
         public PaEntry GetEntity(int id_code)
         {
             if (entites.EWTable.IsEmpty) return PaEntry.Empty;
             if (id_code == Int32.MaxValue) return PaEntry.Empty;
+            var st = DateTime.Now;
             var diapason=diapasons[GetHash(id_code)];
-            return entites.EWTable.Root.BinarySearchFirst(diapason.start, diapason.numb, entry =>((int)(entry.Field(0).Get())).CompareTo(id_code));
+            PaEntry binarySearchFirst = entites.EWTable.Root.BinarySearchFirst(diapason.start, diapason.numb, entry =>((int)(entry.Field(0).Get())).CompareTo(id_code));
+            long spent = (DateTime.Now - st).Ticks/10000;
+            total += spent;
+            count ++;
+            if (spent > max) max = spent;
+            if (diapason.numb > maxRange) maxRange = diapason.numb;
+            totalRange += diapason.numb;
+            return binarySearchFirst;
         }
     }
 }
