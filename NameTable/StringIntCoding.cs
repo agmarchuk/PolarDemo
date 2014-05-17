@@ -94,15 +94,16 @@ namespace NameTable
             //nc_entry.offset = (long)n_index.Root.Element(n_index.Root.Count()).Get();
             //if (((long)nc_entry.Field(2).Get()).CompareTo(newcheckSum) > 0)
             //    return Int32.MinValue;
-            var qu = checkSums_index.Root.BinarySearchDiapason(ent =>
+            var diapason = checkSums_index.Root.BinarySearchDiapason(ent =>
             {
-                long value =  (long) ent.Get();
+                var value =  (long) ent.Get();
                 return value.CompareTo(newcheckSum);
             });
             //if (!qu.Any()) return Int32.MinValue;
-            foreach (long o in n_index.Root.ElementValues(qu.start, qu.numb))
+
+            foreach (long offset in n_index.Root.ElementValues(diapason.start, diapason.numb))
             {
-                nc_entry.offset =  o;
+                nc_entry.offset =  offset;
                 var o1 = (object[]) nc_entry.Get();
                 if ((string) o1[1] == name)
                     return (int) o1[0];
@@ -164,7 +165,7 @@ namespace NameTable
             PaCell source = new PaCell(tp_nc, sourceCell);
 
             PaCell target = new PaCell(tp_nc, originalCell, false);
-            n_index = new PaCell(tp_ind, niCell, false);   
+       
             checkSums_index = new PaCell(tp_ind, checkSumsCell, false);
 
                    
@@ -177,9 +178,9 @@ namespace NameTable
 
             // Очередной (новый) код (индекс)
             int code_new = 0;           
-               n_index.Clear();
+           
             target.Fill(new object[0]);
-            n_index.Fill(new object[0]);
+   
             if (!source.IsEmpty)
             {
                 code_new = (int) source.Root.Count();
@@ -203,7 +204,7 @@ namespace NameTable
                         {
                             // добавляется новый код
                             offset = target.Root.AppendElement(new object[] {code_new, ssa[ssa_ind]});
-                            n_index.Root.AppendElement(offset);
+                        
                             checkSums_index.Root.AppendElement(hashes_arr[ssa_ind]);
                             accumulator.Add(new KeyValuePair<string, int>(ssa[ssa_ind], code_new++));
                             ssa_ind++;
@@ -216,7 +217,7 @@ namespace NameTable
                     }
                     offset = target.Root.AppendElement(val); // переписывается тот же объект
                     checkSums_index.Root.AppendElement(existsCheckSum);
-                    n_index.Root.AppendElement(offset);
+           
                 }
             }
             else checkSums_index.Fill(new object[0]);
@@ -225,7 +226,7 @@ namespace NameTable
                 do
                 {
                     var offset = target.Root.AppendElement(new object[] {code_new, ssa[ssa_ind]});
-                    n_index.Root.AppendElement(offset );
+            
                     checkSums_index.Root.AppendElement( hashes_arr[ssa_ind] );
                     accumulator.Add(new KeyValuePair<string, int>(ssa[ssa_ind], code_new++));
                     ssa_ind++;
@@ -235,7 +236,7 @@ namespace NameTable
             target.Close();      
             source.Close();     
             checkSums_index.Close();
-                n_index.Close();
+         
             this.Open(); // парный к this.Close() оператор
             // Финальный аккорд: формирование и выдача словаря
               Dictionary<string, int> dic = new Dictionary<string, int>();
@@ -248,17 +249,22 @@ namespace NameTable
         public void MakeIndexed()
         {
             // Подготовим индексы для заполнения
-          //  n_index.Close();
+            n_index.Close();
             c_index.Close();
-            //n_index = new PaCell(tp_ind, niCell, false);
-            //n_index.Clear();
-            //n_index.Fill(new object[0]);
+            n_index = new PaCell(tp_ind, niCell, false);
+            n_index.Clear();
+            n_index.Fill(new object[0]);
             c_index = new PaCell(tp_ind, ciCell, false);
             c_index.Clear();
             var offsets = new object[nc_cell.Root.Count()];
             if (nc_cell.IsEmpty) return;
+            
             foreach (PaEntry ent in nc_cell.Root.Elements())
-                offsets[(int) ent.Field(0).Get()] = ent.offset;
+            {
+                long offset = ent.offset;
+                offsets[(int) ent.Field(0).Get()] = offset;
+                n_index.Root.AppendElement(offset);
+            }
             c_index.Fill(offsets);
 
             var nc_Entry = nc_cell.Root.Element(0);
