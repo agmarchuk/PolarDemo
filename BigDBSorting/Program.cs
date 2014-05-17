@@ -21,7 +21,7 @@ namespace BigDBSorting
             PaCell icell = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.longinteger)), path + "icell.pac", false);
 
             // Заполнение
-            bool toload = true;
+            bool toload = false;
             int nvalues = 10000000;
             if (toload)
             {
