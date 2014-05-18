@@ -1,0 +1,5 @@
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer84/Product3985, "aligner bronzing museums"
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer76/Product3567, "allomorphism"
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer563/Product27735, "amire fizzers ruddiness"
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer502/Product24705, "banger bibulosities"
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer31/Product1410, "bawdily touring illuminatingly"

@@ -45,12 +45,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DynaIndex.cs" />
+    <Compile Include="IStringIntCoding.cs" />
     <Compile Include="NameTableInt.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Ref.cs" />
     <Compile Include="StringIntCoding.cs" />
+    <Compile Include="StringIntMD5Coding.cs" />
     <Compile Include="StringToIntBuffer.cs" />
   </ItemGroup>
   <ItemGroup>

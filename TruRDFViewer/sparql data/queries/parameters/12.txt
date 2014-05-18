@@ -1,0 +1,8 @@
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor262/Offer514086 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/product http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer320/Product15555
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor262/Offer514086 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/productlabel "roiled trussed guiltiness"
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor262/Offer514086 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/vendor "wanderers"
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor262/Offer514086 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/vendorhomepage http://www.vendor262.com/
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor262/Offer514086 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/offerURL http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor262/Offer514086/
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor262/Offer514086 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/price "6380.38"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor262/Offer514086 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/deliveryDays 4
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor262/Offer514086 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/validuntil 633471840000000000

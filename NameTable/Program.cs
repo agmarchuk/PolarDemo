@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 using PolarDB;
 
@@ -146,7 +143,7 @@ namespace NameTable
             }
             tt0 = DateTime.Now;
             sic.MakeIndexed();
-            Console.WriteLine("Indexes ok. Count=" + sic.Count() + " duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            Console.WriteLine("Indexes ok. Count=" + sic.Count + " duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             //Console.WriteLine("dic count=" + dic.Count());
 
