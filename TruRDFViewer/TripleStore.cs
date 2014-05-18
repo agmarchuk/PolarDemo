@@ -17,7 +17,7 @@ namespace TruRDFViewer
         internal EntitiesMemoryHashTable ewtHash;
         private void InitTypes()
         {
-            tp_entity = new PType(PTypeEnumeration.integer);
+            tp_entity = new PType(PTypeEnumeration.sstring);
             PType tp_rliteral = new PTypeUnion(
                 new NamedType("void", new PType(PTypeEnumeration.none)),
                 new NamedType("integer", new PType(PTypeEnumeration.real)),
@@ -50,12 +50,12 @@ namespace TruRDFViewer
         public PaCell dtriples;
         public PaCell dtriples_sp;
         private FlexIndexView<SubjPredObj> spo_o_index = null;
-        private FlexIndexView<SubjPredInt> sp_d_index = null;
-        private FlexIndexView<SubjPredInt> op_o_index = null;
+        private FlexIndexView<SubjPred> sp_d_index = null;
+        private FlexIndexView<SubjPred> op_o_index = null;
         private PaCell oscale;
         private bool filescale = true;
         //private bool memoryscale = false; // Наоборот от filescale
-        private string range = 0;
+        private int range = 0;
         //// Идея хорошая, но надо менять схему реализации
         //private GroupedEntities getable;
         //private Dictionary<string, object[]> geHash;
@@ -106,7 +106,7 @@ namespace TruRDFViewer
         private void CalculateRange()
         {
             long len = oscale.Root.Count() - 1;
-            string r = 1;
+            int r = 1;
             while (len != 0) { len = len >> 1; r++; }
             range = r + 4;
         }
@@ -115,10 +115,10 @@ namespace TruRDFViewer
         {
             spo_o_index = new FlexIndexView<SubjPredObj>(path + "spo_o_index", otriples.Root,
                 ent => new SubjPredObj() { subj = (string)ent.Field(0).Get(), pred = (string)ent.Field(1).Get(), obj = (string)ent.Field(2).Get() });
-            sp_d_index = new FlexIndexView<SubjPredInt>(path + "subject_d_index", dtriples.Root,
-                ent => new SubjPredInt() { subj = (string)ent.Field(0).Get(), pred = (string)ent.Field(1).Get() });
-            op_o_index = new FlexIndexView<SubjPredInt>(path + "obj_o_index", otriples.Root,
-                ent => new SubjPredInt() { subj = (string)ent.Field(2).Get(), pred = (string)ent.Field(1).Get() });
+            sp_d_index = new FlexIndexView<SubjPred>(path + "subject_d_index", dtriples.Root,
+                ent => new SubjPred() { subj = (string)ent.Field(0).Get(), pred = (string)ent.Field(1).Get() });
+            op_o_index = new FlexIndexView<SubjPred>(path + "obj_o_index", otriples.Root,
+                ent => new SubjPred() { subj = (string)ent.Field(2).Get(), pred = (string)ent.Field(1).Get() });
             if (!filescale) CreateScale();
         }
 
@@ -140,10 +140,10 @@ namespace TruRDFViewer
             //SPOComparer spo_compare = new SPOComparer();
             SPComparer sp_compare = new SPComparer();
             // Упорядочивание otriples_op по o-p
-            otriples_op.Root.SortByKey<SubjPredInt>(rec => 
+            otriples_op.Root.SortByKey<SubjPred>(rec => 
             {
                 object[] r = (object[])rec;
-                return new SubjPredInt() { pred = (string)r[1], subj = (string)r[2] };
+                return new SubjPred() { pred = (string)r[1], subj = (string)r[2] };
             }, sp_compare);
             Console.WriteLine("otriples_op Sort ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
@@ -151,7 +151,7 @@ namespace TruRDFViewer
             dtriples_sp.Root.SortByKey(rec =>
             {
                 object[] r = (object[])rec;
-                return new SubjPredInt() { pred = (string)r[1], subj = (string)r[0] };
+                return new SubjPred() { pred = (string)r[1], subj = (string)r[0] };
             }, sp_compare);
             Console.WriteLine("dtriples_sp.Root.Sort ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
@@ -163,7 +163,7 @@ namespace TruRDFViewer
                 //ShowScale();
                 oscale.Clear();
                 oscale.Fill(new object[0]);
-                foreach (string v in scale.Values()) oscale.Root.AppendElement(v);
+                foreach (int v in scale.Values()) oscale.Root.AppendElement(v);
                 oscale.Flush();
                 CalculateRange(); // Наверное, range считается в CreateScale() 
             }
@@ -211,7 +211,7 @@ namespace TruRDFViewer
             otriples.Fill(new object[0]);
             dtriples.Clear();
             dtriples.Fill(new object[0]);
-            string i = 0;
+            int i = 0;
             //Entity e = new Entity();
             foreach (var triple in Turtle.LoadGraph(filepath))
             {
@@ -328,7 +328,7 @@ namespace TruRDFViewer
         private void CreateScale()
         {
             long len = otriples.Root.Count() - 1;
-            string r = 1;
+            int r = 1;
             while (len != 0) { len = len >> 1; r++; }
 
             range = r + 2; //r + 4; // здесь 4 - фактор "разрежения" шкалы, можно меньше
@@ -338,17 +338,17 @@ namespace TruRDFViewer
                 string subj = (string)tr[0];
                 string pred = (string)tr[1];
                 string obj = (string)tr[2];
-                string code = Scale1.Code(range, subj, pred, obj);
+                int code = Scale1.Code(range, subj.GetHashCode(), pred.GetHashCode(), obj.GetHashCode());
                 scale[code] = 1;
             }
         }
         public void ShowScale(long ntriples)
         {
-            string c = scale.Count();
-            string c1 = 0;
-            for (string i=0; i<c; i++)
+            int c = scale.Count();
+            int c1 = 0;
+            for (int i=0; i<c; i++)
             {
-                string bit = scale[i];
+                int bit = scale[i];
                 if (bit > 0) c1++;
             }
             Console.WriteLine("{0} {1} {2}", c, c1, ntriples);
@@ -410,7 +410,7 @@ namespace TruRDFViewer
             {
                 var rec = (object[]) ent.Get();
                 string ob = (string) rec[0];
-                string cmp = ob.CompareTo(obj);
+                int cmp = ob.CompareTo(obj);
                 return cmp;
             });
             if (itemEntriry.IsEmpty) return Enumerable.Empty<string>();
@@ -428,7 +428,7 @@ namespace TruRDFViewer
             {
                 object[] rec = (object[]) ent.Get();
                 string ob = (string) rec[2];
-                string cmp = ob.CompareTo(obj);
+                int cmp = ob.CompareTo(obj);
                 if (cmp != 0) return cmp;
                 string pr = (string) rec[1];
                 return pr.CompareTo(pred);
@@ -441,7 +441,7 @@ namespace TruRDFViewer
             return op_o_index.GetAll(ent =>
             {
                 string ob = (string) ent.Field(2).Get();
-                string cmp = ob.CompareTo(obj);
+                int cmp = ob.CompareTo(obj);
                 if (cmp != 0) return cmp;
                 string pr = (string) ent.Field(1).Get();
                 return pr.CompareTo(pred);
@@ -502,7 +502,7 @@ namespace TruRDFViewer
             {
                 var rec = (object[]) ent.Get();
                 string ob = (string) rec[0];
-                string cmp = ob.CompareTo(subj);
+                int cmp = ob.CompareTo(subj);
                 return cmp;
             });
             if (itemEntriry.IsEmpty) return Enumerable.Empty<string>();
@@ -517,7 +517,7 @@ namespace TruRDFViewer
             return otriples.Root.BinarySearchAll(ent =>
             {
                 string su = (string) ent.Field(0).Get();
-                string cmp = su.CompareTo(subj);
+                int cmp = su.CompareTo(subj);
                 if (cmp != 0) return cmp;
                 string pr = (string) ent.Field(1).Get();
                 return pr.CompareTo(pred);
@@ -530,7 +530,7 @@ namespace TruRDFViewer
             return spo_o_index.GetAll(ent =>
             {
                 string su = (string) ent.Field(0).Get();
-                string cmp = su.CompareTo(subj);
+                int cmp = su.CompareTo(subj);
                 if (cmp != 0) return cmp;
                 string pr = (string) ent.Field(1).Get();
                 return pr.CompareTo(pred);
@@ -540,20 +540,20 @@ namespace TruRDFViewer
 
         #endregion
 
-        private object[] GetDiapasonFromHash(string key, string pred, string direction)
+        private object[] GetDiapasonFromHash(string key, string pred, int direction)
         {
             var itemEntry = ewtHash.GetEntity(key);
             if (itemEntry.IsEmpty) return null;
             var diap = (object[])itemEntry.Field(1 + direction).Get();
             return diap;
         }
-        private object[] GetDiapasonFromHash1(string key, string pred, string direction)
+        private object[] GetDiapasonFromHash1(string key, string pred, int direction)
         {
             var itemEntry = ewt.EWTable.Root.BinarySearchFirst(ent =>
             {
                 var rec = (object[])ent.Get();
                 string ob = (string)rec[0];
-                string cmp = ob.CompareTo(key);
+                int cmp = ob.CompareTo(key);
                 return cmp;
             });
             if (itemEntry.IsEmpty) return null;
@@ -604,7 +604,7 @@ namespace TruRDFViewer
 
         private static Literal ToLiteral(object[] uni)
         {
-            switch ((string) uni[0])
+            switch ((int) uni[0])
             {
                 case 1:
                     return new Literal(LiteralVidEnumeration.integer) {Value = Convert.ToDouble(uni[1])};
@@ -677,7 +677,7 @@ namespace TruRDFViewer
             {
                 var rec = (object[]) ent.Get();
                 string ob = (string) rec[0];
-                string cmp = ob.CompareTo(subj);
+                int cmp = ob.CompareTo(subj);
                 return cmp;
             });
             if (itemEntriry.IsEmpty) return Enumerable.Empty<Literal>();
@@ -701,7 +701,7 @@ namespace TruRDFViewer
             return dtriples_sp.Root.BinarySearchAll(ent =>
             {
                 string su = (string) ent.Field(0).Get();
-                string cmp = su.CompareTo(subj);
+                int cmp = su.CompareTo(subj);
                 if (cmp != 0) return cmp;
                 string pr = (string) ent.Field(1).Get();
                 return pr.CompareTo(pred);
@@ -718,7 +718,7 @@ namespace TruRDFViewer
             return sp_d_index.GetAll(ent =>
             {
                 string su = (string) ent.Field(0).Get();
-                string cmp = su.CompareTo(subj);
+                int cmp = su.CompareTo(subj);
                 if (cmp != 0) return cmp;
                 string pr = (string) ent.Field(1).Get();
                 return pr.CompareTo(pred);
@@ -745,11 +745,11 @@ namespace TruRDFViewer
         {
             if (range > 0)
             {
-                string code = Scale1.Code(range, subj, pred, obj);
-                string bit;
+                int code = Scale1.Code(range, subj.GetHashCode(), pred.GetHashCode(), obj.GetHashCode());
+                int bit;
                 if (filescale)
                 {
-                    string word = (string)oscale.Root.Element(Scale1.GetArrIndex(code)).Get();
+                    int word = (int)oscale.Root.Element(Scale1.GetArrIndex(code)).Get();
                     bit = Scale1.GetFromWord(word, code);
                 }
                 else // if (memoryscale)
@@ -765,10 +765,10 @@ namespace TruRDFViewer
             // Шкалу добавлю позднее
             if (false && range > 0)
             {
-                string code = Scale1.Code(range, subj, pred, obj);
+                int code = Scale1.Code(range, subj.GetHashCode(), pred.GetHashCode(), obj.GetHashCode());
                 //string word = (string)oscale.Root.Element(Scale1.GetArrIndex(code)).Get();
                 //string tb = Scale1.GetFromWord(word, code);
-                string tb = scale[code];
+                int tb = scale[code];
                 if (tb == 0) return false;
                 // else if (tb == 1) return true; -- это был источник ошибки
                 // else надо считаль длинно, см. далее
@@ -776,7 +776,7 @@ namespace TruRDFViewer
             return !spo_o_index.GetFirst(ent =>
             {
                 string su = (string)ent.Field(0).Get();
-                string cmp = su.CompareTo(subj);
+                int cmp = su.CompareTo(subj);
                 if (cmp != 0) return cmp;
                 string pr = (string)ent.Field(1).Get();
                 cmp = pr.CompareTo(pred);
@@ -853,7 +853,7 @@ namespace TruRDFViewer
         {
             Diapason set = otriples.Root.BinarySearchDiapason(di.start, di.numb, ent =>
             {
-                string cmp = ((string)ent.Field(1).Get()).CompareTo(pred);
+                int cmp = ((string)ent.Field(1).Get()).CompareTo(pred);
                 if (cmp != 0) return cmp;
                 return ((string)ent.Field(2).Get()).CompareTo(obj);
             });
@@ -905,15 +905,15 @@ namespace TruRDFViewer
         }
 
 
-        private readonly Dictionary<string, IEnumerable<KeyValuePair<Int32, string>>> SPoCache =
+        private readonly Dictionary<string, IEnumerable<KeyValuePair<string, string>>> SPoCache =
             new Dictionary<string, IEnumerable<KeyValuePair<string, string>>>();
 
         public IEnumerable<KeyValuePair<string, string>> GetSubjectByObj(string obj)
         {
             if (obj =="") return Enumerable.Empty<KeyValuePair<string, string>>();
-            IEnumerable<KeyValuePair<Int32, string>> res;
+            IEnumerable<KeyValuePair<string, string>> res;
             if (SPoCache.TryGetValue(obj, out res)) return res;
-            object[] diapason = GetDiapasonFromHash(obj, 0, 1);
+            object[] diapason = GetDiapasonFromHash(obj, "", 1);
             res = diapason == null
                 ? new KeyValuePair<string, string>[0]
                 : otriples_op.Root.ElementValues((long) diapason[0], (long) diapason[1])
@@ -925,22 +925,22 @@ namespace TruRDFViewer
             return res;
         }
 
-        public IEnumerable<Int32> GetSubjectByDataPred(string p, Literal d)
+        public IEnumerable<string> GetSubjectByDataPred(string p, Literal d)
         {
-            return Enumerable.Empty<Int32>();
+            return Enumerable.Empty<string>();
         }
 
-        private Dictionary<string, IEnumerable<KeyValuePair<Int32, Int32>>> sPOCache =
+        private Dictionary<string, IEnumerable<KeyValuePair<string, string>>> sPOCache =
             new Dictionary<string, IEnumerable<KeyValuePair<string, string>>>();
 
-        public IEnumerable<KeyValuePair<Int32, Int32>> GetObjBySubj(string subj)
+        public IEnumerable<KeyValuePair<string, string>> GetObjBySubj(string subj)
         {
             if (subj =="") return Enumerable.Empty<KeyValuePair<string, string>>();
             IEnumerable<KeyValuePair<string, string>> res;  
             if (sPOCache.TryGetValue(subj, out res)) return res;
-            object[] diapason = GetDiapasonFromHash(subj, 0, 0);
+            object[] diapason = GetDiapasonFromHash(subj, "", 0);
             res = diapason == null
-                ? new KeyValuePair<Int32, Int32>[0]
+                ? new KeyValuePair<string, string>[0]
                 : otriples.Root.ElementValues((long) diapason[0], (long) diapason[1])
                     .Cast<object[]>()
                     //.Where(spo => pred == (string)spo[1]) // Если диапазон с учетом предиката, эта проверка не нужна, но операция очень дешевая, можно оставить
@@ -957,7 +957,7 @@ namespace TruRDFViewer
             IEnumerable<KeyValuePair<Literal, string>> res;
             if (sPDCache.TryGetValue(subj, out res)) return res;
 
-            object[] diapason = GetDiapasonFromHash(subj, 0, 2);
+            object[] diapason = GetDiapasonFromHash(subj, "", 2);
             PaEntry dtriple_entry = dtriples.Root.Element(0);
             res = diapason == null
                 ? new KeyValuePair<Literal, string>[0]

@@ -9,7 +9,7 @@
         public OValEnumeration vid;
         public Literal lit = null; // Если значение. null - неопределено 
         public bool odefined = false; // Значение Entity задано или вычислено
-        public int entity;
+        public string entity;
         public long spo_start; // Начальный индекс диапазона значений entity в отсортированных по spo объектных триплетах
         public long spo_number = -1; // Число значений в диапазоне. -1 - диапазон не вычислялся
         public long op_start; // То же самое для сортировки op

@@ -60,8 +60,9 @@ namespace TruRDFViewer
         public static long count = 0;
         public static long maxRange = 0;
         public static long totalRange = 0;
-        public PaEntry GetEntity(int id_code)
+        public PaEntry GetEntity(string id)
         {
+            var id_code = id.GetHashCode();
             if (entites.EWTable.IsEmpty) return PaEntry.Empty;
             if (id_code == Int32.MaxValue) return PaEntry.Empty;
             var st = DateTime.Now;

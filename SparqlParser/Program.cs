@@ -19,14 +19,13 @@ namespace ANTLR_Test
 
             Console.WriteLine(Millions = 1);
 
-            TestCoding(new StringIntMD5Coding(@"..\..\sparql data\queries\parameters\"));
-            TestCoding(new StringIntCoding(@"..\..\sparql data\queries\parameters\tmp\"));
+            var count = 100 * 1000 * 1000;
+            TestPerfomanceCoding(new StringIntMD5Coding(@"..\..\codeTests\"), Enumerable.Repeat(Guid.NewGuid().ToString(), count), count);
           
-          //   Test();
+           //  Test();
 
             Console.WriteLine(Millions = 10);
-            TestCoding(new StringIntMD5Coding(@"..\..\sparql data\queries\parameters\"));
-            TestCoding(new StringIntCoding(@"..\..\sparql data\queries\parameters\tmp\"));
+
 
 
                
@@ -35,8 +34,7 @@ namespace ANTLR_Test
 
             Console.WriteLine(Millions = 100);
 
-            TestCoding(new StringIntMD5Coding(@"..\..\sparql data\queries\parameters\"));
-            TestCoding(new StringIntCoding(@"..\..\sparql data\queries\parameters\tmp\"));
+          
 
             //    Test();
         }
@@ -50,8 +48,8 @@ namespace ANTLR_Test
            TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
             //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\undecoded\" + Millions + @"mln\");
 
-             bool load = false;
-            //      bool load = true;
+              bool load = false;
+            //     bool load = true;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;
@@ -63,8 +61,8 @@ namespace ANTLR_Test
             }
             else
             {
-               //     RunBerlinsWithConstants( ts);
-               RunBerlinsParameters(ts);      
+                    RunBerlinsWithConstants( ts);
+           //    RunBerlinsParameters(ts);      
             }
             var spent = (DateTime.Now - start).Ticks/10000;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))   
@@ -360,64 +358,124 @@ namespace ANTLR_Test
             Console.WriteLine(parameteersValues.Count);
             Console.WriteLine(copies);
         }
-        private static void TestCoding(IStringIntCoding stringIntMd5Coding)
+
+        private static void TestCoding(IStringIntCoding stringIntMd5Coding, IEnumerable<string> forCode)
         {
-            var paramvaluesFilePath = string.Format(@"..\..\sparql data\queries\parameters\param values for{0} m.txt", Millions);
-          //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
+            //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
             int copies = 0;
-            long max=0;
-            long total=0;
-            int i = 0, imax=0;
+            long max = 0;
+            long total = 0;
+            int i = 0, imax = 0;
             long load;
             long createindex;
-            using (StreamReader streamQueryParameters = new StreamReader(paramvaluesFilePath))
-            {
-                List<string> forCode=new List<string>();        
-               while (!streamQueryParameters.EndOfStream)
-                {
-                    var value = streamQueryParameters.ReadLine();
-                    forCode.Add(value);
-                }
-               stringIntMd5Coding.Close();
-               stringIntMd5Coding.Open(false);
-                stringIntMd5Coding.Clear();
-                var st = DateTime.Now;
-              var d1 = stringIntMd5Coding.InsertPortion(forCode.Take(forCode.Count / 2).ToArray());
-              var d2 = stringIntMd5Coding.InsertPortion(forCode.Skip(forCode.Count / 2).ToArray());
-                load = (DateTime.Now - st).Ticks/10000;
-                st = DateTime.Now;
-              stringIntMd5Coding.MakeIndexed();
-              createindex = (DateTime.Now - st).Ticks / 10000;
-              streamQueryParameters.BaseStream.Seek(0, SeekOrigin.Begin);
-                                                        
-                while (!streamQueryParameters.EndOfStream)
-                {
-                    var value = streamQueryParameters.ReadLine();
-                    st = DateTime.Now;
-                    var code = stringIntMd5Coding.GetCode(value);
-                    var getCode = (DateTime.Now - st).Ticks / 10000;
-                    if (getCode > max)
-                    {
-                        max = getCode;
-                        imax = i;
-                    }
-                    i++;
-                    total += getCode;
+            stringIntMd5Coding.Close();
+            stringIntMd5Coding.Open(false);
+            stringIntMd5Coding.Clear();
+            var st = DateTime.Now;
+            
+            var d1 = stringIntMd5Coding.InsertPortion(forCode.Take(forCode.Count()/2).ToArray());
+            var d2 = stringIntMd5Coding.InsertPortion(forCode.Skip(forCode.Count()/2).ToArray());
+            load = (DateTime.Now - st).Ticks/10000;
+            st = DateTime.Now;
+            stringIntMd5Coding.MakeIndexed();
+            createindex = (DateTime.Now - st).Ticks/10000;
 
-                    int c1, c2;
-                    bool ok = (d1.TryGetValue(value, out c1) && c1 == code) ||
-                              (d2.TryGetValue(value, out c2) && c2 == code);
-                if(!ok)
-                    throw new Exception();
-                }
+            var value1 = forCode.ElementAt(i);
+            st = DateTime.Now;
+            var code = stringIntMd5Coding.GetCode(value1);
+            var getCode = (DateTime.Now - st).Ticks/10000;
+            if (getCode > max)
+            {
+                max = getCode;
+                imax = i;
             }
-            Console.WriteLine("max " + max);
-            Console.WriteLine("index of max "+imax);
-            Console.WriteLine("total "+total);
-            Console.WriteLine("count "+i);
-            Console.WriteLine("average "+(double)total/i);
-            Console.WriteLine("load " + load);
-            Console.WriteLine("create index " + createindex);
+            i++;
+            total += getCode;
+
+            int c1, c2;
+            bool ok = (d1.TryGetValue(value1, out c1) && c1 == code) ||
+                      (d2.TryGetValue(value1, out c2) && c2 == code);
+            if (!ok)
+                throw new Exception();
+            using (StreamWriter r = new StreamWriter(@"..\..\output.txt",true))
+            {
+
+                r.WriteLine("milions " + Millions);
+                r.WriteLine("max " + max);
+                r.WriteLine("index of max " + imax);
+                r.WriteLine("total " + total);
+                r.WriteLine("count " + i);
+                r.WriteLine("average " + (double) total/i);
+                r.WriteLine("load " + load);
+                r.WriteLine("create index " + createindex);
+            }
+        }
+        private static void TestPerfomanceCoding(IStringIntCoding stringIntMd5Coding, IEnumerable<string> forCode, int length)
+        {
+            //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
+            int copies = 0;
+            long max = 0;
+            long total = 0;
+            int i = 0, imax = 0;
+            long load;
+            long createindex;
+            stringIntMd5Coding.Close();
+            stringIntMd5Coding.Open(false);
+            stringIntMd5Coding.Clear();
+            int loadPortion = 1000*1000;
+            
+            var st = DateTime.Now;
+            for (int j = 0; j < length/loadPortion; j++)
+            {
+                stringIntMd5Coding.InsertPortion(forCode.Skip(j*loadPortion).Take(loadPortion).ToArray());
+            }
+        
+            load = (DateTime.Now - st).Ticks / 10000;
+            st = DateTime.Now;
+            stringIntMd5Coding.MakeIndexed();
+            createindex = (DateTime.Now - st).Ticks / 10000;
+               
+            int testsCount = 100;
+            for (int j = 0; j < testsCount; j++)
+            {                         
+                var value1 = forCode.ElementAt(i);
+                st = DateTime.Now;
+                var code = stringIntMd5Coding.GetCode(value1);
+                var getCode = (DateTime.Now - st).Ticks/10000;
+                if (getCode > max)
+                {
+                    max = getCode;
+                    imax = i;
+                }
+                i++;
+                total += getCode;
+            }
+
+
+
+
+
+            using (StreamWriter r = new StreamWriter(@"..\..\output.txt", true))
+            {
+
+                r.WriteLine("milions " + Millions);
+                r.WriteLine("max " + max);
+                r.WriteLine("elements " + length);
+                r.WriteLine("index of max " + imax);
+                r.WriteLine("total " + total);
+                r.WriteLine("count tests " + i);
+                r.WriteLine("average " + (double)total / i);
+                r.WriteLine("load " + load);
+                r.WriteLine("create index " + createindex);
+            }
+        }
+        private static  List<string> GetParametersValues()
+        {                                           
+            var forCode=new List<string>();
+            using (var streamQueryParameters = new StreamReader(string.Format(@"..\..\sparql data\queries\parameters\param values for{0} m.txt", Millions)))
+                while (!streamQueryParameters.EndOfStream)
+                    forCode.Add(streamQueryParameters.ReadLine());
+            return forCode;
         }
     }
 }

@@ -43,7 +43,7 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
             pathMD5Index = path + "md5_index.pac"; 
           
             // Создание ячеек, предполагается, что все либо есть либо их нет и надо создавать
-            if (!System.IO.File.Exists(niCell))
+            if (!File.Exists(niCell) || !File.Exists(pathCiCell))
                 Clear();
 
             // Открытие ячеек в режиме работы (чтения)
@@ -145,6 +145,7 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
                     }
                     insertPortion.Add(portion[i], code);
                 }
+            nc_cell.Flush();
 
             var offsetsNC = ofsets2NC.ToArray();
             var checkSums = checkSumList.ToArray();
@@ -176,7 +177,7 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
             for (; portionIndex < checkSums.Length; portionIndex++)
                 md5_index.Root.AppendElement(new object[] {checkSums[portionIndex], offsetsNC[portionIndex]});
 
-            
+              md5_index.Flush();
             //Count += insertPortion.Count;
             return insertPortion;             
         }

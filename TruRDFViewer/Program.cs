@@ -16,6 +16,7 @@ namespace TruRDFViewer
 
             Millions = 1;        
  
+            Test();
           //   Test();
          
             Millions = 10;
@@ -33,11 +34,11 @@ namespace TruRDFViewer
         {
             Console.WriteLine(Millions);
 
-           TripleStore ts = new TripleStore(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
+           TripleStore ts = new TripleStore(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\without coding\" + Millions + @"mln\");
             //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\undecoded\" + Millions + @"mln\");
 
-             bool load = false;
-            //      bool load = true;
+            // bool load = false;
+                  bool load = true;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;

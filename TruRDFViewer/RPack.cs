@@ -27,9 +27,9 @@ namespace TruRDFViewer
             else return row[index].ToString();
         }
 
-        public int GetE(object si)
+        public string GetE(object si)
         {
-            return si is short ? (int)row[(short)si] : (int)si;
+            return si is short ? (string)row[(short)si] : (string)si;
         }
 
         public bool Hasvalue(short si)

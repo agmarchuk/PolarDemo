@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using PolarDB;
 
 namespace NameTable
@@ -171,9 +172,8 @@ namespace NameTable
             this.Open(true); // парный к this.Close() оператор
             // Финальный аккорд: формирование и выдача словаря
               Dictionary<string, int> dic = new Dictionary<string, int>();
-            foreach (var keyValuePair in accumulator)
+            foreach (var keyValuePair in accumulator.Where(keyValuePair => !dic.ContainsKey(keyValuePair.Key)))
             {
-                if (dic.ContainsKey(keyValuePair.Key)) continue;
                 dic.Add(keyValuePair.Key, keyValuePair.Value);
             }
             //Console.WriteLine("Слияние ok (" + ssa.Length + "). duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;

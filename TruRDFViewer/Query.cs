@@ -259,7 +259,8 @@ namespace TruRDFViewer
        
 
         internal Expression EqualOrAssign(Expression left, Expression right, Variable leftVariable, Variable rightVariable)
-        {   
+        {
+            throw new NotImplementedException();
             var isRightNewSingleVariable = rightVariable != null && rightVariable.isNew;
             if (leftVariable!=null && leftVariable.isNew)
                 if (isRightNewSingleVariable)
@@ -275,7 +276,8 @@ namespace TruRDFViewer
 
         private Expression ExpressionAssignValueToVariable(Expression varExpression, Expression constExpression, Variable unknownVariable)
         {
-            if (constExpression.Type == typeof(int))
+            throw new NotImplementedException();
+            if (constExpression.Type == typeof(string))
             {
                 varExpression = Expression.Property(currentFilterParameter, "Item", Expression.Constant(unknownVariable.index));
                 unknownVariable.graph.Set(false);

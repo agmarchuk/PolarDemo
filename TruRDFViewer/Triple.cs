@@ -21,15 +21,6 @@ namespace  TruRDFViewer
             return vid == other.vid && Equals(Value, other.Value);
         }
 
-        public static bool operator ==(Literal left, Literal right)
-        {
-            
-        }
-
-        public static bool operator !=(Literal left, Literal right)
-        {
-            return !(left == right);
-        }
 
 
         public override int GetHashCode()
@@ -169,14 +160,14 @@ namespace  TruRDFViewer
         }
     }
              
-    public class SubjPredInt
+    public class SubjPred
     {
-        public int subj, pred;
+        public string subj, pred;
         public int CompareTo(object sp)
         {
-            int cmp = subj.CompareTo(((SubjPredInt)sp).subj);
+            int cmp = subj.CompareTo(((SubjPred)sp).subj);
             if (cmp != 0) return cmp;
-            return pred.CompareTo(((SubjPredInt)sp).pred);
+            return pred.CompareTo(((SubjPred)sp).pred);
         }
     }
     public class SubjPredObj : IComparable
@@ -186,9 +177,9 @@ namespace  TruRDFViewer
         public SubjPredObj(object pobj)
         {
             object[] rec = (object[])pobj;
-            subj = rec[0];
-            pred = rec[1];
-            obj = rec[2];
+            subj = (string) rec[0];
+            pred = (string) rec[1];
+            obj = (string) rec[2];
         }
         public int CompareTo(object sp)
         {
@@ -200,9 +191,9 @@ namespace  TruRDFViewer
             return obj.CompareTo(target.obj); 
         }
     }
-    public class SPComparer : IComparer<SubjPredInt>
+    public class SPComparer : IComparer<SubjPred>
     {
-        public int Compare(SubjPredInt x, SubjPredInt y)
+        public int Compare(SubjPred x, SubjPred y)
         {
             return x.CompareTo(y);
         }

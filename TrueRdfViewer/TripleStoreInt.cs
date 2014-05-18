@@ -65,7 +65,7 @@ namespace TrueRdfViewer
         {
             this.path = path;
             InitTypes();
-            TripleInt.SiCoding = new StringIntCoding(path+"stringsCodes");
+            TripleInt.SiCoding = new StringIntMD5Coding(path+"stringsCodes");
             otriples = new PaCell(tp_otriple_seq, path + "otriples.pac", false);
             otriples_op = new PaCell(tp_otriple_seq, path + "otriples_op.pac", false);
             dtriples = new PaCell(tp_dtriple_seq, path + "dtriples.pac", false);

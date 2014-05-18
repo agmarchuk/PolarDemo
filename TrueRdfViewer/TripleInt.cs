@@ -8,7 +8,7 @@ namespace  TrueRdfViewer
     public abstract class TripleInt 
     { 
         public int subject, predicate;
-        public static StringIntCoding SiCoding;
+        public static IStringIntCoding SiCoding;
         public static Dictionary<string, int> CodeCache = new Dictionary<string, int>();
      
         public static long totalMilisecondsCodingUsages = 0;

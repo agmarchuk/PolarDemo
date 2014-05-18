@@ -7,9 +7,9 @@ namespace TruRDFViewer
     {
         private PaCell ewtable;
         public PaCell EWTable { get { return ewtable; } }
-        private DiapasonScanner<int>[] scanners;
+        private DiapasonScanner<string>[] scanners;
         private string path;
-        public EntitiesWideTable(string path, DiapasonScanner<int>[] scanners) 
+        public EntitiesWideTable(string path, DiapasonScanner<string>[] scanners) 
         {
             this.path = path;
             this.scanners = scanners;
@@ -17,7 +17,7 @@ namespace TruRDFViewer
                 new NamedType("start", new PType(PTypeEnumeration.longinteger)),
                 new NamedType("number", new PType(PTypeEnumeration.longinteger)));
             PType tp = new PTypeSequence(new PTypeRecord(
-                new NamedType("entity", new PType(PTypeEnumeration.integer)),
+                new NamedType("entity", new PType(PTypeEnumeration.sstring)),
                 new NamedType("spo", DiaRec),
                 new NamedType("spo_op", DiaRec),
                 new NamedType("spd", DiaRec)));
@@ -32,7 +32,7 @@ namespace TruRDFViewer
             
             while (NotFinished(scanners))
             {
-                int key = Least(scanners);
+                string key = Least(scanners);
                 Diapason[] diaps = Enumerable.Repeat<Diapason>(new Diapason() { start = 0L, numb = 0L }, 3).ToArray();
                 object[] pval = new object[4];
                 pval[0] = key;
@@ -49,16 +49,16 @@ namespace TruRDFViewer
             }
             ewtable.Flush();
         }
-        private static bool NotFinished(DiapasonScanner<int>[] scanners)
+        private static bool NotFinished(DiapasonScanner<string>[] scanners)
         {
             var query = scanners.Any(ds => ds.HasValue);
             return query;
         }
-        private static int Least(DiapasonScanner<int>[] scanners)
+        private static string Least(DiapasonScanner<string>[] scanners)
         {
             var keyCurrent = scanners
                 .Where(ds => ds.HasValue)
-                .Aggregate((ds1, ds2) => ds1.KeyCurrent < ds2.KeyCurrent ? ds1 : ds2).KeyCurrent;
+                .Aggregate((ds1, ds2) => ds1.KeyCurrent.CompareTo(ds2.KeyCurrent) < 0 ? ds1 : ds2).KeyCurrent;
             return keyCurrent;    
         }
     }
