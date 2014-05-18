@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Antlr4.Runtime;
+using NameTable;
 using SparqlParser;
 using TrueRdfViewer;
 
@@ -16,14 +17,16 @@ namespace ANTLR_Test
         {
             PolarDB.PaEntry.bufferBytes = 1*1000*1000*1000;
 
-            Millions = 1;         
+            Millions = 1;        
+ 
+            TestCoding();
           
           //   Test();
          
             Millions = 10;
                
           
-          Test();
+       //   Test();
               
             Millions = 100;     // TestCoding();
            //    Test();
@@ -351,26 +354,35 @@ namespace ANTLR_Test
         private static void TestCoding()
         {
             var paramvaluesFilePath = string.Format(@"..\..\sparql data\queries\parameters\param values for{0} m.txt", Millions);
-            TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
+          //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
             int copies = 0;
             long max=0;
             long total=0;
             int i = 0, imax=0;
             using (StreamReader streamQueryParameters = new StreamReader(paramvaluesFilePath))
             {
+                List<string> forCode=new List<string>();        
                 while (!streamQueryParameters.EndOfStream)
                 {
                     var value = streamQueryParameters.ReadLine();
-                    var st = DateTime.Now;
-                    var coede = TripleInt.SiCoding.GetCode(value);
-                    long timeSpan = (DateTime.Now-st).Ticks/10000;
-                    total += timeSpan;
-                    if (timeSpan > max)
-                    {
-                        max = timeSpan;
-                        imax = i;
-                    }
-                    i++;
+                    forCode.Add(value);
+                }
+                TripleInt.SiCoding=new StringIntCoding(@"..\..\sparql data\queries\parameters\");
+                TripleInt.SiCoding.Clear();
+               var d1 = TripleInt.SiCoding.InsertPortion(forCode.Take(forCode.Count / 2).ToArray());
+               var d2 = TripleInt.SiCoding.InsertPortion(forCode.Skip(forCode.Count / 2).ToArray());
+                TripleInt.SiCoding.MakeIndexed();
+                streamQueryParameters.BaseStream.Seek(0, SeekOrigin.Begin);
+                                                        
+                while (!streamQueryParameters.EndOfStream)
+                {
+                    var value = streamQueryParameters.ReadLine();        
+                    var code = TripleInt.SiCoding.GetCode(value);
+                    int c1, c2;
+                    bool ok = (d1.TryGetValue(value, out c1) && c1 == code) ||
+                              (d2.TryGetValue(value, out c2) && c2 == code);
+                if(!ok)
+                    throw new Exception();
                 }
             }
             Console.WriteLine(max);
