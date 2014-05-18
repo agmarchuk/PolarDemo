@@ -17,20 +17,28 @@ namespace ANTLR_Test
         {
             PolarDB.PaEntry.bufferBytes = 1*1000*1000*1000;
 
-            Millions = 1;        
- 
-            TestCoding();
+            Console.WriteLine(Millions = 1);
+
+            TestCoding(new StringIntMD5Coding(@"..\..\sparql data\queries\parameters\"));
+            TestCoding(new StringIntCoding(@"..\..\sparql data\queries\parameters\tmp\"));
           
           //   Test();
-         
-            Millions = 10;
+
+            Console.WriteLine(Millions = 10);
+            TestCoding(new StringIntMD5Coding(@"..\..\sparql data\queries\parameters\"));
+            TestCoding(new StringIntCoding(@"..\..\sparql data\queries\parameters\tmp\"));
+
+
                
           
        //   Test();
-              
-            Millions = 100;     
-            TestCoding();
-           //    Test();
+
+            Console.WriteLine(Millions = 100);
+
+            TestCoding(new StringIntMD5Coding(@"..\..\sparql data\queries\parameters\"));
+            TestCoding(new StringIntCoding(@"..\..\sparql data\queries\parameters\tmp\"));
+
+            //    Test();
         }
 
         
@@ -352,7 +360,7 @@ namespace ANTLR_Test
             Console.WriteLine(parameteersValues.Count);
             Console.WriteLine(copies);
         }
-        private static void TestCoding()
+        private static void TestCoding(IStringIntCoding stringIntMd5Coding)
         {
             var paramvaluesFilePath = string.Format(@"..\..\sparql data\queries\parameters\param values for{0} m.txt", Millions);
           //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
@@ -360,25 +368,42 @@ namespace ANTLR_Test
             long max=0;
             long total=0;
             int i = 0, imax=0;
+            long load;
+            long createindex;
             using (StreamReader streamQueryParameters = new StreamReader(paramvaluesFilePath))
             {
                 List<string> forCode=new List<string>();        
-                while (!streamQueryParameters.EndOfStream)
+               while (!streamQueryParameters.EndOfStream)
                 {
                     var value = streamQueryParameters.ReadLine();
                     forCode.Add(value);
                 }
-              var str2IntMD5 =new StringIntMD5Coding(@"..\..\sparql data\queries\parameters\");
-              str2IntMD5.Clear();
-              var d1 = str2IntMD5.InsertPortion(forCode.Take(forCode.Count / 2).ToArray());
-              var d2 = str2IntMD5.InsertPortion(forCode.Skip(forCode.Count / 2).ToArray());
-              str2IntMD5.MakeIndexed();
-                streamQueryParameters.BaseStream.Seek(0, SeekOrigin.Begin);
+               stringIntMd5Coding.Close();
+               stringIntMd5Coding.Open(false);
+                stringIntMd5Coding.Clear();
+                var st = DateTime.Now;
+              var d1 = stringIntMd5Coding.InsertPortion(forCode.Take(forCode.Count / 2).ToArray());
+              var d2 = stringIntMd5Coding.InsertPortion(forCode.Skip(forCode.Count / 2).ToArray());
+                load = (DateTime.Now - st).Ticks/10000;
+                st = DateTime.Now;
+              stringIntMd5Coding.MakeIndexed();
+              createindex = (DateTime.Now - st).Ticks / 10000;
+              streamQueryParameters.BaseStream.Seek(0, SeekOrigin.Begin);
                                                         
                 while (!streamQueryParameters.EndOfStream)
                 {
                     var value = streamQueryParameters.ReadLine();
-                    var code = str2IntMD5.GetCode(value);
+                    st = DateTime.Now;
+                    var code = stringIntMd5Coding.GetCode(value);
+                    var getCode = (DateTime.Now - st).Ticks / 10000;
+                    if (getCode > max)
+                    {
+                        max = getCode;
+                        imax = i;
+                    }
+                    i++;
+                    total += getCode;
+
                     int c1, c2;
                     bool ok = (d1.TryGetValue(value, out c1) && c1 == code) ||
                               (d2.TryGetValue(value, out c2) && c2 == code);
@@ -386,10 +411,13 @@ namespace ANTLR_Test
                     throw new Exception();
                 }
             }
-            Console.WriteLine(max);
-            Console.WriteLine(imax);
-            Console.WriteLine(total);
-            Console.WriteLine(i);
+            Console.WriteLine("max " + max);
+            Console.WriteLine("index of max "+imax);
+            Console.WriteLine("total "+total);
+            Console.WriteLine("count "+i);
+            Console.WriteLine("average "+(double)total/i);
+            Console.WriteLine("load " + load);
+            Console.WriteLine("create index " + createindex);
         }
     }
 }

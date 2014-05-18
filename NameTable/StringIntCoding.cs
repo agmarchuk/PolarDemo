@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-
 using PolarDB;
 
 namespace NameTable
 {
-    public class StringIntCoding
+    public class StringIntCoding :IStringIntCoding
     {
-
         private string originalCell;
         private string sourceCell;
         private string niCell;
@@ -23,12 +18,10 @@ namespace NameTable
         private PType tp_ind = new PTypeSequence(new PType(PTypeEnumeration.longinteger));
         private PType tp_nc = new PTypeSequence(new PTypeRecord(
                 new NamedType("code", new PType(PTypeEnumeration.integer)),
-                new NamedType("name", new PType(PTypeEnumeration.sstring)),
-                new NamedType("check sum", new PType(PTypeEnumeration.longinteger))));
+                new NamedType("name", new PType(PTypeEnumeration.sstring))));
 
         public StringIntCoding(string path)
         {
-          
             originalCell = path + "original_nt.pac";
             sourceCell = path + "source_nt.pac";
             niCell = path + "n_index.pac";
@@ -47,14 +40,14 @@ namespace NameTable
                 c_index.Close();
             }
             // Открытие ячеек в режиме работы (чтения)
-            Open();
+            Open(true);
         }
-        public void Open()
+        public void Open(bool readOnlyMode)
         {
             //TODO: надо разобраться с readOnly модой 
-            nc_cell = new PaCell(tp_nc, originalCell, false);
-            n_index = new PaCell(tp_ind, niCell, false);
-            c_index = new PaCell(tp_ind, ciCell, false);
+            nc_cell = new PaCell(tp_nc, originalCell, readOnlyMode);
+            n_index = new PaCell(tp_ind, niCell, readOnlyMode);
+            c_index = new PaCell(tp_ind, ciCell, readOnlyMode);
         }
         public void Close()
         {
@@ -72,19 +65,10 @@ namespace NameTable
         {
             if (string.IsNullOrEmpty(name) || n_index.Root.Count() == 0) return Int32.MinValue;
             PaEntry nc_entry = nc_cell.Root.Element(0);
-            var newcheckSum = BitConverter.ToUInt64(MD5.Create(name).Hash, 0);
-
-            //проверка первого
-            //if(((long)nc_entry.Field(2).Get()).CompareTo(newcheckSum)<=0)
-            //    return Int32.MinValue;
-            ////проверка последнего
-            //nc_entry.offset = (long)n_index.Root.Element(n_index.Root.Count()).Get();
-            //if (((long)nc_entry.Field(2).Get()).CompareTo(newcheckSum) > 0)
-            //    return Int32.MinValue;
             var qu = n_index.Root.BinarySearchFirst(ent =>
             {
                 nc_entry.offset = (long)ent.Get();
-                return ((long)nc_entry.Field(2).Get()).CompareTo(newcheckSum);
+                return ((string)nc_entry.Field(1).Get()).CompareTo(name);
             });
             if (qu.IsEmpty) return Int32.MinValue;
             nc_entry.offset = (long)qu.Get();
@@ -92,7 +76,7 @@ namespace NameTable
         }
         public string GetName(int code)
         {
-            long cnt = c_index.Root.Count();
+            
             if (code < 0 || code >= c_index.Root.Count()) return null;
             PaEntry nc_entry = nc_cell.Root.Element(0);
             var qu = c_index.Root.BinarySearchFirst(ent =>
@@ -137,22 +121,19 @@ namespace NameTable
 
             // Очередной (новый) код (индекс)
             int code_new = 0;
-            var md5 = MD5.Create();
-            var newcheckSum = BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(ssa_current)), 0);
             if (!source.IsEmpty)
             {
                 code_new = (int)source.Root.Count();
                 foreach (object[] val in source.Root.ElementValues())
                 {
                     // Пропускаю элементы из нового потока, которые меньше текущего сканированного элемента 
-                    //string s = (string)val[1];
+                    string s = (string)val[1];
                     int cmp = 0;
-                    var existsCheckSum = (long)val[2];
-                    while (ssa_notempty && (cmp = newcheckSum.CompareTo(existsCheckSum)) <= 0)
+                    while (ssa_notempty && (cmp = ssa_current.CompareTo(s)) <= 0)
                     {
                         if (cmp < 0)
                         { // добавляется новый код
-                            object[] v = new object[] { code_new, ssa_current, newcheckSum };
+                            object[] v = new object[] { code_new, ssa_current };
                             target.Root.AppendElement(v);
                             code_new++;
                             accumulator.Add(new KeyValuePair<string, int>((string)v[1], (int)v[0]));
@@ -162,10 +143,7 @@ namespace NameTable
                             accumulator.Add(new KeyValuePair<string, int>((string)val[1], (int)val[0]));
                         }
                         if (ssa_ind < ssa.Length)
-                        {
                             ssa_current = ssa[ssa_ind++]; //ssa.ElementAt<string>(ssa_ind);
-                            newcheckSum = BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(ssa_current)), 0);
-                        }
                         else
                             ssa_notempty = false;
                     }
@@ -177,15 +155,11 @@ namespace NameTable
             {
                 do
                 {
-                    object[] v = new object[] { code_new, ssa_current, newcheckSum };
+                    object[] v = new object[] { code_new, ssa_current };
                     target.Root.AppendElement(v);
                     code_new++;
                     accumulator.Add(new KeyValuePair<string, int>((string)v[1], (int)v[0]));
-                    if (ssa_ind < ssa.Length)
-                    {
-                        ssa_current = ssa[ssa_ind];
-                        newcheckSum = BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(ssa_current)), 0);
-                    }
+                    if (ssa_ind < ssa.Length) ssa_current = ssa[ssa_ind];
                     ssa_ind++;
                 }
                 while (ssa_ind <= ssa.Length);
@@ -194,11 +168,16 @@ namespace NameTable
             target.Close();
             source.Close();
             System.IO.File.Delete(sourceCell);
-            this.Open(); // парный к this.Close() оператор
+            this.Open(true); // парный к this.Close() оператор
             // Финальный аккорд: формирование и выдача словаря
-            //  Dictionary<string, int> dic = new Dictionary<string, int>();
+              Dictionary<string, int> dic = new Dictionary<string, int>();
+            foreach (var keyValuePair in accumulator)
+            {
+                if (dic.ContainsKey(keyValuePair.Key)) continue;
+                dic.Add(keyValuePair.Key, keyValuePair.Value);
+            }
             //Console.WriteLine("Слияние ok (" + ssa.Length + "). duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            return accumulator.ToDictionary(pair => pair.Key, pair => pair.Value);
+            return dic;
         }
         public void MakeIndexed()
         {
@@ -228,6 +207,6 @@ namespace NameTable
                 return nc_entry.Field(0).Get();
             });
         }
-        public long Count() { return c_index.Root.Count(); }
+        public int Count{ get { return Convert.ToInt32(c_index.Root.Count()); }}
     }
 }

@@ -14,6 +14,6 @@ namespace NameTable
             ;
 
         void MakeIndexed();
-        long Count { get; }
+        int Count { get; }
     }
 }

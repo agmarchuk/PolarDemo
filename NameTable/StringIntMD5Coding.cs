@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using PolarDB;
@@ -27,21 +28,28 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
         private PaCell md5_index;
         private string pathMD5Index;
         private bool? openMode;
-                      
+        private static Dictionary<string, IStringIntCoding> Opend=new Dictionary<string, IStringIntCoding>();
+
         public StringIntMD5Coding(string path)
         {
-
+            IStringIntCoding existed;
+            if (Opend.TryGetValue(path, out existed))
+            {
+                existed.Close();
+                Opend.Remove(path);
+            }
             niCell = path + "n_index.pac";
-            pathCiCell = path + "pathCiCell.pac";
+            pathCiCell = path + "c_index.pac";
             pathMD5Index = path + "md5_index.pac"; 
           
             // Создание ячеек, предполагается, что все либо есть либо их нет и надо создавать
-            if (!System.IO.File.Exists(niCell))  
+            if (!System.IO.File.Exists(niCell))
                 Clear();
 
             // Открытие ячеек в режиме работы (чтения)
             Open(true);
-            Count = c_index.Root.Count();
+            Count = Convert.ToInt32( c_index.Root.Count());
+            Opend.Add(path, this);
         }
         public void Open(bool readonlyMode)
         {
@@ -79,6 +87,7 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
             nc_cell.Fill(new object[0]);
             c_index.Fill(new object[0]);
             md5_index.Fill(new object[0]);
+            Count = 0;
         }
 
         public int GetCode(string name)
@@ -117,36 +126,72 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
             return (string) paEntry.Field(1).Get();
         }
 
-        public Dictionary<string, int> InsertPortion(List<string> portion)
+    
+        public Dictionary<string, int> InsertPortion(string[] portion)
         {
             Open(false);
-            List<long> ofsets2NC = new List<long>(portion.Count);
-            List<long> checkSum = new List<long>(portion.Count);
+            List<long> ofsets2NC = new List<long>(portion.Length);
+            List<long> checkSumList = new List<long>(portion.Length);
             var insertPortion = new Dictionary<string, int>();
-            for (int i = 0; i < portion.Count; i++)
-            {
-                if(insertPortion.ContainsKey(portion[i]))
-                    continue;
-                var code = GetCode(portion[i]);
-                if (code != Int32.MinValue)
-                    insertPortion.Add(portion[i], code);
-                else
+            for (int i = 0; i < portion.Length; i++)
+                if (!insertPortion.ContainsKey(portion[i]))
                 {
-                    checkSum.Add(BitConverter.ToInt64(UTF8Encoding.UTF8.GetBytes(portion[i]),0));
-                    ofsets2NC.Add(nc_cell.Root.AppendElement(new object[] { Count++, portion[i] }));
+                        var checkSum = BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(portion[i])),0);
+                    var code = GetCode(portion[i],checkSum);
+                    if (code == Int32.MinValue)
+                    {
+                        checkSumList.Add(checkSum);
+                        ofsets2NC.Add(nc_cell.Root.AppendElement(new object[] {code = Count++, portion[i]}));
+                    }
+                    insertPortion.Add(portion[i], code);
                 }
-            }
 
+            var offsetsNC = ofsets2NC.ToArray();
+            var checkSums = checkSumList.ToArray();
+            Array.Sort(checkSums, offsetsNC);
+            int portionIndex = 0;
+            if (md5_index.Root.Count() > 0)
+            {
+                Close();
+                string tmp = pathMD5Index + ".tmp";
+                if (File.Exists(tmp)) File.Delete(tmp);
+
+                File.Move(pathMD5Index, tmp);
+                Open(false);
+                md5_index.Clear();
+                md5_index.Fill(new object[0]);
+                var tmpCell = new PaCell(tp_pair_longs, tmp);
+
+                foreach (object[] existingPair in tmpCell.Root.ElementValues())
+                {
+                    for (; portionIndex < offsetsNC.Length
+                        && checkSums[portionIndex] <= (long) existingPair[0];
+                        portionIndex++)
+                        md5_index.Root.AppendElement(new object[] {checkSums[portionIndex], offsetsNC[portionIndex]});
+                    md5_index.Root.AppendElement(existingPair);
+                }
+                tmpCell.Close();
+                File.Delete(tmp);
+            }
+            for (; portionIndex < checkSums.Length; portionIndex++)
+                md5_index.Root.AppendElement(new object[] {checkSums[portionIndex], offsetsNC[portionIndex]});
+
+            
             //Count += insertPortion.Count;
-            return insertPortion;
-                
+            return insertPortion;             
         }
 
         public void MakeIndexed()
         {
-            
+           Open(false); 
+            c_index.Clear();
+            var offsets = new object[Count];
+            foreach (PaEntry entry in nc_cell.Root.Elements())
+                offsets[(int) ((object[]) entry.Get())[0]] = entry.offset;
+            c_index.Fill(offsets);
+            Open(true);
         }
 
-        public long Count { get; private set; }
+        public int Count { get; private set; }
     }
 }
