@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
+
 using System.IO;
 using System.Linq;
 using Antlr4.Runtime;
-using NameTable;
-using SparqlParser;
-using TrueRdfViewer;
 
-namespace ANTLR_Test
+namespace TruRDFViewer
 {
     class Program
     {
@@ -19,8 +16,6 @@ namespace ANTLR_Test
 
             Millions = 1;        
  
-            TestCoding();
-          
           //   Test();
          
             Millions = 10;
@@ -28,8 +23,7 @@ namespace ANTLR_Test
           
        //   Test();
               
-            Millions = 100;     
-            TestCoding();
+            Millions = 100;     // TestCoding();
            //    Test();
         }
 
@@ -39,7 +33,7 @@ namespace ANTLR_Test
         {
             Console.WriteLine(Millions);
 
-           TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
+           TripleStore ts = new TripleStore(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
             //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\undecoded\" + Millions + @"mln\");
 
              bool load = false;
@@ -63,7 +57,7 @@ namespace ANTLR_Test
                 wr.WriteLine("total " + spent + " мс.");
         }
 
-        private static void RunBerlinsParameters(TripleStoreInt ts)
+        private static void RunBerlinsParameters(TripleStore ts)
         {
            
             Console.WriteLine("antrl parametered");
@@ -104,7 +98,7 @@ namespace ANTLR_Test
             }
         }
 
-        private static void SubTestRun(TripleStoreInt ts, FileInfo[] fileInfos,  StreamReader streamQueryParameters, int i1)
+        private static void SubTestRun(TripleStore ts, FileInfo[] fileInfos,  StreamReader streamQueryParameters, int i1)
         {
             int i; 
             long[] results = new long[12];
@@ -153,20 +147,18 @@ namespace ANTLR_Test
                 r.WriteLine("maximums " + string.Join(", ", maximums));
                 r.WriteLine("total parse " + string.Join(", ", totalparseMS));
                 r.WriteLine("total run " + string.Join(", ", totalrun));
-                r.WriteLine("countCodingUsages {0} totalMillisecondsCodingUsages {1}", TripleInt.CodeCache.Count, TripleInt.totalMilisecondsCodingUsages);
-                r.WriteLine("EWT count" + EntitiesMemoryHashTable.count);
+                 r.WriteLine("EWT count" + EntitiesMemoryHashTable.count);
                 r.WriteLine("EWT total search" + EntitiesMemoryHashTable.total);
                 r.WriteLine("EWT max search" + EntitiesMemoryHashTable.max);
                 r.WriteLine("EWT total range" + EntitiesMemoryHashTable.totalRange);
                 r.WriteLine("EWT max range" + EntitiesMemoryHashTable.maxRange);
                 r.WriteLine("EWT average search" + EntitiesMemoryHashTable.total / EntitiesMemoryHashTable.count);
                 r.WriteLine("EWT average range" + EntitiesMemoryHashTable.totalRange / EntitiesMemoryHashTable.count);
-                TripleInt.CodeCache.Clear();
-                TripleInt.totalMilisecondsCodingUsages = 0;
+            
             }
         }
 
-        private static void RunBerlinsWithConstants(TripleStoreInt ts)
+        private static void RunBerlinsWithConstants(TripleStore ts)
         {
             long[] results = new long[12];
             Console.WriteLine("antrl with constants");
@@ -222,11 +214,7 @@ namespace ANTLR_Test
                 }
             }
             Console.WriteLine(string.Join(", ", results));
-            using (StreamWriter r = new StreamWriter(@"..\..\output.txt", true))
-            {
-                r.WriteLine("milions " + Millions);          
-                r.WriteLine("countCodingUsages {0} totalMillisecondsCodingUsages {1}", TripleInt.CodeCache.Count, TripleInt.totalMilisecondsCodingUsages);
-            }
+
 
         }
 
@@ -235,15 +223,9 @@ namespace ANTLR_Test
             ICharStream input = new AntlrInputStream(te);
 
 
-            // Console.WriteLine(input);
-            // Настраиваем лексер на этот поток
-            //CalcLexer lexer = new CalcLexer(input);
-            //// Создаем поток токенов на основе лексера
-            //CommonTokenStream tokens = new CommonTokenStream(lexer);
-            //// Создаем парсер
-            //CalcParser parser = new CalcParser(tokens);
-            //// И запускаем первое правило грамматики!!!
-            //parser.calc();
+             Console.WriteLine(input);
+       
+        
             DateTime tm = DateTime.Now;
 
             var lexer = new sparql2PacLexer(input);
@@ -253,6 +235,7 @@ namespace ANTLR_Test
             sparqlParser.query();
          //   Console.WriteLine((DateTime.Now-tm).TotalMilliseconds);
             return sparqlParser.q;
+            return new Query();
         }                                
 
         private static Random random = new Random(DateTime.Now.Millisecond);
@@ -260,54 +243,7 @@ namespace ANTLR_Test
         private static string[] words =
             File.ReadAllLines(@"..\..\sparql data\queries\parameters\titlewords.txt");
 
-        private static void QueryWriteParameters(string parameteredQuery, StreamWriter output, TripleStoreInt ts)
-        {         
-            var productsCodes = ts.GetSubjectByObjPred(
-                TripleInt.Code("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Product"),
-                TripleInt.Code("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
-            var codes = productsCodes as int[] ?? productsCodes.ToArray();
-            int productCount = codes.Count();
-            var product = TripleInt.Decode(codes.ElementAt(random.Next(0, productCount)));
-                //Millions == 1000 ? 2855260 : Millions == 100 ? 284826 : Millions == 10 ? 284826 : 2785;
-            int productFeatureCount =
-                Millions == 1000 ? 478840 : Millions == 100 ? 47884 : Millions == 10 ? 47450 : 4745;
-             int productTypesCount =Millions == 1000 ? 20110 : Millions == 100 ? 2011 : Millions == 10 ? 1510 : 151;  
-            //var review = random.Next(1, productCount*10);
-            ////var product = random.Next(1, productCount);
-            ////var productProducer = product/ProductsPerProducer + 1; 
-            //var offer = random.Next(1, productCount*OffersPerProduct);
-            //var vendor = offer/OffersPerVendor + 1;
-             var offersCodes = ts.GetSubjectByObjPred(
-               TripleInt.Code("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Offer"),
-               TripleInt.Code("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
-             codes = offersCodes as int[] ?? offersCodes.ToArray();
-            var offer = TripleInt.Decode(codes[random.Next(0, codes.Length)]);
-            var reviewsCodes = ts.GetSubjectByObjPred(
-           TripleInt.Code("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Review"),
-           TripleInt.Code("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
-            codes = reviewsCodes as int[] ?? reviewsCodes.ToArray();
-            var review = TripleInt.Decode(codes[random.Next(0, codes.Length)]);
-            if (parameteredQuery.Contains("%ProductType%"))
-                output.WriteLine("bsbm-inst:ProductType" + random.Next(1, productTypesCount));
-            if (parameteredQuery.Contains("%ProductFeature1%"))
-                output.WriteLine("bsbm-inst:ProductFeature" + random.Next(1, productFeatureCount));
-            if (parameteredQuery.Contains("%ProductFeature2%"))
-                output.WriteLine("bsbm-inst:ProductFeature" + random.Next(1, productFeatureCount));
-            if (parameteredQuery.Contains("%ProductFeature3%"))
-                output.WriteLine("bsbm-inst:ProductFeature" + random.Next(1, productFeatureCount));
-            if (parameteredQuery.Contains("%x%")) output.WriteLine(random.Next(1, 500).ToString());
-            if (parameteredQuery.Contains("%y%")) output.WriteLine(random.Next(1, 500).ToString());
-            if (parameteredQuery.Contains("%ProductXYZ%"))
-                output.WriteLine(product);//"<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer{0}/Product{1}>",productProducer, product);
-            if (parameteredQuery.Contains("%word1%")) output.WriteLine(words[random.Next(0, words.Length)]);
-            if (parameteredQuery.Contains("%currentDate%"))
-                output.WriteLine("\"" + DateTime.Today.AddYears(-6) + "\"^^<http://www.w3.org/2001/XMLSchema#dateTime>");
-            if (parameteredQuery.Contains("%ReviewXYZ%"))
-                output.WriteLine(review);//"<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite{0}/Review{1}>",review/10000 + 1, review);
-            if (parameteredQuery.Contains("%OfferXYZ%"))
-                output.WriteLine(offer);
-                    //"<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor{0}/Offer{1}>", vendor, offer);
-        }
+      
 
         private static string QueryReadParameters(string parameteredQuery, StreamReader input)
         {
@@ -334,62 +270,6 @@ namespace ANTLR_Test
             if (parameteredQuery.Contains("%OfferXYZ%"))
                 parameteredQuery = parameteredQuery.Replace("%OfferXYZ%", "<"+input.ReadLine()+">");    
             return parameteredQuery;
-        }
-        private static void TestParametersValuesCopies()
-        {
-            var paramvaluesFilePath = string.Format(@"..\..\sparql data\queries\parameters\param values for{0} m.txt", Millions);
-            HashSet<String> parameteersValues = new HashSet<string>();
-            int copies = 0;
-            using (StreamReader streamQueryParameters = new StreamReader(paramvaluesFilePath))
-            {
-                while (!streamQueryParameters.EndOfStream)
-                {
-                    var value = streamQueryParameters.ReadLine();
-                    if (parameteersValues.Contains(value)) copies++;
-                    else parameteersValues.Add(value);
-                }
-            }
-            Console.WriteLine(parameteersValues.Count);
-            Console.WriteLine(copies);
-        }
-        private static void TestCoding()
-        {
-            var paramvaluesFilePath = string.Format(@"..\..\sparql data\queries\parameters\param values for{0} m.txt", Millions);
-          //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
-            int copies = 0;
-            long max=0;
-            long total=0;
-            int i = 0, imax=0;
-            using (StreamReader streamQueryParameters = new StreamReader(paramvaluesFilePath))
-            {
-                List<string> forCode=new List<string>();        
-                while (!streamQueryParameters.EndOfStream)
-                {
-                    var value = streamQueryParameters.ReadLine();
-                    forCode.Add(value);
-                }
-              var str2IntMD5 =new StringIntMD5Coding(@"..\..\sparql data\queries\parameters\");
-              str2IntMD5.Clear();
-              var d1 = str2IntMD5.InsertPortion(forCode.Take(forCode.Count / 2).ToArray());
-              var d2 = str2IntMD5.InsertPortion(forCode.Skip(forCode.Count / 2).ToArray());
-              str2IntMD5.MakeIndexed();
-                streamQueryParameters.BaseStream.Seek(0, SeekOrigin.Begin);
-                                                        
-                while (!streamQueryParameters.EndOfStream)
-                {
-                    var value = streamQueryParameters.ReadLine();
-                    var code = str2IntMD5.GetCode(value);
-                    int c1, c2;
-                    bool ok = (d1.TryGetValue(value, out c1) && c1 == code) ||
-                              (d2.TryGetValue(value, out c2) && c2 == code);
-                if(!ok)
-                    throw new Exception();
-                }
-            }
-            Console.WriteLine(max);
-            Console.WriteLine(imax);
-            Console.WriteLine(total);
-            Console.WriteLine(i);
-        }
-    }
+        }           
+   }
 }

@@ -1,0 +1,31 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rev: <http://purl.org/stuff/rev#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX dataFromProducer1: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+
+SELECT ?productLabel ?offer ?price ?vendor ?vendorTitle ?review ?revTitle 
+       ?reviewer ?revName ?rating1 ?rating2
+WHERE { 
+	dataFromProducer1:Product12 rdfs:label ?productLabel .
+    OPTIONAL {
+        ?offer bsbm:product dataFromProducer1:Product12 .
+        ?offer bsbm:validTo ?date .
+        FILTER (?date > "2007-07-23T00:00:00"^^xsd:dateTime  )
+		?vendor bsbm:country <http://downlode.org/rdf/iso-3166/countries#DE> .
+		?offer bsbm:price ?price .
+		?offer bsbm:vendor ?vendor .
+		?vendor rdfs:label ?vendorTitle .
+        ?offer dc:publisher ?vendor . 
+    }
+    OPTIONAL {
+	?review bsbm:reviewFor dataFromProducer1:Product12 .
+	?review rev:reviewer ?reviewer .
+	?reviewer foaf:name ?revName .
+	?review dc:title ?revTitle .
+    OPTIONAL { ?review bsbm:rating1 ?rating1 . }
+    OPTIONAL { ?review bsbm:rating2 ?rating2 . } 
+    }
+}

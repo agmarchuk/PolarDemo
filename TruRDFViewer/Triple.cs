@@ -1,40 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using NameTable;
 
-namespace  TrueRdfViewer
+namespace  TruRDFViewer
 {
-    public abstract class TripleInt 
+    public abstract class Triple 
     { 
-        public int subject, predicate;
-        public static StringIntCoding SiCoding;
-        public static Dictionary<string, int> CodeCache = new Dictionary<string, int>();
-     
-        public static long totalMilisecondsCodingUsages = 0;
+        public string subject, predicate;
+       
         
-        public static int Code(string s)
-        {   
-            int c;
-            if(!CodeCache.TryGetValue(s, out c))
-            {
-                DateTime st = DateTime.Now;
-                   c = SiCoding.GetCode(s);
-           //  c = s.GetHashCode();
-                totalMilisecondsCodingUsages += (DateTime.Now - st).Ticks/10000;
-                CodeCache.Add(s, c); //s.GetHashCode() 
-                
-            }
-            return c;
-        }              
-        public static string Decode(int e)
-        {
-          //   return e.ToString();
-            return SiCoding.GetName(e);
-        } 
+   
     }
-    public class OTripleInt : TripleInt { public int obj; }
-    public class DTripleInt : TripleInt { public Literal data; }
+    public class OTriple : Triple { public string obj; }
+    public class DTriple : Triple { public Literal data; }
     public enum LiteralVidEnumeration { typedObject, integer, text, date, boolean, nil }
     public class Literal
     {
@@ -42,6 +20,17 @@ namespace  TrueRdfViewer
         {
             return vid == other.vid && Equals(Value, other.Value);
         }
+
+        public static bool operator ==(Literal left, Literal right)
+        {
+            
+        }
+
+        public static bool operator !=(Literal left, Literal right)
+        {
+            return !(left == right);
+        }
+
 
         public override int GetHashCode()
         {
@@ -190,20 +179,20 @@ namespace  TrueRdfViewer
             return pred.CompareTo(((SubjPredInt)sp).pred);
         }
     }
-    public class SubjPredObjInt : IComparable
+    public class SubjPredObj : IComparable
     {
-        public int subj, pred, obj;
-        public SubjPredObjInt() { }
-        public SubjPredObjInt(object pobj)
+        public string subj, pred, obj;
+        public SubjPredObj() { }
+        public SubjPredObj(object pobj)
         {
             object[] rec = (object[])pobj;
-            subj = (int)rec[0];
-            pred = (int)rec[1];
-            obj = (int)rec[2];
+            subj = rec[0];
+            pred = rec[1];
+            obj = rec[2];
         }
         public int CompareTo(object sp)
         {
-            SubjPredObjInt target = (SubjPredObjInt)sp;
+            SubjPredObj target = (SubjPredObj)sp;
             int cmp = subj.CompareTo(target.subj);
             if (cmp != 0) return cmp;
             cmp = pred.CompareTo(target.pred);
@@ -218,9 +207,9 @@ namespace  TrueRdfViewer
             return x.CompareTo(y);
         }
     }
-    public class SPOComparer : IComparer<SubjPredObjInt>
+    public class SPOComparer : IComparer<SubjPredObj>
     {
-        public int Compare(SubjPredObjInt x, SubjPredObjInt y)
+        public int Compare(SubjPredObj x, SubjPredObj y)
         {
             return x.CompareTo(y);
         }

@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using TrueRdfViewer;
 
-namespace SparqlParser
+namespace TruRDFViewer
 {
-    public static class RPackComplexExtensionInt
+    public static class RPackComplexExtension
     {
-        public static IEnumerable<RPackInt> OptionalGroup(this IEnumerable<RPackInt> pack, Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> group, params short[] changedVariables)
+        public static IEnumerable<RPack> OptionalGroup(this IEnumerable<RPack> pack, Func<IEnumerable<RPack>, IEnumerable<RPack>> group, params short[] changedVariables)
         {
             var packArray = pack;// as RPackInt[] ?? pack.ToArray();
             var optionalGroup = @group(packArray);//.ToArray();
@@ -22,12 +21,12 @@ namespace SparqlParser
             });
         }
 
-        public static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> Optional(this Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> graphSelector, short parametersStartIndex, short parametersEndIndex)
+        public static Func<IEnumerable<RPack>, IEnumerable<RPack>> Optional(this Func<IEnumerable<RPack>, IEnumerable<RPack>> graphSelector, short parametersStartIndex, short parametersEndIndex)
         {
             return packs => packs.SelectMany(pack => Optional(pack, graphSelector, parametersStartIndex, parametersEndIndex));
         }
 
-        private static IEnumerable<RPackInt> Optional(RPackInt pack, Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> graphSelector, short parametersStartIndex, short parametersEndIndex)
+        private static IEnumerable<RPack> Optional(RPack pack, Func<IEnumerable<RPack>, IEnumerable<RPack>> graphSelector, short parametersStartIndex, short parametersEndIndex)
         {
             var packBox = Enumerable.Repeat(pack, 1); // as RPackInt[] ?? packs.ToArray();
             bool any = false;
@@ -42,8 +41,8 @@ namespace SparqlParser
         }
 
 
-        public static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> Union(
-            this Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> first, Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> second)
+        public static Func<IEnumerable<RPack>, IEnumerable<RPack>> Union(
+            this Func<IEnumerable<RPack>, IEnumerable<RPack>> first, Func<IEnumerable<RPack>, IEnumerable<RPack>> second)
         {
             return packs =>
             //{
@@ -53,7 +52,7 @@ namespace SparqlParser
             //};
         }
 
-        private static IEnumerable<RPackInt> UnionRun(RPackInt pack, Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> first, Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> second)
+        private static IEnumerable<RPack> UnionRun(RPack pack, Func<IEnumerable<RPack>, IEnumerable<RPack>> first, Func<IEnumerable<RPack>, IEnumerable<RPack>> second)
         {
             var rPackIntBox = Enumerable.Repeat(pack, 1);
             if (first != null)
@@ -64,63 +63,63 @@ namespace SparqlParser
                 yield return resultRPackInt;
         }
 
-        public static IEnumerable<RPackInt> Union(this IEnumerable<RPackInt> pack,
-            params Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>>[] groupFuncs)
+        public static IEnumerable<RPack> Union(this IEnumerable<RPack> pack,
+            params Func<IEnumerable<RPack>, IEnumerable<RPack>>[] groupFuncs)
         {
             return groupFuncs.SelectMany(func => func(pack));
         }
 
-        public static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> spo(object subj, object pred, object obj)
+        public static Func<IEnumerable<RPack>, IEnumerable<RPack>> spo(object subj, object pred, object obj)
         {
             return pacs => pacs.Where(pk => pk.Store.ChkOSubjPredObj(pk.GetE(subj), pk.GetE(pred), pk.GetE(obj)));
         }
 
-        public static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> spd(object subj, object pred, Literal d)
+        public static Func<IEnumerable<RPack>, IEnumerable<RPack>> spd(object subj, object pred, Literal d)
         {
             return pacs => pacs.Where(pk => pk.Store.GetDataBySubjPred(pk.GetE(subj), pk.GetE(pred)).Any(d1=>d1.Equals(d)));
         }
 
-        internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> spO(object sEntityCode, object pEntityCode, short obj)
+        internal static Func<IEnumerable<RPack>, IEnumerable<RPack>> spO(object sEntityCode, object pEntityCode, short obj)
         {
             return pack => pack.SelectMany(pk => pk.Store
                 .GetObjBySubjPred(pk.GetE(sEntityCode), pk.GetE(pEntityCode))
                 .Select(ob =>
                 {
                     pk.Set(obj, ob);
-                    return new RPackInt(pk.row, pk.Store);
+                    return new RPack(pk.row, pk.Store);
                 }));
         }
-        internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> Spo(short subj, object pEntityCode, object oEntityCode)
+        internal static Func<IEnumerable<RPack>, IEnumerable<RPack>> Spo(short subj, object pEntityCode, object oEntityCode)
         {
           return pack => pack.SelectMany(pk => pk.Store
                 .GetSubjectByObjPred(pk.GetE(oEntityCode), pk.GetE(pEntityCode))
                 .Select(su =>
                 {
                     pk.Set(subj, su);
-                    return new RPackInt(pk.row, pk.Store);
+                    return new RPack(pk.row, pk.Store);
                 }));
         }
 
-        internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> SpO(short s, object pEntityCode, short o)
+        internal static Func<IEnumerable<RPack>, IEnumerable<RPack>> SpO(short s, object pEntityCode, short o)
         {
             throw new NotImplementedException();
         }
 
-        public static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> spD(object sEntityCode, object pEntityCode, short oParamIndex)
+        public static Func<IEnumerable<RPack>, IEnumerable<RPack>> spD(object sEntityCode, object pEntityCode, short oParamIndex)
         {
             return pack => pack.SelectMany(pk => pk.Store
              .GetDataBySubjPred(pk.GetE(sEntityCode), pk.GetE(pEntityCode))
              .Select(ob =>
              {
                  pk.Set(oParamIndex, ob);
-                 return new RPackInt(pk.row, pk.Store);
+                 return new RPack(pk.row, pk.Store);
              }));
         }
 
-        private static IEnumerable<RPackInt> CallObjectAndData(
-            Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> oCall,
-            Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> dCall, 
-            IEnumerable<RPackInt> pack)
+        private static IEnumerable<RPack> CallObjectAndData(
+            Func<IEnumerable<RPack>, IEnumerable<RPack>> oCall,
+            Func<IEnumerable<RPack>, IEnumerable<RPack>> dCall, 
+            IEnumerable<RPack> pack)
         {
             var beforeSequene = pack.Select(i => Enumerable.Repeat(i,1));
             foreach (var before in beforeSequene)
@@ -132,14 +131,14 @@ namespace SparqlParser
                     yield return rPackInt;
             }
         }
-        internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> CallObjectAndData(
-            Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> oCall,
-            Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> dCall)
+        internal static Func<IEnumerable<RPack>, IEnumerable<RPack>> CallObjectAndData(
+            Func<IEnumerable<RPack>, IEnumerable<RPack>> oCall,
+            Func<IEnumerable<RPack>, IEnumerable<RPack>> dCall)
         {
             return pack => CallObjectAndData(oCall, dCall, pack);
         }
 
-        internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> CallObjectOrData(GraphIsDataProperty pGraph, Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> oCall, Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> dCall)
+        internal static Func<IEnumerable<RPack>, IEnumerable<RPack>> CallObjectOrData(GraphIsDataProperty pGraph, Func<IEnumerable<RPack>, IEnumerable<RPack>> oCall, Func<IEnumerable<RPack>, IEnumerable<RPack>> dCall)
         {
             return pack => pGraph.IsData != null
                 ? (pGraph.IsData.Value ? dCall(pack) : oCall(pack))
@@ -147,7 +146,7 @@ namespace SparqlParser
                       .SelectMany(before => CallObjectOrDataRunOnSingle(before, pGraph, oCall, dCall)); ;
         }  
 
-        private static IEnumerable<RPackInt> CallObjectOrDataRunOnSingle(IEnumerable<RPackInt> before, GraphIsDataProperty pGraph, Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> oCall, Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> dCall)
+        private static IEnumerable<RPack> CallObjectOrDataRunOnSingle(IEnumerable<RPack> before, GraphIsDataProperty pGraph, Func<IEnumerable<RPack>, IEnumerable<RPack>> oCall, Func<IEnumerable<RPack>, IEnumerable<RPack>> dCall)
         {
             foreach (var oCallRPac in oCall(before))
             {
@@ -163,7 +162,7 @@ namespace SparqlParser
             }
         }
 
-        internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> sPo(object sEntityCode, short pParamIndex, object oEntityCode)
+        internal static Func<IEnumerable<RPack>, IEnumerable<RPack>> sPo(object sEntityCode, short pParamIndex, object oEntityCode)
         {
             return pack => pack.SelectMany(pk => pk.Store
                 .GetObjBySubj(pk.GetE(sEntityCode))
@@ -171,11 +170,11 @@ namespace SparqlParser
                 .Select(po =>
                 {
                     pk.Set(pParamIndex, po.Value);
-                    return new RPackInt(pk.row, pk.Store);
+                    return new RPack(pk.row, pk.Store);
                 }));
         }
 
-        internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> sPd(object sEntityCode, short pParamIndex, Literal d)
+        internal static Func<IEnumerable<RPack>, IEnumerable<RPack>> sPd(object sEntityCode, short pParamIndex, Literal d)
         {
             return pack => pack.SelectMany(pk => pk.Store
                 .GetDataBySubj(pk.GetE(sEntityCode))
@@ -183,11 +182,11 @@ namespace SparqlParser
                 .Select(po =>
                 {
                     pk.Set(pParamIndex, po.Value);
-                    return new RPackInt(pk.row, pk.Store);
+                    return new RPack(pk.row, pk.Store);
                 }));
         }
 
-        internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> sPO(object sEntityCode, short pParamIndex, short oParamIndex, GraphIsDataProperty graph)
+        internal static Func<IEnumerable<RPack>, IEnumerable<RPack>> sPO(object sEntityCode, short pParamIndex, short oParamIndex, GraphIsDataProperty graph)
         {
             return pack => pack.SelectMany(pk => pk.Store
                  .GetObjBySubj(pk.GetE(sEntityCode))
@@ -197,11 +196,11 @@ namespace SparqlParser
                      pk.Set(oParamIndex, po.Key);
                      if (graph.IsData == null || graph.IsData.Value)
                          graph.ReSet(false);
-                     return new RPackInt(pk.row, pk.Store);
+                     return new RPack(pk.row, pk.Store);
                  }));
         }
 
-        internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> sPD(object sEntityCode, short pParamIndex, short oParamIndex, GraphIsDataProperty graph)
+        internal static Func<IEnumerable<RPack>, IEnumerable<RPack>> sPD(object sEntityCode, short pParamIndex, short oParamIndex, GraphIsDataProperty graph)
         {
             return pack => pack.SelectMany(pk => pk.Store
                 .GetDataBySubj(pk.GetE(sEntityCode))
@@ -211,27 +210,27 @@ namespace SparqlParser
                     pk.Set(oParamIndex, po.Key);
                     if (graph.IsData == null || !graph.IsData.Value)
                         graph.ReSet(po.Key.vid);
-                    return new RPackInt(pk.row, pk.Store);
+                    return new RPack(pk.row, pk.Store);
                 })); 
         }
 
-        internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> Spd(short sParamIndex, object pEntityCode, Literal d)
+        internal static Func<IEnumerable<RPack>, IEnumerable<RPack>> Spd(short sParamIndex, object pEntityCode, Literal d)
         {
             return pack => pack.SelectMany(pk => pk.Store
                 .GetSubjectByDataPred(pk.GetE(pEntityCode), d)
                 .Select(su =>
                 {
                     pk.Set(sParamIndex, su);
-                    return new RPackInt(pk.row, pk.Store);
+                    return new RPack(pk.row, pk.Store);
                 }));
         }
 
-        internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> SpD(short sParamIndex, object pEntityCode, short oParamIndex)
+        internal static Func<IEnumerable<RPack>, IEnumerable<RPack>> SpD(short sParamIndex, object pEntityCode, short oParamIndex)
         {
             throw new NotImplementedException();
         }
 
-        internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> SPo(short sParamIndex, short pParamIndex, object oEntityCode)
+        internal static Func<IEnumerable<RPack>, IEnumerable<RPack>> SPo(short sParamIndex, short pParamIndex, object oEntityCode)
         {
             return pack => pack.SelectMany(pk => pk.Store
                 .GetSubjectByObj(pk.GetE(oEntityCode))
@@ -239,21 +238,21 @@ namespace SparqlParser
                 {
                     pk.Set(pParamIndex, po.Value);
                     pk.Set(sParamIndex, po.Key);
-                    return new RPackInt(pk.row, pk.Store);
+                    return new RPack(pk.row, pk.Store);
                 }));
         }
 
-        internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> SPd(short sParamIndex, short pParamIndex, Literal d)
+        internal static Func<IEnumerable<RPack>, IEnumerable<RPack>> SPd(short sParamIndex, short pParamIndex, Literal d)
         {
             throw new NotImplementedException();
         }
 
-        internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> SPO(short sParamIndex, short pParamIndex, short oParamIndex)
+        internal static Func<IEnumerable<RPack>, IEnumerable<RPack>> SPO(short sParamIndex, short pParamIndex, short oParamIndex)
         {
             throw new NotImplementedException();
         }
 
-        internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> SPD(short sParamIndex, short pParamIndex, short oParamIndex)
+        internal static Func<IEnumerable<RPack>, IEnumerable<RPack>> SPD(short sParamIndex, short pParamIndex, short oParamIndex)
         {
             throw new NotImplementedException();
         }

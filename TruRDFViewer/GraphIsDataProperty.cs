@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ANTLR_Test.Annotations;
-using TrueRdfViewer;
+using Antlr4.Runtime.Misc;
 
-namespace SparqlParser
+namespace TruRDFViewer
 {
     public class GraphIsDataProperty
     {
