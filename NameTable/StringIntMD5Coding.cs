@@ -83,28 +83,33 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
 
         public int GetCode(string name)
         {
-            if (Count != 0)
-            {
-                var newD5 = BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(name)), 0);
+            Open(true);
+            if (Count == 0) return Int32.MinValue;
+            return GetCode(name, BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(name)), 0));
 
-                var searchAll = md5_index.Root.BinarySearchAll(md5Entry =>
-                {
-                    var existMD5 = (long) md5Entry.Field(0).Get();
-                    return existMD5.CompareTo(newD5);
-                });
-                var ncEntry = nc_cell.Root.Element(0);
-                foreach (var md5Entry in searchAll)
-                {
-                    ncEntry.offset = (long) md5Entry.Field(1).Get();
-                    if ((string) ncEntry.Field(1).Get() == name)
-                        return (int) ncEntry.Field(0).Get();
-                }
-            }               
-            return Int32.MinValue;    
+        }
+
+        private int GetCode(string name, long newD5)
+        {
+            if (Count == 0) return Int32.MinValue;
+            var searchAll = md5_index.Root.BinarySearchAll(md5Entry =>
+            {
+                var existMD5 = (long) md5Entry.Field(0).Get();
+                return existMD5.CompareTo(newD5);
+            });
+            var ncEntry = nc_cell.Root.Element(0);
+            foreach (var md5Entry in searchAll)
+            {
+                ncEntry.offset = (long) md5Entry.Field(1).Get();
+                if ((string) ncEntry.Field(1).Get() == name)
+                    return (int) ncEntry.Field(0).Get();
+            }
+            return Int32.MinValue;
         }
 
         public string GetName(int code)
         {
+            Open(true);
             if (Count == 0) return string.Empty;
             if (Count<= code) return string.Empty;
             PaEntry paEntry = nc_cell.Root.Element(0);
@@ -112,10 +117,29 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
             return (string) paEntry.Field(1).Get();
         }
 
-        public Dictionary<string, int> InsertPortion(string[] portion)
+        public Dictionary<string, int> InsertPortion(List<string> portion)
         {
-         
-            return new Dictionary<string, int>();
+            Open(false);
+            List<long> ofsets2NC = new List<long>(portion.Count);
+            List<long> checkSum = new List<long>(portion.Count);
+            var insertPortion = new Dictionary<string, int>();
+            for (int i = 0; i < portion.Count; i++)
+            {
+                if(insertPortion.ContainsKey(portion[i]))
+                    continue;
+                var code = GetCode(portion[i]);
+                if (code != Int32.MinValue)
+                    insertPortion.Add(portion[i], code);
+                else
+                {
+                    checkSum.Add(BitConverter.ToInt64(UTF8Encoding.UTF8.GetBytes(portion[i]),0));
+                    ofsets2NC.Add(nc_cell.Root.AppendElement(new object[] { Count++, portion[i] }));
+                }
+            }
+
+            //Count += insertPortion.Count;
+            return insertPortion;
+                
         }
 
         public void MakeIndexed()
