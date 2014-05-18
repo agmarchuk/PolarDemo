@@ -51,7 +51,7 @@ namespace TrueRdfViewer
                 //Console.WriteLine("LoadXML ok.");
                 PolarDB.PaEntry.bufferBytes = 1000000000; //2*1000*1000*1000;
                 //ts.LoadTurtle(@"D:\deployed\dataset_100M.ttl");
-                ts.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset1000m.ttl");
+                ts.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset10m.ttl");
                 Console.WriteLine("LoadTurtle ok.");
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 return;
