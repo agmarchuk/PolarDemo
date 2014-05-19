@@ -19,24 +19,23 @@ namespace ANTLR_Test
 
             Console.WriteLine(Millions = 1);
 
-            var count = 100 * 1000 * 1000;
-            TestPerfomanceCoding(new StringIntMD5Coding(@"..\..\codeTests\"), Enumerable.Repeat(Guid.NewGuid().ToString(), count), count);
+            //var count = 100 * 1000 * 1000;
+            //TestPerfomanceCoding(new StringIntMD5Coding(@"..\..\codeTests\"), Enumerable.Repeat(Guid.NewGuid().ToString(), count), count);
           
-           //  Test();
+             Test();
 
             Console.WriteLine(Millions = 10);
 
 
-
                
           
-       //   Test();
+         // Test();
 
             Console.WriteLine(Millions = 100);
 
           
 
-            //    Test();
+         //      Test();
         }
 
         
@@ -44,12 +43,12 @@ namespace ANTLR_Test
         private static void Test()
         {
             Console.WriteLine(Millions);
-
            TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
+           TripleInt.CodeCache.Clear();
             //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\undecoded\" + Millions + @"mln\");
 
-              bool load = false;
-            //     bool load = true;
+               bool load = false;
+            //    bool load = true;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;
@@ -61,8 +60,8 @@ namespace ANTLR_Test
             }
             else
             {
-                    RunBerlinsWithConstants( ts);
-           //    RunBerlinsParameters(ts);      
+            //        RunBerlinsWithConstants( ts);
+               RunBerlinsParameters(ts);      
             }
             var spent = (DateTime.Now - start).Ticks/10000;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))   
@@ -208,7 +207,7 @@ namespace ANTLR_Test
                     var resultString = q.Run(ts);
                     //var totalMilliseconds = (long)(DateTime.Now - st).TotalMilliseconds;
                     // results[i++] += totalMilliseconds;
-                    File.WriteAllText(Path.ChangeExtension(file.FullName, ".txt"), resultString);
+                //   File.WriteAllText(Path.ChangeExtension(file.FullName, ".txt"), resultString);
                     //.Save(Path.ChangeExtension(file.FullName,".xml"));
                 }
             }
@@ -223,7 +222,7 @@ namespace ANTLR_Test
                     var resultString = q.Run(ts);
                     var totalMilliseconds = (DateTime.Now - st).Ticks / 10000L;
                     results[i++] += totalMilliseconds;
-              //   File.WriteAllText(Path.ChangeExtension(file.FullName, ".txt"), resultString);
+                 File.WriteAllText(Path.ChangeExtension(file.FullName, ".txt"), resultString);
                     //.Save(Path.ChangeExtension(file.FullName,".xml"));
                 }
             }

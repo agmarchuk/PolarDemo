@@ -1,0 +1,2 @@
+1439926883, "3294.69"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+922330953, "4120.17"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
