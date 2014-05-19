@@ -50,7 +50,16 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
             Open(true);
             Count = Convert.ToInt32( c_index.Root.Count());
             Opend.Add(path, this);
+         
         }
+
+        public void WarmUp()
+        {
+            foreach (var q in nc_cell.Root.ElementValues()) ;
+            foreach (var q in c_index.Root.ElementValues()) ;
+            foreach (var q in md5_index.Root.ElementValues()) ;
+        }
+
         public void Open(bool readonlyMode)
         {
             if (openMode == null)
@@ -120,7 +129,8 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
         {
             Open(true);
             if (Count == 0) return string.Empty;
-            if (Count<= code) return string.Empty;
+            if ( code==int.MinValue) return string.Empty;
+            if (Count <= code) return string.Empty;
             PaEntry paEntry = nc_cell.Root.Element(0);
             paEntry.offset = (long) c_index.Root.Element(code).Get();
             return (string) paEntry.Field(1).Get();

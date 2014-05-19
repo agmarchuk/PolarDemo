@@ -22,20 +22,20 @@ namespace ANTLR_Test
             //var count = 100 * 1000 * 1000;
             //TestPerfomanceCoding(new StringIntMD5Coding(@"..\..\codeTests\"), Enumerable.Repeat(Guid.NewGuid().ToString(), count), count);
           
-             Test();
+              Test();
 
             Console.WriteLine(Millions = 10);
 
 
                
           
-         // Test();
+            Test();
 
             Console.WriteLine(Millions = 100);
 
           
 
-         //      Test();
+           Test();
         }
 
         
@@ -44,12 +44,14 @@ namespace ANTLR_Test
         {
             Console.WriteLine(Millions);
            TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
-           TripleInt.CodeCache.Clear();
+          
+           TripleInt.EntitiesCodeCache.Clear();
+           Query.decodesCashe.Clear();
             //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\undecoded\" + Millions + @"mln\");
 
-               bool load = false;
-            //    bool load = true;
-            using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
+             //    bool load = false;
+            bool load = true;
+              using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;
             if (load)
@@ -60,8 +62,9 @@ namespace ANTLR_Test
             }
             else
             {
-            //        RunBerlinsWithConstants( ts);
-               RunBerlinsParameters(ts);      
+                ts.WarmUp();
+                  RunBerlinsWithConstants( ts);
+             //    RunBerlinsParameters(ts);      
             }
             var spent = (DateTime.Now - start).Ticks/10000;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))   
@@ -72,7 +75,6 @@ namespace ANTLR_Test
         {
            
             Console.WriteLine("antrl parametered");
-            int i = 0;             
             var fileInfos = new []
                 {
                     @"..\..\sparql data\queries\parameters\1.rq"     ,  
@@ -158,7 +160,7 @@ namespace ANTLR_Test
                 r.WriteLine("maximums " + string.Join(", ", maximums));
                 r.WriteLine("total parse " + string.Join(", ", totalparseMS));
                 r.WriteLine("total run " + string.Join(", ", totalrun));
-                r.WriteLine("countCodingUsages {0} totalMillisecondsCodingUsages {1}", TripleInt.CodeCache.Count, TripleInt.totalMilisecondsCodingUsages);
+                r.WriteLine("countCodingUsages {0} totalMillisecondsCodingUsages {1}", TripleInt.EntitiesCodeCache.Count, TripleInt.totalMilisecondsCodingUsages);
                 r.WriteLine("EWT count" + EntitiesMemoryHashTable.count);
                 r.WriteLine("EWT total search" + EntitiesMemoryHashTable.total);
                 r.WriteLine("EWT max search" + EntitiesMemoryHashTable.max);
@@ -166,7 +168,7 @@ namespace ANTLR_Test
                 r.WriteLine("EWT max range" + EntitiesMemoryHashTable.maxRange);
                 r.WriteLine("EWT average search" + EntitiesMemoryHashTable.total / EntitiesMemoryHashTable.count);
                 r.WriteLine("EWT average range" + EntitiesMemoryHashTable.totalRange / EntitiesMemoryHashTable.count);
-                TripleInt.CodeCache.Clear();
+                TripleInt.EntitiesCodeCache.Clear();
                 TripleInt.totalMilisecondsCodingUsages = 0;
             }
         }
@@ -230,7 +232,7 @@ namespace ANTLR_Test
             using (StreamWriter r = new StreamWriter(@"..\..\output.txt", true))
             {
                 r.WriteLine("milions " + Millions);          
-                r.WriteLine("countCodingUsages {0} totalMillisecondsCodingUsages {1}", TripleInt.CodeCache.Count, TripleInt.totalMilisecondsCodingUsages);
+                r.WriteLine("countCodingUsages {0} totalMillisecondsCodingUsages {1}", TripleInt.EntitiesCodeCache.Count, TripleInt.totalMilisecondsCodingUsages);
             }
 
         }
@@ -268,11 +270,11 @@ namespace ANTLR_Test
         private static void QueryWriteParameters(string parameteredQuery, StreamWriter output, TripleStoreInt ts)
         {         
             var productsCodes = ts.GetSubjectByObjPred(
-                TripleInt.Code("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Product"),
-                TripleInt.Code("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
+                TripleInt.CodeEntities("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Product"),
+                TripleInt.CodePredicates("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
             var codes = productsCodes as int[] ?? productsCodes.ToArray();
             int productCount = codes.Count();
-            var product = TripleInt.Decode(codes.ElementAt(random.Next(0, productCount)));
+            var product = TripleInt.DecodeEntities(codes.ElementAt(random.Next(0, productCount)));
                 //Millions == 1000 ? 2855260 : Millions == 100 ? 284826 : Millions == 10 ? 284826 : 2785;
             int productFeatureCount =
                 Millions == 1000 ? 478840 : Millions == 100 ? 47884 : Millions == 10 ? 47450 : 4745;
@@ -283,15 +285,15 @@ namespace ANTLR_Test
             //var offer = random.Next(1, productCount*OffersPerProduct);
             //var vendor = offer/OffersPerVendor + 1;
              var offersCodes = ts.GetSubjectByObjPred(
-               TripleInt.Code("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Offer"),
-               TripleInt.Code("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
+               TripleInt.CodeEntities("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Offer"),
+               TripleInt.CodePredicates("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
              codes = offersCodes as int[] ?? offersCodes.ToArray();
-            var offer = TripleInt.Decode(codes[random.Next(0, codes.Length)]);
+            var offer = TripleInt.DecodeEntities(codes[random.Next(0, codes.Length)]);
             var reviewsCodes = ts.GetSubjectByObjPred(
-           TripleInt.Code("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Review"),
-           TripleInt.Code("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
+           TripleInt.CodeEntities("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Review"),
+           TripleInt.CodePredicates("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
             codes = reviewsCodes as int[] ?? reviewsCodes.ToArray();
-            var review = TripleInt.Decode(codes[random.Next(0, codes.Length)]);
+            var review = TripleInt.DecodeEntities(codes[random.Next(0, codes.Length)]);
             if (parameteredQuery.Contains("%ProductType%"))
                 output.WriteLine("bsbm-inst:ProductType" + random.Next(1, productTypesCount));
             if (parameteredQuery.Contains("%ProductFeature1%"))
@@ -361,7 +363,6 @@ namespace ANTLR_Test
         private static void TestCoding(IStringIntCoding stringIntMd5Coding, IEnumerable<string> forCode)
         {
             //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
-            int copies = 0;
             long max = 0;
             long total = 0;
             int i = 0, imax = 0;
@@ -412,7 +413,6 @@ namespace ANTLR_Test
         private static void TestPerfomanceCoding(IStringIntCoding stringIntMd5Coding, IEnumerable<string> forCode, int length)
         {
             //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
-            int copies = 0;
             long max = 0;
             long total = 0;
             int i = 0, imax = 0;

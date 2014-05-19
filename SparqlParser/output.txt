@@ -140,3 +140,146 @@ EWT max range4096
 EWT average search0
 EWT average range4092
 total 5025575 мс.
+
+
+millions 1
+milions 1
+max memory usage 97234456
+average 431, 416, 354, 265, 136, 152, 54, 72, 1960, 105, 385, 298
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 31, 15, 15, 31, 31, 31, 171, 125, 15, 46, 31, 46
+total parse 390, 180, 825, 705, 1320, 300, 390, 765, 120, 1065, 1192, 1482
+total run 767, 1020, 585, 1173, 2341, 2971, 8863, 6153, 135, 3643, 106, 195
+countCodingUsages 9166 totalMillisecondsCodingUsages 13569
+EWT count255098
+EWT total search17145
+EWT max search15
+EWT total range1039900482
+EWT max range4096
+EWT average search0
+EWT average range4076
+total 223094 мс.
+millions 10
+milions 10
+max memory usage 138626280
+average 160, 87, 123, 117, 26, 16, 3, 5, 70, 12, 47, 44
+minimums 0, 0, 0, 0, 0, 46, 0, 0, 0, 0, 0, 0
+minimums 0, 0, 0, 0, 0, 46, 0, 0, 0, 0, 0, 0
+maximums 62, 78, 62, 93, 93, 78, 906, 531, 78, 296, 93, 93
+total parse 1651, 705, 2580, 2176, 2191, 315, 525, 2393, 800, 2475, 6557, 6702
+total run 1468, 4987, 1473, 2052, 16533, 29320, 151624, 83904, 6315, 37320, 3937, 4538
+countCodingUsages 15479 totalMillisecondsCodingUsages 78367
+EWT count430838
+EWT total search46607
+EWT max search15
+EWT total range1762643841
+EWT max range4096
+EWT average search0
+EWT average range4091
+total 1419275 мс.
+добавил разогрев таблицы имён.
+millions 1
+milions 1
+max memory usage 98499848
+average 606, 555, 362, 338, 136, 153, 126, 197, 1960, 155, 2083, 1075
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 15, 31, 46, 15, 31, 31, 15, 15, 15, 15, 15
+total parse 315, 165, 825, 540, 1260, 330, 300, 930, 75, 615, 75, 270
+total run 510, 735, 556, 935, 2415, 2926, 3634, 1605, 180, 2610, 165, 195
+countCodingUsages 9166 totalMillisecondsCodingUsages 885
+EWT count255098
+EWT total search10320
+EWT max search15
+EWT total range1039900482
+EWT max range4096
+EWT average search0
+EWT average range4076
+total 51140 мс.
+millions 10
+milions 10
+max memory usage 170223568
+average 529, 362, 313, 214, 32, 16, 73, 150, 2777, 123, 1960, 980
+minimums 0, 0, 0, 0, 0, 46, 0, 0, 0, 0, 0, 0
+minimums 0, 0, 0, 0, 0, 46, 0, 0, 0, 0, 0, 0
+maximums 15, 15, 46, 93, 109, 78, 31, 15, 15, 15, 15, 15
+total parse 525, 195, 975, 930, 915, 330, 465, 900, 75, 810, 105, 240
+total run 420, 1185, 620, 1396, 14234, 30392, 6356, 2415, 105, 3255, 150, 270
+countCodingUsages 15479 totalMillisecondsCodingUsages 2115
+EWT count685936
+EWT total search29160
+EWT max search15
+EWT total range2802544323
+EWT max range4096
+EWT average search0
+EWT average range4085
+total 146922 мс.
+millions 1
+milions 1
+max memory usage 97730088
+average 520, 628, 366, 296, 153, 139, 130, 193, 1666, 168, 2083, 900
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 15, 15, 31, 15, 31, 31, 15, 15, 15, 15, 15
+total parse 480, 120, 810, 735, 1035, 315, 435, 1035, 135, 630, 135, 270
+total run 480, 675, 555, 949, 2220, 3271, 3393, 1545, 165, 2340, 105, 285
+countCodingUsages 9166 totalMillisecondsCodingUsages 1183
+EWT count255098
+EWT total search10001
+EWT max search15
+EWT total range1039900482
+EWT max range4096
+EWT average search0
+EWT average range4076
+total 50865 мс.
+millions 100
+milions 100
+max memory usage 313941528
+average 68, 303, 59, 36, 6, 1, 68, 152, 1388, 105, 1754, 980
+minimums 0, 0, 0, 0, 15, 624, 0, 0, 0, 0, 0, 0
+minimums 0, 0, 0, 0, 15, 624, 0, 0, 0, 0, 0, 0
+maximums 640, 15, 999, 390, 390, 875, 31, 15, 15, 31, 15, 15
+total parse 435, 210, 810, 690, 1230, 300, 495, 1020, 75, 885, 135, 195
+total run 6837, 1440, 7517, 13064, 71118, 324318, 6776, 2250, 285, 3872, 150, 315
+countCodingUsages 16021 totalMillisecondsCodingUsages 2520
+EWT count1724750
+EWT total search77696
+EWT max search15
+EWT total range7059108731
+EWT max range4096
+EWT average search0
+EWT average range4092
+total 970702 мс.
+millions 1
+total 18943 мс.
+millions 1
+millions 1
+millions 1
+millions 1
+millions 1
+millions 1
+millions 1
+total 14248 мс.
+millions 1
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 13
+total 9402 мс.
+millions 1
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 13
+total 1185 мс.
+millions 1
+millions 1
+millions 1
+millions 1
+millions 1
+millions 1
+millions 1
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 12
+total 1225 мс.
+millions 1
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 13
+total 868 мс.

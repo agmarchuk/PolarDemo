@@ -76,7 +76,7 @@ namespace SparqlParser
                                         return o;
                                     string name;
                                     if (!decodesCashe.TryGetValue((int)o, out name))
-                                        decodesCashe.Add((int)o, name = TripleInt.Decode((int)o));
+                                        decodesCashe.Add((int)o, name = TripleInt.DecodeEntities((int)o));
                                     return name;
                                 }));
             };
@@ -133,7 +133,7 @@ namespace SparqlParser
                                 return o!=null ? o.ToString():"";
                             string name;
                             if (!decodesCashe.TryGetValue((int)o, out name))
-                                decodesCashe.Add((int) o, name= TripleInt.Decode((int) o));
+                                decodesCashe.Add((int) o, name= TripleInt.DecodeEntities((int) o));
                             return name;
                         }));
 
@@ -162,7 +162,7 @@ namespace SparqlParser
                         return o;
                     string name;
                     if (!decodesCashe.TryGetValue((int)o, out name))
-                        decodesCashe.Add((int)o, name = TripleInt.Decode((int)o));
+                        decodesCashe.Add((int)o, name = TripleInt.DecodeEntities((int)o));
                     return name;
                 }
                     ));
@@ -173,7 +173,7 @@ namespace SparqlParser
         internal Func<RPackInt, IEnumerable<Tuple<string, string, string>>> constructTemplate;
 
         internal readonly List<Func<RPackInt, IEnumerable<Tuple<string, string, string>>>> constructTriples = new List<Func<RPackInt, IEnumerable<Tuple<string, string, string>>>>();
-        private static readonly Dictionary<int, string> decodesCashe = new Dictionary<int, string>();
+        public static readonly Dictionary<int, string> decodesCashe = new Dictionary<int, string>();
 
         internal void CreateAsqRun()
         {
@@ -386,13 +386,10 @@ namespace SparqlParser
                         "Value");
                 case LiteralVidEnumeration.typedObject:
                     return Expression.Property(
-                        Expression.Convert(literalValueExpr, typeof(TypedObject)),
+                        Expression.Convert(literalValueExpr, typeof (TypedObject)),
                         "Value");
                 case LiteralVidEnumeration.integer:
-                {
-                    return Expression.Call(typeof(Query).GetMethod("Convert"), literalValueExpr);
-                }
-                    break;
+                    return Expression.Call(typeof (Query).GetMethod("Convert"), literalValueExpr);
                 case LiteralVidEnumeration.date:
                     type = typeof (long);
                     break;

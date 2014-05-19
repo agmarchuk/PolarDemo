@@ -208,5 +208,11 @@ namespace NameTable
             });
         }
         public int Count{ get { return Convert.ToInt32(c_index.Root.Count()); }}
+        public void WarmUp()
+        {
+            foreach (var q in nc_cell.Root.ElementValues()) ;
+            foreach (var q in c_index.Root.ElementValues()) ;
+            foreach (var q in n_index.Root.ElementValues()) ; 
+        }
     }
 }
