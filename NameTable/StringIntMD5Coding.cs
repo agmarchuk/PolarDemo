@@ -28,7 +28,7 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
         private PaCell md5_index;
         private string pathMD5Index;
         private bool? openMode;
-        private static Dictionary<string, IStringIntCoding> Opend=new Dictionary<string, IStringIntCoding>();
+        private static readonly Dictionary<string, IStringIntCoding> Opend=new Dictionary<string, IStringIntCoding>();
 
         public StringIntMD5Coding(string path)
         {

@@ -76,7 +76,7 @@ namespace SparqlParser
                                         return o;
                                     string name;
                                     if (!decodesCashe.TryGetValue((int)o, out name))
-                                        decodesCashe.Add((int)o, name = TripleInt.Decode((int)o));
+                                        decodesCashe.Add((int)o, name = TripleInt.DecodeEntity((int)o));
                                     return name;
                                 }));
             };
@@ -133,7 +133,7 @@ namespace SparqlParser
                                 return o!=null ? o.ToString():"";
                             string name;
                             if (!decodesCashe.TryGetValue((int)o, out name))
-                                decodesCashe.Add((int) o, name= TripleInt.Decode((int) o));
+                                decodesCashe.Add((int) o, name= TripleInt.DecodeEntity((int) o));
                             return name;
                         }));
 
@@ -162,7 +162,7 @@ namespace SparqlParser
                         return o;
                     string name;
                     if (!decodesCashe.TryGetValue((int)o, out name))
-                        decodesCashe.Add((int)o, name = TripleInt.Decode((int)o));
+                        decodesCashe.Add((int)o, name = TripleInt.DecodeEntity((int)o));
                     return name;
                 }
                     ));
