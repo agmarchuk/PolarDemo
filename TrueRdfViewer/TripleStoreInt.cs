@@ -65,8 +65,7 @@ namespace TrueRdfViewer
         {
             this.path = path;
             InitTypes();
-            TripleInt.EntitiesCoding = new StringIntMD5Coding(path + "entitiesCodes");
-            TripleInt.PredicatesCoding= new StringIntMD5Coding(path + "predicatesCodes");
+            TripleInt.SiCoding = new StringIntMD5Coding(path+"stringsCodes");
             otriples = new PaCell(tp_otriple_seq, path + "otriples.pac", false);
             otriples_op = new PaCell(tp_otriple_seq, path + "otriples_op.pac", false);
             dtriples = new PaCell(tp_dtriple_seq, path + "dtriples.pac", false);
@@ -86,8 +85,8 @@ namespace TrueRdfViewer
                 new DiapasonScanner<int>(otriples_op, ent => (int)((object[])ent.Get())[2]),
                 new DiapasonScanner<int>(dtriples_sp, ent => (int)((object[])ent.Get())[0])
             });
-          //  ewtHash = new EntitiesMemoryHashTable(ewt);
-            //ewtHash.Load();
+            ewtHash = new EntitiesMemoryHashTable(ewt);
+            ewtHash.Load();
             
 
             //getable = new GroupedEntities(path); // Это хорошая идея, но нужно менять схему реализации
@@ -176,7 +175,7 @@ namespace TrueRdfViewer
             Console.WriteLine("ewt.Load() ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
             
             // Вычисление кеша. Это можно не делать, все равно - кеш в оперативной памяти
-           // ewtHash.Load();
+            ewtHash.Load();
             Console.WriteLine("ewtHash.Load() ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
             
         }
@@ -215,8 +214,7 @@ namespace TrueRdfViewer
             dtriples.Fill(new object[0]);
             int i = 0;
             //Entity e = new Entity();
-            TripleInt.EntitiesCoding.Clear();
-            TripleInt.PredicatesCoding.Clear();
+           TripleInt.SiCoding.Clear();
             foreach (var triple in TurtleInt.LoadGraph(filepath))
             {
                 if (i % 100000 == 0) Console.Write("{0} ", i / 100000);
@@ -363,7 +361,7 @@ namespace TrueRdfViewer
             if (obj == Int32.MinValue || pred == Int32.MinValue) return Enumerable.Empty<int>();
             int[] res;
             var key = new KeyValuePair<int, int>(obj, pred);
-            object[] diapason = GetDiapasonFromHash(obj, 1);
+            object[] diapason = GetDiapasonFromHash(obj, pred, 1);
             if (SpoCache.TryGetValue(key, out res)) return res;
             res = diapason == null
                 ? new int[0]
@@ -381,7 +379,7 @@ namespace TrueRdfViewer
 
         public IEnumerable<int> GetSubjectByObjPred4(int obj, int pred)
         {
-            object[] diapason = GetDiapasonFromHash(obj, 1);
+            object[] diapason = GetDiapasonFromHash(obj, pred, 1);
             if (diapason == null) return Enumerable.Empty<int>();
             return otriples_op.Root.Elements((long) diapason[0], (long) diapason[1])
                 .Select<PaEntry, object[]>(ent => (object[]) ent.Get())
@@ -462,7 +460,7 @@ namespace TrueRdfViewer
             int[] res;
             var key = new KeyValuePair<int, int>(subj, pred);
             if (spOCache.TryGetValue(key, out res)) return res;
-            object[] diapason = GetDiapasonFromHash(subj, 0);
+            object[] diapason = GetDiapasonFromHash(subj, pred, 0);
             if (diapason == null) return Enumerable.Empty<int>();
             res = otriples.Root.ElementValues((long)diapason[0], (long)diapason[1])
                 .Cast<object[]>()
@@ -476,7 +474,7 @@ namespace TrueRdfViewer
 
         public IEnumerable<int> GetObjBySubjPred4(int subj, int pred)
         {
-            object[] diapason = GetDiapasonFromHash(subj, 0);
+            object[] diapason = GetDiapasonFromHash(subj, pred, 0);
             if (diapason == null) return Enumerable.Empty<int>();
             //return otriples.Root.Elements((long)diapason[0], (long)diapason[1])
             //    //.Where(entry => pred == (int)((object[])entry.Get())[1])
@@ -544,9 +542,9 @@ namespace TrueRdfViewer
 
         #endregion
 
-        private object[] GetDiapasonFromHash(int key, int direction)
+        private object[] GetDiapasonFromHash(int key, int pred, int direction)
         {
-            var itemEntry = ewt.EWTable.Root.Element(key);//ewtHash.GetEntity(key);
+            var itemEntry = ewtHash.GetEntity(key);
             if (itemEntry.IsEmpty) return null;
             var diap = (object[])itemEntry.Field(1 + direction).Get();
             return diap;
@@ -591,7 +589,7 @@ namespace TrueRdfViewer
             var key = new KeyValuePair<int, int>(subj, pred);
             if (spDCache.TryGetValue(key, out res)) return res;
 
-            object[] diapason = GetDiapasonFromHash(subj, 2);
+            object[] diapason = GetDiapasonFromHash(subj, pred, 2);
             PaEntry dtriple_entry = dtriples.Root.Element(0);
             res = diapason == null
                 ? new Literal[0]
@@ -639,7 +637,7 @@ namespace TrueRdfViewer
 
         public IEnumerable<Literal> GetDataBySubjPred4(int subj, int pred)
         {
-            object[] diapason = GetDiapasonFromHash(subj, 2);
+            object[] diapason = GetDiapasonFromHash(subj, pred, 2);
             if (diapason == null) return Enumerable.Empty<Literal>();
 
             PaEntry dtriple_entry = dtriples.Root.Element(0);
@@ -917,7 +915,7 @@ namespace TrueRdfViewer
             if (obj == Int32.MinValue) return Enumerable.Empty<KeyValuePair<int, int>>();
             IEnumerable<KeyValuePair<Int32, int>> res;
             if (SPoCache.TryGetValue(obj, out res)) return res;
-            object[] diapason = GetDiapasonFromHash(obj, 1);
+            object[] diapason = GetDiapasonFromHash(obj, 0, 1);
             res = diapason == null
                 ? new KeyValuePair<int, int>[0]
                 : otriples_op.Root.ElementValues((long) diapason[0], (long) diapason[1])
@@ -942,7 +940,7 @@ namespace TrueRdfViewer
             if (subj == Int32.MinValue) return Enumerable.Empty<KeyValuePair<int, int>>();
             IEnumerable<KeyValuePair<int, int>> res;  
             if (sPOCache.TryGetValue(subj, out res)) return res;
-            object[] diapason = GetDiapasonFromHash(subj, 0);
+            object[] diapason = GetDiapasonFromHash(subj, 0, 0);
             res = diapason == null
                 ? new KeyValuePair<Int32, Int32>[0]
                 : otriples.Root.ElementValues((long) diapason[0], (long) diapason[1])
@@ -961,7 +959,7 @@ namespace TrueRdfViewer
             IEnumerable<KeyValuePair<Literal, int>> res;
             if (sPDCache.TryGetValue(subj, out res)) return res;
 
-            object[] diapason = GetDiapasonFromHash(subj, 2);
+            object[] diapason = GetDiapasonFromHash(subj, 0, 2);
             PaEntry dtriple_entry = dtriples.Root.Element(0);
             res = diapason == null
                 ? new KeyValuePair<Literal, int>[0]

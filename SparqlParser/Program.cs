@@ -19,10 +19,10 @@ namespace ANTLR_Test
 
             Console.WriteLine(Millions = 1);
 
-           // var count = 100 * 1000 * 1000;
-           //TestPerfomanceCoding(new StringIntMD5Coding(@"..\..\codeTests\"), Enumerable.Repeat(Guid.NewGuid().ToString(), count), count);
+            var count = 100 * 1000 * 1000;
+            TestPerfomanceCoding(new StringIntMD5Coding(@"..\..\codeTests\"), Enumerable.Repeat(Guid.NewGuid().ToString(), count), count);
           
-             Test();
+           //  Test();
 
             Console.WriteLine(Millions = 10);
 
@@ -48,8 +48,8 @@ namespace ANTLR_Test
            TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
             //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\undecoded\" + Millions + @"mln\");
 
-             bool load = false;
-              //    bool load = true;
+              bool load = false;
+            //     bool load = true;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;
@@ -269,11 +269,11 @@ namespace ANTLR_Test
         private static void QueryWriteParameters(string parameteredQuery, StreamWriter output, TripleStoreInt ts)
         {         
             var productsCodes = ts.GetSubjectByObjPred(
-                TripleInt.CodeEntity("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Product"),
-                TripleInt.CodeEntity("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
+                TripleInt.Code("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Product"),
+                TripleInt.Code("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
             var codes = productsCodes as int[] ?? productsCodes.ToArray();
             int productCount = codes.Count();
-            var product = TripleInt.DecodeEntity(codes.ElementAt(random.Next(0, productCount)));
+            var product = TripleInt.Decode(codes.ElementAt(random.Next(0, productCount)));
                 //Millions == 1000 ? 2855260 : Millions == 100 ? 284826 : Millions == 10 ? 284826 : 2785;
             int productFeatureCount =
                 Millions == 1000 ? 478840 : Millions == 100 ? 47884 : Millions == 10 ? 47450 : 4745;
@@ -284,15 +284,15 @@ namespace ANTLR_Test
             //var offer = random.Next(1, productCount*OffersPerProduct);
             //var vendor = offer/OffersPerVendor + 1;
              var offersCodes = ts.GetSubjectByObjPred(
-               TripleInt.CodeEntity("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Offer"),
-               TripleInt.CodeEntity("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
+               TripleInt.Code("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Offer"),
+               TripleInt.Code("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
              codes = offersCodes as int[] ?? offersCodes.ToArray();
-            var offer = TripleInt.DecodeEntity(codes[random.Next(0, codes.Length)]);
+            var offer = TripleInt.Decode(codes[random.Next(0, codes.Length)]);
             var reviewsCodes = ts.GetSubjectByObjPred(
-           TripleInt.CodeEntity("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Review"),
-           TripleInt.CodeEntity("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
+           TripleInt.Code("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Review"),
+           TripleInt.Code("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
             codes = reviewsCodes as int[] ?? reviewsCodes.ToArray();
-            var review = TripleInt.DecodeEntity(codes[random.Next(0, codes.Length)]);
+            var review = TripleInt.Decode(codes[random.Next(0, codes.Length)]);
             if (parameteredQuery.Contains("%ProductType%"))
                 output.WriteLine("bsbm-inst:ProductType" + random.Next(1, productTypesCount));
             if (parameteredQuery.Contains("%ProductFeature1%"))

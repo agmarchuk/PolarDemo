@@ -8,19 +8,18 @@ namespace  TrueRdfViewer
     public abstract class TripleInt 
     { 
         public int subject, predicate;
-        public static IStringIntCoding EntitiesCoding;
-        public static IStringIntCoding PredicatesCoding;   
+        public static IStringIntCoding SiCoding;
         public static Dictionary<string, int> CodeCache = new Dictionary<string, int>();
      
         public static long totalMilisecondsCodingUsages = 0;
         
-        public static int CodeEntity(string s)
+        public static int Code(string s)
         {   
             int c;
             if(!CodeCache.TryGetValue(s, out c))
             {
                 DateTime st = DateTime.Now;
-                   c = EntitiesCoding.GetCode(s);
+                   c = SiCoding.GetCode(s);
            //  c = s.GetHashCode();
                 totalMilisecondsCodingUsages += (DateTime.Now - st).Ticks/10000;
                 CodeCache.Add(s, c); //s.GetHashCode() 
@@ -28,29 +27,10 @@ namespace  TrueRdfViewer
             }
             return c;
         }              
-        public static string DecodeEntity(int e)
+        public static string Decode(int e)
         {
           //   return e.ToString();
-            return PredicatesCoding.GetName(e);
-        }
-        public static int CodePredicate(string s)
-        {
-            int c;
-            if (!CodeCache.TryGetValue(s, out c))
-            {
-                DateTime st = DateTime.Now;
-                c = PredicatesCoding.GetCode(s);
-                //  c = s.GetHashCode();
-                totalMilisecondsCodingUsages += (DateTime.Now - st).Ticks / 10000;
-                CodeCache.Add(s, c); //s.GetHashCode() 
-
-            }
-            return c;
-        }
-        public static string DecodePredicate(int e)
-        {
-            //   return e.ToString();
-            return PredicatesCoding.GetName(e);
+            return SiCoding.GetName(e);
         } 
     }
     public class OTripleInt : TripleInt { public int obj; }

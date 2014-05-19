@@ -15,8 +15,3 @@ count tests 100
 average 0,01
 load 48639
 create index 6
-millions 1
-total 22012 мс.
-millions 1
-millions 1
-millions 1

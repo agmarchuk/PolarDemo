@@ -13,7 +13,7 @@ namespace TrueRdfViewer
         public static string dc = "http://purl.org/dc/elements/1.1/";
         public static string bsbm = "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/";
         public static string bsbm_inst = "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/";
-        private static int E(string spo) { return TripleInt.CodeEntity(spo); }
+        private static int E(string spo) { return TripleInt.Code(spo); }
         private static OVal rdftype = new OVal() { vid = OValEnumeration.obj, entity = E(rdf + "type") };
         private static OVal rdfslabel = new OVal() { vid = OValEnumeration.obj, entity = E(rdfs + "label") };
 

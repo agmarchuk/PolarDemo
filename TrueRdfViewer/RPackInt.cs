@@ -20,11 +20,11 @@ namespace TrueRdfViewer
         public string Get(object si)
         {
             if (!(si is short)) 
-                return TripleInt.DecodeEntity((int)si);
+                return TripleInt.Decode((int)si);
             var index = (short)si;
             var literal = (row[index] as Literal);
             if (literal != null) return literal.ToString();
-            else return TripleInt.DecodeEntity((int) row[index]);
+            else return TripleInt.Decode((int) row[index]);
         }
 
         public int GetE(object si)

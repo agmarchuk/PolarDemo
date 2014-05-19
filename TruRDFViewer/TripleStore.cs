@@ -9,12 +9,10 @@ namespace TruRDFViewer
 {
     public class TripleStore
     {
-       
-        private PType tp_entity;
-        private PType tp_dtriple_spf;
         private PType tp_otriple_seq;
         private PType tp_dtriple_seq;
-                                              
+        private PType tp_entity;
+        private PType tp_dtriple_spf;
         internal EntitiesWideTable ewt;
         internal EntitiesMemoryHashTable ewtHash;
         private void InitTypes()
@@ -65,7 +63,8 @@ namespace TruRDFViewer
         public TripleStore(string path)
         {
             this.path = path;
-            InitTypes();   
+            InitTypes();
+        
             otriples = new PaCell(tp_otriple_seq, path + "otriples.pac", false);
             otriples_op = new PaCell(tp_otriple_seq, path + "otriples_op.pac", false);
             dtriples = new PaCell(tp_dtriple_seq, path + "dtriples.pac", false);
@@ -141,20 +140,20 @@ namespace TruRDFViewer
             //SPOComparer spo_compare = new SPOComparer();
             SPComparer sp_compare = new SPComparer();
             // Упорядочивание otriples_op по o-p
-            //otriples_op.Root.SortByKey<SubjPred>(rec => 
-            //{
-            //    object[] r = (object[])rec;
-            //    return new SubjPred() { pred = (string)r[1], subj = (string)r[2] };
-            //}, sp_compare);
-        //   Console.WriteLine("otriples_op Sort ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
+            otriples_op.Root.SortByKey<SubjPred>(rec => 
+            {
+                object[] r = (object[])rec;
+                return new SubjPred() { pred = (string)r[1], subj = (string)r[2] };
+            }, sp_compare);
+            Console.WriteLine("otriples_op Sort ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
             // Упорядочивание dtriples_sp по s-p
-            //dtriples_sp.Root.SortByKey(rec =>
-            //{
-            //    object[] r = (object[])rec;
-            //    return new SubjPred() { pred = (string)r[1], subj = (string)r[0] };
-            //}, sp_compare);
-         //   Console.WriteLine("dtriples_sp.Root.Sort ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
+            dtriples_sp.Root.SortByKey(rec =>
+            {
+                object[] r = (object[])rec;
+                return new SubjPred() { pred = (string)r[1], subj = (string)r[0] };
+            }, sp_compare);
+            Console.WriteLine("dtriples_sp.Root.Sort ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
 
             if (filescale)
@@ -203,7 +202,7 @@ namespace TruRDFViewer
                 dtriples_sp.Root.AppendElement(new object[] { s, p, off });
                 return true;
             });
-            dtriples_sp.Flush();      
+            dtriples_sp.Flush();
         }
 
         private void Load(string filepath)
