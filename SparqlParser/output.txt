@@ -283,3 +283,78 @@ millions 1
 milions 1
 countCodingUsages 14 totalMillisecondsCodingUsages 13
 total 868 мс.
+millions 1
+total 14097 мс.
+millions 10
+total 266303 мс.
+millions 100
+millions 100
+millions 100
+millions 100
+millions 100
+total 4842384 мс.
+millions 1
+milions 1
+max memory usage 82195968
+average 564, 854, 416, 304, 148, 125, 173, 343, 3333, 179, 3703, 1282
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 15, 31, 46, 31, 46, 15, 15, 15, 15, 15, 15
+total parse 435, 180, 765, 675, 1245, 390, 360, 840, 75, 675, 90, 270
+total run 450, 405, 436, 966, 2131, 3601, 2520, 615, 75, 2115, 45, 120
+countCodingUsages 9133 totalMillisecondsCodingUsages 856
+EWT count0
+EWT total search0
+EWT max search0
+EWT total range0
+EWT max range0
+millions 1
+millions 1
+millions 1
+milions 1
+max memory usage 81553392
+average 469, 813, 427, 353, 149, 131, 167, 444, 2777, 166, 2380, 1666
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 15, 15, 31, 31, 15, 15, 15, 15, 15, 15, 15
+total parse 480, 105, 690, 555, 1095, 255, 330, 555, 45, 1005, 90, 240
+total run 585, 510, 480, 860, 2251, 3555, 2655, 570, 135, 1995, 120, 60
+countCodingUsages 9133 totalMillisecondsCodingUsages 765
+EWT count0
+EWT total search0
+EWT max search0
+EWT total range0
+EWT max range0
+total 53515 мс.
+millions 10
+milions 10
+max memory usage 135218856
+average 545, 529, 353, 250, 33, 15, 119, 262, 2380, 153, 3030, 1449
+minimums 0, 0, 0, 0, 0, 62, 0, 0, 0, 0, 0, 0
+minimums 0, 0, 0, 0, 0, 62, 0, 0, 0, 0, 0, 0
+maximums 31, 15, 46, 78, 93, 93, 31, 15, 15, 15, 15, 15
+total parse 450, 225, 795, 825, 1185, 285, 525, 1050, 90, 855, 60, 195
+total run 466, 720, 618, 1170, 13497, 32759, 3675, 855, 120, 2400, 105, 150
+countCodingUsages 15446 totalMillisecondsCodingUsages 2010
+EWT count0
+EWT total search0
+EWT max search0
+EWT total range0
+EWT max range0
+total 200484 мс.
+millions 100
+milions 100
+max memory usage 284225936
+average 67, 469, 60, 35, 6, 1, 109, 249, 1213, 126, 3246, 1628
+minimums 0, 0, 0, 0, 0, 640, 0, 0, 0, 0, 0, 0
+minimums 0, 0, 0, 0, 0, 640, 0, 0, 0, 0, 0, 0
+maximums 640, 15, 1000, 390, 421, 1015, 31, 19, 15, 31, 15, 15
+total parse 641, 294, 864, 968, 1429, 340, 563, 910, 109, 645, 92, 170
+total run 6753, 768, 7325, 13261, 72368, 339404, 4014, 1086, 303, 3298, 62, 137
+countCodingUsages 15988 totalMillisecondsCodingUsages 2480
+EWT count0
+EWT total search0
+EWT max search0
+EWT total range0
+EWT max range0
+total 1165383 мс.

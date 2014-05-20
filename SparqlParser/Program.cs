@@ -19,23 +19,25 @@ namespace ANTLR_Test
 
             Console.WriteLine(Millions = 1);
 
+        
+                
             //var count = 100 * 1000 * 1000;
             //TestPerfomanceCoding(new StringIntMD5Coding(@"..\..\codeTests\"), Enumerable.Repeat(Guid.NewGuid().ToString(), count), count);
-          
-              Test();
+
+               Test();
 
             Console.WriteLine(Millions = 10);
 
 
-               
-          
-            Test();
+
+
+            //   Test();
 
             Console.WriteLine(Millions = 100);
 
           
 
-           Test();
+     //      Test();
         }
 
         
@@ -49,8 +51,8 @@ namespace ANTLR_Test
            Query.decodesCashe.Clear();
             //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\undecoded\" + Millions + @"mln\");
 
-             //    bool load = false;
-            bool load = true;
+               bool load = false;
+            //  bool load = true;
               using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;
@@ -63,8 +65,8 @@ namespace ANTLR_Test
             else
             {
                 ts.WarmUp();
-                  RunBerlinsWithConstants( ts);
-             //    RunBerlinsParameters(ts);      
+                    RunBerlinsWithConstants( ts);
+          //     RunBerlinsParameters(ts);      
             }
             var spent = (DateTime.Now - start).Ticks/10000;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))   
@@ -166,8 +168,8 @@ namespace ANTLR_Test
                 r.WriteLine("EWT max search" + EntitiesMemoryHashTable.max);
                 r.WriteLine("EWT total range" + EntitiesMemoryHashTable.totalRange);
                 r.WriteLine("EWT max range" + EntitiesMemoryHashTable.maxRange);
-                r.WriteLine("EWT average search" + EntitiesMemoryHashTable.total / EntitiesMemoryHashTable.count);
-                r.WriteLine("EWT average range" + EntitiesMemoryHashTable.totalRange / EntitiesMemoryHashTable.count);
+                //r.WriteLine("EWT average search" + EntitiesMemoryHashTable.total / EntitiesMemoryHashTable.count);
+                //r.WriteLine("EWT average range" + EntitiesMemoryHashTable.totalRange / EntitiesMemoryHashTable.count);
                 TripleInt.EntitiesCodeCache.Clear();
                 TripleInt.totalMilisecondsCodingUsages = 0;
             }

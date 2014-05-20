@@ -52,6 +52,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Ref.cs" />
     <Compile Include="StringIntCoding.cs" />
+    <Compile Include="StringIntMD5RAMCoding.cs" />
     <Compile Include="StringIntMD5Coding.cs" />
     <Compile Include="StringToIntBuffer.cs" />
   </ItemGroup>

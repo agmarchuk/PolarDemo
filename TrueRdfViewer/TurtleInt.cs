@@ -11,6 +11,7 @@ namespace TrueRdfViewer
 {
     public static class TurtleInt
     {
+        public static int BufferMax = 20* 1000*1000;
         // (Только для специальных целей) Это для накапливания идентификаторов собираемых сущностей:
         public static List<string> sarr = new List<string>();
 
@@ -20,8 +21,7 @@ namespace TrueRdfViewer
             int ntriples = 0;
             string subject = null;
             var namespaces = new Dictionary<string, string>();
-            var tripletsBuffer = new List<Tuple<string, string, object>>();    
-            int bufferMax = 50*1000*1000;
+            var tripletsBuffer = new List<Tuple<string, string, object>>();
             using (var sr = new StreamReader(datafile))
                 while (!sr.EndOfStream)
                 {           
@@ -49,7 +49,7 @@ namespace TrueRdfViewer
                     }
                     else if (line[0] != ' ')
                     {
-                        if (tripletsBuffer.Count >= bufferMax)
+                        if (tripletsBuffer.Count >= BufferMax)
                         {
                             foreach (var tripleInt in TripleIntsCode(tripletsBuffer))
                                 yield return tripleInt;              

@@ -48,7 +48,7 @@
     <Compile Include="BerlinTestsInt.cs" />
     <Compile Include="DiapasonScanner.cs" />
     <Compile Include="DiapLinksScanner.cs" />
-    <Compile Include="EntitiesDiapasons.cs" />
+    <Compile Include="EntitiesMemoryHashTable.cs" />
     <Compile Include="EntitiesWideTable.cs" />
     <Compile Include="FlexIndexView.cs" />
     <Compile Include="GroupedEntities.cs" />
