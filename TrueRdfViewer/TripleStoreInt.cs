@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using NameTable;
@@ -11,11 +12,22 @@ namespace TrueRdfViewer
     public class TripleStoreInt
     {
         private PType tp_otriple_seq;
-        private PType tp_dtriple_seq;
+        private PType tp_triple_seq_two;
+        private PType tp_data_seq;
         private PType tp_entity;
         private PType tp_dtriple_spf;
+        private PType tp_dtriple_spf_two;
         internal EntitiesWideTable ewt;
        internal EntitiesMemoryHashTable ewtHash;
+       private readonly Dictionary<int, IEnumerable<KeyValuePair<Int32, int>>> SPoCache = new Dictionary<int, IEnumerable<KeyValuePair<int, int>>>();
+       private Dictionary<int, IEnumerable<KeyValuePair<Int32, Int32>>> sPOCache = new Dictionary<int, IEnumerable<KeyValuePair<int, int>>>();
+       readonly Dictionary<int, IEnumerable<KeyValuePair<Literal, int>>> sPDCache = new Dictionary<int, IEnumerable<KeyValuePair<Literal, int>>>();
+       private Dictionary<KeyValuePair<int, int>, Literal[]> spDCache = new Dictionary<KeyValuePair<int, int>, Literal[]>();
+       private readonly Dictionary<KeyValuePair<int, int>, int[]> SpoCache = new Dictionary<KeyValuePair<int, int>, int[]>();
+       private readonly Dictionary<KeyValuePair<int, int>, int[]> spOCache = new Dictionary<KeyValuePair<int, int>, int[]>();
+       private string otriplets_op_filePath;
+       private string otriples_filePath;
+       private string dtriples_filePath;
         private void InitTypes()
         {
             tp_entity = new PType(PTypeEnumeration.integer);
@@ -34,21 +46,24 @@ namespace TrueRdfViewer
                     new NamedType("subject", tp_entity),
                     new NamedType("predicate", tp_entity),
                     new NamedType("object", tp_entity)));
-            tp_dtriple_seq = new PTypeSequence(new PTypeRecord(
-                    new NamedType("subject", tp_entity),
-                    new NamedType("predicate", tp_entity),
-                    new NamedType("data", tp_rliteral)));
+            tp_data_seq = new PTypeSequence(tp_rliteral);
             // Тип для экономного выстраивания индекса s-p для dtriples
             tp_dtriple_spf = new PTypeSequence(new PTypeRecord(
                     new NamedType("subject", tp_entity),
                     new NamedType("predicate", tp_entity),
                     new NamedType("offset", new PType(PTypeEnumeration.longinteger))));
+            tp_dtriple_spf_two = new PTypeSequence(new PTypeRecord(       
+                new NamedType("predicate", tp_entity),
+                new NamedType("offset", new PType(PTypeEnumeration.longinteger))));
+            tp_triple_seq_two = new PTypeSequence(new PTypeRecord(
+                new NamedType("predicate", tp_entity),
+                new NamedType("_bject", tp_entity)));
 
         }
         private string path;
         public PaCell otriples;
         public PaCell otriples_op; // объектные триплеты, упорядоченные по o-p
-        public PaCell dtriples;
+        public PaCell dataCell;
         public PaCell dtriples_sp;
         private FlexIndexView<SubjPredObjInt> spo_o_index = null;
         private FlexIndexView<SubjPredInt> sp_d_index = null;
@@ -64,43 +79,93 @@ namespace TrueRdfViewer
         public TripleStoreInt(string path)
         {
             this.path = path;
+         
             InitTypes();
             TripleInt.SiCodingEntities = new StringIntMD5RAMCoding(path + "entitiesCodes");
             TripleInt.SiCodingPredicates= new StringIntMD5RAMCoding(path + "predicatesCodes");
-            otriples = new PaCell(tp_otriple_seq, path + "otriples.pac", false);
-            otriples_op = new PaCell(tp_otriple_seq, path + "otriples_op.pac", false);
-            dtriples = new PaCell(tp_dtriple_seq, path + "dtriples.pac", false);
-            dtriples_sp = new PaCell(tp_dtriple_spf, path + "dtriples_spf.pac", false);
-            oscale = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)), path + "oscale.pac", false);
+            otriplets_op_filePath = path + "otriples_op.pac";
+            otriples_filePath = path + "otriples.pac";
+            dtriples_filePath = path + "dtriples_spf.pac";
+            Open(File.Exists(otriples_filePath));
             if (!oscale.IsEmpty)
-            {
                 CalculateRange();
-            }
-            if (!otriples.IsEmpty)
-            {
-                OpenCreateIndexes();
-            }
-            ewt = new EntitiesWideTable(path, new[]  
-            {
-                new DiapasonScanner<int>(otriples, ent => (int)((object[])ent.Get())[0]),
-                new DiapasonScanner<int>(otriples_op, ent => (int)((object[])ent.Get())[2]),
-                new DiapasonScanner<int>(dtriples_sp, ent => (int)((object[])ent.Get())[0])
-            });
+
+
+            ewt = new EntitiesWideTable(path, 3);
             //ewtHash = new EntitiesMemoryHashTable(ewt);
            // ewtHash.Load();
+
             
 
             //getable = new GroupedEntities(path); // Это хорошая идея, но нужно менять схему реализации
             //getable.CheckGroupedEntities();
             //geHash = getable.GroupedEntitiesHash();
+
         }
+
+        private void Open(bool readOnlyMode)
+        {
+            if (readOnlyMode)
+            {
+                otriples = new PaCell(tp_triple_seq_two, otriples_filePath);
+                otriples_op = new PaCell(tp_triple_seq_two, otriplets_op_filePath);
+                dtriples_sp = new PaCell(tp_dtriple_spf_two, dtriples_filePath);
+            }
+            else
+            {
+                otriples = new PaCell(tp_otriple_seq , otriples_filePath + "tmp", false);
+                otriples_op = new PaCell(tp_otriple_seq , otriplets_op_filePath + "tmp", false);
+                dtriples_sp = new PaCell(tp_dtriple_spf, dtriples_filePath + "tmp", false);
+            }
+
+            dataCell = new PaCell(tp_data_seq, path + "dtriples.pac", readOnlyMode);
+            oscale = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)), path + "oscale.pac", readOnlyMode);
+        }
+
+
+        private void RemoveColumns()
+        {                 
+            otriples = new PaCell(tp_triple_seq_two, otriples_filePath, false);
+            otriples_op = new PaCell(tp_triple_seq_two, otriplets_op_filePath, false);
+            dtriples_sp = new PaCell(tp_dtriple_spf_two, dtriples_filePath, false);
+            otriples.Clear();
+            otriples_op.Clear();
+            dtriples_sp.Clear();     
+            otriples.Fill(new object[0]);
+            dtriples_sp.Fill(new object[0]);
+            otriples_op.Fill(new object[0]);
+
+            var otriples_tmp = new PaCell(tp_otriple_seq, otriples_filePath + "tmp");
+            var otriples_op_tmp = new PaCell(tp_otriple_seq, otriplets_op_filePath + "tmp");
+            var dtriples_sp_tmp = new PaCell(tp_dtriple_spf, dtriples_filePath + "tmp");        
+
+            foreach (object[] elementValue in otriples_tmp.Root.ElementValues())
+                otriples.Root.AppendElement(new[] {elementValue[1], elementValue[2]});
+            foreach (object[] elementValue in otriples_op_tmp.Root.ElementValues())
+                otriples_op.Root.AppendElement(new[] {elementValue[1], elementValue[0]});
+            foreach (object[] elementValue in dtriples_sp_tmp.Root.ElementValues())
+                dtriples_sp.Root.AppendElement(new[] {elementValue[1], elementValue[2]});
+
+            otriples_tmp.Close();
+            otriples_op_tmp.Close();
+            dtriples_sp_tmp.Close();
+            File.Delete(otriplets_op_filePath + "tmp");
+            File.Delete(otriples_filePath + "tmp");
+            File.Delete(dtriples_filePath + "tmp");
+
+            otriples.Close();
+            otriples_op.Close();
+            dtriples_sp.Close();
+        }
+
         public void WarmUp()
         {
             if (otriples.IsEmpty) return;
             foreach (var v in otriples.Root.ElementValues()) ;
             foreach (var v in otriples_op.Root.ElementValues()) ;
-            foreach (var v in dtriples.Root.ElementValues()) ;
+            foreach (var v in dataCell.Root.ElementValues()) ;
             foreach (var v in dtriples_sp.Root.ElementValues()) ;
+           
             if (filescale) 
                 foreach (var v in oscale.Root.ElementValues()) ;
             foreach (var v in ewt.EWTable.Root.ElementValues()) ; // этая ячейка "подогревается" при начале программы
@@ -115,36 +180,30 @@ namespace TrueRdfViewer
             range = r + 4;
         }
 
-        private void OpenCreateIndexes()
-        {
-            spo_o_index = new FlexIndexView<SubjPredObjInt>(path + "spo_o_index", otriples.Root,
-                ent => new SubjPredObjInt() { subj = (int)ent.Field(0).Get(), pred = (int)ent.Field(1).Get(), obj = (int)ent.Field(2).Get() });
-            sp_d_index = new FlexIndexView<SubjPredInt>(path + "subject_d_index", dtriples.Root,
-                ent => new SubjPredInt() { subj = (int)ent.Field(0).Get(), pred = (int)ent.Field(1).Get() });
-            op_o_index = new FlexIndexView<SubjPredInt>(path + "obj_o_index", otriples.Root,
-                ent => new SubjPredInt() { subj = (int)ent.Field(2).Get(), pred = (int)ent.Field(1).Get() });
-            if (!filescale) CreateScale();
-        }
+      
 
         public void LoadTurtle(string filepath)
-        {
+        {                                          
             DateTime tt0 = DateTime.Now;
 
-            Load(filepath);
-            Console.WriteLine("Load ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
+            Close();
 
+            Open(false);
+
+            Load(filepath);
+            Console.WriteLine("Load ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;  
             
             PrepareArrays();
             Console.WriteLine("PrepareArrays ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
             
             // Упорядочивание otriples по s-p-o
-            otriples.Root.SortByKey<SubjPredObjInt>(rec => new SubjPredObjInt(rec), new SPOComparer());
+            otriples.Root.SortByKey(rec => new SubjPredObjInt(rec), new SPOComparer());
             Console.WriteLine("otriples.Root.Sort ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
             //SPOComparer spo_compare = new SPOComparer();
             SPComparer sp_compare = new SPComparer();
             // Упорядочивание otriples_op по o-p
-            otriples_op.Root.SortByKey<SubjPredInt>(rec => 
+            otriples_op.Root.SortByKey(rec => 
             {
                 object[] r = (object[])rec;
                 return new SubjPredInt() { pred = (int)r[1], subj = (int)r[2] };
@@ -173,52 +232,112 @@ namespace TrueRdfViewer
             }
             Console.WriteLine("CreateScale ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
+           
             // Создание "широкой" таблицы
-            ewt.Load();
+            ewt.Load(new[]  
+            {
+                new DiapasonScanner<int>(otriples, ent => (int)((object[])ent.Get())[0]),
+                new DiapasonScanner<int>(otriples_op, ent => (int)((object[])ent.Get())[2]),
+                new DiapasonScanner<int>(dtriples_sp, ent => (int)((object[])ent.Get())[0])
+            });
             Console.WriteLine("ewt.Load() ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
             
             // Вычисление кеша. Это можно не делать, все равно - кеш в оперативной памяти
             //ewtHash.Load();
-            Console.WriteLine("ewtHash.Load() ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
-            
+          // Console.WriteLine("ewtHash.Load() ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
+
+            Close();                           
+            RemoveColumns();
+            Open(true);
+        }
+
+        private void Test()
+        {   
+            var first = otriples_op.Root.ElementValues().Cast<object[]>().First();
+            int currentPredicate = (int) first[1];
+            var currentDiapason = new Diapason();
+            var currentObjectDiapason = new Diapason();
+            int currentObj = (int) first[2];
+
+            using (StreamWriter wr = new StreamWriter(@"..\..\temp.txt"))
+                foreach (object[] spo in otriples_op.Root.ElementValues())
+            {
+                                                                  
+                if (currentPredicate == (int) spo[1] && currentObj == (int) spo[2])
+                {
+                    currentDiapason.numb++;
+                }
+                else
+                {   
+                    currentPredicate = (int) spo[1];
+                    wr.WriteLine("diapasonPredicate " + currentDiapason.numb);
+                    currentDiapason.start += currentDiapason.numb;
+                    currentDiapason.numb = 1;
+                    if (currentObj == (int) spo[2])
+                        currentObjectDiapason.numb++;
+                    else
+                    {   
+                        currentObj = (int) spo[2];
+                        currentObjectDiapason.start += currentObjectDiapason.numb;
+                  //      wr.WriteLine("currentObjectDiapason " + currentObjectDiapason.numb);
+                        currentObjectDiapason.numb = 1;
+                    }
+                }
+            }
+         
         }
 
         private void PrepareArrays()
         {
             // Создание и упорядочивание дополнительных структур
-            otriples_op.Clear();
-            otriples_op.Fill(new object[0]);
-            foreach (object v in otriples.Root.ElementValues()) otriples_op.Root.AppendElement(v);
-            otriples_op.Flush();
-            dtriples_sp.Clear();
-            dtriples_sp.Fill(new object[0]);
+            
+            otriples_op.Close();
+            otriples.Close();
+            if (File.Exists(otriplets_op_filePath + "tmp")) File.Delete(otriplets_op_filePath + "tmp");
+            File.Copy(otriples_filePath + "tmp", otriplets_op_filePath + "tmp");
+            otriples_op = new PaCell(tp_otriple_seq, otriplets_op_filePath + "tmp", false);
+            otriples = new PaCell(tp_otriple_seq, otriples_filePath + "tmp", false);
+            //otriples_op.Clear();
+            //otriples_op.Fill(new object[0]);
+            //foreach (object v in otriples.Root.ElementValues()) otriples_op.Root.AppendElement(v);
+            //otriples_op.Flush();
+           
             //foreach (PaEntry entry in dtriples.Root.Elements())
             //{
             //    int s = (int)entry.Field(0).Get();
             //    int p = (int)entry.Field(1).Get();
             //    dtriples_sp.Root.AppendElement(new object[] { s, p, entry.offset });
             //}
-            dtriples.Root.Scan((off, pobj) =>
-            {
-                object[] tri = (object[])pobj;
-                int s = (int)tri[0];
-                int p = (int)tri[1];
-                dtriples_sp.Root.AppendElement(new object[] { s, p, off });
-                return true;
-            });
-            dtriples_sp.Flush();
+            //       dataCell.Root.Scan((off, pobj) =>
+            //{
+            //    object[] tri = (object[])pobj;
+            //    int s = (int)tri[0];
+            //    int p = (int)tri[1];
+            //    dtriples_sp.Root.AppendElement(new object[] { s, p, off });
+            //    return true;
+            //});
+            //dtriples_sp.Flush();
         }
 
         private void Load(string filepath)
         {
+            //Directory.Delete(path);               
+            //Directory.CreateDirectory(path);
+
+          
             otriples.Clear();
             otriples.Fill(new object[0]);
-            dtriples.Clear();
-            dtriples.Fill(new object[0]);
+            dataCell.Clear();
+            dataCell.Fill(new object[0]);
+            dtriples_sp.Clear();
+            dtriples_sp.Fill(new object[0]);
             int i = 0;
             //Entity e = new Entity();
             TripleInt.SiCodingEntities.Clear();
             TripleInt.SiCodingPredicates.Clear();
+            TripleInt.EntitiesCodeCache.Clear();
+            TripleInt.PredicatesCodeCache.Clear();
+          
             foreach (var triple in TurtleInt.LoadGraph(filepath))
             {
                 if (i % 100000 == 0) Console.Write("{0} ", i / 100000);
@@ -266,17 +385,24 @@ namespace TrueRdfViewer
                         da = new object[] { 0, null };
                             break;
                     }
-                    dtriples.Root.AppendElement(new object[] 
-                    { 
-                        tr.subject, 
-                        tr.predicate, 
-                        da 
-                    });
+                   var offset = dataCell.Root.AppendElement(da);
+                    dtriples_sp.Root.AppendElement(new object[] {tr.subject, tr.predicate, offset});
                 }
             }
             otriples.Flush();
-            dtriples.Flush();
+            dataCell.Flush();
+            dtriples_sp.Flush();
         }
+
+        private void Close()
+        {
+            dataCell.Close();
+            dtriples_sp.Close();
+            otriples.Close();
+            otriples_op.Close();
+            oscale.Close();       
+        }
+
         //public void LoadXML(string filepath)
         //{
         //    otriples.Clear();
@@ -359,7 +485,7 @@ namespace TrueRdfViewer
             }
             Console.WriteLine("{0} {1} {2}", c, c1, ntriples);
         }
-        private readonly Dictionary<KeyValuePair<int, int>, int[]> SpoCache = new Dictionary<KeyValuePair<int, int>, int[]>();
+
         public IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
         {
             if (obj == Int32.MinValue || pred == Int32.MinValue) return Enumerable.Empty<int>();
@@ -370,11 +496,13 @@ namespace TrueRdfViewer
             res = diapason == null
                 ? new int[0]
                 : otriples_op.Root.ElementValues((long) diapason[0], (long) diapason[1])
-                    // Можно использовать ElementValues потому что результат не итерация, а массив
                     .Cast<object[]>()
-                    .Where(spo => pred == (int) spo[1])
-                    // Если диапазон с учетом предиката, эта проверка не нужна, но операция очень дешевая, можно оставить
-                    .Select(spo => (int) spo[0]).ToArray();
+                    .SkipWhile(spo => pred != (int) spo[0])
+                    .TakeWhile(spo => pred == (int) spo[0])
+                    .Select(spo => (int) spo[1])
+                    .ToArray();
+
+
             SpoCache.Add(key, res);
             return res;
         }
@@ -386,7 +514,7 @@ namespace TrueRdfViewer
             object[] diapason = GetDiapasonFromHash(obj, 1);
             if (diapason == null) return Enumerable.Empty<int>();
             return otriples_op.Root.Elements((long) diapason[0], (long) diapason[1])
-                .Select<PaEntry, object[]>(ent => (object[]) ent.Get())
+                .Select(ent => (object[]) ent.Get())
                 //.Cast<object[]>()
                 .Select(spo => (int) spo[0]);
         }
@@ -400,7 +528,7 @@ namespace TrueRdfViewer
             long num = (long) diapason[1];
             if (num < 500)
                 return otriples_op.Root.Elements((long) diapason[0], num)
-                    .Select<PaEntry, object[]>(ent => (object[]) ent.Get())
+                    .Select(ent => (object[]) ent.Get())
                     //.Cast<object[]>()
                     .Where(spo => pred == (int) spo[1])
                     .Select(spo => (int) spo[0]);
@@ -423,7 +551,7 @@ namespace TrueRdfViewer
             var diapason = (object[]) itemEntriry.Field(2).Get();
 
             return otriples_op.Root.Elements((long) diapason[0], (long) diapason[1])
-                .Select<PaEntry, object[]>(ent => (object[]) ent.Get())
+                .Select(ent => (object[]) ent.Get())
                 .Where(spo => pred == (int) spo[1])
                 .Select(spo => (int) spo[0]);
         }
@@ -457,7 +585,6 @@ namespace TrueRdfViewer
 
         #endregion     
 
-        private readonly Dictionary<KeyValuePair<int, int>, int[]> spOCache = new Dictionary<KeyValuePair<int, int>, int[]>();
         public IEnumerable<int> GetObjBySubjPred(int subj, int pred)
         {
             if (subj == Int32.MinValue || pred == Int32.MinValue) return Enumerable.Empty<int>();
@@ -466,16 +593,25 @@ namespace TrueRdfViewer
             if (spOCache.TryGetValue(key, out res)) return res;
             object[] diapason = GetDiapasonFromHash(subj, 0);
             if (diapason == null) return Enumerable.Empty<int>();
-            res = otriples.Root.ElementValues((long)diapason[0], (long)diapason[1])
+            res = otriples.Root.ElementValues((long) diapason[0], (long) diapason[1])
                 .Cast<object[]>()
-                .Where(spo => pred == (int)spo[1]) // Если диапазон с учетом предиката, эта проверка не нужна, но операция очень дешевая, можно оставить
-                .Select(spo => (int)spo[2]).ToArray();
+                .SkipWhile(entry => pred != (int)entry[0])
+                .TakeWhile(entry => pred == (int)entry[0])
+                .Select(entry => (int)entry[1])
+                .ToArray();
+            
+                
+            //res = 
+            //    otriples.Root.Elements((long) diapason[0], (long) diapason[1])
+            //    .Where(spo => pred == (int)spo[1]) // Если диапазон с учетом предиката, эта проверка не нужна, но операция очень дешевая, можно оставить
+            //    .Select(spo => (int)spo[2]).ToArray();
             spOCache.Add(key, res);
             return res;
         }
 
         #region GetObjBySubjPred old
 
+        [Obsolete]
         public IEnumerable<int> GetObjBySubjPred4(int subj, int pred)
         {
             object[] diapason = GetDiapasonFromHash(subj, 0);
@@ -484,9 +620,9 @@ namespace TrueRdfViewer
             //    //.Where(entry => pred == (int)((object[])entry.Get())[1])
             //    .Select(en => (int)((object[])en.Get())[2]);
             return otriples.Root.Elements((long) diapason[0], (long) diapason[1])
-                .Select<PaEntry, object[]>(ent => (object[]) ent.Get())
-                .Where(spo => pred == (int) spo[1])
-                .Select(spo => (int) spo[2]);
+                .Select(ent => (object[]) ent.Get())
+                .Where(spo => pred == (int) spo[0])
+                .Select(spo => (int) spo[1]);
         }
 
         public IEnumerable<int> GetObjBySubjPred3(int subj, int pred)
@@ -496,11 +632,12 @@ namespace TrueRdfViewer
             if (itemEntriry.IsEmpty) return Enumerable.Empty<int>();
             var diapason = (object[]) itemEntriry.Field(1).Get();
             return otriples.Root.Elements((long) diapason[0], (long) diapason[1])
-                .Select<PaEntry, object[]>(ent => (object[]) ent.Get())
-                .Where(spo => pred == (int) spo[1])
-                .Select(spo => (int) spo[2]);
+                .Select(ent => (object[]) ent.Get())
+                .Where(spo => pred == (int) spo[0])
+                .Select(spo => (int) spo[1]);
         }
 
+        [Obsolete]
         public IEnumerable<int> GetObjBySubjPred2(int subj, int pred)
         {
             if (otriples.IsEmpty) return Enumerable.Empty<int>();
@@ -514,10 +651,11 @@ namespace TrueRdfViewer
             if (itemEntriry.IsEmpty) return Enumerable.Empty<int>();
             var diapason = (object[]) itemEntriry.Field(1).Get();
             return otriples.Root.Elements((long) diapason[0], (long) diapason[1])
-                .Where(entry => pred == (int) ((object[]) entry.Get())[1])
-                .Select(en => (int) ((object[]) en.Get())[2]);
+                .Where(entry => pred == (int) ((object[]) entry.Get())[0])
+                .Select(en => (int) ((object[]) en.Get())[1]);
         }
 
+       [Obsolete]
         public IEnumerable<int> GetObjBySubjPred1(int subj, int pred)
         {
             return otriples.Root.BinarySearchAll(ent =>
@@ -531,7 +669,8 @@ namespace TrueRdfViewer
                 .Select(en => (int) en.Field(2).Get());
         }
 
-        public IEnumerable<int> GetObjBySubjPred0(int subj, int pred)
+       [Obsolete]
+       public IEnumerable<int> GetObjBySubjPred0(int subj, int pred)
         {
             return spo_o_index.GetAll(ent =>
             {
@@ -551,9 +690,9 @@ namespace TrueRdfViewer
             if (key < 0 || key > ewt.EWTable.Root.Count()) return null;
             var itemEntry = ewt.EWTable.Root.Element(key); //ewtHash.GetEntity(key);
             if (itemEntry.IsEmpty) return null;
-            var diap = (object[])itemEntry.Field(1 + direction).Get();
-            return diap;
+            return (object[])itemEntry.Field(1 + direction).Get();
         }
+        [Obsolete]
         private object[] GetDiapasonFromHash1(int key, int pred, int direction)
         {
             var itemEntry = ewt.EWTable.Root.BinarySearchFirst(ent =>
@@ -586,7 +725,8 @@ namespace TrueRdfViewer
         //    if (diap == null) return null;//new object[] { 0L, 0L };
         //    return diap;
         //}
-        private Dictionary<KeyValuePair<int, int>, Literal[]> spDCache = new Dictionary<KeyValuePair<int, int>, Literal[]>();
+      
+
         public IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
         {
             if (subj == Int32.MinValue || pred == Int32.MinValue) return Enumerable.Empty<Literal>();
@@ -595,15 +735,17 @@ namespace TrueRdfViewer
             if (spDCache.TryGetValue(key, out res)) return res;
 
             object[] diapason = GetDiapasonFromHash(subj, 2);
-            PaEntry dtriple_entry = dtriples.Root.Element(0);
+            PaEntry dtriple_entry = dataCell.Root.Element(0);
             res = diapason == null
                 ? new Literal[0]
-                : dtriples_sp.Root.Elements((long) diapason[0], (long) diapason[1])
-                    .Where(entry => pred == (int) ((object[]) entry.Get())[1])
+                : dtriples_sp.Root.ElementValues((long) diapason[0], (long) diapason[1])
+                    .Cast<object[]>()
+                    .SkipWhile(entry => pred != (int) entry[0])
+                    .TakeWhile(entry => pred == (int) entry[0])
                     .Select(en =>
                     {
-                        dtriple_entry.offset = (long) en.Field(2).Get();
-                        return ToLiteral((object[]) dtriple_entry.Field(2).Get());
+                        dtriple_entry.offset = (long) en[1];
+                        return ToLiteral((object[]) dtriple_entry.Get());
                     }).ToArray();
             spDCache.Add(key, res);
             return res;
@@ -640,21 +782,23 @@ namespace TrueRdfViewer
 
         #region GetDataBySubjPred old
 
+        [Obsolete]
         public IEnumerable<Literal> GetDataBySubjPred4(int subj, int pred)
         {
             object[] diapason = GetDiapasonFromHash(subj, 2);
             if (diapason == null) return Enumerable.Empty<Literal>();
 
-            PaEntry dtriple_entry = dtriples.Root.Element(0);
+            PaEntry dtriple_entry = dataCell.Root.Element(0);
             return dtriples_sp.Root.Elements((long) diapason[0], (long) diapason[1])
                 //.Where(entry => pred == (int)((object[])entry.Get())[1])
                 .Select(en =>
                 {
                     dtriple_entry.offset = (long) en.Field(2).Get();
-                    return ToLiteral((object[]) dtriple_entry.Field(2).Get());
+                    return ToLiteral((object[]) dtriple_entry.Get());
                 });
         }
 
+        [Obsolete]
         public IEnumerable<Literal> GetDataBySubjPred3(int subj, int pred)
         {
             if (dtriples_sp.IsEmpty) return Enumerable.Empty<Literal>();
@@ -663,20 +807,21 @@ namespace TrueRdfViewer
             var diapason = (object[]) itemEntriry.Field(3).Get();
 
             if (dtriples_sp.Root.Count() == 0) return Enumerable.Empty<Literal>();
-            PaEntry dtriple_entry = dtriples.Root.Element(0);
+            PaEntry dtriple_entry = dataCell.Root.Element(0);
             long num = (long) diapason[1];
 
             var query = dtriples_sp.Root.Elements((long) diapason[0], num)
-                .Select<PaEntry, object[]>(ent => (object[]) ent.Get())
+                .Select(ent => (object[]) ent.Get())
                 .Where(ve => (int) ve[1] == pred)
                 .Select(ve =>
                 {
                     dtriple_entry.offset = (long) ve[2];
-                    return ToLiteral((object[]) dtriple_entry.Field(2).Get());
+                    return ToLiteral((object[]) dtriple_entry.Get());
                 });
             return query;
         }
 
+        [Obsolete]
         public IEnumerable<Literal> GetDataBySubjPred2(int subj, int pred)
         {
             if (dtriples_sp.IsEmpty) return Enumerable.Empty<Literal>();
@@ -691,20 +836,21 @@ namespace TrueRdfViewer
             var diapason = (object[]) itemEntriry.Field(3).Get();
 
             if (dtriples_sp.Root.Count() == 0) return Enumerable.Empty<Literal>();
-            PaEntry dtriple_entry = dtriples.Root.Element(0);
+            PaEntry dtriple_entry = dataCell.Root.Element(0);
             return dtriples_sp.Root.Elements((long) diapason[0], (long) diapason[1])
                 .Where(entry => pred == (int) ((object[]) entry.Get())[1])
                 .Select(en =>
                 {
                     dtriple_entry.offset = (long) en.Field(2).Get();
-                    return ToLiteral((object[]) dtriple_entry.Field(2).Get());
+                    return ToLiteral((object[]) dtriple_entry.Get());
                 });
         }
 
+        [Obsolete]
         public IEnumerable<Literal> GetDataBySubjPred1(int subj, int pred)
         {
-            if (dtriples.Root.Count() == 0) return Enumerable.Empty<Literal>();
-            PaEntry dtriple_entry = dtriples.Root.Element(0);
+            if (dataCell.Root.Count() == 0) return Enumerable.Empty<Literal>();
+            PaEntry dtriple_entry = dataCell.Root.Element(0);
             return dtriples_sp.Root.BinarySearchAll(ent =>
             {
                 int su = (int) ent.Field(0).Get();
@@ -716,10 +862,11 @@ namespace TrueRdfViewer
                 .Select(en =>
                 {
                     dtriple_entry.offset = (long) en.Field(2).Get();
-                    return ToLiteral((object[]) dtriple_entry.Field(2).Get());
+                    return ToLiteral((object[]) dtriple_entry.Get());
                 });
         }
 
+        [Obsolete]
         public IEnumerable<Literal> GetDataBySubjPred0(int subj, int pred)
         {
             return sp_d_index.GetAll(ent =>
@@ -742,10 +889,52 @@ namespace TrueRdfViewer
         }
         public bool ChkOSubjPredObj(int subj, int pred, int obj)
         {
+            if (subj == Int32.MinValue || obj == Int32.MinValue ||pred == Int32.MinValue ) return false;
+            
             if (!ChkInScale(subj, pred, obj)) return false;
-            SubjPredObjInt key = new SubjPredObjInt() { subj = subj, pred = pred, obj = obj };
-            var entry = otriples.Root.BinarySearchFirst(ent => (new SubjPredObjInt(ent.Get())).CompareTo(key));
-            return !entry.IsEmpty;
+            //SubjPredObjInt key = new SubjPredObjInt() { subj = subj, pred = pred, obj = obj };
+            //var entry = otriples.Root.BinarySearchFirst(ent => (new SubjPredObjInt(ent.Get())).CompareTo(key));
+            int[] resSubj, resObj;
+            var keySub = new KeyValuePair<int, int>(subj, pred);
+            var keyObj = new KeyValuePair<int, int>(obj, pred);
+
+            const int limit = 1000;               
+       
+            if (spOCache.TryGetValue(keySub, out resSubj) && resSubj.Length < limit) return resSubj.Contains(obj);
+            if (SpoCache.TryGetValue(keyObj, out resObj) && resObj.Length < limit) return resObj.Contains(subj);
+            var subjDiapason = GetDiapasonFromHash(subj, 0);
+            var objDiapason = GetDiapasonFromHash(obj, 1);
+            if (subjDiapason == null || objDiapason == null) return false;
+            if ((long)subjDiapason[1] < (long)objDiapason[1])
+            {
+                if (resSubj == null)
+                {
+                    resSubj = otriples.Root.ElementValues((long) subjDiapason[0], (long) subjDiapason[1])
+                        .Cast<object[]>()
+                        .SkipWhile(entry => pred != (int) entry[0])
+                        .TakeWhile(entry => pred == (int) entry[0])
+                        .Select(entry => (int) entry[1])
+                        .ToArray();
+                    spOCache.Add(keySub, resSubj);
+                }
+                return resSubj.Contains(obj);
+            }
+            else
+            {
+                if (resObj == null)
+                {
+                    resObj = otriples_op.Root.ElementValues((long) objDiapason[0], (long) objDiapason[1])
+                        .Cast<object[]>()
+                        .SkipWhile(entry => pred != (int) entry[0])
+                        .TakeWhile(entry => pred == (int) entry[0])
+                        .Select(entry => (int) entry[1])
+                        .ToArray();
+                    SpoCache.Add(keyObj, resObj);
+                }
+                return resObj.Contains(subj);
+
+            }
+           
         }
         // Проверка наличия объектного триплета через шкалу. Если false - точно нет, при true надо продолжать проверку
         public bool ChkInScale(int subj, int pred, int obj)
@@ -797,7 +986,7 @@ namespace TrueRdfViewer
         public XElement GetItem(string subject)
         {
             if (otriples.Root.Count() == 0) return null;
-            if (dtriples.Root.Count() == 0) return null;
+            if (dataCell.Root.Count() == 0) return null;
             XElement res = new XElement("record", new XAttribute("id", subject));
             //PaEntry dent = dtriples.Root.Element(0);
             //foreach (var ent in subject_d_index.GetAllByKey(subject))
@@ -857,7 +1046,7 @@ namespace TrueRdfViewer
             return dtriples_sp.Root.BinarySearchDiapason(ent => ((int)ent.Field(0).Get()).CompareTo(subj));
         }
         public bool CheckPredObjInDiapason(Diapason di, int pred, int obj)
-        {
+        {                                      
             Diapason set = otriples.Root.BinarySearchDiapason(di.start, di.numb, ent =>
             {
                 int cmp = ((int)ent.Field(1).Get()).CompareTo(pred);
@@ -885,13 +1074,10 @@ namespace TrueRdfViewer
             //return otriples_op.Root.BinarySearchAll(di.start, di.numb, ent => ((int)ent.Field(1).Get()).CompareTo(pred))
             //    .Select(en => (int)en.Field(0).Get());
 
-            Diapason internal_diap = otriples_op.Root.BinarySearchDiapason(di.start, di.numb, ent =>
-            {
-                return ((int)ent.Field(1).Get()).CompareTo(pred);
-            });
+            Diapason internal_diap = otriples_op.Root.BinarySearchDiapason(di.start, di.numb, ent => ((int)ent.Field(0).Get()).CompareTo(pred));
             return otriples_op.Root.Elements(internal_diap.start, internal_diap.numb)
-                .Select<PaEntry, object[]>(ent => (object[])ent.Get())
-                .Select(p_obj => (int)((object[])p_obj)[0]);
+                .Select(ent => (object[])ent.Get())
+                .Select(p_obj => (int)((object[])p_obj)[1]);
         }
         public IEnumerable<Literal> GetDatInDiapason(Diapason di, int pred)
         {
@@ -899,21 +1085,17 @@ namespace TrueRdfViewer
             {
                 return ((int)ent.Field(1).Get()).CompareTo(pred);
             });
-            PaEntry dtriple_entry = dtriples.Root.Element(0);
-            return dtriples_sp.Root.Elements(internal_diap.start, internal_diap.numb)
-                .Select<PaEntry, object[]>(ent => (object[])ent.Get())
+            PaEntry data_entry = dataCell.Root.Element(0);
+            return dtriples_sp.Root.ElementValues(internal_diap.start, internal_diap.numb)
+                .Cast<object[]>()
                 .Select(p_obj => 
                     {
-                        long off = (long)((object[])p_obj)[2];
-                        dtriple_entry.offset = off;
-                        return PObjToLiteral(dtriple_entry.Field(2).Get());
-                    })
-                ;
+                        data_entry.offset = (long)p_obj[1];
+                        return PObjToLiteral(data_entry.Get());
+                    });
         }
 
 
-        private readonly Dictionary<int, IEnumerable<KeyValuePair<Int32, int>>> SPoCache =
-            new Dictionary<int, IEnumerable<KeyValuePair<int, int>>>();
 
         public IEnumerable<KeyValuePair<int, int>> GetSubjectByObj(int obj)
         {
@@ -927,7 +1109,7 @@ namespace TrueRdfViewer
                     // Можно использовать ElementValues потому что результат не итерация, а массив
                     .Cast<object[]>()
                     //.Where(spo => pred == (int)spo[1]) // Если диапазон с учетом предиката, эта проверка не нужна, но операция очень дешевая, можно оставить
-                    .Select(spo => new KeyValuePair<int, int>((int) spo[0], (int)spo[1])).ToArray();
+                    .Select(spo => new KeyValuePair<int, int>((int) spo[1], (int)spo[0])).ToArray();
             SPoCache.Add(obj, res);
             return res;
         }
@@ -937,8 +1119,6 @@ namespace TrueRdfViewer
             return Enumerable.Empty<Int32>();
         }
 
-        private Dictionary<int, IEnumerable<KeyValuePair<Int32, Int32>>> sPOCache =
-            new Dictionary<int, IEnumerable<KeyValuePair<int, int>>>();
 
         public IEnumerable<KeyValuePair<Int32, Int32>> GetObjBySubj(int subj)
         {
@@ -950,13 +1130,10 @@ namespace TrueRdfViewer
                 ? new KeyValuePair<Int32, Int32>[0]
                 : otriples.Root.ElementValues((long) diapason[0], (long) diapason[1])
                     .Cast<object[]>()
-                    //.Where(spo => pred == (int)spo[1]) // Если диапазон с учетом предиката, эта проверка не нужна, но операция очень дешевая, можно оставить
-                    .Select(spo => new KeyValuePair<int, int>((int) spo[2], (int) spo[1])).ToArray();
+                     .Select(spo => new KeyValuePair<int, int>((int) spo[1], (int) spo[0])).ToArray();
             sPOCache.Add(subj, res);
             return res;
-        }
-
-        readonly Dictionary<int, IEnumerable<KeyValuePair<Literal, int>>> sPDCache = new Dictionary<int, IEnumerable<KeyValuePair<Literal, int>>>();
+        }    
 
         public IEnumerable<KeyValuePair<Literal, int>> GetDataBySubj(int subj)
         {
@@ -965,18 +1142,15 @@ namespace TrueRdfViewer
             if (sPDCache.TryGetValue(subj, out res)) return res;
 
             object[] diapason = GetDiapasonFromHash(subj, 2);
-            PaEntry dtriple_entry = dtriples.Root.Element(0);
+            PaEntry dtriple_entry = dataCell.Root.Element(0);
             res = diapason == null
                 ? new KeyValuePair<Literal, int>[0]
-                : dtriples_sp.Root.Elements((long) diapason[0], (long) diapason[1])
-                    //.Where(entry => pred == (int)((object[])entry.Get())[1])
-                    .Select(en =>
-                    {
-                        var row = ((object[]) en.Get());
-                        var pred = (int) row[1];
-                        dtriple_entry.offset = (long) row[2];
-                        Literal lit = ToLiteral((object[]) dtriple_entry.Field(2).Get());
-                        return new KeyValuePair<Literal, int>(lit, pred);
+                : dtriples_sp.Root.ElementValues((long) diapason[0], (long) diapason[1])
+                .Cast<object[]>()
+                    .Select(row =>
+                    {       
+                        dtriple_entry.offset = (long) row[1];
+                        return new KeyValuePair<Literal, int>(ToLiteral((object[]) dtriple_entry.Get()), (int) row[0]);
                     }).ToArray();
             sPDCache.Add(subj, res);
             return res;

@@ -17,42 +17,43 @@ namespace ANTLR_Test
         {
             PolarDB.PaEntry.bufferBytes = 1*1000*1000*1000;
 
-            Console.WriteLine(Millions = 1);
+           Console.WriteLine(Millions = 1);
 
         
                 
             //var count = 100 * 1000 * 1000;
             //TestPerfomanceCoding(new StringIntMD5Coding(@"..\..\codeTests\"), Enumerable.Repeat(Guid.NewGuid().ToString(), count), count);
 
+       
+
                Test();
 
-            Console.WriteLine(Millions = 10);
+           Console.WriteLine(Millions = 10);
 
 
 
 
-            //   Test();
+        //    Test();
 
-            Console.WriteLine(Millions = 100);
+           Console.WriteLine(Millions = 100);
 
           
 
-     //      Test();
-        }
-
-        
+         //  Test();
+        }    
 
         private static void Test()
         {
-            Console.WriteLine(Millions);
+           // Console.WriteLine(Millions);
            TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
-          
+
            TripleInt.EntitiesCodeCache.Clear();
+           TripleInt.PredicatesCodeCache.Clear();
            Query.decodesCashe.Clear();
             //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\undecoded\" + Millions + @"mln\");
 
                bool load = false;
-            //  bool load = true;
+           //   bool load = true;
               using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;
@@ -65,8 +66,8 @@ namespace ANTLR_Test
             else
             {
                 ts.WarmUp();
-                    RunBerlinsWithConstants( ts);
-          //     RunBerlinsParameters(ts);      
+                  RunBerlinsWithConstants( ts);
+             //    RunBerlinsParameters(ts);      
             }
             var spent = (DateTime.Now - start).Ticks/10000;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))   
@@ -158,16 +159,11 @@ namespace ANTLR_Test
                 r.WriteLine("max memory usage " + maxMemoryUsage);
                 r.WriteLine("average " +     string.Join(", ", results.Select(l => l == 0 ? "inf" : (500*1000/l).ToString())));
                 r.WriteLine("minimums " + string.Join(", ", minimums));
-                r.WriteLine("minimums " + string.Join(", ", minimums));
                 r.WriteLine("maximums " + string.Join(", ", maximums));
                 r.WriteLine("total parse " + string.Join(", ", totalparseMS));
                 r.WriteLine("total run " + string.Join(", ", totalrun));
                 r.WriteLine("countCodingUsages {0} totalMillisecondsCodingUsages {1}", TripleInt.EntitiesCodeCache.Count, TripleInt.totalMilisecondsCodingUsages);
-                r.WriteLine("EWT count" + EntitiesMemoryHashTable.count);
-                r.WriteLine("EWT total search" + EntitiesMemoryHashTable.total);
-                r.WriteLine("EWT max search" + EntitiesMemoryHashTable.max);
-                r.WriteLine("EWT total range" + EntitiesMemoryHashTable.totalRange);
-                r.WriteLine("EWT max range" + EntitiesMemoryHashTable.maxRange);
+
                 //r.WriteLine("EWT average search" + EntitiesMemoryHashTable.total / EntitiesMemoryHashTable.count);
                 //r.WriteLine("EWT average range" + EntitiesMemoryHashTable.totalRange / EntitiesMemoryHashTable.count);
                 TripleInt.EntitiesCodeCache.Clear();

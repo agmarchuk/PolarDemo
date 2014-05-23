@@ -358,3 +358,124 @@ EWT max search0
 EWT total range0
 EWT max range0
 total 1165383 мс.
+millions 1
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 2
+total 2224 мс.
+millions 1
+milions 1
+max memory usage 85804456
+average 537, 740, 416, 319, 161, 126, 163, 438, 4761, 188, 3333, 1754
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 15, 15, 31, 15, 31, 15, 15, 15, 15, 15, 15
+total parse 390, 120, 795, 675, 1020, 420, 450, 570, 45, 600, 30, 225
+total run 540, 555, 405, 888, 2070, 3526, 2610, 570, 60, 2055, 120, 60
+countCodingUsages 9133 totalMillisecondsCodingUsages 255
+EWT count0
+EWT total search0
+EWT max search0
+EWT total range0
+EWT max range0
+total 52359 мс.
+millions 10
+milions 10
+max memory usage 229165280
+average 512, 628, 316, 275, 33, 15, 120, 275, 3030, 166, 4761, 1754
+minimums 0, 0, 0, 0, 0, 62, 0, 0, 0, 0, 0, 0
+minimums 0, 0, 0, 0, 0, 62, 0, 0, 0, 0, 0, 0
+maximums 31, 15, 31, 93, 93, 78, 31, 15, 15, 15, 15, 15
+total parse 600, 150, 855, 705, 1050, 405, 435, 825, 75, 630, 45, 210
+total run 376, 645, 725, 1096, 13812, 32504, 3707, 990, 90, 2370, 60, 75
+countCodingUsages 15446 totalMillisecondsCodingUsages 375
+EWT count0
+EWT total search0
+EWT max search0
+EWT total range0
+EWT max range0
+total 196968 мс.
+millions 100
+milions 100
+max memory usage 1049586240
+average 68, 574, 62, 36, 6, 1, 112, 275, 2083, 132, 2564, 2380
+minimums 0, 0, 0, 0, 0, 624, 0, 0, 0, 0, 0, 0
+minimums 0, 0, 0, 0, 0, 624, 0, 0, 0, 0, 0, 0
+maximums 656, 15, 1000, 390, 390, 859, 31, 15, 15, 15, 15, 15
+total parse 465, 180, 735, 645, 1065, 345, 420, 885, 45, 960, 105, 105
+total run 6805, 690, 7198, 13048, 70433, 326117, 4022, 930, 180, 2805, 90, 105
+countCodingUsages 15988 totalMillisecondsCodingUsages 450
+EWT count0
+EWT total search0
+EWT max search0
+EWT total range0
+EWT max range0
+total 1134781 мс.
+millions 1
+milions 1
+max memory usage 86557144
+average 520, 680, 546, 289, 149, 148, 162, 320, 4166, 208, 3333, 2083
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 15, 15, 31, 15, 31, 15, 15, 15, 15, 15, 15
+total parse 435, 150, 510, 735, 1110, 255, 525, 720, 30, 675, 90, 165
+total run 525, 585, 405, 994, 2235, 3106, 2550, 840, 90, 1725, 60, 75
+countCodingUsages 9133 totalMillisecondsCodingUsages 270
+EWT count0
+EWT total search0
+EWT max search0
+EWT total range0
+EWT max range0
+total 52203 мс.
+millions 10
+milions 10
+max memory usage 227575576
+average 573, 537, 364, 319, 32, 14, 123, 280, 2564, 155, 4761, 1754
+minimums 0, 0, 0, 0, 0, 62, 0, 0, 0, 0, 0, 0
+minimums 0, 0, 0, 0, 0, 62, 0, 0, 0, 0, 0, 0
+maximums 31, 15, 46, 78, 78, 93, 31, 15, 15, 15, 15, 15
+total parse 360, 210, 660, 465, 1260, 300, 405, 795, 0, 810, 30, 135
+total run 511, 720, 711, 1097, 14259, 33095, 3645, 990, 195, 2400, 75, 150
+countCodingUsages 15446 totalMillisecondsCodingUsages 285
+EWT count0
+EWT total search0
+EWT max search0
+EWT total range0
+EWT max range0
+total 198734 мс.
+millions 100
+milions 100
+max memory usage 1048460976
+average 68, 641, 61, 36, 6, 1, 110, 292, 2083, 140, 4761, 1388
+minimums 0, 0, 0, 0, 0, 640, 0, 0, 0, 0, 0, 0
+minimums 0, 0, 0, 0, 0, 640, 0, 0, 0, 0, 0, 0
+maximums 640, 15, 1000, 390, 406, 859, 31, 15, 15, 15, 15, 15
+total parse 450, 90, 750, 660, 1080, 360, 540, 690, 45, 840, 60, 225
+total run 6803, 690, 7344, 12902, 71583, 331570, 3976, 1020, 195, 2730, 45, 135
+countCodingUsages 15988 totalMillisecondsCodingUsages 525
+EWT count0
+EWT total search0
+EWT max search0
+EWT total range0
+EWT max range0
+total 1130159 мс.
+
+
+millions 1
+total load 14470 мс.
+millions 1
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 2
+total 1365 мс.
+millions 1
+millions 1
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 2
+total 3787 мс.
+millions 1
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 5
+total 1742 мс.
+millions 1
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 2
+total 1750 мс.
