@@ -479,3 +479,42 @@ millions 1
 milions 1
 countCodingUsages 14 totalMillisecondsCodingUsages 2
 total 1750 мс.
+millions 1
+total 17667 мс.
+millions 10
+total 203924 мс.
+millions 100
+total 3600168 мс.
+millions 1
+milions 1
+max memory usage 87540896
+average 1059, 821, 660, 800, 159, 120, 371, 393, 2463, 370, 5154, 1779
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 15, 15, 16, 46, 15, 15, 16, 15, 15, 15, 15
+total parse 407, 171, 694, 535, 947, 325, 357, 580, 77, 760, 49, 135
+total run 64, 429, 61, 81, 2164, 3814, 963, 674, 126, 566, 48, 146
+countCodingUsages 9133 totalMillisecondsCodingUsages 299
+total 41779 мс.
+millions 10
+milions 10
+max memory usage 231977976
+average 1461, 954, 707, 818, 31, 14, 213, 306, 3521, 350, 5494, 2083
+minimums 0, 0, 0, 0, 8, 64, 0, 0, 0, 1, 0, 0
+maximums 2, 7, 6, 11, 83, 80, 11, 16, 1, 6, 1, 3
+total parse 314, 166, 657, 531, 999, 353, 453, 783, 29, 732, 33, 159
+total run 24, 266, 29, 58, 14686, 33313, 1641, 621, 113, 489, 58, 78
+countCodingUsages 15446 totalMillisecondsCodingUsages 335
+total 156736 мс.
+millions 100
+milions 100
+max memory usage 1011014504
+average 371, 826, 266, 271, 6, 1, 205, 287, 2994, 334, 4761, 1773
+minimums 0, 0, 0, 0, 8, 643, 1, 1, 0, 1, 0, 0
+maximums 149, 4, 189, 46, 412, 815, 10, 7, 1, 6, 1, 23
+total parse 340, 87, 692, 621, 1162, 405, 471, 792, 33, 755, 31, 153
+total run 855, 403, 949, 995, 73159, 335125, 1673, 684, 134, 516, 74, 126
+countCodingUsages 15988 totalMillisecondsCodingUsages 426
+total 1028399 мс.
+millions 1000
+millions 1000
+millions 1000

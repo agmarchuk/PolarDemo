@@ -889,8 +889,8 @@ namespace TrueRdfViewer
         }
         public bool ChkOSubjPredObj(int subj, int pred, int obj)
         {
-            if (subj == Int32.MinValue || obj == Int32.MinValue ||pred == Int32.MinValue ) return false;
-            
+            if (subj == Int32.MinValue || obj == Int32.MinValue || pred == Int32.MinValue) return false;
+
             if (!ChkInScale(subj, pred, obj)) return false;
             //SubjPredObjInt key = new SubjPredObjInt() { subj = subj, pred = pred, obj = obj };
             //var entry = otriples.Root.BinarySearchFirst(ent => (new SubjPredObjInt(ent.Get())).CompareTo(key));
@@ -898,18 +898,48 @@ namespace TrueRdfViewer
             var keySub = new KeyValuePair<int, int>(subj, pred);
             var keyObj = new KeyValuePair<int, int>(obj, pred);
 
-            const int limit = 1000;               
-       
-            if (spOCache.TryGetValue(keySub, out resSubj) && resSubj.Length < limit) return resSubj.Contains(obj);
-            if (SpoCache.TryGetValue(keyObj, out resObj) && resObj.Length < limit) return resObj.Contains(subj);
-            var subjDiapason = GetDiapasonFromHash(subj, 0);
-            var objDiapason = GetDiapasonFromHash(obj, 1);
-            if (subjDiapason == null || objDiapason == null) return false;
-            if ((long)subjDiapason[1] < (long)objDiapason[1])
+            const int limit = 1000;
+
+            var subjExists = spOCache.TryGetValue(keySub, out resSubj);
+            var objExists = SpoCache.TryGetValue(keyObj, out resObj);
+            long subjLength = 0; 
+            if (subjExists)
             {
-                if (resSubj == null)
+                subjLength = resSubj.Length;
+                if (!objExists && subjLength < limit)
+                    return resSubj.Contains(obj);}
+            long objLength = 0;
+            if (objExists)
+            {
+                objLength = resObj.Length;
+                if (objLength < limit)
+                    return resObj.Contains(subj);
+            }
+            if (subjExists && objExists)
+                if (subjLength > objLength)
+                    return resObj.Contains(subj);
+                else resSubj.Contains(obj);
+
+            object[] subjDiapason=null;
+            if (!subjExists)
+            {
+                subjDiapason = GetDiapasonFromHash(subj, 0);
+                if (subjDiapason == null) return false;
+                subjLength = (long)subjDiapason[1];
+            }
+            object[] objDiapason=null;
+            if (!objExists)
+            {
+                objDiapason = GetDiapasonFromHash(obj, 1);
+                if (objDiapason == null) return false;
+                objLength = (long)objDiapason[1];
+            }
+
+            if (subjLength < objLength)
+            {
+                if (!subjExists)
                 {
-                    resSubj = otriples.Root.ElementValues((long) subjDiapason[0], (long) subjDiapason[1])
+                    resSubj = otriples.Root.ElementValues((long) subjDiapason[0], subjLength)
                         .Cast<object[]>()
                         .SkipWhile(entry => pred != (int) entry[0])
                         .TakeWhile(entry => pred == (int) entry[0])
@@ -921,9 +951,9 @@ namespace TrueRdfViewer
             }
             else
             {
-                if (resObj == null)
+                if (!objExists)
                 {
-                    resObj = otriples_op.Root.ElementValues((long) objDiapason[0], (long) objDiapason[1])
+                    resObj = otriples_op.Root.ElementValues((long) objDiapason[0], objLength)
                         .Cast<object[]>()
                         .SkipWhile(entry => pred != (int) entry[0])
                         .TakeWhile(entry => pred == (int) entry[0])
@@ -932,10 +962,9 @@ namespace TrueRdfViewer
                     SpoCache.Add(keyObj, resObj);
                 }
                 return resObj.Contains(subj);
-
             }
-           
         }
+
         // Проверка наличия объектного триплета через шкалу. Если false - точно нет, при true надо продолжать проверку
         public bool ChkInScale(int subj, int pred, int obj)
         {
