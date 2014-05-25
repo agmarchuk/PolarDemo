@@ -898,28 +898,33 @@ namespace TrueRdfViewer
             var keySub = new KeyValuePair<int, int>(subj, pred);
             var keyObj = new KeyValuePair<int, int>(obj, pred);
 
+            //если даже в оперативной памяти закешированы предикаты, но их больше, чем эта константа, то будет проверено количество предикатов в другом
             const int limit = 1000;
 
+
+            // проверка кешей 
             var subjExists = spOCache.TryGetValue(keySub, out resSubj);
             var objExists = SpoCache.TryGetValue(keyObj, out resObj);
             long subjLength = 0; 
             if (subjExists)
             {
-                subjLength = resSubj.Length;
+                subjLength = resSubj.Length;   
+                // но если и обратыне тоже есть в кеше, то будет сравниваться их количество
                 if (!objExists && subjLength < limit)
                     return resSubj.Contains(obj);}
             long objLength = 0;
             if (objExists)
             {
                 objLength = resObj.Length;
-                if (objLength < limit)
+                if (!subjExists && objLength < limit)
                     return resObj.Contains(subj);
             }
             if (subjExists && objExists)
                 if (subjLength > objLength)
                     return resObj.Contains(subj);
-                else resSubj.Contains(obj);
+                else return resSubj.Contains(obj);
 
+             //теперь либо один из массивов есть в кеше и слишком большой, либо обоих нет.
             object[] subjDiapason=null;
             if (!subjExists)
             {
