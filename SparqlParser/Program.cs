@@ -26,7 +26,7 @@ namespace ANTLR_Test
 
        
 
-               // Test();
+            //   Test();
 
            Console.WriteLine(Millions = 10);
 
@@ -41,7 +41,7 @@ namespace ANTLR_Test
 
            //Test();
            Console.WriteLine(Millions = 1000);
-           Test();
+          Test();
 
         }    
 
@@ -60,6 +60,7 @@ namespace ANTLR_Test
               using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;
+            long spent = 0;
             if (load)
             {
                 ts.LoadTurtle(@"C:\deployed\" + Millions + "M.ttl");       
@@ -67,10 +68,13 @@ namespace ANTLR_Test
             else
             {
                 ts.WarmUp();
+                spent = (DateTime.Now - start).Ticks / 10000;
+                using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
+                    wr.WriteLine("warm up " + spent + " мс.");
                //    RunBerlinsWithConstants( ts);
                 RunBerlinsParameters(ts);      
             }
-            var spent = (DateTime.Now - start).Ticks/10000;
+            spent = (DateTime.Now - start).Ticks/10000;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))   
                 wr.WriteLine("total " + spent + " мс.");
         }

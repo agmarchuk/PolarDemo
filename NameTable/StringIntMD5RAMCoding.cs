@@ -126,18 +126,19 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
         private int GetCode(string name, long newD5)
         {
             if (Count == 0) return Int32.MinValue;
-            int index;
+                 int index;
            if(!offsetsByMd5Cache.TryGetValue(newD5, out index)) return Int32.MinValue;
             
             var ncEntry = nc_cell.Root.Element(0);
-            for(var md5_offet = (object[]) md5_index.Root.Element(index).Get(); (long)md5_offet[0]==newD5;
-                md5_offet = (object[])md5_index.Root.Element(index++).Get())
+            for (;;index++)
             {
+                var md5_offet=(object[])md5_index.Root.Element(index).Get();
+                if ((long)md5_offet[0] != newD5) return Int32.MinValue;
                 ncEntry.offset = (long) md5_offet[1];
                 if ((string)ncEntry.Field(1).Get() == name)
                     return (int)ncEntry.Field(0).Get();
             }
-            return Int32.MinValue;
+            //return Int32.MinValue;
         }
 
         public string GetName(int code)

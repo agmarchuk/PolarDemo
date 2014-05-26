@@ -11,7 +11,7 @@ namespace TrueRdfViewer
 {
     public static class TurtleInt
     {
-        public static int BufferMax = 20* 1000*1000;
+        public static int BufferMax =  1000*1000;
         // (Только для специальных целей) Это для накапливания идентификаторов собираемых сущностей:
         public static List<string> sarr = new List<string>();
 
@@ -147,13 +147,22 @@ namespace TrueRdfViewer
           
            // Array.Sort(arr);
           //  var codes = arr.ToDictionary(s =>s, s=> s.GetHashCode());
+
             var codesEntities = TripleInt.SiCodingEntities.InsertPortion(tripletsBuffer
-                                                                    .Select(tuple => tuple.Item1)
-                                                                    .Concat(tripletsBuffer
-                                                                        .Select(tuple => tuple.Item3)
-                                                                        .Where(o => o is string)
-                                                                        .Cast<string>())
-                                                                    .ToArray());
+                                                                 .Select(tuple => tuple.Item1)
+                                                                 .Concat(tripletsBuffer
+                                                                     .Select(tuple => tuple.Item3)
+                                                                     .Where(o => o is string)
+                                                                     .Cast<string>())
+                                                                 .ToArray());
+            //return Enumerable.Empty<TripleInt>();
+            //var codesEntities = tripletsBuffer
+            //    .Select(tuple => tuple.Item1)
+            //    .Concat(tripletsBuffer
+            //        .Select(tuple => tuple.Item3)
+            //        .Where(o => o is string)
+            //        .Cast<string>())
+                //.ToDictionary(s => s, TripleInt.SiCodingEntities.GetCode);
             var codesPredicates = TripleInt.SiCodingPredicates.InsertPortion(tripletsBuffer.Select(tuple => tuple.Item2).ToArray());
             return tripletsBuffer.Select(tuple =>
             {
