@@ -1197,14 +1197,14 @@ namespace TrueRdfViewer
         public IEnumerable<TripleInt> GetAllTriplets()
         {
             int subjectsCount = Convert.ToInt32(ewt.EWTable.Root.Count());
-            int bufferTripletsMax = Math.Min(subjectsCount, 1000);
-            int[] objDiapasons = new int[bufferTripletsMax];
-            int[] literalDiapasons = new int[bufferTripletsMax];
+            int bufferSubjectssMax = Math.Min(subjectsCount, 1000 * 1000);
+            int[] objDiapasons = new int[bufferSubjectssMax];
+            int[] literalDiapasons = new int[bufferSubjectssMax];
             long objTrippletsBufferCount = 0, objTrippletsBufferStart = 0;
             long literalsTrippletsBufferCount = 0, literalsTrippletsBufferStart = 0;
-            for (int kod = 0, index_in_buffer = 0; kod < subjectsCount; kod++, index_in_buffer++)
+            for (int kod = 0, index_in_buffer = 0;; kod++, index_in_buffer++)
             {
-                if (index_in_buffer == bufferTripletsMax)
+                if (index_in_buffer == bufferSubjectssMax)
                 {
                     int s = kod - index_in_buffer;
                     int s_local_index = 0;
@@ -1224,27 +1224,38 @@ namespace TrueRdfViewer
                         }
                         yield return new OTripleInt { subject = s, predicate = (int)pred_obj[0], obj = (int)pred_obj[1] };
                     }
-                    if (dataCell.IsEmpty || dataCell.Root.Count() == 0) yield break;
-                    //буфер dtriples_sp записывается в массив, что бы не прыгать по офсетам к литералам
-                    var predicateLiteralsOfsset = dtriples_sp.Root.ElementValues(literalsTrippletsBufferStart, literalsTrippletsBufferCount)
-                        .Cast<object[]>()
-                        .ToArray();
-                    var dataEntry = dataCell.Root.Element(0);
-                    s = kod - index_in_buffer;
-                    s_local_index = 0;
-                    s_count = objDiapasons[0];
-                    //когда буыффер dtriples_sp считан, читаются литералы. тут придётся попрыгать.
-                    for (int j = 0; j < literalsTrippletsBufferCount; j++)
-                    {
-                        if (s_count-- == 0)
+                    if (!dataCell.IsEmpty && dataCell.Root.Count() > 0)
+                    {                 
+                        //буфер dtriples_sp записывается в массив, что бы не прыгать по офсетам к литералам
+                        var predicateLiteralsOfsset =
+                            dtriples_sp.Root.ElementValues(literalsTrippletsBufferStart, literalsTrippletsBufferCount)
+                                .Cast<object[]>()
+                                .ToArray();
+                        var dataEntry = dataCell.Root.Element(0);
+                        s = kod - index_in_buffer;
+                        s_local_index = 0;
+                        s_count = objDiapasons[0];
+                        //когда буыффер dtriples_sp считан, читаются литералы. тут придётся попрыгать.
+                        for (int j = 0; j < literalsTrippletsBufferCount; j++)
                         {
-                            s_local_index++;
-                            s++;
-                            s_count = objDiapasons[s_local_index];
+                            if (s_count-- == 0)
+                            {
+                                s_local_index++;
+                                s++;
+                                s_count = objDiapasons[s_local_index];
+                            }
+                            dataEntry.offset = (long) predicateLiteralsOfsset[j][1];
+                            yield return
+                                new DTripleInt
+                                {
+                                    subject = s,
+                                    predicate = (int) predicateLiteralsOfsset[j][0],
+                                    data = ToLiteral((object[]) dataEntry.Get())
+                                };
                         }
-                        dataEntry.offset = (long)predicateLiteralsOfsset[j][1];
-                        yield return new DTripleInt { subject = s, predicate = (int)predicateLiteralsOfsset[j][0], data = ToLiteral((object[])dataEntry.Get()) };
                     }
+                    if (kod == subjectsCount) yield break;
+
                     index_in_buffer = 0;
                     objTrippletsBufferStart += objTrippletsBufferCount;
                     objTrippletsBufferCount = 0;
