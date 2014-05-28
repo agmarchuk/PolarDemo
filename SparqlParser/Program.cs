@@ -17,56 +17,64 @@ namespace ANTLR_Test
         {
             PolarDB.PaEntry.bufferBytes = 1*1000*1000*1000;
 
-            Console.WriteLine(Millions = 1);
+           Console.WriteLine(Millions = 1);
 
-            //var count = 100 * 1000 * 1000;
-            //TestPerfomanceCoding(new StringIntMD5Coding(@"..\..\codeTests\"), Enumerable.Repeat(Guid.NewGuid().ToString(), count), count);
-          
-              Test();
+        
+                
+         //   var count =  1000;
+         //   TestPerfomanceCoding(new StringIntRAMDIctionary(@"..\..\codeTests\"), Enumerable.Range(0, count).Select(i => Guid.NewGuid().ToString()).ToArray(), count);
 
-            Console.WriteLine(Millions = 10);
+       
+
+           //    Test();
+
+           Console.WriteLine(Millions = 10);
 
 
-               
-          
-            Test();
 
-            Console.WriteLine(Millions = 100);
 
+          // Test();
+
+           Console.WriteLine(Millions = 100);
+                
           
 
            Test();
-        }
+           Console.WriteLine(Millions = 1000);
+         // Test();
 
-        
+        }    
 
         private static void Test()
         {
-            Console.WriteLine(Millions);
+           // Console.WriteLine(Millions);
            TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
-          
+
            TripleInt.EntitiesCodeCache.Clear();
+           TripleInt.PredicatesCodeCache.Clear();
            Query.decodesCashe.Clear();
             //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\undecoded\" + Millions + @"mln\");
 
-             //    bool load = false;
-            bool load = true;
+                  //  bool load = false;
+                     bool load = true;
               using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;
+            long spent = 0;
             if (load)
             {
-                ts.LoadTurtle(@"C:\deployed\" + Millions + "M.ttl"); //30мин.          
-
-
+                ts.LoadTurtle(@"C:\deployed\" + Millions + "M.ttl");       
             }
             else
             {
                 ts.WarmUp();
-                  RunBerlinsWithConstants( ts);
-             //    RunBerlinsParameters(ts);      
+                spent = (DateTime.Now - start).Ticks / 10000;
+                using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
+                    wr.WriteLine("warm up " + spent + " мс.");
+                //   RunBerlinsWithConstants( ts);
+                RunBerlinsParameters(ts);      
             }
-            var spent = (DateTime.Now - start).Ticks/10000;
+            spent = (DateTime.Now - start).Ticks/10000;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))   
                 wr.WriteLine("total " + spent + " мс.");
         }
@@ -92,12 +100,12 @@ namespace ANTLR_Test
                 }
                 .Select(s => new FileInfo(s))
                 .ToArray();
-            var paramvaluesFilePath = string.Format(@"..\..\sparql data\queries\parameters\param values for{0} m.txt", Millions);
-            //using (StreamWriter streamQueryParameters = new StreamWriter(paramvaluesFilePath)) 
-            //    for (int j = 0; j < 1000; j++)
-            //        foreach (var file in fileInfos.Select(info => File.ReadAllText(info.FullName)))
-            //            QueryWriteParameters(file, streamQueryParameters, ts);
-
+           var paramvaluesFilePath = string.Format(@"..\..\sparql data\queries\parameters\param values for{0} m.txt", Millions);
+//            using (StreamWriter streamQueryParameters = new StreamWriter(paramvaluesFilePath))
+//                for (int j = 0; j < 1000; j++)
+//                    foreach (var file in fileInfos.Select(info => File.ReadAllText(info.FullName)))
+//                        QueryWriteParameters(file, streamQueryParameters, ts);
+//return;
 
             using (StreamReader streamQueryParameters = new StreamReader(paramvaluesFilePath))
             {
@@ -156,18 +164,13 @@ namespace ANTLR_Test
                 r.WriteLine("max memory usage " + maxMemoryUsage);
                 r.WriteLine("average " +     string.Join(", ", results.Select(l => l == 0 ? "inf" : (500*1000/l).ToString())));
                 r.WriteLine("minimums " + string.Join(", ", minimums));
-                r.WriteLine("minimums " + string.Join(", ", minimums));
                 r.WriteLine("maximums " + string.Join(", ", maximums));
                 r.WriteLine("total parse " + string.Join(", ", totalparseMS));
                 r.WriteLine("total run " + string.Join(", ", totalrun));
                 r.WriteLine("countCodingUsages {0} totalMillisecondsCodingUsages {1}", TripleInt.EntitiesCodeCache.Count, TripleInt.totalMilisecondsCodingUsages);
-                r.WriteLine("EWT count" + EntitiesMemoryHashTable.count);
-                r.WriteLine("EWT total search" + EntitiesMemoryHashTable.total);
-                r.WriteLine("EWT max search" + EntitiesMemoryHashTable.max);
-                r.WriteLine("EWT total range" + EntitiesMemoryHashTable.totalRange);
-                r.WriteLine("EWT max range" + EntitiesMemoryHashTable.maxRange);
-                r.WriteLine("EWT average search" + EntitiesMemoryHashTable.total / EntitiesMemoryHashTable.count);
-                r.WriteLine("EWT average range" + EntitiesMemoryHashTable.totalRange / EntitiesMemoryHashTable.count);
+
+                //r.WriteLine("EWT average search" + EntitiesMemoryHashTable.total / EntitiesMemoryHashTable.count);
+                //r.WriteLine("EWT average range" + EntitiesMemoryHashTable.totalRange / EntitiesMemoryHashTable.count);
                 TripleInt.EntitiesCodeCache.Clear();
                 TripleInt.totalMilisecondsCodingUsages = 0;
             }
@@ -424,7 +427,7 @@ namespace ANTLR_Test
             int loadPortion = 1000*1000;
             
             var st = DateTime.Now;
-            for (int j = 0; j < length/loadPortion; j++)
+            for (int j = 0; j < length/loadPortion+1; j++)
             {
                 stringIntMd5Coding.InsertPortion(forCode.Skip(j*loadPortion).Take(loadPortion).ToArray());
             }

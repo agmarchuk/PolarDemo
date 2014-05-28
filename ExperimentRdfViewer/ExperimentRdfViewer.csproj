@@ -4,22 +4,23 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{5283693D-68CC-4B7A-B2BB-6E901592A272}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{3165CDE6-FA27-4FC4-BDBC-01967BB4F0E5}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NameTable</RootNamespace>
-    <AssemblyName>NameTable</AssemblyName>
+    <RootNamespace>TrueRdfViewer</RootNamespace>
+    <AssemblyName>TrueRdfViewer</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -28,8 +29,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <UseVSHostingProcess>true</UseVSHostingProcess>
-    <Prefer32Bit>false</Prefer32Bit>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -44,29 +44,37 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DynaIndex.cs" />
-    <Compile Include="IStringIntCoding.cs" />
-    <Compile Include="NameTableInt.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="allproducts.cs" />
+    <Compile Include="BerlinTestsInt.cs" />
+    <Compile Include="DiapasonScanner.cs" />
+    <Compile Include="DiapLinksScanner.cs" />
+    <Compile Include="EntitiesMemoryHashTable.cs" />
+    <Compile Include="EntitiesWideTable.cs" />
+    <Compile Include="FlexIndexView.cs" />
+    <Compile Include="GroupedEntities.cs" />
+    <Compile Include="OValRowInt.cs" />
+    <Compile Include="ONames.cs" />
+    <Compile Include="PaKeyValueTable.cs" />
+    <Compile Include="ProgramInt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Ref.cs" />
-    <Compile Include="StringIntCoding.cs" />
-    <Compile Include="StringIntRAMDIctionary.cs" />
-    <Compile Include="StringIntMD5RAMCoding.cs" />
-    <Compile Include="StringIntMD5Coding.cs" />
-    <Compile Include="StringToIntBuffer.cs" />
+    <Compile Include="RPackInt.cs" />
+    <Compile Include="Scale2.cs" />
+    <Compile Include="TripleInt.cs" />
+    <Compile Include="TripleStoreInt.cs" />
+    <Compile Include="TurtleInt.cs" />
   </ItemGroup>
   <ItemGroup>
-    <WCFMetadata Include="Service References\" />
+    <Content Include="Description.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\PolarDB\PolarDB.csproj">
       <Project>{907bb4af-fbc9-4a1e-8f80-194af9337aa4}</Project>
       <Name>PolarDB</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Description.txt" />
+    <ProjectReference Include="..\NameTable\NameTable.csproj">
+      <Project>{5283693d-68cc-4b7a-b2bb-6e901592a272}</Project>
+      <Name>NameTable</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
