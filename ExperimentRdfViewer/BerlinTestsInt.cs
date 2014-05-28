@@ -13,9 +13,11 @@ namespace TrueRdfViewer
         public static string dc = "http://purl.org/dc/elements/1.1/";
         public static string bsbm = "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/";
         public static string bsbm_inst = "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/";
-        private static int E(string spo) { return TripleInt.Code(spo); }
-        private static OVal rdftype = new OVal() { vid = OValEnumeration.obj, entity = E(rdf + "type") };
-        private static OVal rdfslabel = new OVal() { vid = OValEnumeration.obj, entity = E(rdfs + "label") };
+        //TODO repase E to EP
+        private static int E(string so) { return TripleInt.CodeEntities(so); }
+        private static int EP(string p) { return TripleInt.CodePredicates(p); }
+        private static OVal rdftype = new OVal() { vid = OValEnumeration.obj, entity = EP(rdf + "type") };
+        private static OVal rdfslabel = new OVal() { vid = OValEnumeration.obj, entity = EP(rdfs + "label") };
 
         public static IEnumerable<OValRowInt> Berlin1(TripleStoreInt ts)
         {
@@ -41,7 +43,7 @@ namespace TrueRdfViewer
                 ._spo(_product, _bsbm_productFeature, _bsbm_inst_ProductFeature8)
                 ._spo(_product, _rdftype, _bsbm_inst_ProductType1)
                 ._spD(_product, _bsbm_ProductPropertyNumeric1, _value1)
-                .Where(ovalrow => (int)ovalrow.row[_value1].lit.value > 1000)
+                .Where(ovalrow => (int)ovalrow.row[_value1].lit.Value > 1000)
                 ._spD(_product, _rdfslabel, _label)
                 ;
             return quer;
@@ -100,7 +102,7 @@ namespace TrueRdfViewer
             var quer = Enumerable.Repeat<OValRowInt>(ovr, 1)
                 ._Spo(_product, _rdftype, _bsbm_Product)
                 ._spD(_product, _rdfslabel, _label)
-                .Where(ovalrow => rx.IsMatch( ((Text)ovalrow.row[_label].lit.value).s ))
+                .Where(ovalrow => rx.IsMatch( ((Text)ovalrow.row[_label].lit.Value).Value ))
                 ;
             return quer;
         }
@@ -278,7 +280,7 @@ namespace TrueRdfViewer
             var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
                 .Spo(_product, E(rdf + "type"), E(bsbm + "Product"))
                 .spD(_product, E(rdfs + "label"), _label)
-                .Where(pack => rx.IsMatch(((Text)pack.Val(_label).value).s))
+                .Where(pack => rx.IsMatch(((Text)pack.Val(_label).Value).Value))
                 ;
             return quer;
         }

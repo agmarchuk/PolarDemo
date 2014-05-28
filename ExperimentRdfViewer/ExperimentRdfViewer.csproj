@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2053B201-18A6-4B4C-B1EC-1FE2B2D77F15}</ProjectGuid>
+    <ProjectGuid>{3165CDE6-FA27-4FC4-BDBC-01967BB4F0E5}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TrueRdfViewer</RootNamespace>
@@ -48,7 +48,7 @@
     <Compile Include="BerlinTestsInt.cs" />
     <Compile Include="DiapasonScanner.cs" />
     <Compile Include="DiapLinksScanner.cs" />
-    <Compile Include="EntitiesDiapasons.cs" />
+    <Compile Include="EntitiesMemoryHashTable.cs" />
     <Compile Include="EntitiesWideTable.cs" />
     <Compile Include="FlexIndexView.cs" />
     <Compile Include="GroupedEntities.cs" />
@@ -70,6 +70,10 @@
     <ProjectReference Include="..\..\PolarDB\PolarDB.csproj">
       <Project>{907bb4af-fbc9-4a1e-8f80-194af9337aa4}</Project>
       <Name>PolarDB</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NameTable\NameTable.csproj">
+      <Project>{5283693d-68cc-4b7a-b2bb-6e901592a272}</Project>
+      <Name>NameTable</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,209 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using NameTable;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace  TrueRdfViewer
+namespace TrueRdfViewer
 {
     public abstract class TripleInt 
     { 
         public int subject, predicate;
-        public static IStringIntCoding SiCodingEntities;
-        public static IStringIntCoding SiCodingPredicates;
-        public static Dictionary<string, int> EntitiesCodeCache = new Dictionary<string, int>();
-        public static Dictionary<string, int> PredicatesCodeCache = new Dictionary<string, int>();
-     
-        public static long totalMilisecondsCodingUsages = 0;
-        
-        public static int CodeEntities(string s)
-        {   
-            int c;
-           // if(!EntitiesCodeCache.TryGetValue(s, out c))
-            {
-                DateTime st = DateTime.Now;
-                   c = SiCodingEntities.GetCode(s);
-           //  c = s.GetHashCode();
-                totalMilisecondsCodingUsages += (DateTime.Now - st).Ticks/10000;
-           //     EntitiesCodeCache.Add(s, c); //s.GetHashCode() 
-                
-            }
-            return c;
-        }              
-        public static string DecodeEntities(int e)
-        {
-          //   return e.ToString();
-            return SiCodingEntities.GetName(e);
-        }
-
-        public static int CodePredicates(string s)
-        {
-            int c;
-           // if (!PredicatesCodeCache.TryGetValue(s, out c))
-            {
-                DateTime st = DateTime.Now;
-                c = SiCodingPredicates.GetCode(s);
-                //  c = s.GetHashCode();
-                totalMilisecondsCodingUsages += (DateTime.Now - st).Ticks / 10000;
-            //    PredicatesCodeCache.Add(s, c); //s.GetHashCode() 
-
-            }
-            return c;
-        }
-        public static string DecodePredicates(int e)
-        {
-            //   return e.ToString();
-            return SiCodingPredicates.GetName(e);
-        } 
-
-
+        public static int Code(string s) { return s.GetHashCode(); }
+        public static string Decode(int e) { return "noname" + e; }
     }
     public class OTripleInt : TripleInt { public int obj; }
     public class DTripleInt : TripleInt { public Literal data; }
-    public enum LiteralVidEnumeration { typedObject, integer, text, date, boolean, nil }
-    public class Literal
-    {
-        protected bool Equals(Literal other)
-        {
-            return vid == other.vid && Equals(Value, other.Value);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return ((int)vid * 397) ^ (Value != null ? Value.GetHashCode() : 0);
-            }
-        }
-
-        public readonly LiteralVidEnumeration vid;
-
-        public string GetString()
+    public enum LiteralVidEnumeration { unknown, integer, text, date }
+    public class Literal 
+    { 
+        public LiteralVidEnumeration vid; 
+        public object value;
+        public override string ToString()
         {
             switch (vid)
             {
-                case LiteralVidEnumeration.typedObject:
-                    return ((TypedObject)Value).Value;
                 case LiteralVidEnumeration.text:
-                    return ((Text)Value).Value;
-                case LiteralVidEnumeration.date:
-                    return ((DateTime)Value).ToString(CultureInfo.InvariantCulture);
-                case LiteralVidEnumeration.integer:
-                case LiteralVidEnumeration.boolean:
-                    return Value.ToString();
-                case LiteralVidEnumeration.nil:
-                default:
-                    throw new ArgumentOutOfRangeException();
+                    {
+                        Text txt = (Text)value;
+                        return "\"" + txt.s + "\"@" + txt.l;
+                    }
+                default: return value.ToString();
             }
         }
-        public Literal(LiteralVidEnumeration vid)
-        {
-            this.vid = vid;
-        }
+    } 
+    public class Text { public string s, l; }
 
-        public object Value { get; set; }
-
-        public bool HasValue
-        {
-            get
-            {
-                return Value is Double && Value == (object)double.MinValue
-                       || Value is long && (long)Value == DateTime.MinValue.ToBinary()
-                       || Value is Text && !string.IsNullOrEmpty(((Text)Value).Value);
-            }
-        }
-
-        public override string ToString()
-        {
-            return Value.ToString();
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((Literal)obj);
-        }
-    }
-                                                       
-    public class TypedObject : ICloneable
-    {
-        protected bool Equals(TypedObject other)
-        {
-            return string.Equals(Value, other.Value) && string.Equals(Type, other.Type);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return ((Value != null ? Value.GetHashCode() : 0) * 397) ^ (Type != null ? Type.GetHashCode() : 0);
-            }
-        }
-
-        public string Value { get; set; }
-        public string Type { get; set; }
-        public override string ToString()
-        {
-            string result = "\"" + Value + "\"";
-            if (!string.IsNullOrWhiteSpace(Type))
-                result += "^^" + Type;
-            return result;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((TypedObject)obj);
-        }
-
-        public object Clone()
-        {
-            return new TypedObject() { Type = Type, Value = Value };
-        }
-    }
-    public class Text : ICloneable
-    {
-        protected bool Equals(Text other)
-        {
-            return string.Equals(Value, other.Value) && string.Equals(Lang, other.Lang);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return ((Value != null ? Value.GetHashCode() : 0) * 397) ^ (Lang != null ? Lang.GetHashCode() : 0);
-            }
-        }
-
-        public string Value { get; set; }
-        public string Lang { get; set; }
-        public override string ToString()
-        {
-            string result = "\"" + Value + "\"";
-            if (!string.IsNullOrWhiteSpace(Lang))
-                result += "@" + Lang;
-            return result;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((Text)obj);
-        }
-
-        public object Clone()
-        {
-            return new Text() { Lang = Lang, Value = Value };
-
-        }
-    }
-             
     public class SubjPredInt
     {
         public int subj, pred;

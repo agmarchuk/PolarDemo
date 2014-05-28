@@ -11,23 +11,23 @@ namespace TrueRdfViewer
     {
         private PaCell ewtable;
         public PaCell EWTable { get { return ewtable; } }
-        private DiapasonScanner<int>[] scanners;
-        private string path;
-        public EntitiesWideTable(string path, DiapasonScanner<int>[] scanners) 
+
+      
+        public EntitiesWideTable(string path, int count) 
         {
-            this.path = path;
-            this.scanners = scanners;
+          //  this.path = path;
+
             PType DiaRec = new PTypeRecord(
                 new NamedType("start", new PType(PTypeEnumeration.longinteger)),
                 new NamedType("number", new PType(PTypeEnumeration.longinteger)));
             PType tp = new PTypeSequence(new PTypeRecord(
                 new NamedType("entity", new PType(PTypeEnumeration.integer)),
-                new NamedType("spo", DiaRec),
+                new NamedType("spo", DiaRec),                                //TODO use count
                 new NamedType("spo_op", DiaRec),
                 new NamedType("spd", DiaRec)));
             ewtable = new PaCell(tp, path + "ewtable.pac", false); 
         }
-        public void Load()
+        public void Load(DiapasonScanner<int>[] scanners)
         {
             ewtable.Clear();
             ewtable.Fill(new object[0]);
@@ -38,8 +38,8 @@ namespace TrueRdfViewer
             {
                 int key = Least(scanners);
                 Diapason[] diaps = Enumerable.Repeat<Diapason>(new Diapason() { start = 0L, numb = 0L }, 3).ToArray();
-                object[] pval = new object[4];
-                pval[0] = key;
+                object[] pval = new object[5];
+                pval[0] = key;    
                 for (int ind = 0; ind < 3; ind++)
                 {
                     if (scanners[ind].HasValue && scanners[ind].KeyCurrent == key)
