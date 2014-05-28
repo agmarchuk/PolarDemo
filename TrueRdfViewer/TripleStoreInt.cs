@@ -82,7 +82,7 @@ namespace TrueRdfViewer
 
             InitTypes();
             TripleInt.SiCodingEntities = new StringIntMD5RAMCoding(path + "entitiesCodes");
-            TripleInt.SiCodingPredicates = new StringIntMD5RAMCoding(path + "predicatesCodes");
+            TripleInt.SiCodingPredicates = new StringIntRAMDIctionary(path + "predicatesCodes");
             otriplets_op_filePath = path + "otriples_op.pac";
             otriples_filePath = path + "otriples.pac";
             dtriples_filePath = path + "dtriples_spf.pac";
@@ -124,7 +124,7 @@ namespace TrueRdfViewer
 
 
         private void RemoveColumns()
-        {
+        {   
             otriples = new PaCell(tp_triple_seq_two, otriples_filePath, false);
             otriples_op = new PaCell(tp_triple_seq_two, otriplets_op_filePath, false);
             dtriples_sp = new PaCell(tp_dtriple_spf_two, dtriples_filePath, false);
@@ -250,6 +250,7 @@ namespace TrueRdfViewer
 
             Close();
             RemoveColumns();
+            Console.WriteLine("RemoveColumns() ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
             Open(true);
         }
 
@@ -340,60 +341,80 @@ namespace TrueRdfViewer
             TripleInt.EntitiesCodeCache.Clear();
             TripleInt.PredicatesCodeCache.Clear();
 
-            foreach (var triple in TurtleInt.LoadGraph(filepath))
-            {
-                if (i % 100000 == 0) Console.Write("{0} ", i / 100000);
-                i++;
-                if (triple is OTripleInt)
-                {
-                    var tr = (OTripleInt)triple;
-                    otriples.Root.AppendElement(new object[] 
-                    { 
-                        tr.subject, 
-                        tr.predicate, 
-                        tr.obj 
+            const int bufferLength = 1000*1000;
+            ;
+            var buffer = new List<DTripleInt>(bufferLength);
+
+            foreach (var triplet in TurtleInt.LoadGraph(filepath))
+            {                                                    
+                if (i%100000 == 0) Console.Write("{0} ", i/100000);i++;    
+                var otr = triplet as OTripleInt;
+                if (otr != null)
+                    otriples.Root.AppendElement(new object[]
+                    {
+                        otr.subject,
+                        otr.predicate,
+                        otr.obj
                     });
-                }
                 else
                 {
-                    var tr = (DTripleInt)triple;
-                    Literal lit = tr.data;
-                    object[] da;
-                    switch (lit.vid)
+                    if (buffer.Count == bufferLength)
                     {
+                        WriteDataTripletsBuffer(buffer);
 
-                        case LiteralVidEnumeration.integer:
-                            da = new object[] { 1, lit.Value };
-                            break;
-                        case LiteralVidEnumeration.date:
-                            da = new object[] { 3, lit.Value };
-                            break;
-                        case LiteralVidEnumeration.boolean:
-                            da = new object[] { 4, lit.Value };
-                            break;
-                        case LiteralVidEnumeration.text:
-                            {
-                                Text t = (Text)lit.Value;
-                                da = new object[] { 2, new object[] { t.Value, t.Lang } };
-                            }
-                            break;
-                        case LiteralVidEnumeration.typedObject:
-                            {
-                                TypedObject t = (TypedObject)lit.Value;
-                                da = new object[] { 5, new object[] { t.Value, t.Type } };
-                            }
-                            break;
-                        default:
-                            da = new object[] { 0, null };
-                            break;
+                        buffer.Clear();
                     }
-                    var offset = dataCell.Root.AppendElement(da);
-                    dtriples_sp.Root.AppendElement(new object[] { tr.subject, tr.predicate, offset });
+                    buffer.Add(triplet as DTripleInt);
                 }
+                
             }
+            WriteDataTripletsBuffer(buffer);
+
             otriples.Flush();
             dataCell.Flush();
             dtriples_sp.Flush();
+        }
+
+        private void WriteDataTripletsBuffer(List<DTripleInt> buffer)
+        {
+            var offsetsOnData = new long[buffer.Count];
+            for (int k = 0; k < buffer.Count; k++)
+            {
+                var tr = buffer[k];
+                Literal lit = tr.data;
+                object[] da;
+                switch (lit.vid)
+                {
+                    case LiteralVidEnumeration.integer:
+                        da = new object[] {1, lit.Value};
+                        break;
+                    case LiteralVidEnumeration.date:
+                        da = new object[] {3, lit.Value};
+                        break;
+                    case LiteralVidEnumeration.boolean:
+                        da = new object[] {4, lit.Value};
+                        break;
+                    case LiteralVidEnumeration.text:
+                    {
+                        Text t = (Text) lit.Value;
+                        da = new object[] {2, new object[] {t.Value, t.Lang}};
+                    }
+                        break;
+                    case LiteralVidEnumeration.typedObject:
+                    {
+                        TypedObject t = (TypedObject) lit.Value;
+                        da = new object[] {5, new object[] {t.Value, t.Type}};
+                    }
+                        break;
+                    default:
+                        da = new object[] {0, null};
+                        break;
+                }
+                offsetsOnData[k] = dataCell.Root.AppendElement(da);
+            }
+
+            for (int k = 0; k < buffer.Count; k++)
+                dtriples_sp.Root.AppendElement(new object[] {buffer[k].subject, buffer[k].predicate, offsetsOnData[k]});
         }
 
         private void Close()
@@ -1214,7 +1235,9 @@ namespace TrueRdfViewer
                     //Если триплеты нужно возращать в порядке возрастания субъекта  (и предиката), то нужно заполнить массив и затем возразщать пары списков объектных и литералов (соединить и отсортировать по предикату)
                     //List<KeyValuePair<int, int>>[] opLists = new List<KeyValuePair<int, int>>[bufferTripletsMax];
                     if (!otriples.IsEmpty && otriples.Root.Count() != 0)
-                        foreach (object[] pred_obj in otriples.Root.ElementValues(objTrippletsBufferStart, objTrippletsBufferCount))
+                        foreach (object[] pred_obj in otriples.Root.ElementValues(objTrippletsBufferStart, objTrippletsBufferCount)
+                            //что бы чтение не проводилось паралелльно с декодированием
+                            .ToArray())
                     {
                         if (s_count-- == 0)
                         {
@@ -1265,6 +1288,45 @@ namespace TrueRdfViewer
                 var wideRow = (object[])ewt.EWTable.Root.Element(kod).Get();
                 objTrippletsBufferCount += objDiapasons[index_in_buffer] = Convert.ToInt32((long)((object[])wideRow[1])[1]);
                 literalsTrippletsBufferCount += literalDiapasons[index_in_buffer] = Convert.ToInt32((long)((object[])wideRow[3])[1]);
+            }
+        }
+
+        public IEnumerable<Tuple<string, string, string>> DecodeTriplets(IEnumerable<TripleInt> triplets)
+        {
+            var enumerator = triplets.GetEnumerator();
+            //TODO переделать
+            Dictionary<int, string> predicatesCodes = new Dictionary<int, string>();
+            for (int i = 0; i < TripleInt.SiCodingPredicates.Count; i++)
+                predicatesCodes.Add(i, TripleInt.SiCodingPredicates.GetName(i));
+            int subjectCodesBuffer = 100*1000*1000;
+
+            var entitiesCodes = new Dictionary<int, string>(subjectCodesBuffer);
+            for (int kod = 0, bufferIndex = 0; kod < TripleInt.SiCodingEntities.Count; kod++, bufferIndex++)
+            {
+                if (bufferIndex == subjectCodesBuffer)
+                {
+                    while( enumerator.MoveNext() && enumerator.Current.subject < kod)
+                    {
+                        var dTripleInt = enumerator.Current as DTripleInt;
+                        if (dTripleInt != null)
+                            yield return
+                                Tuple.Create(entitiesCodes[dTripleInt.subject],
+                                    predicatesCodes[dTripleInt.predicate], dTripleInt.data.ToString());
+                        else
+                        {
+                            var oTripleInt = enumerator.Current as OTripleInt;
+                            string obj;
+                            Tuple.Create(entitiesCodes[oTripleInt.subject], predicatesCodes[oTripleInt.predicate],
+                                entitiesCodes.TryGetValue(oTripleInt.obj, out obj)
+                                    ? obj
+                                    : TripleInt.SiCodingEntities.GetName(oTripleInt.obj));
+                        }
+                    }
+
+                    bufferIndex = 0;
+                    entitiesCodes.Clear();   
+                }   
+                entitiesCodes.Add(kod, TripleInt.SiCodingEntities.GetName(kod));
             }
         }
     }

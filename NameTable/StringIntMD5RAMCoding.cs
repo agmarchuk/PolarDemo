@@ -29,7 +29,7 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
         private PaCell md5_index;
         private string pathMD5Index;
         private bool? openMode;
-        private readonly Dictionary<long, int> offsetsByMd5Cache = new Dictionary<long, int>();
+        private readonly Dictionary<long, int> offsetsOrCodeByMd5Cache = new Dictionary<long, int>();
         private static Dictionary<string, IStringIntCoding> Opend=new Dictionary<string, IStringIntCoding>();
 
         public StringIntMD5RAMCoding(string path)
@@ -57,12 +57,12 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
 
         private void ReadOffsetsByMd5Cache()
         {
-            offsetsByMd5Cache.Clear();
+            offsetsOrCodeByMd5Cache.Clear();
             int index = 0;
             foreach (object[] pair in md5_index.Root.ElementValues())
             {
-                if (!offsetsByMd5Cache.ContainsKey((long) pair[0]))
-                    offsetsByMd5Cache.Add((long) pair[0], index);
+                if (!offsetsOrCodeByMd5Cache.ContainsKey((long) pair[0]))
+                    offsetsOrCodeByMd5Cache.Add((long) pair[0], index);
                 index++;
             }
         }
@@ -112,7 +112,7 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
             c_index.Fill(new object[0]);
             md5_index.Fill(new object[0]);
             Count = 0;
-            offsetsByMd5Cache.Clear();
+            offsetsOrCodeByMd5Cache.Clear();
         }
 
         public int GetCode(string name)
@@ -127,7 +127,7 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
         {
             if (Count == 0) return Int32.MinValue;
                  int index;
-           if(!offsetsByMd5Cache.TryGetValue(newD5, out index)) return Int32.MinValue;
+           if(!offsetsOrCodeByMd5Cache.TryGetValue(newD5, out index)) return Int32.MinValue;
             
             var ncEntry = nc_cell.Root.Element(0);
             for (;;index++)
@@ -189,7 +189,10 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
                 md5_index.Fill(new object[0]);
                 var tmpCell = new PaCell(tp_pair_longs, tmp);
 
-                foreach (object[] existingPair in tmpCell.Root.ElementValues())
+                const int max = 500*1000*1000;
+                long count = tmpCell.Root.Count();
+                for (int i = 0; i < (int) (count/max)+1; i++)
+                    foreach (object[] existingPair in tmpCell.Root.ElementValues(i * max, Math.Min(max, count - i * max)).ToArray())
                 {
                     for (; portionIndex < offsetsNC.Length
                         && checkSums[portionIndex] <= (long) existingPair[0];
@@ -202,8 +205,10 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
             }
             for (; portionIndex < checkSums.Length; portionIndex++)
                 md5_index.Root.AppendElement(new object[] {checkSums[portionIndex], offsetsNC[portionIndex]});
+          
 
-              md5_index.Flush();
+
+            md5_index.Flush();
               ReadOffsetsByMd5Cache();   
             //Count += insertPortion.Count;
             return insertPortion;             
@@ -214,8 +219,9 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
            Open(false); 
             c_index.Clear();
             var offsets = new object[Count];
+            int i = 0;
             foreach (PaEntry entry in nc_cell.Root.Elements())
-                offsets[(int) ((object[]) entry.Get())[0]] = entry.offset;
+                offsets[i++] = entry.offset;
             c_index.Fill(offsets);
             Open(true);
         }

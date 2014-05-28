@@ -529,4 +529,147 @@ millions 1
 total 20836 мс.
 millions 1
 total 14164 мс.
+загрузка миллиарда
 millions 1000
+total 77 453 338 мс.
+  63060 сек. загрузка тириплетов + создание таблиц имён
+  prepareArrays 835секунд
+  сортировка
+	otripelts 4230
+	otripelts_op 1874 
+	dtripelts_sp 3501
+CreateScale 535
+ewt load 1784
+остальное время удаление столбцов(перенос пар столбцов из временных таблиц в постоянные)
+
+millions 1000
+warm up 1511372 мс.
+total 1890857 мс.
+millions 1000
+warm up 1364365 мс.
+milions 1000
+max memory usage 8 680 722 248
+average 9, 16, 15, 5, 0, 0, 0, 1, 7, 0, 6, 6
+minimums 0, 15, 0, 0, 140, 6406, 343, 31, 31, 31, 62, 62
+maximums 23640, 140, 4703, 56203, 29140, 28687, 5859, 2359, 250, 2750, 218, 249
+total parse 12643, 8521, 12838, 16354, 11671, 630, 10465, 10683, 15499, 10270, 15856, 16281
+total run 41368, 22193, 19895, 76092, 1389365, 3470383, 1149640, 416042, 48743, 531738, 60510, 60899
+countCodingUsages 17717 totalMillisecondsCodingUsages 220 610
+total 21 751 591 мс.
+millions 1
+total 31275 мс.
+millions 1
+total 14392 мс.
+millions 1
+total 17792 мс.
+millions 1
+millions 1
+total 16234 мс.
+millions 1
+total 17890 мс.
+millions 1
+warm up 1000 мс.
+milions 1
+max 0
+elements 1000
+index of max 0
+total 0
+count tests 100
+average 0
+load 0
+create index 1
+milions 1
+max 0
+elements 1000
+index of max 0
+total 0
+count tests 100
+average 0
+load 3
+create index 3
+milions 1
+max 15543
+elements 1000
+index of max 1
+total 37903
+count tests 100
+average 379,03
+load 12321
+create index 7
+millions 1
+warm up 901 мс.
+millions 1
+warm up 880 мс.
+millions 1
+warm up 897 мс.
+millions 1
+warm up 988 мс.
+millions 1
+warm up 885 мс.
+millions 1
+warm up 855 мс.
+millions 1
+total 16423 мс.
+millions 1
+millions 1
+warm up 899 мс.
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 7985
+total 9719 мс.
+millions 1
+warm up 910 мс.
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 3
+total 1656 мс.
+millions 1
+warm up 605 мс.
+milions 1
+max memory usage 87581288
+average 1577, 1179, 750, 851, 148, 125, 331, 389, 5617, 404, 7142, 2824
+minimums 0, 0, 0, 0, 3, 6, 0, 0, 0, 0, 0, 0
+maximums 2, 4, 3, 4, 20, 17, 8, 6, 1, 6, 1, 1
+total parse 268, 129, 604, 501, 1036, 289, 341, 715, 26, 692, 32, 115
+total run 42, 223, 26, 31, 2145, 3544, 1016, 421, 63, 356, 38, 61
+countCodingUsages 9133 totalMillisecondsCodingUsages 220
+total 34250 мс.
+millions 1
+warm up 912 мс.
+millions 1
+total 14377 мс.
+millions 1
+total 12702 мс.
+millions 1
+warm up 535 мс.
+milions 1
+max memory usage 127 239 016
+average 1602, 1179, 739, 872, 149, 124, 345, 384, 8928, 417, 8196, 2857
+minimums 0, 0, 0, 0, 2, 6, 0, 0, 0, 0, 0, 0
+maximums 2, 2, 3, 2, 15, 24, 8, 6, 1, 6, 1, 1
+total parse 281, 132, 627, 493, 1038, 281, 327, 704, 13, 706, 24, 106
+total run 21, 226, 17, 31, 2118, 3624, 950, 425, 43, 313, 38, 68
+countCodingUsages 0 totalMillisecondsCodingUsages 42
+total 33358 мс.
+millions 1
+millions 1
+millions 1
+total 15075 мс.
+millions 1
+total 11799 мс.
+millions 1
+warm up 300 мс.
+millions 1
+warm up 599 мс.
+millions 1
+warm up 438 мс.
+millions 1
+total 17177 мс.
+millions 1
+total 13510 мс.
+millions 1
+warm up 621 мс.
+milions 1
+countCodingUsages 0 totalMillisecondsCodingUsages 5
+total 1391 мс.
+millions 10
+total 207321 мс.
+millions 100

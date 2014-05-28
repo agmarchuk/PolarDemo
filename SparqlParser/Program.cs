@@ -21,12 +21,12 @@ namespace ANTLR_Test
 
         
                 
-            //var count = 100 * 1000 * 1000;
-            //TestPerfomanceCoding(new StringIntMD5Coding(@"..\..\codeTests\"), Enumerable.Repeat(Guid.NewGuid().ToString(), count), count);
+         //   var count =  1000;
+         //   TestPerfomanceCoding(new StringIntRAMDIctionary(@"..\..\codeTests\"), Enumerable.Range(0, count).Select(i => Guid.NewGuid().ToString()).ToArray(), count);
 
        
 
-            //   Test();
+           //    Test();
 
            Console.WriteLine(Millions = 10);
 
@@ -36,12 +36,12 @@ namespace ANTLR_Test
           // Test();
 
            Console.WriteLine(Millions = 100);
-
+                
           
 
-           //Test();
+           Test();
            Console.WriteLine(Millions = 1000);
-          Test();
+         // Test();
 
         }    
 
@@ -55,8 +55,8 @@ namespace ANTLR_Test
            Query.decodesCashe.Clear();
             //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\undecoded\" + Millions + @"mln\");
 
-             //     bool load = false;
-           bool load = true;
+                  //  bool load = false;
+                     bool load = true;
               using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;
@@ -71,7 +71,7 @@ namespace ANTLR_Test
                 spent = (DateTime.Now - start).Ticks / 10000;
                 using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                     wr.WriteLine("warm up " + spent + " мс.");
-               //    RunBerlinsWithConstants( ts);
+                //   RunBerlinsWithConstants( ts);
                 RunBerlinsParameters(ts);      
             }
             spent = (DateTime.Now - start).Ticks/10000;
@@ -100,12 +100,12 @@ namespace ANTLR_Test
                 }
                 .Select(s => new FileInfo(s))
                 .ToArray();
-            var paramvaluesFilePath = string.Format(@"..\..\sparql data\queries\parameters\param values for{0} m.txt", Millions);
-            //using (StreamWriter streamQueryParameters = new StreamWriter(paramvaluesFilePath)) 
-            //    for (int j = 0; j < 1000; j++)
-            //        foreach (var file in fileInfos.Select(info => File.ReadAllText(info.FullName)))
-            //            QueryWriteParameters(file, streamQueryParameters, ts);
-
+           var paramvaluesFilePath = string.Format(@"..\..\sparql data\queries\parameters\param values for{0} m.txt", Millions);
+//            using (StreamWriter streamQueryParameters = new StreamWriter(paramvaluesFilePath))
+//                for (int j = 0; j < 1000; j++)
+//                    foreach (var file in fileInfos.Select(info => File.ReadAllText(info.FullName)))
+//                        QueryWriteParameters(file, streamQueryParameters, ts);
+//return;
 
             using (StreamReader streamQueryParameters = new StreamReader(paramvaluesFilePath))
             {
@@ -427,7 +427,7 @@ namespace ANTLR_Test
             int loadPortion = 1000*1000;
             
             var st = DateTime.Now;
-            for (int j = 0; j < length/loadPortion; j++)
+            for (int j = 0; j < length/loadPortion+1; j++)
             {
                 stringIntMd5Coding.InsertPortion(forCode.Skip(j*loadPortion).Take(loadPortion).ToArray());
             }

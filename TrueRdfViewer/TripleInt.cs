@@ -18,13 +18,13 @@ namespace  TrueRdfViewer
         public static int CodeEntities(string s)
         {   
             int c;
-            if(!EntitiesCodeCache.TryGetValue(s, out c))
+           // if(!EntitiesCodeCache.TryGetValue(s, out c))
             {
                 DateTime st = DateTime.Now;
                    c = SiCodingEntities.GetCode(s);
            //  c = s.GetHashCode();
                 totalMilisecondsCodingUsages += (DateTime.Now - st).Ticks/10000;
-                EntitiesCodeCache.Add(s, c); //s.GetHashCode() 
+           //     EntitiesCodeCache.Add(s, c); //s.GetHashCode() 
                 
             }
             return c;
@@ -38,13 +38,13 @@ namespace  TrueRdfViewer
         public static int CodePredicates(string s)
         {
             int c;
-            if (!PredicatesCodeCache.TryGetValue(s, out c))
+           // if (!PredicatesCodeCache.TryGetValue(s, out c))
             {
                 DateTime st = DateTime.Now;
                 c = SiCodingPredicates.GetCode(s);
                 //  c = s.GetHashCode();
                 totalMilisecondsCodingUsages += (DateTime.Now - st).Ticks / 10000;
-                PredicatesCodeCache.Add(s, c); //s.GetHashCode() 
+            //    PredicatesCodeCache.Add(s, c); //s.GetHashCode() 
 
             }
             return c;
