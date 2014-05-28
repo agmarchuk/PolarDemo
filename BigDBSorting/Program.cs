@@ -8,8 +8,125 @@ namespace BigDBSorting
 {
     class Program
     {
-        // Проверка индексирования строкового столбца
+        // Проверка таблицы с индексами
         static void Main(string[] args)
+        {
+            Console.WriteLine("Start");
+            string path = @"..\..\..\Databases\";
+            DateTime tt0 = DateTime.Now;
+            Random rnd = new Random(3333);
+
+            // Тип для таблицы
+            PType tp_tab = new PTypeSequence(new PTypeRecord(
+                new NamedType("id", new PType(PTypeEnumeration.integer)),
+                new NamedType("date", new PType(PTypeEnumeration.longinteger)),
+                new NamedType("name", new PType(PTypeEnumeration.sstring))
+                ));
+                
+            // Таблица
+            PaCell table = new PaCell(tp_tab, path + "table.pac", false);
+            // Индексы
+            PaCell id_index = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.longinteger)), path + "id_index.pac", false);
+            PaCell dt_index = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.longinteger)), path + "dt_index.pac", false);
+            PaCell nm_index = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.longinteger)), path + "nm_index.pac", false);
+
+            // Заполнение
+            bool toload = false;
+            int nvalues = 10000000;
+            System.Collections.Generic.List<int> times = new System.Collections.Generic.List<int>();
+            if (toload)
+            {
+                table.Clear();
+                table.Fill(new object[0]);
+                id_index.Clear();
+                id_index.Fill(new object[0]);
+                dt_index.Clear();
+                dt_index.Fill(new object[0]);
+                nm_index.Clear();
+                nm_index.Fill(new object[0]);
+                for (int i = 0; i < nvalues; i++)
+                {
+                    int r1 = rnd.Next();
+                    int r2 = rnd.Next();
+                    int r3 = rnd.Next();
+                    if ((i + 1) % 100000 == 0)
+                    {
+                        Console.Write("{0} ", (i + 1) / 100000);
+                    }
+                    object[] record = new object[] { r1, (long)r2, "Иванов" + r3 };
+                    long off = table.Root.AppendElement(record);
+                    id_index.Root.AppendElement(off);
+                    dt_index.Root.AppendElement(off);
+                    nm_index.Root.AppendElement(off);
+                }
+                Console.WriteLine();
+                table.Flush();
+                id_index.Flush();
+                dt_index.Flush();
+                nm_index.Flush();
+                Console.WriteLine("Load ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                PaEntry.bufferBytes = 200000000;
+
+                var ptr = table.Root.Element(0);
+                id_index.Root.SortByKey<int>((object v) =>
+                {
+                    ptr.offset = (long)v;
+                    return (int)ptr.Field(0).Get();
+                });
+                Console.WriteLine("id ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                dt_index.Root.SortByKey<long>((object v) =>
+                {
+                    ptr.offset = (long)v;
+                    return (long)ptr.Field(1).Get();
+                });
+                Console.WriteLine("date index ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                nm_index.Root.SortByKey<string>((object v) =>
+                {
+                    ptr.offset = (long)v;
+                    return (string)ptr.Field(2).Get();
+                });
+                Console.WriteLine("Sort ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            }
+
+            // Бинарный поиск
+            rnd = new Random(3333);
+            for (int i = 0; i < nvalues; i++)
+            {
+                int r1 = rnd.Next();
+                int r2 = rnd.Next();
+                int r3 = rnd.Next();
+                if ((i + 1) % 100000 == 0) times.Add(r2);
+            }
+            long min = 199900000, max = 200000000;
+
+            var tab_entry = table.Root.Element(0);
+            var query = dt_index.Root.BinarySearchAll(entry =>
+            {
+                tab_entry.offset = (long)entry.Get();
+                long time = (long)tab_entry.Field(1).Get();
+                return time < min ? -1 : (time > max ? 1 : 0);
+                //return time.CompareTo((long)times[10]);
+            });
+            Console.WriteLine("Binary search found {0}. duration={1}",
+                query.Count(), (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            int cnt = 0;
+            foreach (var tm in times)
+            {
+                var query2 = dt_index.Root.BinarySearchAll(entry =>
+                {
+                    tab_entry.offset = (long)entry.Get();
+                    long time = (long)tab_entry.Field(1).Get();
+                    return time.CompareTo((long)tm);
+                });
+                cnt += query2.Count();
+            }
+            Console.WriteLine("For {0} binary searches: duration={1}",
+                times.Count,
+                (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
+        }
+        // Проверка индексирования строкового столбца
+        static void Main2(string[] args)
         {
             Console.WriteLine("Start");
             string path = @"..\..\..\Databases\";
