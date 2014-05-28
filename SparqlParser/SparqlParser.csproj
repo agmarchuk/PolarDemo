@@ -96,8 +96,6 @@
   <ItemGroup>
     <Content Include="bin\Debug\Antlr4.Runtime.v4.5.dll" />
     <Content Include="bin\Debug\Antlr4.Runtime.v4.5.xml" />
-    <Content Include="Input.txt" />
-    <Content Include="output.xml" />
     <Content Include="sparql data\queries\parameters\1.txt" />
     <Content Include="sparql data\queries\parameters\10.txt" />
     <Content Include="sparql data\queries\parameters\11.txt" />
