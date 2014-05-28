@@ -8,11 +8,71 @@ namespace BigDBSorting
 {
     class Program
     {
-        // Проверка индексирования строкового столбца
+        // Проверка работы с данными, существенно превышающими размер оперативной памяти
         static void Main(string[] args)
         {
             Console.WriteLine("Start");
-            string path = @"..\..\..\Databases\";
+            //string path = @"..\..\..\Databases\"; //HDD
+            string path = @"G:\Home\Databases\"; //SSD
+            DateTime tt0 = DateTime.Now;
+            Random rnd = new Random(3333);
+
+            // Две ячейки: строковый столбец и индексный столбец
+            PaCell scell = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.sstring)), path + "scell.pac", false);
+            PaCell icell = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.longinteger)), path + "icell.pac", false);
+
+            // Заполнение или разогрев
+            bool toload = false;
+            int nvalues = 100000000;
+            if (toload)
+            {
+                scell.Clear();
+                scell.Fill(new object[0]);
+                icell.Clear();
+                icell.Fill(new object[0]);
+                for (int i = 0; i < nvalues; i++)
+                {
+                    if ((i + 1) % 100000 == 0) Console.Write("{0} ", (i + 1) / 100000);
+                    // длина идентификатора более 100 байтов
+                    long off = scell.Root.AppendElement("http://verylongdomain012345678901234567890123456789012345678901234567890123456789totestprefix.ru/qwerty/" + rnd.Next().ToString());
+                    icell.Root.AppendElement(off);
+                }
+                Console.WriteLine();
+                scell.Flush();
+                icell.Flush();
+                Console.WriteLine("Load ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            }
+            else
+            {
+                //foreach (var q in icell.Root.ElementValues()) ;
+                //Console.WriteLine("Warming-up ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //foreach (var q in scell.Root.ElementValues()) ;
+                //Console.WriteLine("Warming-up ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            }
+
+            // Случайные выборки. По rnd выбирается номер рядка, прочитывается offset из индекса, читается строка из scell
+            int portion = 100000;
+            for (int j = 0; j < 10; j++)
+            {
+                tt0 = DateTime.Now;
+                PaEntry entry = scell.Root.Element(0);
+                for (int i = 0; i < portion; i++)
+                {
+                    int ind = rnd.Next(nvalues - 1);
+                    long off = (long)icell.Root.Element(ind).Get();
+                    entry.offset = off;
+                    string s = (string)entry.Get();
+                }
+                Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            }
+        }
+
+        // Проверка индексирования строкового столбца
+        static void Main2(string[] args)
+        {
+            Console.WriteLine("Start");
+            //string path = @"..\..\..\Databases\";
+            string path = @"G:\Home\Databases\";
             DateTime tt0 = DateTime.Now;
             Random rnd = new Random(3333);
 
@@ -21,7 +81,7 @@ namespace BigDBSorting
             PaCell icell = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.longinteger)), path + "icell.pac", false);
 
             // Заполнение
-            bool toload = true;
+            bool toload = false;
             int nvalues = 10000000;
             if (toload)
             {
@@ -31,7 +91,7 @@ namespace BigDBSorting
                 icell.Fill(new object[0]);
                 for (int i = 0; i < nvalues; i++)
                 {
-                    if ((i + 1) % 100000 == 0) Console.Write("{0} ", (i + 1) / 100000); 
+                    if ((i + 1) % 100000 == 0) Console.Write("{0} ", (i + 1) / 100000);
                     long off = scell.Root.AppendElement("http://verylongdomaintotestprefix.ru/qwerty/" + rnd.Next().ToString());
                     icell.Root.AppendElement(off);
                 }
@@ -49,6 +109,13 @@ namespace BigDBSorting
                 });
                 Console.WriteLine("Sort ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             }
+            else
+            {
+                //foreach (var q in icell.Root.ElementValues()) ;
+                //Console.WriteLine("Warming-up ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                //foreach (var q in scell.Root.ElementValues()) ;
+                //Console.WriteLine("Warming-up ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            }
 
             rnd = new Random(3333);
             int[] rand_arr = new int[nvalues];
@@ -58,7 +125,7 @@ namespace BigDBSorting
             }
 
             // Проверка бинарного поиска
-            rnd = new Random(3333);
+            rnd = new Random();
             tt0 = DateTime.Now;
             int ntests = 1000;
             int found = 0;
@@ -74,6 +141,8 @@ namespace BigDBSorting
                         return ((string)entity.Get()).CompareTo(sample);
                     });
                 if (!qq.IsEmpty) found++;
+                //if ((i + 1) % 100000 == 0) 
+                //    Console.Write("{0} ", i + 1);
             }
             Console.WriteLine("Found {0}. Duration={1}", found, (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
         }
