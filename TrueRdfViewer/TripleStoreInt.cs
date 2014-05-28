@@ -130,10 +130,11 @@ namespace TrueRdfViewer
             Console.WriteLine("PrepareArrays ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
             
             // Упорядочивание otriples по s-p-o
+            SPOComparer spo_compare = new SPOComparer();
+
             otriples.Root.SortByKey<SubjPredObjInt>(rec => new SubjPredObjInt(rec), spo_compare);
             Console.WriteLine("otriples.Root.Sort ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
-            //SPOComparer spo_compare = new SPOComparer();
             SPComparer sp_compare = new SPComparer();
             // Упорядочивание otriples_op по o-p
             otriples_op.Root.SortByKey<SubjPredInt>(rec => 

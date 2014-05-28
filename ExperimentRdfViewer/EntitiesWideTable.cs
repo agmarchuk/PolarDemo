@@ -38,7 +38,7 @@ namespace TrueRdfViewer
             {
                 int key = Least(scanners);
                 Diapason[] diaps = Enumerable.Repeat<Diapason>(new Diapason() { start = 0L, numb = 0L }, 3).ToArray();
-                object[] pval = new object[5];
+                object[] pval = new object[4];
                 pval[0] = key;    
                 for (int ind = 0; ind < 3; ind++)
                 {
