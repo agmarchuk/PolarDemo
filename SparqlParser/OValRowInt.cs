@@ -1,4 +1,7 @@
-﻿namespace TrueRdfViewer
+﻿
+using TrueRdfViewer;
+
+namespace SparqlParser
 {
     public enum OValEnumeration
     {

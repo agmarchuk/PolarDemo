@@ -14,8 +14,7 @@ options
 @header{
 	using System;
 	using System.Linq;
-	using System.Xml.Linq;	
-	using System.Collections.Generic;
+	using System.Xml.Linq;		
 	using System.Text.RegularExpressions;
     using Sparql;
     using TrueRdfViewer;
@@ -62,7 +61,7 @@ q.CreateConstructRun();
 
 describeQuery	
  : 'DESCRIBE'  
-( (varLiteral {q.variables.Add($varLiteral.text);} | iRIref { q.constants.Add(TripleInt.Code( $iRIref.text)); } )+ 
+( (varLiteral {q.variables.Add($varLiteral.text);} | iRIref { q.constants.Add(TripleInt.CodeEntities( $iRIref.text)); } )+ 
 | '*' { q.all=true; }) datasetClause* whereClause? solutionModifier  
 {q.CreateDescribeRun();};
 
@@ -368,7 +367,7 @@ verb
 : varOrIRIref { $verbObjectList::PredicateVariable=$varOrIRIref.p; } 
 | 'a' {	
 var PredicateVariable=new Variable();							   
-PredicateVariable.pacElement =  TripleInt.Code("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");  
+PredicateVariable.pacElement =  TripleInt.CodePredicates("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");  
 PredicateVariable.graph	= new GraphIsDataProperty(){IsData=false};
 $verbObjectList::PredicateVariable=PredicateVariable;	   
 } ;
@@ -388,7 +387,7 @@ graphNode  returns [Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> f]
 
 varOrTermSub 
 : var  { $triplesSameSubject::subj=$var.p; q.SetSubjectIsDataFalse($var.p);} 
-| graphTerm  {	$triplesSameSubject::subj.pacElement =  $graphTerm.entityCode; };
+| graphTerm  {	$triplesSameSubject::subj.pacElement = TripleInt.CodeEntities($graphTerm.entity); };
 
 
  varOrTerm returns [Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> f]
@@ -402,18 +401,21 @@ varOrTermSub
 {
 	var p = $verbObjectList::PredicateVariable;
 	var sVar = $triplesSameSubject::subj;
-	var o=new Variable(){ pacElement = $graphTerm.entityCode};
-	GraphIsDataProperty oGraph;
-	if(!q.isDataGraph.TryGetValue(o.pacElement, out oGraph))
-	if($graphTerm.d==null)
-		oGraph=new GraphIsDataProperty(){IsData=false};
-	else
-		{oGraph=new GraphIsDataProperty(){IsData=true, vid=$graphTerm.d.vid};
-		q.isDataGraph.Add(o.pacElement, oGraph);
+	var o=new Variable();						
+
+
+		
+
+if($graphTerm.d==null)	
+		{		
+		 o.graph=new GraphIsDataProperty(){IsData=false};
+		o.pacElement = TripleInt.CodeEntities($graphTerm.entity);
 		}
-		 o.graph=oGraph;			
-	$f = Query.CreateTriplet(sVar, p, o, d:$graphTerm.d);
-	
+	else
+		{ 
+		o.graph=new GraphIsDataProperty(){IsData=true, vid=$graphTerm.d.vid};	 		
+		}		 
+	$f = Query.CreateTriplet(sVar, p, o, d:$graphTerm.d);	
 };
 
 varOrIRIref	  returns[Variable p]
@@ -421,7 +423,7 @@ varOrIRIref	  returns[Variable p]
 | iRIref 
 {	
 $p=new Variable(){
-    pacElement = TripleInt.Code($iRIref.value)	 };
+    pacElement = TripleInt.CodePredicates($iRIref.value)	 };
 	GraphIsDataProperty graph;
 	if (!q.isDataGraph.TryGetValue($p.pacElement, out graph)) 	
             {                
@@ -441,12 +443,12 @@ varLiteral
 : VAR1  
 | VAR2 ;
 
-graphTerm returns[int entityCode, Literal d]	 
-:	iRIref 	{   $entityCode = TripleInt.Code($iRIref.value); } 
+graphTerm returns[string entity, Literal d]	 
+:	iRIref 	{   $entity = $iRIref.value; } 
 |	rDFLiteral {$d = $rDFLiteral.value;}
 |	numeric {  $d = new Literal(LiteralVidEnumeration.integer) {Value = $numeric.num }; } 
 |	BooleanLiteral {	 $d = new Literal(LiteralVidEnumeration.boolean) {Value = bool.Parse($BooleanLiteral.text)}; } 
-|	BlankNode  { $entityCode = TripleInt.Code($BlankNode.text); } 
+|	BlankNode  { $entity =$BlankNode.text; } 
 |	NIL	{	$d = new Literal(LiteralVidEnumeration.nil);  }   ;
 
 expression	 returns [Expression value, Variable singleNewParameter] 
@@ -516,7 +518,7 @@ regexExpression	 returns [Expression value] : ( 'REGEX'| 'regex' | 'Regex' ) '('
 { $value=Query.RegExpression(q.Parameter($v.p), $rex.text, $extraParam==null ? null : $extraParam.text); };
 
 iRIrefOrFunction	returns [Expression value] 
-: iRIref { var code=TripleInt.Code($iRIref.value); $value = Expression.Constant(code);}
+: iRIref { var code=TripleInt.CodeEntities($iRIref.value); if(code==int.MinValue) code=TripleInt.CodePredicates($iRIref.value);  $value = Expression.Constant(code);}
  (argList { $value = Query.Call($iRIref.value,  $argList.value);  })? ;
 
 rDFLiteral	returns [Literal value, Text literalText] 

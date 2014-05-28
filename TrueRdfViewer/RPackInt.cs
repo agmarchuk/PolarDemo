@@ -1,54 +1,40 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using PolarDB;
 
 namespace TrueRdfViewer
 {
-    public class RPackInt : ICloneable
+    public class RPackInt
     {
         //public bool result;
         public object[] row;
-        private readonly TripleStoreInt ts;
+        private TripleStoreInt ts;
         public TripleStoreInt Store { get { return ts; } }
-
         public RPackInt(object[] row, TripleStoreInt ts)
         {
             this.row = row;
             this.ts = ts;
         }
-        public string Get(object si)
+        public object Get(object si)
         {
-            if (!(si is short)) 
-                return TripleInt.Decode((int)si);
-            var index = (short)si;
-            var literal = (row[index] as Literal);
-            if (literal != null) return literal.ToString();
-            else return TripleInt.Decode((int) row[index]);
+            return si is short ? row[(int)si] : si;
         }
-
         public int GetE(object si)
         {
             return si is short ? (int)row[(short)si] : (int)si;
         }
-
-        public bool Hasvalue(short si)
-        {
-            return
-                (row[si] is int && row[si] != (object)Int32.MinValue)
-                || (row[si] is Literal &&
-                    ((Literal)row[si]).HasValue);
-
-        }
-        public Literal Val(short ind)
+        public Literal Val(int ind)
         {
             return (Literal)row[ind];
         }
-        public double Vai(short ind)
+        public int Vai(int ind)
         {
             Literal lit = (Literal)row[ind];
-            //if (lit.vid != LiteralVidEnumeration.integer) throw new Exception("Wrong literal vid in Vai method");
-            return (double)lit.Value;
+            if (lit.vid != LiteralVidEnumeration.integer) throw new Exception("Wrong literal vid in Vai method");
+            return (int)lit.value;
         }
         public void Set(object si, object valu)
         {
@@ -56,78 +42,7 @@ namespace TrueRdfViewer
             short ind = (short)si;
             row[ind] = valu;
         }
-
-        public RPackInt ResetDiapason(short parametersStartIndex, short parametersEndIndex)
-        {
-            for (short i = parametersStartIndex; i < parametersEndIndex; i++)
-                Reset(i);
-            return this;
-        }
-        public void Reset(short si)
-        {
-            if (row[si] == null) return;
-            if (row[si] is int)
-                row[si] = 0;
-            else
-            {
-                var oldliteral = row[si] as Literal;
-                if (oldliteral == null) throw new Exception(); //return;
-                var newLiteral = new Literal(oldliteral.vid);
-                row[si] = newLiteral;
-                switch (oldliteral.vid)
-                {
-                    case LiteralVidEnumeration.integer:
-                        newLiteral.Value = 0.0;
-                        break;
-                    case LiteralVidEnumeration.typedObject:
-                        newLiteral.Value = new TypedObject();
-                        break;
-                    case LiteralVidEnumeration.text:
-                        newLiteral.Value = new Text { };
-                        break;
-                    case LiteralVidEnumeration.date:
-                        newLiteral.Value = DateTime.MinValue.ToBinary();
-                        break;
-                    case LiteralVidEnumeration.boolean:
-                        newLiteral.Value = false;
-                        break;
-                    case LiteralVidEnumeration.nil:
-                        break;
-                }
-            }
-        }
-
-        public object this[short index]
-        {
-            get { return row[index]; }
-            set
-            {
-                row[index] = value;
-            }
-        }
-        object ICloneable.Clone()
-        {
-            var newRow = new object[row.Length];
-            for (int i = 0; i < newRow.Length; i++)
-            {
-                var literal = row[i] as Literal;
-                if (literal != null)
-                {
-                    var value = literal.Value;
-                    if (value is Text)
-                        newRow[i] = new Literal(literal.vid) { Value = ((ICloneable)value).Clone() };
-                    else if (value is TypedObject)
-                        newRow[i] = new Literal(literal.vid) { Value = ((ICloneable)value).Clone() };
-                    else
-                        newRow[i] = new Literal(literal.vid) { Value = value };
-                }
-                else
-                    newRow[i] = row[i];
-            }
-            return new RPackInt(newRow, ts);
-        }
     }
-
     public static class RPackExtentionInt
     {
         public static IEnumerable<OValRowInt> _Spo(this IEnumerable<OValRowInt> rows, short subj, short pred, short obj)
@@ -150,7 +65,7 @@ namespace TrueRdfViewer
                     diap.start = obj_oval.spo_start = di.start;
                     diap.numb = obj_oval.spo_number = di.numb;
                 }
-                return rw.Store.GetSubjInDiapason(diap, row[pred].entity)
+                return rw.Store.GetSubjInDiap(diap, row[pred].entity)
                     .Select(su => 
                     {
                         row[subj].entity = su; row[subj].op_number = -1; row[subj].spd_number = -1; row[subj].spo_number = -1;
@@ -183,7 +98,7 @@ namespace TrueRdfViewer
                     diap.numb = subj_oval.spo_number = di.numb;
                 }
 
-                return ovr.Store.CheckPredObjInDiapason(diap, ovr.row[pred].entity, ovr.row[obj].entity);
+                return ovr.Store.CheckPredObjInDiap(diap, ovr.row[pred].entity, ovr.row[obj].entity);
             });
             return query;
         }
@@ -204,11 +119,11 @@ namespace TrueRdfViewer
                 }
                 else
                 {
-                    Diapason di = ovr.Store.GetDiapason_spd(subj_oval.entity);
+                    Diapason di = ovr.Store.GetDiap_spd(subj_oval.entity);
                     diap.start = subj_oval.spd_start = di.start;
                     diap.numb = subj_oval.spd_number = di.numb;
                 }
-                return ovr.Store.GetDatInDiapason(diap, row[pred].entity)
+                return ovr.Store.GetDatInDiap(diap, row[pred].entity)
                     .Select(lit =>
                     {
                         row[dat].lit = lit;

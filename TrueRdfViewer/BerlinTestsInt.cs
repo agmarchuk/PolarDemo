@@ -41,7 +41,7 @@ namespace TrueRdfViewer
                 ._spo(_product, _bsbm_productFeature, _bsbm_inst_ProductFeature8)
                 ._spo(_product, _rdftype, _bsbm_inst_ProductType1)
                 ._spD(_product, _bsbm_ProductPropertyNumeric1, _value1)
-                .Where(ovalrow => (int)ovalrow.row[_value1].lit.Value > 1000)
+                .Where(ovalrow => (int)ovalrow.row[_value1].lit.value > 1000)
                 ._spD(_product, _rdfslabel, _label)
                 ;
             return quer;
@@ -100,7 +100,7 @@ namespace TrueRdfViewer
             var quer = Enumerable.Repeat<OValRowInt>(ovr, 1)
                 ._Spo(_product, _rdftype, _bsbm_Product)
                 ._spD(_product, _rdfslabel, _label)
-                .Where(ovalrow => rx.IsMatch( ((Text)ovalrow.row[_label].lit.Value).Value ))
+                .Where(ovalrow => rx.IsMatch( ((Text)ovalrow.row[_label].lit.value).s ))
                 ;
             return quer;
         }
@@ -278,7 +278,7 @@ namespace TrueRdfViewer
             var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
                 .Spo(_product, E(rdf + "type"), E(bsbm + "Product"))
                 .spD(_product, E(rdfs + "label"), _label)
-                .Where(pack => rx.IsMatch(((Text)pack.Val(_label).Value).Value))
+                .Where(pack => rx.IsMatch(((Text)pack.Val(_label).value).s))
                 ;
             return quer;
         }

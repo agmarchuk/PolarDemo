@@ -42,7 +42,12 @@ namespace SparqlParser
 
         public void Set(bool isData)
         {
-            if (connected==null) connected=new HashSet<GraphIsDataProperty>();
+            if (connected == null)
+            {
+               
+                IsData = isData;
+                return;
+            }
             //IsData = isData;            .Where(sub => sub != this)
             foreach (var node in connected)
             {
@@ -52,7 +57,13 @@ namespace SparqlParser
         }
         public void Set(LiteralVidEnumeration vidEnumeration)
         {
-            if (connected == null) connected = new HashSet<GraphIsDataProperty>();
+            if (connected == null)
+            {
+             
+                IsData = true;
+                vid = vidEnumeration;
+                return;
+            }
             //IsData = isData;            .Where(sub => sub != this)
             foreach (var node in connected)
             {
@@ -63,7 +74,13 @@ namespace SparqlParser
         }
         public void ReSet(LiteralVidEnumeration vidEnumeration)
         {
-            if (connected == null) connected = new HashSet<GraphIsDataProperty>();
+            if (connected == null)
+            {
+
+                IsData = true;
+                vid = vidEnumeration;
+                return;
+            }
             //IsData = isData;            .Where(sub => sub != this)
             foreach (var node in connected)
             {
@@ -73,7 +90,11 @@ namespace SparqlParser
         }
         public void ReSet(bool isData)
         {
-            if (connected == null) connected = new HashSet<GraphIsDataProperty>();
+            if (connected == null)
+            {
+                IsData = isData;
+                return;
+            }
             //IsData = isData;            .Where(sub => sub != this)
             foreach (var node in connected)
                 node.IsData = isData;

@@ -5,16 +5,17 @@ using PolarDB;
 
 namespace TrueRdfViewer
 {
-    class EntitiesMemoryHashTable
-    {                        
-        private readonly EntitiesWideTable entites; 
+    public class EntitiesMemoryHashTable
+    {
+        private EntitiesWideTable entites;
+
         public EntitiesMemoryHashTable(EntitiesWideTable entites)
         {
             this.entites = entites;
+        
         }
 
-        public static int ArraySizeLog = 20, ArraySizeL = (int) Math.Pow(2, ArraySizeLog);
-        public Diapason[] Diapasons=new Diapason[ArraySizeL];
+        
         public void Test()
         {
             var groupBy = entites.EWTable.Root.Elements()
@@ -22,43 +23,58 @@ namespace TrueRdfViewer
             Console.WriteLine("hash-values count = " + groupBy.Count());
             Console.WriteLine("max elements count in hash-value = " + groupBy.Max(entries => entries.Count()));
         }
-
+        Diapason[] diapasons;
         public void Load()
         {
-            Diapason current=new Diapason(){start = 0, numb = 1};
-            int hashCurrent = GetHash((int) entites.EWTable.Root.Element(0).Field(0).Get());
-            foreach (int hashNew in 
-                entites.EWTable.Root.Elements()
-                    .Skip(1)
-                    .Select(entry => entry.Field(0).Get())
-                    .Cast<int>()
-                    .Select(GetHash))
-                if (hashNew == hashCurrent) current.numb++;
+            if (entites.EWTable.IsEmpty) return;
+            if (entites.EWTable.Root.Count()==0) return;
+
+            diapasons = new Diapason[ArraySize];
+            Diapason diapason = new Diapason() { start = 0, numb = 1 };
+            int hashCurrent = GetHash((int)entites.EWTable.Root.Element(0).Field(0).Get());
+            foreach (var hashNew in entites.EWTable.Root.ElementValues()
+                .Skip(1)
+                .Select(v => ((object[])v)[0])
+                .Cast<int>()
+                .Select(GetHash))
+            {
+                if (hashNew == hashCurrent) diapason.numb++;
                 else
                 {
-                    Diapasons[hashCurrent] = current;
-                    current = new Diapason() {start = current.start + current.numb, numb = 1};
+                    diapasons[hashCurrent] = diapason;
+                    diapason = new Diapason { start = diapason.start + diapason.numb, numb = 1 };
                     hashCurrent = hashNew;
                 }
-            Diapasons[hashCurrent] = current;
+            }
+            diapasons[hashCurrent] = diapason;
         }
 
-        private readonly int helpConstArraySize = ArraySizeL >> 1;
-        private readonly int helperConstShift=32-ArraySizeLog;
+        public static int ArraySizeLog = 20, ArraySize = (int)Math.Pow(2, ArraySizeLog), BitsShift=32-ArraySizeLog, ResultIndexShift=ArraySize >> 1;
+        
         public int GetHash(int source)
         {
-            return (source >> helperConstShift) + helpConstArraySize;
+            return (source >> BitsShift) + ResultIndexShift;
         }
 
+        public static long max = 0;
+        public static long total = 0;
+        public static long count = 0;
+        public static long maxRange = 0;
+        public static long totalRange = 0;
         public PaEntry GetEntity(int id_code)
         {
+            if (entites.EWTable.IsEmpty) return PaEntry.Empty;
             if (id_code == Int32.MaxValue) return PaEntry.Empty;
-            var diapason = Diapasons[GetHash(id_code)];
-            if(diapason.numb==0) return PaEntry.Empty;
-           return entites.EWTable.Root.BinarySearchFirst(diapason.start, diapason.numb,
-                entry => ((int)entry.Field(0).Get()).CompareTo(id_code));
-        }
-
+            var st = DateTime.Now;
+            var diapason=diapasons[GetHash(id_code)];
+            PaEntry binarySearchFirst = entites.EWTable.Root.BinarySearchFirst(diapason.start, diapason.numb, entry =>((int)(entry.Field(0).Get())).CompareTo(id_code));
+            long spent = (DateTime.Now - st).Ticks/10000;
+            total += spent;
+            count ++;
+            if (spent > max) max = spent;
+            if (diapason.numb > maxRange) maxRange = diapason.numb;
+            totalRange += diapason.numb;
+            return binarySearchFirst;
         }
     }
-   
+}

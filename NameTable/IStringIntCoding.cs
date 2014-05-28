@@ -15,5 +15,6 @@ namespace NameTable
 
         void MakeIndexed();
         int Count { get; }
+        void WarmUp();
     }
 }
