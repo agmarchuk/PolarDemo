@@ -674,3 +674,59 @@ millions 10
 total 207321 мс.
 millions 100
 total 2850718 мс.
+возвращаю кодирование без md5
+
+millions 10
+total 714359 мс.
+
+
+fix load
+md5 ram coding	
+millions 100
+total 2 476 251 мс.
+
+millions 10
+total 180 081 мс.
+		  
+ md5 coding
+ millions 10
+total 322 237 мс.
+millions 100
+total 5475587 мс.
+
+md5 ram
+millions 10
+total 192 178 мс.
+millions 100
+total 1 929 355 мс.
+
+две фазы загрузки
+
+millions 1
+total 24885 мс.
+millions 1
+millions 1
+millions 1
+total 25039 мс.
+millions 1
+total 25038 мс.
+millions 10
+total 259 697 мс.
+
+чтения исходного файла порциями
+1) чтение порции сущностей и предикатов до заполнения буфера
+2) кодирование сущностей и предикатов
+3) повтороное чтение порции повтороное для обработки триплетов, при этом используются только коды из 2)
+НЕ РАБОТАЕТ изменение позиции streamReader.
+
+millions 1
+total 12838 мс.
+millions 10
+// 1 порция весь файл
+total 211 003 мс.
+
+
+millions 10
+millions 10
+millions 10
+millions 10

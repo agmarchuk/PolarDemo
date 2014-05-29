@@ -26,22 +26,22 @@ namespace ANTLR_Test
 
        
 
-           //    Test();
+            
+            //   Test();
 
            Console.WriteLine(Millions = 10);
 
 
 
-
-          // Test();
+Test();
 
            Console.WriteLine(Millions = 100);
                 
           
 
-           Test();
-           Console.WriteLine(Millions = 1000);
          // Test();
+           Console.WriteLine(Millions = 1000);
+        // Test();
 
         }    
 

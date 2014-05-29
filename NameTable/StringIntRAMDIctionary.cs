@@ -132,5 +132,9 @@ namespace NameTable
         }
 
         public int Count { get; private set; }
+        public Dictionary<string, int> InsertPortion(HashSet<string> entities)
+        {
+            return InsertPortion(entities.ToArray());
+        }
     }
 }

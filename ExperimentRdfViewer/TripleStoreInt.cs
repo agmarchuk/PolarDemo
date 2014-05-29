@@ -11,6 +11,7 @@ namespace TrueRdfViewer
 {
     public class TripleStoreInt
     {
+        private const int BufferLength = 1000*1000;
         private PType tp_otriple_seq;
         private PType tp_triple_seq_two;
         private PType tp_data_seq;
@@ -190,7 +191,6 @@ namespace TrueRdfViewer
             Close();
 
             Open(false);
-
             Load(filepath);
             Console.WriteLine("Load ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
@@ -321,44 +321,42 @@ namespace TrueRdfViewer
             //});
             //dtriples_sp.Flush();
         }
-
+        int i = 0;  
         private void Load(string filepath)
         {
             //Directory.Delete(path);               
             //Directory.CreateDirectory(path);
 
-
+            i = 0;
             otriples.Clear();
             otriples.Fill(new object[0]);
             dataCell.Clear();
             dataCell.Fill(new object[0]);
             dtriples_sp.Clear();
             dtriples_sp.Fill(new object[0]);
-            int i = 0;
             //Entity e = new Entity();
             TripleInt.SiCodingEntities.Clear();
             TripleInt.SiCodingPredicates.Clear();
             TripleInt.EntitiesCodeCache.Clear();
             TripleInt.PredicatesCodeCache.Clear();
-
-            const int bufferLength = 1000*1000;
-            ;
-            var buffer = new List<DTripleInt>(bufferLength);
-
+           TurtleInt._namespaces.Clear();
+            var buffer = new List<DTripleInt>(BufferLength);
+           
             foreach (var triplet in TurtleInt.LoadGraph(filepath))
             {                                                    
-                if (i%100000 == 0) Console.Write("{0} ", i/100000);i++;    
                 var otr = triplet as OTripleInt;
                 if (otr != null)
+                {
+                    if (i % BufferLength == 0) Console.Write("wo{0} ", i / BufferLength); i++;
                     otriples.Root.AppendElement(new object[]
                     {
                         otr.subject,
                         otr.predicate,
                         otr.obj
-                    });
+                    });}
                 else
                 {
-                    if (buffer.Count == bufferLength)
+                    if (buffer.Count == BufferLength)
                     {
                         WriteDataTripletsBuffer(buffer);
 
@@ -376,10 +374,11 @@ namespace TrueRdfViewer
         }
 
         private void WriteDataTripletsBuffer(List<DTripleInt> buffer)
-        {
+        {        
             var offsetsOnData = new long[buffer.Count];
             for (int k = 0; k < buffer.Count; k++)
             {
+                if (i % BufferLength == 0) Console.Write("wd{0} ", i / BufferLength); i++;
                 var tr = buffer[k];
                 Literal lit = tr.data;
                 object[] da;

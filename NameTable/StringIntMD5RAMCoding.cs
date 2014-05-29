@@ -155,27 +155,31 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
     
         public Dictionary<string, int> InsertPortion(string[] portion)
         {
-            Open(false);
-            List<long> ofsets2NC = new List<long>(portion.Length);
-            List<long> checkSumList = new List<long>(portion.Length);
-            var insertPortion = new Dictionary<string, int>();
-            for (int i = 0; i < portion.Length; i++)
-                if (!insertPortion.ContainsKey(portion[i]))
+            return InsertPortion(new HashSet<string>(portion));
+        }
+        public Dictionary<string, int> InsertPortion(HashSet<string> portion)
+        {
+            Console.Write("c0 ");
+            List<long> ofsets2NC = new List<long>(portion.Count);
+            List<long> checkSumList = new List<long>(portion.Count);
+            var insertPortion = new Dictionary<string, int>(portion.Count);
+                foreach (var newString in portion)
                 {
-                        var checkSum = BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(portion[i])),0);
-                    var code = GetCode(portion[i],checkSum);
+                    var checkSum = BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(newString)), 0);
+                    var code = GetCode(newString, checkSum);
                     if (code == Int32.MinValue)
                     {
                         checkSumList.Add(checkSum);
-                        ofsets2NC.Add(nc_cell.Root.AppendElement(new object[] {code = Count++, portion[i]}));
+                        ofsets2NC.Add(nc_cell.Root.AppendElement(new object[] { code = Count++, newString }));
                     }
-                    insertPortion.Add(portion[i], code);
+                    insertPortion.Add(newString, code);
                 }
             nc_cell.Flush();
-
+            Console.Write("c_nc ");
             var offsetsNC = ofsets2NC.ToArray();
             var checkSums = checkSumList.ToArray();
             Array.Sort(checkSums, offsetsNC);
+            Console.Write("c_s");
             int portionIndex = 0;
             if (md5_index.Root.Count() > 0)
             {
@@ -189,31 +193,32 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
                 md5_index.Fill(new object[0]);
                 var tmpCell = new PaCell(tp_pair_longs, tmp);
 
-                const int max = 500*1000*1000;
+                const int max = 500 * 1000 * 1000;
                 long count = tmpCell.Root.Count();
-                for (int i = 0; i < (int) (count/max)+1; i++)
+                for (int i = 0; i < (int)(count / max) + 1; i++)
                     foreach (object[] existingPair in tmpCell.Root.ElementValues(i * max, Math.Min(max, count - i * max)).ToArray())
-                {
-                    for (; portionIndex < offsetsNC.Length
-                        && checkSums[portionIndex] <= (long) existingPair[0];
-                        portionIndex++)
-                        md5_index.Root.AppendElement(new object[] {checkSums[portionIndex], offsetsNC[portionIndex]});
-                    md5_index.Root.AppendElement(existingPair);
-                }
+                    {
+                        for (; portionIndex < offsetsNC.Length
+                            && checkSums[portionIndex] <= (long)existingPair[0];
+                            portionIndex++)
+                            md5_index.Root.AppendElement(new object[] { checkSums[portionIndex], offsetsNC[portionIndex] });
+                        md5_index.Root.AppendElement(existingPair);
+                    }
                 tmpCell.Close();
                 File.Delete(tmp);
             }
             for (; portionIndex < checkSums.Length; portionIndex++)
-                md5_index.Root.AppendElement(new object[] {checkSums[portionIndex], offsetsNC[portionIndex]});
-          
-
-
+                md5_index.Root.AppendElement(new object[] { checkSums[portionIndex], offsetsNC[portionIndex] });
             md5_index.Flush();
-              ReadOffsetsByMd5Cache();   
-            //Count += insertPortion.Count;
-            return insertPortion;             
-        }
 
+            Console.Write("c_md5 ");
+
+
+            ReadOffsetsByMd5Cache();
+            Console.Write("c_ram ");
+            //Count += insertPortion.Count;
+            return insertPortion;     
+        }
         public void MakeIndexed()
         {
            Open(false); 
@@ -227,5 +232,6 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
         }
 
         public int Count { get; private set; }
+      
     }
 }
