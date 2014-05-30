@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using NameTable;
 
 namespace  TrueRdfViewer
@@ -71,73 +70,7 @@ namespace  TrueRdfViewer
         
         }
     }
-    public enum LiteralVidEnumeration { typedObject, integer, text, date, boolean, nil }
-    public class Literal
-    {
-        protected bool Equals(Literal other)
-        {
-            return vid == other.vid && Equals(Value, other.Value);
-        }
 
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return ((int)vid * 397) ^ (Value != null ? Value.GetHashCode() : 0);
-            }
-        }
-
-        public readonly LiteralVidEnumeration vid;
-
-        public string GetString()
-        {
-            switch (vid)
-            {
-                case LiteralVidEnumeration.typedObject:
-                    return ((TypedObject)Value).Value;
-                case LiteralVidEnumeration.text:
-                    return ((Text)Value).Value;
-                case LiteralVidEnumeration.date:
-                    return ((DateTime)Value).ToString(CultureInfo.InvariantCulture);
-                case LiteralVidEnumeration.integer:
-                case LiteralVidEnumeration.boolean:
-                    return Value.ToString();
-                case LiteralVidEnumeration.nil:
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-        public Literal(LiteralVidEnumeration vid)
-        {
-            this.vid = vid;
-        }
-
-        public object Value { get; set; }
-
-        public bool HasValue
-        {
-            get
-            {
-                return Value is Double && Value == (object)double.MinValue
-                       || Value is long && (long)Value == DateTime.MinValue.ToBinary()
-                       || Value is Text && !string.IsNullOrEmpty(((Text)Value).Value);
-            }
-        }
-
-        public override string ToString()
-        {
-            return Value.ToString();
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((Literal)obj);
-        }
-    }
-                                                       
     public class TypedObject : ICloneable
     {
         protected bool Equals(TypedObject other)

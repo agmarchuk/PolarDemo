@@ -27,13 +27,10 @@ namespace ANTLR_Test
        
 
             
-            //   Test();
+              Test();
 
-           Console.WriteLine(Millions = 10);
-
-
-
-Test();
+           Console.WriteLine(Millions = 10);         
+            //Test();
 
            Console.WriteLine(Millions = 100);
                 
@@ -55,8 +52,8 @@ Test();
            Query.decodesCashe.Clear();
             //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\undecoded\" + Millions + @"mln\");
 
-                  //  bool load = false;
-                     bool load = true;
+                   bool load = false;
+                     // bool load = true;
               using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;
@@ -71,8 +68,8 @@ Test();
                 spent = (DateTime.Now - start).Ticks / 10000;
                 using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                     wr.WriteLine("warm up " + spent + " мс.");
-                //   RunBerlinsWithConstants( ts);
-                RunBerlinsParameters(ts);      
+                  RunBerlinsWithConstants( ts);
+                // RunBerlinsParameters(ts);      
             }
             spent = (DateTime.Now - start).Ticks/10000;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))   

@@ -11,7 +11,20 @@ namespace NameTable
         public static void Main(string[] args)
         {
             string path = @"..\..\..\Databases\";
-       
+
+            var strings =
+                Enumerable.Range(0, 1000)
+                    .Select(i => Guid.NewGuid().ToString())
+                    .Select((guid, i) => new {guid, i})
+                    .ToDictionary(arg => arg.guid, arg => arg.i);
+            StringIntRAMDIctionary ramdIctionary=new StringIntRAMDIctionary(path+"ram dictionary", strings);
+
+            foreach (var g_i in strings)
+            {
+                if(g_i.Value!=ramdIctionary.GetCode(g_i.Key))
+                    throw new KeyNotFoundException();
+            }
+            return;
 
             StringIntCoding sic = new StringIntCoding(path);
 
@@ -28,6 +41,7 @@ namespace NameTable
             sic.MakeIndexed();
             Console.WriteLine(sic.GetName(4));
             Console.WriteLine(sic.GetCode("0"));
+
         }
         public static void MainNew(string[] args)
         {

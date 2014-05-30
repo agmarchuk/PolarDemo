@@ -11,10 +11,9 @@ namespace TrueRdfViewer
 {
     public class TripleStoreInt
     {
-        private const int BufferLength = 1000*1000;
+      
         private PType tp_otriple_seq;
         private PType tp_triple_seq_two;
-        private PType tp_data_seq;
         private PType tp_entity;
         private PType tp_dtriple_spf;
         private PType tp_dtriple_spf_two;
@@ -32,22 +31,12 @@ namespace TrueRdfViewer
         private void InitTypes()
         {
             tp_entity = new PType(PTypeEnumeration.integer);
-            PType tp_rliteral = new PTypeUnion(
-                new NamedType("void", new PType(PTypeEnumeration.none)),
-                new NamedType("integer", new PType(PTypeEnumeration.real)),
-                new NamedType("string", new PTypeRecord(
-                    new NamedType("s", new PType(PTypeEnumeration.sstring)),
-                    new NamedType("l", new PType(PTypeEnumeration.sstring)))),
-                new NamedType("date", new PType(PTypeEnumeration.longinteger)),
-                new NamedType("bool", new PType(PTypeEnumeration.boolean)),
-                new NamedType("typedObject", new PTypeRecord(
-                    new NamedType("s", new PType(PTypeEnumeration.sstring)),
-                    new NamedType("t", new PType(PTypeEnumeration.sstring)))));
+          
             tp_otriple_seq = new PTypeSequence(new PTypeRecord(
                     new NamedType("subject", tp_entity),
                     new NamedType("predicate", tp_entity),
                     new NamedType("object", tp_entity)));
-            tp_data_seq = new PTypeSequence(tp_rliteral);
+         
             // Тип для экономного выстраивания индекса s-p для dtriples
             tp_dtriple_spf = new PTypeSequence(new PTypeRecord(
                     new NamedType("subject", tp_entity),
@@ -64,12 +53,12 @@ namespace TrueRdfViewer
         private string path;
         public PaCell otriples;
         public PaCell otriples_op; // объектные триплеты, упорядоченные по o-p
-        public PaCell dataCell;
         public PaCell dtriples_sp;
         private FlexIndexView<SubjPredObjInt> spo_o_index = null;
         private FlexIndexView<SubjPredInt> sp_d_index = null;
         private FlexIndexView<SubjPredInt> op_o_index = null;
         private PaCell oscale;
+        
         private bool filescale = true;
         //private bool memoryscale = false; // Наоборот от filescale
         private int range = 0;
@@ -84,6 +73,7 @@ namespace TrueRdfViewer
             InitTypes();
             TripleInt.SiCodingEntities = new StringIntMD5RAMCoding(path + "entitiesCodes");
             TripleInt.SiCodingPredicates = new StringIntRAMDIctionary(path + "predicatesCodes");
+            LiteralStore.Literals=new LiteralStore(path);
             otriplets_op_filePath = path + "otriples_op.pac";
             otriples_filePath = path + "otriples.pac";
             dtriples_filePath = path + "dtriples_spf.pac";
@@ -118,70 +108,12 @@ namespace TrueRdfViewer
                 otriples_op = new PaCell(tp_otriple_seq, otriplets_op_filePath + "tmp", false);
                 dtriples_sp = new PaCell(tp_dtriple_spf, dtriples_filePath + "tmp", false);
             }
-
-            dataCell = new PaCell(tp_data_seq, path + "dtriples.pac", readOnlyMode);
+            LiteralStore.Literals.Open(readOnlyMode);
             oscale = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)), path + "oscale.pac", readOnlyMode);
         }
 
 
-        private void RemoveColumns()
-        {   
-            otriples = new PaCell(tp_triple_seq_two, otriples_filePath, false);
-            otriples_op = new PaCell(tp_triple_seq_two, otriplets_op_filePath, false);
-            dtriples_sp = new PaCell(tp_dtriple_spf_two, dtriples_filePath, false);
-            otriples.Clear();
-            otriples_op.Clear();
-            dtriples_sp.Clear();
-            otriples.Fill(new object[0]);
-            dtriples_sp.Fill(new object[0]);
-            otriples_op.Fill(new object[0]);
-
-            var otriples_tmp = new PaCell(tp_otriple_seq, otriples_filePath + "tmp");
-            var otriples_op_tmp = new PaCell(tp_otriple_seq, otriplets_op_filePath + "tmp");
-            var dtriples_sp_tmp = new PaCell(tp_dtriple_spf, dtriples_filePath + "tmp");
-
-            foreach (object[] elementValue in otriples_tmp.Root.ElementValues())
-                otriples.Root.AppendElement(new[] { elementValue[1], elementValue[2] });
-            foreach (object[] elementValue in otriples_op_tmp.Root.ElementValues())
-                otriples_op.Root.AppendElement(new[] { elementValue[1], elementValue[0] });
-            foreach (object[] elementValue in dtriples_sp_tmp.Root.ElementValues())
-                dtriples_sp.Root.AppendElement(new[] { elementValue[1], elementValue[2] });
-
-            otriples_tmp.Close();
-            otriples_op_tmp.Close();
-            dtriples_sp_tmp.Close();
-            File.Delete(otriplets_op_filePath + "tmp");
-            File.Delete(otriples_filePath + "tmp");
-            File.Delete(dtriples_filePath + "tmp");
-
-            otriples.Close();
-            otriples_op.Close();
-            dtriples_sp.Close();
-        }
-
-        public void WarmUp()
-        {
-            if (otriples.IsEmpty) return;
-            foreach (var v in otriples.Root.ElementValues()) ;
-            foreach (var v in otriples_op.Root.ElementValues()) ;
-            foreach (var v in dataCell.Root.ElementValues()) ;
-            foreach (var v in dtriples_sp.Root.ElementValues()) ;
-
-            if (filescale)
-                foreach (var v in oscale.Root.ElementValues()) ;
-            foreach (var v in ewt.EWTable.Root.ElementValues()) ; // этая ячейка "подогревается" при начале программы
-            TripleInt.SiCodingEntities.WarmUp();
-            TripleInt.SiCodingPredicates.WarmUp();
-        }
-        private void CalculateRange()
-        {
-            long len = oscale.Root.Count() - 1;
-            if (len == -1) return;
-            int r = 1;
-            while (len != 0) { len = len >> 1; r++; }
-            range = r + 4;
-        }
-
+     
 
 
         public void LoadTurtle(string filepath)
@@ -254,6 +186,65 @@ namespace TrueRdfViewer
             Open(true);
         }
 
+        private void RemoveColumns()
+        {
+            otriples = new PaCell(tp_triple_seq_two, otriples_filePath, false);
+            otriples_op = new PaCell(tp_triple_seq_two, otriplets_op_filePath, false);
+            dtriples_sp = new PaCell(tp_dtriple_spf_two, dtriples_filePath, false);
+            otriples.Clear();
+            otriples_op.Clear();
+            dtriples_sp.Clear();
+            otriples.Fill(new object[0]);
+            dtriples_sp.Fill(new object[0]);
+            otriples_op.Fill(new object[0]);
+
+            var otriples_tmp = new PaCell(tp_otriple_seq, otriples_filePath + "tmp");
+            var otriples_op_tmp = new PaCell(tp_otriple_seq, otriplets_op_filePath + "tmp");
+            var dtriples_sp_tmp = new PaCell(tp_dtriple_spf, dtriples_filePath + "tmp");
+
+            foreach (object[] elementValue in otriples_tmp.Root.ElementValues())
+                otriples.Root.AppendElement(new[] { elementValue[1], elementValue[2] });
+            foreach (object[] elementValue in otriples_op_tmp.Root.ElementValues())
+                otriples_op.Root.AppendElement(new[] { elementValue[1], elementValue[0] });
+            foreach (object[] elementValue in dtriples_sp_tmp.Root.ElementValues())
+                dtriples_sp.Root.AppendElement(new[] { elementValue[1], elementValue[2] });
+
+            otriples_tmp.Close();
+            otriples_op_tmp.Close();
+            dtriples_sp_tmp.Close();
+            File.Delete(otriplets_op_filePath + "tmp");
+            File.Delete(otriples_filePath + "tmp");
+            File.Delete(dtriples_filePath + "tmp");
+
+            otriples.Close();
+            otriples_op.Close();
+            dtriples_sp.Close();
+        }
+
+        public void WarmUp()
+        {
+            if (otriples.IsEmpty) return;
+            foreach (var v in otriples.Root.ElementValues()) ;
+            foreach (var v in otriples_op.Root.ElementValues()) ;
+            LiteralStore.Literals.WarmUp();
+            foreach (var v in dtriples_sp.Root.ElementValues()) ;
+
+            if (filescale)
+                foreach (var v in oscale.Root.ElementValues()) ;
+            foreach (var v in ewt.EWTable.Root.ElementValues()) ; // этая ячейка "подогревается" при начале программы
+            TripleInt.SiCodingEntities.WarmUp();
+            TripleInt.SiCodingPredicates.WarmUp();
+        }
+        private void CalculateRange()
+        {
+            long len = oscale.Root.Count() - 1;
+            if (len == -1) return;
+            int r = 1;
+            while (len != 0) { len = len >> 1; r++; }
+            range = r + 4;
+        }
+
+
         private void Test()
         {
             var first = otriples_op.Root.ElementValues().Cast<object[]>().First();
@@ -321,7 +312,8 @@ namespace TrueRdfViewer
             //});
             //dtriples_sp.Flush();
         }
-        int i = 0;  
+        int i = 0;
+
         private void Load(string filepath)
         {
             //Directory.Delete(path);               
@@ -330,8 +322,8 @@ namespace TrueRdfViewer
             i = 0;
             otriples.Clear();
             otriples.Fill(new object[0]);
-            dataCell.Clear();
-            dataCell.Fill(new object[0]);
+            LiteralStore.Literals.dataCell.Clear();
+            LiteralStore.Literals.dataCell.Fill(new object[0]);
             dtriples_sp.Clear();
             dtriples_sp.Fill(new object[0]);
             //Entity e = new Entity();
@@ -339,86 +331,56 @@ namespace TrueRdfViewer
             TripleInt.SiCodingPredicates.Clear();
             TripleInt.EntitiesCodeCache.Clear();
             TripleInt.PredicatesCodeCache.Clear();
-           TurtleInt._namespaces.Clear();
-            var buffer = new List<DTripleInt>(BufferLength);
-           
-            foreach (var triplet in TurtleInt.LoadGraph(filepath))
-            {                                                    
-                var otr = triplet as OTripleInt;
-                if (otr != null)
-                {
-                    if (i % BufferLength == 0) Console.Write("wo{0} ", i / BufferLength); i++;
-                    otriples.Root.AppendElement(new object[]
-                    {
-                        otr.subject,
-                        otr.predicate,
-                        otr.obj
-                    });}
-                else
-                {
-                    if (buffer.Count == BufferLength)
-                    {
-                        WriteDataTripletsBuffer(buffer);
+            TurtleInt.Namespaces.Clear();
+            foreach (var buffers in TurtleInt.LoadGraph(filepath))
+            {
+                WriteObjTripletsBuffer(buffers.Key);
+                Console.WriteLine("wo" + i);
 
-                        buffer.Clear();
-                    }
-                    buffer.Add(triplet as DTripleInt);
-                }
-                
+                LiteralStore.Literals.WriteBufferForce();
+                WriteDataTripletsBuffer(buffers.Value);
+                Console.WriteLine("wd" + i);
+
             }
-            WriteDataTripletsBuffer(buffer);
-
             otriples.Flush();
-            dataCell.Flush();
+
             dtriples_sp.Flush();
+
+            TripleInt.SiCodingPredicates=new StringIntRAMDIctionary(path, TripleInt.PredicatesCodeCache);
         }
 
-        private void WriteDataTripletsBuffer(List<DTripleInt> buffer)
-        {        
-            var offsetsOnData = new long[buffer.Count];
-            for (int k = 0; k < buffer.Count; k++)
+        private void WriteDataTripletsBuffer(List<GraphDtriplet> bufferDTriplets)  
+        {          
+            foreach (var tr in bufferDTriplets)
             {
-                if (i % BufferLength == 0) Console.Write("wd{0} ", i / BufferLength); i++;
-                var tr = buffer[k];
-                Literal lit = tr.data;
-                object[] da;
-                switch (lit.vid)
+                //string subj = TurtleInt.GetEntityString(tr.subject);
+                int subjCode = TripleInt.EntitiesCodeCache[tr.subject];
+                foreach (KeyValuePair<int, Literal> t in tr.PredicatesValues)
                 {
-                    case LiteralVidEnumeration.integer:
-                        da = new object[] {1, lit.Value};
-                        break;
-                    case LiteralVidEnumeration.date:
-                        da = new object[] {3, lit.Value};
-                        break;
-                    case LiteralVidEnumeration.boolean:
-                        da = new object[] {4, lit.Value};
-                        break;
-                    case LiteralVidEnumeration.text:
-                    {
-                        Text t = (Text) lit.Value;
-                        da = new object[] {2, new object[] {t.Value, t.Lang}};
-                    }
-                        break;
-                    case LiteralVidEnumeration.typedObject:
-                    {
-                        TypedObject t = (TypedObject) lit.Value;
-                        da = new object[] {5, new object[] {t.Value, t.Type}};
-                    }
-                        break;
-                    default:
-                        da = new object[] {0, null};
-                        break;
+                    dtriples_sp.Root.AppendElement(new object[] {subjCode, t.Key, t.Value.Offset});
+                    i++;
                 }
-                offsetsOnData[k] = dataCell.Root.AppendElement(da);
             }
-
-            for (int k = 0; k < buffer.Count; k++)
-                dtriples_sp.Root.AppendElement(new object[] {buffer[k].subject, buffer[k].predicate, offsetsOnData[k]});
+        }
+        private void WriteObjTripletsBuffer(List<GraphOtriplet> bufferOTriplets)
+        {   
+            foreach (var tr in bufferOTriplets)
+            {
+              //  string subj = TurtleInt.GetEntityString(tr.Key);
+                int subjCode = TripleInt.EntitiesCodeCache[tr.subject];
+                foreach (KeyValuePair<int, string> t in tr.PredicatesValues)
+                {
+                    //string obj = TurtleInt.GetEntityString(t.Value);
+                    int objCode = TripleInt.EntitiesCodeCache[t.Value];
+                    otriples.Root.AppendElement(new object[] { subjCode, t.Key, objCode });
+                    i++;
+                }
+            }
         }
 
         private void Close()
         {
-            dataCell.Close();
+            LiteralStore.Literals.dataCell.Close();
             dtriples_sp.Close();
             otriples.Close();
             otriples_op.Close();
@@ -758,158 +720,26 @@ namespace TrueRdfViewer
             if (spDCache.TryGetValue(key, out res)) return res;
 
             object[] diapason = GetDiapasonFromHash(subj, 2);
-            PaEntry dtriple_entry = dataCell.Root.Element(0);
+          
             res = diapason == null
                 ? new Literal[0]
                 : dtriples_sp.Root.ElementValues((long)diapason[0], (long)diapason[1])
                     .Cast<object[]>()
                     .SkipWhile(entry => pred != (int)entry[0])
                     .TakeWhile(entry => pred == (int)entry[0])
-                    .Select(en =>
-                    {
-                        dtriple_entry.offset = (long)en[1];
-                        return ToLiteral((object[])dtriple_entry.Get());
-                    }).ToArray();
+                    .Select(row => (long)row[1])
+                    .Select(LiteralStore.Literals.Read)
+                    .ToArray();
             spDCache.Add(key, res);
             return res;
         }
 
-        private static Literal ToLiteral(object[] uni)
-        {
-            switch ((int)uni[0])
-            {
-                case 1:
-                    return new Literal(LiteralVidEnumeration.integer) { Value = Convert.ToDouble(uni[1]) };
-                case 3:
-                    return new Literal(LiteralVidEnumeration.date) { Value = (long)uni[1] };
-                case 4:
-                    return new Literal(LiteralVidEnumeration.boolean) { Value = (bool)uni[1] };
-                case 5:
-                    {
-                        object[] txt = (object[])uni[1];
-                        return new Literal(LiteralVidEnumeration.typedObject)
-                        {
-                            Value = new TypedObject() { Value = (string)txt[0], Type = (string)txt[1] }
-                        };
-                    }
-                case 2:
-                    object[] txt1 = (object[])uni[1];
-                    return new Literal(LiteralVidEnumeration.text)
-                    {
-                        Value = new Text() { Value = (string)txt1[0], Lang = (string)txt1[1] }
-                    };
-                default:
-                    return new Literal(LiteralVidEnumeration.nil);
-            }
-        }
-
-        #region GetDataBySubjPred old
-
-        [Obsolete]
-        public IEnumerable<Literal> GetDataBySubjPred4(int subj, int pred)
-        {
-            object[] diapason = GetDiapasonFromHash(subj, 2);
-            if (diapason == null) return Enumerable.Empty<Literal>();
-
-            PaEntry dtriple_entry = dataCell.Root.Element(0);
-            return dtriples_sp.Root.Elements((long)diapason[0], (long)diapason[1])
-                //.Where(entry => pred == (int)((object[])entry.Get())[1])
-                .Select(en =>
-                {
-                    dtriple_entry.offset = (long)en.Field(2).Get();
-                    return ToLiteral((object[])dtriple_entry.Get());
-                });
-        }
-
-        [Obsolete]
-        public IEnumerable<Literal> GetDataBySubjPred3(int subj, int pred)
-        {
-            if (dtriples_sp.IsEmpty) return Enumerable.Empty<Literal>();
-            var itemEntriry = ewtHash.GetEntity(subj);
-            if (itemEntriry.IsEmpty) return Enumerable.Empty<Literal>();
-            var diapason = (object[])itemEntriry.Field(3).Get();
-
-            if (dtriples_sp.Root.Count() == 0) return Enumerable.Empty<Literal>();
-            PaEntry dtriple_entry = dataCell.Root.Element(0);
-            long num = (long)diapason[1];
-
-            var query = dtriples_sp.Root.Elements((long)diapason[0], num)
-                .Select(ent => (object[])ent.Get())
-                .Where(ve => (int)ve[1] == pred)
-                .Select(ve =>
-                {
-                    dtriple_entry.offset = (long)ve[2];
-                    return ToLiteral((object[])dtriple_entry.Get());
-                });
-            return query;
-        }
-
-        [Obsolete]
-        public IEnumerable<Literal> GetDataBySubjPred2(int subj, int pred)
-        {
-            if (dtriples_sp.IsEmpty) return Enumerable.Empty<Literal>();
-            var itemEntriry = ewt.EWTable.Root.BinarySearchFirst(ent =>
-            {
-                var rec = (object[])ent.Get();
-                int ob = (int)rec[0];
-                int cmp = ob.CompareTo(subj);
-                return cmp;
-            });
-            if (itemEntriry.IsEmpty) return Enumerable.Empty<Literal>();
-            var diapason = (object[])itemEntriry.Field(3).Get();
-
-            if (dtriples_sp.Root.Count() == 0) return Enumerable.Empty<Literal>();
-            PaEntry dtriple_entry = dataCell.Root.Element(0);
-            return dtriples_sp.Root.Elements((long)diapason[0], (long)diapason[1])
-                .Where(entry => pred == (int)((object[])entry.Get())[1])
-                .Select(en =>
-                {
-                    dtriple_entry.offset = (long)en.Field(2).Get();
-                    return ToLiteral((object[])dtriple_entry.Get());
-                });
-        }
-
-        [Obsolete]
-        public IEnumerable<Literal> GetDataBySubjPred1(int subj, int pred)
-        {
-            if (dataCell.Root.Count() == 0) return Enumerable.Empty<Literal>();
-            PaEntry dtriple_entry = dataCell.Root.Element(0);
-            return dtriples_sp.Root.BinarySearchAll(ent =>
-            {
-                int su = (int)ent.Field(0).Get();
-                int cmp = su.CompareTo(subj);
-                if (cmp != 0) return cmp;
-                int pr = (int)ent.Field(1).Get();
-                return pr.CompareTo(pred);
-            })
-                .Select(en =>
-                {
-                    dtriple_entry.offset = (long)en.Field(2).Get();
-                    return ToLiteral((object[])dtriple_entry.Get());
-                });
-        }
-
-        [Obsolete]
-        public IEnumerable<Literal> GetDataBySubjPred0(int subj, int pred)
-        {
-            return sp_d_index.GetAll(ent =>
-            {
-                int su = (int)ent.Field(0).Get();
-                int cmp = su.CompareTo(subj);
-                if (cmp != 0) return cmp;
-                int pr = (int)ent.Field(1).Get();
-                return pr.CompareTo(pred);
-            })
-                .Select(en => PObjToLiteral(en.Field(2).Get()));
-        }
-
-        #endregion
+       
 
 
-        private static Literal PObjToLiteral(object pobj)
-        {
-            return ToLiteral((object[])pobj);
-        }
+
+
+   
         public bool ChkOSubjPredObj(int subj, int pred, int obj)
         {
             if (subj == Int32.MinValue || obj == Int32.MinValue || pred == Int32.MinValue) return false;
@@ -1044,7 +874,7 @@ namespace TrueRdfViewer
         public XElement GetItem(string subject)
         {
             if (otriples.Root.Count() == 0) return null;
-            if (dataCell.Root.Count() == 0) return null;
+          
             XElement res = new XElement("record", new XAttribute("id", subject));
             //PaEntry dent = dtriples.Root.Element(0);
             //foreach (var ent in subject_d_index.GetAllByKey(subject))
@@ -1143,14 +973,10 @@ namespace TrueRdfViewer
             {
                 return ((int)ent.Field(1).Get()).CompareTo(pred);
             });
-            PaEntry data_entry = dataCell.Root.Element(0);
             return dtriples_sp.Root.ElementValues(internal_diap.start, internal_diap.numb)
                 .Cast<object[]>()
-                .Select(p_obj =>
-                    {
-                        data_entry.offset = (long)p_obj[1];
-                        return PObjToLiteral(data_entry.Get());
-                    });
+                .Select(p_obj => (long) p_obj[1])
+                .Select(LiteralStore.Literals.Read);
         }
 
 
@@ -1200,16 +1026,12 @@ namespace TrueRdfViewer
             if (sPDCache.TryGetValue(subj, out res)) return res;
 
             object[] diapason = GetDiapasonFromHash(subj, 2);
-            PaEntry dtriple_entry = dataCell.Root.Element(0);
+         
             res = diapason == null
                 ? new KeyValuePair<Literal, int>[0]
                 : dtriples_sp.Root.ElementValues((long)diapason[0], (long)diapason[1])
                 .Cast<object[]>()
-                    .Select(row =>
-                    {
-                        dtriple_entry.offset = (long)row[1];
-                        return new KeyValuePair<Literal, int>(ToLiteral((object[])dtriple_entry.Get()), (int)row[0]);
-                    }).ToArray();
+                    .Select(row => new KeyValuePair<Literal, int>(LiteralStore.Literals.Read((long)row[1]), (int)row[0])).ToArray();
             sPDCache.Add(subj, res);
             return res;
         }
@@ -1246,14 +1068,14 @@ namespace TrueRdfViewer
                         }
                         yield return new OTripleInt { subject = s, predicate = (int)pred_obj[0], obj = (int)pred_obj[1] };
                     }
-                    if (!dataCell.IsEmpty && dataCell.Root.Count() > 0)
+                    if (!dtriples_sp.IsEmpty && dtriples_sp.Root.Count() > 0)
                     {                 
                         //буфер dtriples_sp записывается в массив, что бы не прыгать по офсетам к литералам
                         var predicateLiteralsOfsset =
                             dtriples_sp.Root.ElementValues(literalsTrippletsBufferStart, literalsTrippletsBufferCount)
                                 .Cast<object[]>()
                                 .ToArray();
-                        var dataEntry = dataCell.Root.Element(0);
+                        
                         s = kod - index_in_buffer;
                         s_local_index = 0;
                         s_count = objDiapasons[0];
@@ -1266,13 +1088,13 @@ namespace TrueRdfViewer
                                 s++;
                                 s_count = objDiapasons[s_local_index];
                             }
-                            dataEntry.offset = (long) predicateLiteralsOfsset[j][1];
+                   
                             yield return
                                 new DTripleInt
                                 {
                                     subject = s,
                                     predicate = (int) predicateLiteralsOfsset[j][0],
-                                    data = ToLiteral((object[]) dataEntry.Get())
+                                    data = new Literal(){Offset =(long) predicateLiteralsOfsset[j][1] }
                                 };
                         }
                     }

@@ -44,6 +44,21 @@ namespace NameTable
           Close();
         }
 
+        public StringIntRAMDIctionary(string path, Dictionary<string, int> ReWrite)      
+        {
+            niCell = path + "n_index.pac";
+
+            // Создание ячеек, предполагается, что все либо есть либо их нет и надо создавать
+          
+                Clear();
+
+            // Открытие ячеек в режиме работы (чтения)
+            codeByString = ReWrite;
+            stringByCode = ReWrite.Select(pair => pair.Key).ToArray();
+            Count = stringByCode.Length;
+            Close();
+        }
+
         public void WarmUp()
         {
             //foreach (var q in nc_cell.Root.ElementValues()) ;
