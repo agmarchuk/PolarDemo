@@ -4,10 +4,9 @@ using System.IO;
 using System.Linq;
 using Antlr4.Runtime;
 using NameTable;
-using SparqlParser;
 using TrueRdfViewer;
 
-namespace ANTLR_Test
+namespace SparqlParser
 {
     class Program
     {
@@ -52,8 +51,8 @@ namespace ANTLR_Test
            Query.decodesCashe.Clear();
             //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\undecoded\" + Millions + @"mln\");
 
-                   bool load = false;
-                     // bool load = true;
+                  //  bool load = false;
+                     bool load = true;
               using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;
