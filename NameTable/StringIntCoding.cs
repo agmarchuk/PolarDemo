@@ -21,6 +21,8 @@ namespace NameTable
                 new NamedType("code", new PType(PTypeEnumeration.integer)),
                 new NamedType("name", new PType(PTypeEnumeration.sstring))));
 
+        private bool? mode;
+
         public StringIntCoding(string path)
         {
             originalCell = path + "original_nt.pac";
@@ -45,19 +47,24 @@ namespace NameTable
         }
         public void Open(bool readOnlyMode)
         {
-            //TODO: надо разобраться с readOnly модой 
+            if (mode == readOnlyMode) return;
+            if (mode != null)
+                Close();
             nc_cell = new PaCell(tp_nc, originalCell, readOnlyMode);
             n_index = new PaCell(tp_ind, niCell, readOnlyMode);
             c_index = new PaCell(tp_ind, ciCell, readOnlyMode);
+            mode = readOnlyMode;
         }
         public void Close()
         {
             nc_cell.Close();
             n_index.Close();
             c_index.Close();
+            mode = null;
         }
         public void Clear()
         {
+            Open(false);
             nc_cell.Clear();
             n_index.Clear();
             c_index.Clear();
@@ -91,6 +98,7 @@ namespace NameTable
         }
         public Dictionary<string, int> InsertPortion(string[] sorted_arr) //(IEnumerable<string> portion)
         {
+            Open(false);
             //DateTime tt0 = DateTime.Now;
             string[] ssa = sorted_arr;
             if (ssa.Length == 0) return new Dictionary<string, int>();
@@ -179,6 +187,12 @@ namespace NameTable
             //Console.WriteLine("Слияние ok (" + ssa.Length + "). duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             return dic;
         }
+
+        public Dictionary<string, int> InsertPortion(HashSet<string> entities)
+        {
+            return InsertPortion(entities.ToArray());
+        }
+
         public void MakeIndexed()
         {
             // Подготовим индексы для заполнения
@@ -206,6 +220,7 @@ namespace NameTable
                 nc_entry.offset = (long)obj;
                 return nc_entry.Field(0).Get();
             });
+            Open(true);
         }
         public int Count{ get { return Convert.ToInt32(c_index.Root.Count()); }}
         public void WarmUp()

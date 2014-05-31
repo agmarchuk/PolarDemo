@@ -4,10 +4,9 @@ using System.IO;
 using System.Linq;
 using Antlr4.Runtime;
 using NameTable;
-using SparqlParser;
 using TrueRdfViewer;
 
-namespace ANTLR_Test
+namespace SparqlParser
 {
     class Program
     {
@@ -26,22 +25,19 @@ namespace ANTLR_Test
 
        
 
-           //    Test();
+            
+              Test();
 
-           Console.WriteLine(Millions = 10);
-
-
-
-
-          // Test();
+           Console.WriteLine(Millions = 10);         
+            //Test();
 
            Console.WriteLine(Millions = 100);
                 
           
 
-           Test();
-           Console.WriteLine(Millions = 1000);
          // Test();
+           Console.WriteLine(Millions = 1000);
+        // Test();
 
         }    
 
@@ -71,8 +67,8 @@ namespace ANTLR_Test
                 spent = (DateTime.Now - start).Ticks / 10000;
                 using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                     wr.WriteLine("warm up " + spent + " мс.");
-                //   RunBerlinsWithConstants( ts);
-                RunBerlinsParameters(ts);      
+                  RunBerlinsWithConstants( ts);
+                // RunBerlinsParameters(ts);      
             }
             spent = (DateTime.Now - start).Ticks/10000;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))   

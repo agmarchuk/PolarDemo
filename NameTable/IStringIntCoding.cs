@@ -12,6 +12,7 @@ namespace NameTable
 
         Dictionary<string, int> InsertPortion(string[] portion)  //   (string[] sorted_arr) 
             ;
+        Dictionary<string, int> InsertPortion(HashSet<string> entities);
 
         void MakeIndexed();
         int Count { get; }

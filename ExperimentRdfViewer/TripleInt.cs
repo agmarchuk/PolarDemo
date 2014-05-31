@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using NameTable;
 
 namespace  TrueRdfViewer
@@ -18,14 +17,13 @@ namespace  TrueRdfViewer
         public static int CodeEntities(string s)
         {   
             int c;
-           // if(!EntitiesCodeCache.TryGetValue(s, out c))
+            if(!EntitiesCodeCache.TryGetValue(s, out c))
             {
                 DateTime st = DateTime.Now;
                    c = SiCodingEntities.GetCode(s);
            //  c = s.GetHashCode();
                 totalMilisecondsCodingUsages += (DateTime.Now - st).Ticks/10000;
-           //     EntitiesCodeCache.Add(s, c); //s.GetHashCode() 
-                
+                EntitiesCodeCache.Add(s, c); //s.GetHashCode() 
             }
             return c;
         }              
@@ -58,74 +56,21 @@ namespace  TrueRdfViewer
 
     }
     public class OTripleInt : TripleInt { public int obj; }
-    public class DTripleInt : TripleInt { public Literal data; }
-    public enum LiteralVidEnumeration { typedObject, integer, text, date, boolean, nil }
-    public class Literal
-    {
-        protected bool Equals(Literal other)
+    public class DTripleInt : TripleInt { public Literal data;
+
+    public DTripleInt(int subject, int predicate, Literal data)
         {
-            return vid == other.vid && Equals(Value, other.Value);
+            this.subject = subject;
+            this.predicate = predicate;
+            this.data = data;
         }
 
-        public override int GetHashCode()
+        public DTripleInt()
         {
-            unchecked
-            {
-                return ((int)vid * 397) ^ (Value != null ? Value.GetHashCode() : 0);
-            }
-        }
-
-        public readonly LiteralVidEnumeration vid;
-
-        public string GetString()
-        {
-            switch (vid)
-            {
-                case LiteralVidEnumeration.typedObject:
-                    return ((TypedObject)Value).Value;
-                case LiteralVidEnumeration.text:
-                    return ((Text)Value).Value;
-                case LiteralVidEnumeration.date:
-                    return ((DateTime)Value).ToString(CultureInfo.InvariantCulture);
-                case LiteralVidEnumeration.integer:
-                case LiteralVidEnumeration.boolean:
-                    return Value.ToString();
-                case LiteralVidEnumeration.nil:
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-        public Literal(LiteralVidEnumeration vid)
-        {
-            this.vid = vid;
-        }
-
-        public object Value { get; set; }
-
-        public bool HasValue
-        {
-            get
-            {
-                return Value is Double && Value == (object)double.MinValue
-                       || Value is long && (long)Value == DateTime.MinValue.ToBinary()
-                       || Value is Text && !string.IsNullOrEmpty(((Text)Value).Value);
-            }
-        }
-
-        public override string ToString()
-        {
-            return Value.ToString();
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((Literal)obj);
+        
         }
     }
-                                                       
+
     public class TypedObject : ICloneable
     {
         protected bool Equals(TypedObject other)

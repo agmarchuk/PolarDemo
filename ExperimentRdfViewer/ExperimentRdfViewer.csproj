@@ -52,6 +52,7 @@
     <Compile Include="EntitiesWideTable.cs" />
     <Compile Include="FlexIndexView.cs" />
     <Compile Include="GroupedEntities.cs" />
+    <Compile Include="Literal.cs" />
     <Compile Include="OValRowInt.cs" />
     <Compile Include="ONames.cs" />
     <Compile Include="PaKeyValueTable.cs" />
