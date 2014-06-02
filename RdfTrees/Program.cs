@@ -13,7 +13,7 @@ namespace RdfTrees
             string path = @"..\..\..\Databases\";
             Console.WriteLine("Start RdfTrees");
             RdfTrees rtrees = new RdfTrees(path);
-            rtrees.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset1M.ttl");
+            rtrees.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset100M.ttl");
         }
     }
 }

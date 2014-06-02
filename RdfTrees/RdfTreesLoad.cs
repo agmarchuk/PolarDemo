@@ -88,6 +88,11 @@ namespace RdfTrees
             Console.WriteLine("dtriples_sp.Root.Sort ok. Duration={0} msec.", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             // Делаю три сканера из трех ячеек
+            DiapasonScanner<SubjPredInt> fields = new DiapasonScanner<SubjPredInt>(dtriples_sp, ent =>
+            {
+                object[] v = (object[])ent.Get();
+                return new SubjPredInt() { subj = (int)v[0], pred = (int)v[1] };
+            });
             DiapasonScanner<SubjPredInt> direct = new DiapasonScanner<SubjPredInt>(otriples, ent =>
                 {
                     object[] v = (object[])ent.Get();
@@ -98,63 +103,103 @@ namespace RdfTrees
                 object[] v = (object[])ent.Get();
                 return new SubjPredInt() { subj = (int)v[2], pred = (int)v[1] };
             });
-            DiapasonScanner<SubjPredInt> fields = new DiapasonScanner<SubjPredInt>(dtriples_sp, ent =>
-            {
-                object[] v = (object[])ent.Get();
-                return new SubjPredInt() { subj = (int)v[0], pred = (int)v[1] };
-            });
             // Стартуем сканеры
-            direct.Start(); inverse.Start(); fields.Start();
+            fields.Start(); direct.Start(); inverse.Start(); 
             // Заведем ячейку для результата сканирования
             PaCell tree_free = new PaCell(tp_entitiesTree, path + "tree_free.pac", false);
             tree_free.Clear();
 
-            int cnt_e = 0, cnt_ep = 0;
-            long c1 = 0, c2 = 0, c3 = 0;
+            int cnt_e = 0, cnt_ep = 0; // для отладки
+            long c1 = 0, c2 = 0, c3 = 0; // для отладки
+            //PaEntry ent_dtriples = dtriples.Root.Element(0); // вход для доступа к литералам
             // Начинаем тройное сканирование
-            int id = Int32.MinValue;
-            int prop;
             tree_free.StartSerialFlow();
             tree_free.S();
-            while (direct.HasValue || inverse.HasValue || fields.HasValue)
+            while (fields.HasValue || direct.HasValue || inverse.HasValue)
             {
-                SubjPredInt key = SubjPredInt.MinValue;
-                int num = -1; // 0 - direct, 1 - inverse, 2 - fields
-                if (direct.HasValue && direct.KeyCurrent.CompareTo(key) >= 0) { num = 0; key = direct.KeyCurrent; }
-                if (inverse.HasValue && inverse.KeyCurrent.CompareTo(key) >= 0) { num = 1; key = inverse.KeyCurrent; }
-                if (fields.HasValue && fields.KeyCurrent.CompareTo(key) >= 0) { num = 2; key = fields.KeyCurrent; }
-                // Здесь у нас НОВОЕ значение ключа, но возможно старое значение идентификатора
-                cnt_ep++;
-                if (cnt_ep % 100000 == 0) Console.Write("{0} ", cnt_ep);
-                if (id < key.subj)
-                { // Новое значение id - новая сущность
-                    cnt_e++;
-                    id = key.subj;
-                }
-                else
-                { // Старое значение
-                }
-                if (direct.HasValue && direct.KeyCurrent.CompareTo(key) == 0) 
+                // Здесь у нас НОВОЕ значение идентификатора
+                cnt_e++;
+                if (cnt_e % 10000 == 0) Console.Write("{0} ", cnt_e / 10000);
+                int id0 = fields.HasValue ? fields.KeyCurrent.subj : Int32.MaxValue;
+                int id1 = direct.HasValue ? direct.KeyCurrent.subj : Int32.MaxValue;
+                int id2 = inverse.HasValue ? inverse.KeyCurrent.subj : Int32.MaxValue;
+                // Минимальное значение кода идентификатора
+                int id = Math.Min(id0, Math.Min(id1, id2));
+                
+                // Начало записи
+                tree_free.R();
+                // Запись идентификатора
+                tree_free.V(id);
+
+                tree_free.S();
+                while (fields.HasValue && fields.KeyCurrent.subj == id)
                 {
-                    var diap = direct.Scan();
-                    c1 += diap.numb;
-                }
-                if (inverse.HasValue && inverse.KeyCurrent.CompareTo(key) == 0)
-                {
-                    var diap = inverse.Scan();
-                    c2 += diap.numb;
-                }
-                if (fields.HasValue && fields.KeyCurrent.CompareTo(key) == 0)
-                {
+                    int su = fields.KeyCurrent.subj;
+                    int pr = fields.KeyCurrent.pred;
                     var diap = fields.Scan();
                     c3 += diap.numb;
+                    
+                    for (long ind = diap.start; ind < diap.start + diap.numb; ind++)
+                    {
+                        object[] row = (object[])dtriples_sp.Root.Element(ind).Get();
+                        int subj = (int)row[0];
+                        int prop = (int)row[1];
+                        long off = (long)row[2];
+                        if (subj != su || prop != pr) throw new Exception("Assert err: 287282");
+                        tree_free.V(new object[] { prop, off });
+                    }
                 }
+                tree_free.Se();
+                tree_free.S();
+                while (direct.HasValue && direct.KeyCurrent.subj == id) 
+                {
+                    int su = direct.KeyCurrent.subj;
+                    int pr = direct.KeyCurrent.pred;
+                    var diap = direct.Scan();
+                    c1 += diap.numb;
+                    for (long ind = diap.start; ind < diap.start + diap.numb; ind++)
+                    {
+                        object[] row = (object[])otriples.Root.Element(ind).Get();
+                        int subj = (int)row[0];
+                        int prop = (int)row[1];
+                        int obj = (int)row[2];
+                        if (subj != su || prop != pr) throw new Exception("Assert err: 287283");
+                        tree_free.V(new object[] { prop, obj });
+                    }
+                }
+                tree_free.Se();
+
+                tree_free.S();
+                while (inverse.HasValue && inverse.KeyCurrent.subj == id)
+                {
+                    int su = inverse.KeyCurrent.subj;
+                    int pr = inverse.KeyCurrent.pred;
+                    var diap = inverse.Scan();
+                    c2 += diap.numb;
+
+                    tree_free.R();
+                    tree_free.V(pr);
+                    tree_free.S();
+                    for (long ind = diap.start; ind < diap.start + diap.numb; ind++)
+                    {
+                        object[] row = (object[])otriples_op.Root.Element(ind).Get();
+                        int subj = (int)row[0];
+                        int prop = (int)row[1];
+                        int obj = (int)row[2];
+                        if (obj != su || prop != pr) throw new Exception("Assert err: 287284");
+                        tree_free.V(subj);
+                    }
+                    tree_free.Se();
+                    tree_free.Re();
+                }
+                tree_free.Se();
+                // Конец записи
+                tree_free.Re();
             }
             tree_free.Se();
             tree_free.EndSerialFlow();
-            Console.WriteLine("Scan3 ok. Duration={0} msec. cnt_e={1} cnt_ep={2}", (DateTime.Now - tt0).Ticks / 10000L, cnt_e, cnt_ep); tt0 = DateTime.Now;
-            Console.WriteLine("otriples={0} otriples_op={1} dtriples_sp={2}", otriples.Root.Count(), otriples_op.Root.Count(), dtriples_sp.Root.Count());
-            Console.WriteLine("otriples={0} otriples_op={1} dtriples_sp={2}", c1, c2, c3);  
+            Console.WriteLine("Scan3 ok. Duration={0} msec. cnt_e={1} ", (DateTime.Now - tt0).Ticks / 10000L, cnt_e); tt0 = DateTime.Now;
+            //Console.WriteLine("otriples={0} otriples_op={1} dtriples_sp={2}", otriples.Root.Count(), otriples_op.Root.Count(), dtriples_sp.Root.Count());
 
         }
         private static void Load(string filepath, PaCell otriples, PaCell dtriples)
