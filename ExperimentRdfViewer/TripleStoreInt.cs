@@ -68,7 +68,7 @@ namespace TrueRdfViewer
             this.path = path;
 
             InitTypes();
-            TripleInt.SiCodingEntities = new StringIntMD5RAMCoding(path + "entitiesCodes");
+            TripleInt.SiCodingEntities = new StringIntMD5RAMColisions(path + "entitiesCodes");
             TripleInt.SiCodingPredicates = new StringIntRAMDIctionary(path + "predicatesCodes");
             otriplets_op_filePath = path + "otriples_op.pac";
             otriples_filePath = path + "otriples.pac";
@@ -180,6 +180,8 @@ namespace TrueRdfViewer
             Open(false);
 
             Load(filepath);
+            TripleInt.SiCodingPredicates.Close();
+            TripleInt.SiCodingPredicates = new StringIntRAMDIctionary(path + "predicatesCodes", TripleInt.PredicatesCodeCache);
             Console.WriteLine("Load ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
             PrepareArrays();
@@ -330,56 +332,34 @@ namespace TrueRdfViewer
             TripleInt.EntitiesCodeCache.Clear();
             TripleInt.PredicatesCodeCache.Clear();
 
-            const int bufferLength = 1000 * 1000;
-            ;
-            var buffer = new List<DTripleInt>(bufferLength);
-
-            foreach (var triplet in TurtleInt.LoadGraph(filepath))
+        
+            foreach (var tripletGrpah in TurtleInt.LoadGraph(filepath))
             {
-                if (i % 100000 == 0) Console.Write("{0} ", i / 100000); i++;
-                var otr = triplet as OTripleInt;
-                if (otr != null)
+                LiteralStore.Literals.WriteBufferForce();
+                if (i % 100000 == 0) Console.Write("w{0} ", i / 100000); i += tripletGrpah.PredicateDataValuePairs.Count + tripletGrpah.PredicateObjValuePairs.Count;
+                    var subject = TripleInt.EntitiesCodeCache[tripletGrpah.subject];
+
+                foreach (var predicateObjValuePair in tripletGrpah.PredicateObjValuePairs)
                     otriples.Root.AppendElement(new object[]
                     {
-                        otr.subject,
-                        otr.predicate,
-                        otr.obj
+                        subject,
+                        predicateObjValuePair.Key,
+                        TripleInt.EntitiesCodeCache[predicateObjValuePair.Value]
                     });
-                else
-                {
-                    if (buffer.Count == bufferLength)
+                foreach (var predicateDataValuePair in tripletGrpah.PredicateDataValuePairs)
+                    dtriples_sp.Root.AppendElement(new object[]
                     {
-                        WriteDataTripletsBuffer(buffer);
-
-                        buffer.Clear();
-                    }
-                    buffer.Add(triplet as DTripleInt);
-                }
+                        subject,
+                        predicateDataValuePair.Key,
+                        predicateDataValuePair.Value.Offset
+                    });
 
             }
-            WriteDataTripletsBuffer(buffer);
-
+            
             otriples.Flush();
           
             dtriples_sp.Flush();
-        }
-
-        private void WriteDataTripletsBuffer(List<DTripleInt> buffer)
-        {
-            var offsetsOnData = new long[buffer.Count];
-            for (int k = 0; k < buffer.Count; k++)
-            {
-                var tr = buffer[k];
-                Literal lit = tr.data;
-                LiteralStore.Literals.Write(lit);
-            }
-            LiteralStore.Literals.WriteBufferForce();
-            for (int k = 0; k < buffer.Count; k++)
-                offsetsOnData[k] = buffer[k].data.Offset;
-
-            for (int k = 0; k < buffer.Count; k++)
-                dtriples_sp.Root.AppendElement(new object[] { buffer[k].subject, buffer[k].predicate, offsetsOnData[k] });
-        }
+        }            
 
         private void Close()
         {

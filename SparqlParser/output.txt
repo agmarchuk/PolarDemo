@@ -766,3 +766,75 @@ millions 1
 millions 1
 millions 1
 total 25397 мс.
+millions 1
+millions 1
+millions 1
+total 33226 мс.
+millions 1
+warm up 1887 мс.
+millions 1
+warm up 1887 мс.
+millions 1
+warm up 1891 мс.
+millions 1
+millions 1
+total 29107 мс.
+millions 1
+warm up 1807 мс.
+millions 1
+warm up 1927 мс.
+millions 1
+warm up 1878 мс.
+millions 1
+millions 1
+total 29004 мс.
+millions 1
+warm up 1827 мс.
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 5674
+total 28604 мс.
+millions 1
+millions 1
+total 29327 мс.
+millions 1
+warm up 3445 мс.
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 23
+total 7247 мс.
+millions 1000
+millions 1
+total 15041 мс.
+millions 1
+warm up 946 мс.
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 2
+total 1624 мс.
+millions 1000
+millions 1000
+millions 1000
+millions 1000
+millions 1000
+millions 1
+total 48143 мс.
+millions 1
+total 13144 мс.
+millions 1
+warm up 637 мс.
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 2
+total 1659 мс.
+millions 1000
+millions 1000
+millions 1000
+millions 1000
+millions 1000
+millions 1000
+millions 1000
+millions 1000
+millions 1000
+millions 1000
+millions 1000
+millions 1000
+millions 1000
+millions 1000
+millions 1000
