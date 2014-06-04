@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio Express 2012 for Web
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FirstSteps", "FirstSteps\FirstSteps.csproj", "{2BE582AC-D3B0-4E76-AE73-BF8129C0E3EF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sorting", "Sorting\Sorting.csproj", "{7EF43579-CEF1-481F-A0F2-AFD1EFE71386}"
@@ -52,6 +50,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TruRDFViewer", "TruRDFViewer\TruRDFViewer.csproj", "{292D8A24-22F1-4163-A449-D976CAD3B9EA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExperimentRdfViewer", "ExperimentRdfViewer\ExperimentRdfViewer.csproj", "{3165CDE6-FA27-4FC4-BDBC-01967BB4F0E5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RdfTrees", "RdfTrees\RdfTrees.csproj", "{AC8F68BA-DF90-45BF-B7A2-47CE86CF5914}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -303,6 +303,16 @@ Global
 		{3165CDE6-FA27-4FC4-BDBC-01967BB4F0E5}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{3165CDE6-FA27-4FC4-BDBC-01967BB4F0E5}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{3165CDE6-FA27-4FC4-BDBC-01967BB4F0E5}.Release|x86.ActiveCfg = Release|Any CPU
+		{AC8F68BA-DF90-45BF-B7A2-47CE86CF5914}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC8F68BA-DF90-45BF-B7A2-47CE86CF5914}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC8F68BA-DF90-45BF-B7A2-47CE86CF5914}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{AC8F68BA-DF90-45BF-B7A2-47CE86CF5914}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{AC8F68BA-DF90-45BF-B7A2-47CE86CF5914}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AC8F68BA-DF90-45BF-B7A2-47CE86CF5914}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC8F68BA-DF90-45BF-B7A2-47CE86CF5914}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC8F68BA-DF90-45BF-B7A2-47CE86CF5914}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{AC8F68BA-DF90-45BF-B7A2-47CE86CF5914}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{AC8F68BA-DF90-45BF-B7A2-47CE86CF5914}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
