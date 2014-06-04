@@ -16,6 +16,7 @@ namespace SparqlParser
         public short index;
         public object pacElement;
         public GraphIsDataProperty graph;
+        public bool isPredicate;
     }
     public class Query
     {                   
@@ -59,26 +60,26 @@ namespace SparqlParser
                 IEnumerable<RPackInt> result = Where(Repeat(row, ts));
                 
                 if (solutionModifierOrder != null) result = solutionModifierOrder(result.Select(i => (RPackInt)((ICloneable)i).Clone()));
-                var selectResult = all
-                    ? result.Select(pack => pack.row)
-                    //TODO unbounded variables;
-                    : result.Select(pack => 
-                        variables.Select(s => Variables[s].index)
-                                 .Select(index => pack[index]).ToArray());
-
+                Variable[] SelectVariables;
+                IEnumerable<object[]> selectResult;
+                if (all)
+                    SelectVariables = Variables.Values.ToArray();
+                    //result.Select(pack => pack.row);
+                else
+                    SelectVariables =
+                        variables.Select(s => Variables[s])
+                                 .ToArray();
+                selectResult = result.Select(pack => SelectVariables.Select(variable => variable.index)
+                    .Select(index => pack[index]).ToArray());
                 if (isDistinct) selectResult = new HashSet<object[]>(selectResult,new SequenceEqualityComparer<object>());
 
                 if (solutionModifierCount != null) selectResult = solutionModifierCount(selectResult);
 
-                return selectResult.Select(seq => seq.Select(o =>
-                                {
-                                    if (!(o is Int32))
-                                        return o;
-                                    string name;
-                                    if (!decodesCashe.TryGetValue((int)o, out name))
-                                        decodesCashe.Add((int)o, name = TripleInt.DecodeEntities((int)o));
-                                    return name;
-                                }));
+                return selectResult.Select(seq => seq.Select((o,i) => 
+                    !(o is Int32) ? o : 
+                    (SelectVariables[i].isPredicate 
+                    ? GetNamePredicate(o) 
+                    : GetNameEntity(o))));
             };
         }
 
@@ -127,18 +128,38 @@ namespace SparqlParser
 
                 return
                     describeResults.Select(
-                        objects => objects.Select(o =>
+                        triplet =>
                         {
-                            if (!(o is Int32))
-                                return o!=null ? o.ToString():"";
-                            string name;
-                            if (!decodesCashe.TryGetValue((int)o, out name))
-                                decodesCashe.Add((int) o, name= TripleInt.DecodeEntities((int) o));
-                            return name;
-                        }));
+                            var o = triplet[2];
+                            return new[]
+                            {
+                                GetNameEntity(triplet[0]), GetNamePredicate(triplet[1]),
+                                o is Int32
+                                    ? GetNameEntity(o)
+                                    : o != null ? o.ToString() : ""
+
+                            };
+
+                        });
 
             };
         }
+
+        private static string GetNameEntity(object o)
+        {
+            string name;
+            if (!decodesCasheEntities.TryGetValue((int) o, out name))
+                decodesCasheEntities.Add((int) o, name = TripleInt.DecodeEntities((int) o));
+            return name;
+        }
+        private static string GetNamePredicate(object o)
+        {
+            string name;
+            if (!decodesCashePredicates.TryGetValue((int)o, out name))
+                decodesCashePredicates.Add((int)o, name = TripleInt.DecodePredicates((int)o));
+            return name;
+        }
+
 
         public Func<TripleStoreInt, IEnumerable<IEnumerable<object>>> ConstructRun;
 
@@ -156,16 +177,7 @@ namespace SparqlParser
                 var constructResultSequences = constructResult.Select(tuple => new object[] { tuple.Item1, tuple.Item2, tuple.Item3 });
                 if (solutionModifierCount != null)
                     constructResultSequences = solutionModifierCount(constructResultSequences);
-                return constructResultSequences.Select(seq => seq.Select(o =>
-                {
-                    if (!(o is Int32))
-                        return o;
-                    string name;
-                    if (!decodesCashe.TryGetValue((int)o, out name))
-                        decodesCashe.Add((int)o, name = TripleInt.DecodeEntities((int)o));
-                    return name;
-                }
-                    ));
+                return constructResultSequences;
             };
         }
 
@@ -173,7 +185,8 @@ namespace SparqlParser
         internal Func<RPackInt, IEnumerable<Tuple<string, string, string>>> constructTemplate;
 
         internal readonly List<Func<RPackInt, IEnumerable<Tuple<string, string, string>>>> constructTriples = new List<Func<RPackInt, IEnumerable<Tuple<string, string, string>>>>();
-        public static readonly Dictionary<int, string> decodesCashe = new Dictionary<int, string>();
+        public static readonly Dictionary<int, string> decodesCasheEntities = new Dictionary<int, string>();
+        public static readonly Dictionary<int, string> decodesCashePredicates = new Dictionary<int, string>();
 
         internal void CreateAsqRun()
         {

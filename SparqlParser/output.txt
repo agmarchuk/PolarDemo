@@ -823,18 +823,56 @@ warm up 637 мс.
 milions 1
 countCodingUsages 14 totalMillisecondsCodingUsages 2
 total 1659 мс.
+
+кодирование сущностей тоже в оперативной памяти, но коллизи в отдельной ячейке и словаре
+ячейка+словарь для md5: long md5(уникалльный), int code
+не отсортирована.
+
+warm up 626 мс.
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 8
+total 1564 мс.
+
 millions 1000
 millions 1000
 millions 1000
 millions 1000
+total 22424428 мс.
 millions 1000
 millions 1000
+millions 1
+total 28234 мс.
+millions 1
+warm up 593 мс.
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 0
+total 1703 мс.
+millions 1
+warm up 640 мс.
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 15
+total 1437 мс.
+millions 1
+warm up 593 мс.
+milions 1
+max memory usage 89506952
+average 1449, 980, 595, 833, 156, 124, 358, 438, 3703, 362, 4166, 1587
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 15, 15, 15, 31, 15, 15, 15, 15, 15, 15, 15
+total parse 300, 135, 795, 555, 1260, 510, 405, 675, 30, 855, 45, 135
+total run 45, 375, 45, 45, 1936, 3495, 990, 465, 105, 525, 75, 180
+countCodingUsages 9133 totalMillisecondsCodingUsages 105
+total 32781 мс.
 millions 1000
+warm up 1 325 940 мс.
 millions 1000
-millions 1000
-millions 1000
-millions 1000
-millions 1000
-millions 1000
-millions 1000
-millions 1000
+warm up 1344222 мс.
+milions 1000
+max memory usage 7 532 048 656
+average 2, 13, 17, 4, 0, 0, 0, 1, 9, 0, 10, 8
+minimums 0, 5, 0, 0, 162, 6708, 323, 11, 14, 12, 23, 13
+maximums 147829, 227, 5204, 68691, 73548, 40669, 5989, 2344, 170, 2885, 188, 217
+total parse 1119, 325, 2245, 1787, 3427, 382, 421, 2242, 20, 2431, 26, 250
+total run 198516, 37225, 25601, 100385, 2895452, 3683755, 1190170, 433659, 53899, 588285, 47102, 60031
+countCodingUsages 17717 totalMillisecondsCodingUsages 253
+total 27 474 613 мс.

@@ -36,7 +36,7 @@ namespace SparqlParser
 
          // Test();
            Console.WriteLine(Millions = 1000);
-         Test();
+        Test();
 
         }    
 
@@ -47,11 +47,11 @@ namespace SparqlParser
 
            TripleInt.EntitiesCodeCache.Clear();
            TripleInt.PredicatesCodeCache.Clear();
-           Query.decodesCashe.Clear();
+           Query.decodesCasheEntities.Clear();
             //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\undecoded\" + Millions + @"mln\");
 
-                  //       bool load = false;
-                bool load = true;
+             bool load = false;
+                  //          bool load = true;
               using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;
@@ -66,8 +66,8 @@ namespace SparqlParser
                 spent = (DateTime.Now - start).Ticks / 10000;
                 using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                     wr.WriteLine("warm up " + spent + " мс.");
-                  RunBerlinsWithConstants( ts);
-                // RunBerlinsParameters(ts);      
+                //   RunBerlinsWithConstants( ts);
+                RunBerlinsParameters(ts);      
             }
             spent = (DateTime.Now - start).Ticks/10000;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))   

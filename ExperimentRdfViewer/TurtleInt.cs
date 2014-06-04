@@ -17,7 +17,7 @@ namespace TrueRdfViewer
    
     public static class TurtleInt
     {
-        public static int BufferMax =100 * 1000;
+        public static int BufferMax =30*1000 * 1000;
         // (Только для специальных целей) Это для накапливания идентификаторов собираемых сущностей:
         public static List<string> sarr = new List<string>();
 
