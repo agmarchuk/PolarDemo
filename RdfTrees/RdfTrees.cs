@@ -53,13 +53,17 @@ namespace RdfTrees
                 new NamedType("inverse", new PTypeSequence(new PTypeRecord(
                     new NamedType("prop", new PType(PTypeEnumeration.integer)),
                     new NamedType("sources", new PTypeSequence(new PType(PTypeEnumeration.integer))))))));
-            this.tp_literal = new PTypeUnion(
-                new NamedType("void", new PType(PTypeEnumeration.none)),
-                new NamedType("integer", new PType(PTypeEnumeration.integer)),
-                new NamedType("string", new PTypeRecord(
-                    new NamedType("s", new PType(PTypeEnumeration.sstring)),
-                    new NamedType("l", new PType(PTypeEnumeration.sstring)))),
-                new NamedType("date", new PType(PTypeEnumeration.longinteger)));
+  tp_literal = new PTypeUnion(
+   new NamedType("void", new PType(PTypeEnumeration.none)),
+   new NamedType("integer", new PType(PTypeEnumeration.real)),
+   new NamedType("string", new PTypeRecord(
+       new NamedType("s", new PType(PTypeEnumeration.sstring)),
+       new NamedType("l", new PType(PTypeEnumeration.sstring)))),
+   new NamedType("date", new PType(PTypeEnumeration.longinteger)),
+   new NamedType("bool", new PType(PTypeEnumeration.boolean)),
+   new NamedType("typedObject", new PTypeRecord(
+       new NamedType("s", new PType(PTypeEnumeration.sstring)),
+       new NamedType("t", new PType(PTypeEnumeration.sstring)))));
             this.tp_literalsTree = new PTypeSequence(new PTypeRecord(
                 new NamedType("prop", new PType(PTypeEnumeration.integer)),
                 new NamedType("litpairs", new PTypeSequence(new PTypeRecord(
