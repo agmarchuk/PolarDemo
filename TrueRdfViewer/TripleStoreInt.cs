@@ -54,6 +54,12 @@ namespace TrueRdfViewer
         private bool filescale = true;
         //private bool memoryscale = false; // Наоборот от filescale
         private int range = 0;
+        private Dictionary<KeyValuePair<int, int>, Literal[]> spDCache = new Dictionary<KeyValuePair<int, int>, Literal[]>();
+
+        protected TripleStoreInt()
+        {
+
+        }
         //// Идея хорошая, но надо менять схему реализации
         //private GroupedEntities getable;
         //private Dictionary<int, object[]> geHash;
@@ -334,7 +340,7 @@ namespace TrueRdfViewer
             Console.WriteLine("{0} {1} {2}", c, c1, ntriples);
         }
         private Dictionary<KeyValuePair<int, int>, int[]> SpoCache = new Dictionary<KeyValuePair<int, int>, int[]>();
-        public IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
+        public virtual IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
         {
             int[] res;
             var key = new KeyValuePair<int, int>(obj, pred);
@@ -421,7 +427,7 @@ namespace TrueRdfViewer
         }
 
         private Dictionary<KeyValuePair<int, int>, int[]> spOCache = new Dictionary<KeyValuePair<int, int>, int[]>();
-        public IEnumerable<int> GetObjBySubjPred(int subj, int pred)
+        public virtual IEnumerable<int> GetObjBySubjPred(int subj, int pred)
         {
             int[] res;
             var key = new KeyValuePair<int, int>(subj, pred);
@@ -539,8 +545,9 @@ namespace TrueRdfViewer
         //    if (diap == null) return null;//new object[] { 0L, 0L };
         //    return diap;
         //}
-        private Dictionary<KeyValuePair<int, int>, Literal[]> spDCache = new Dictionary<KeyValuePair<int, int>, Literal[]>();
-        public IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
+
+
+        public virtual IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
         {
             Literal[] res;
             var key = new KeyValuePair<int, int>(subj, pred);
@@ -756,7 +763,7 @@ namespace TrueRdfViewer
             }
             return lit;
         }
-        public bool ChkOSubjPredObj(int subj, int pred, int obj)
+        public virtual bool ChkOSubjPredObj(int subj, int pred, int obj)
         {
             if (!ChkInScale(subj, pred, obj)) return false;
             SubjPredObjInt key = new SubjPredObjInt() { subj = subj, pred = pred, obj = obj };

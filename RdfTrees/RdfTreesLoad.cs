@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using PolarDB;
+using TripleIntClasses;
+
 
 namespace RdfTrees
 {
@@ -369,24 +369,14 @@ namespace RdfTrees
                 else
                 {
                     var tr = (DTripleInt)triple;
-                    Literal lit = tr.data;
-                    object[] da;
-                    if (lit.vid == LiteralVidEnumeration.integer)
-                        da = new object[] { 1, lit.value };
-                    else if (lit.vid == LiteralVidEnumeration.date)
-                        da = new object[] { 3, lit.value };
-                    else if (lit.vid == LiteralVidEnumeration.text)
-                    {
-                        Text t = (Text)lit.value;
-                        da = new object[] { 2, new object[] { t.s, t.l } };
-                    }
-                    else
-                        da = new object[] { 0, null };
+                  Literal lit = tr.data;
+                    
+                    
                     dtriples.Root.AppendElement(new object[] 
                     { 
                         tr.subject, 
                         tr.predicate, 
-                        da 
+                        Literal.ToObjects(lit) 
                     });
                 }
             }

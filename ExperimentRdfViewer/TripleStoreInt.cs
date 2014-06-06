@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml.Linq;
 using NameTable;
 using PolarDB;
-using sema2012m;
+using TripleIntClasses;
 
 namespace TrueRdfViewer
 {
@@ -424,6 +423,11 @@ namespace TrueRdfViewer
         //}
 
         private Scale1 scale = null;
+
+        protected TripleStoreInt()
+        {
+        }
+
         private void CreateScale()
         {
             long len = otriples.Root.Count() - 1;

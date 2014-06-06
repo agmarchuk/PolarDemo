@@ -8,6 +8,7 @@ using System.Text;
 using System.Xml.Linq;
 using Antlr4.Runtime;
 using NameTable;
+using TripleIntClasses;
 using TrueRdfViewer;
 
 namespace SparqlParser

@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using ANTLR_Test.Annotations;
-using TrueRdfViewer;
+using TripleIntClasses;
+
 
 namespace SparqlParser
 {

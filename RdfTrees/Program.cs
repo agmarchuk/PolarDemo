@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
-using PolarDB;
+using TripleIntClasses;
+
 
 namespace RdfTrees
 {
@@ -48,7 +46,7 @@ namespace RdfTrees
                 }
                 else if (spo.Name == "spD")
                 {
-                    Literal lit = rtrees.GetDataBySubjPred(
+                   var lit = rtrees.GetDataBySubjPred(
                         s.GetHashCode(),
                         p.GetHashCode()).FirstOrDefault();
                     if (lit == null) { ncnt++; }
@@ -56,7 +54,7 @@ namespace RdfTrees
                     {
                         bool isEq = false;
                         if (lit.vid == LiteralVidEnumeration.text &&
-                            ((Text)lit.value).s == res.Substring(1, res.Length - 2)) isEq = true;
+                            ((Text)lit.Value).Value == res.Substring(1, res.Length - 2)) isEq = true;
                         else isEq = lit.ToString() == res;
                         if (isEq) ecnt++; else ncnt++;
                     }

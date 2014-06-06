@@ -1,0 +1,167 @@
+using System;
+using System.Globalization;
+
+namespace TripleIntClasses
+{
+    public enum LiteralVidEnumeration { typedObject, integer, text, date, boolean, nil }   
+    public class Literal
+    {
+
+
+        public long Offset;
+
+        protected bool Equals(Literal other)
+        {
+            return vid == other.vid && Equals(Value, other.Value);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((int)vid * 397) ^ (Value != null ? Value.GetHashCode() : 0);
+            }
+        }
+
+        public LiteralVidEnumeration vid;
+
+        public string GetString()
+        {
+            switch (vid)
+            {
+                case LiteralVidEnumeration.typedObject:
+                    return ((TypedObject)Value).Value;
+                case LiteralVidEnumeration.text:
+                    return ((Text)Value).Value;
+                case LiteralVidEnumeration.date:
+                    return ((DateTime)Value).ToString(CultureInfo.InvariantCulture);
+                case LiteralVidEnumeration.integer:
+                case LiteralVidEnumeration.boolean:
+                    return Value.ToString();
+                case LiteralVidEnumeration.nil:
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+        public Literal(LiteralVidEnumeration vid)
+        {
+            this.vid = vid;
+        }
+
+        public Literal()
+        {
+            
+        }
+
+        public object Value { get; set; }
+
+        public bool HasValue
+        {
+            get
+            {
+                return Value is Double && Value == (object)Double.MinValue
+                       || Value is long && (long)Value == DateTime.MinValue.ToBinary()
+                       || Value is Text && !String.IsNullOrEmpty(((Text)Value).Value);
+            }
+        }
+
+        public override string ToString()
+        {
+            return Value.ToString();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Literal)obj);
+        }
+
+        public static Literal Create(string datatype, string sdata, string lang)
+        {
+            return (datatype == "http://www.w3.org/2001/XMLSchema#integer" ||
+                    datatype == "http://www.w3.org/2001/XMLSchema#float" ||
+                    datatype == "http://www.w3.org/2001/XMLSchema#double"
+                ? new Literal(LiteralVidEnumeration.integer)
+                {
+                    Value = Double.Parse(sdata, NumberStyles.Any)
+                }
+                : datatype == "http://www.w3.org/2001/XMLSchema#boolean"
+                    ? new Literal(LiteralVidEnumeration.date) { Value = Boolean.Parse(sdata) }
+                    : datatype == "http://www.w3.org/2001/XMLSchema#dateTime" ||
+                      datatype == "http://www.w3.org/2001/XMLSchema#date"
+                        ? new Literal(LiteralVidEnumeration.date) { Value = DateTime.Parse(sdata).ToBinary() }
+                        : datatype == null ||
+                          datatype == "http://www.w3.org/2001/XMLSchema#string"
+                            ? new Literal(LiteralVidEnumeration.text)
+                            {
+                                Value = new Text() { Value = sdata, Lang = lang ?? String.Empty }
+                            }
+                            : new Literal(LiteralVidEnumeration.typedObject) { Value = new TypedObject() { Value = sdata, Type = datatype } });
+        }
+
+        public static object[] ToObjects(Literal lit)
+        {
+            object[] da;
+            switch (lit.vid)
+            {
+                case LiteralVidEnumeration.integer:
+                    da = new object[] { 1, lit.Value };
+                    break;
+                case LiteralVidEnumeration.date:
+                    da = new object[] { 3, lit.Value };
+                    break;
+                case LiteralVidEnumeration.boolean:
+                    da = new object[] { 4, lit.Value };
+                    break;
+                case LiteralVidEnumeration.text:
+                {
+                    Text t = (Text)lit.Value;
+                    da = new object[] { 2, new object[] { t.Value, t.Lang } };
+                }
+                    break;
+                case LiteralVidEnumeration.typedObject:
+                {
+                    TypedObject t = (TypedObject)lit.Value;
+                    da = new object[] { 5, new object[] { t.Value, t.Type } };
+                }
+                    break;
+                default:
+                    da = new object[] { 0, null };
+                    break;
+            }
+            return da;
+        }
+
+        public static Literal ToLiteral(object[] uni)
+        {
+            switch ((int)uni[0])
+            {
+                case 1:
+                    return new Literal(LiteralVidEnumeration.integer) { Value = Convert.ToDouble(uni[1]) };
+                case 3:
+                    return new Literal(LiteralVidEnumeration.date) { Value = (long)uni[1] };
+                case 4:
+                    return new Literal(LiteralVidEnumeration.boolean) { Value = (bool)uni[1] };
+                case 5:
+                {
+                    object[] txt = (object[])uni[1];
+                    return new Literal(LiteralVidEnumeration.typedObject)
+                    {
+                        Value = new TypedObject() { Value = (string)txt[0], Type = (string)txt[1] }
+                    };
+                }
+                case 2:
+                    object[] txt1 = (object[])uni[1];
+                    return new Literal(LiteralVidEnumeration.text)
+                    {
+                        Value = new Text() { Value = (string)txt1[0], Lang = (string)txt1[1] }
+                    };
+                default:
+                    return new Literal(LiteralVidEnumeration.nil);
+            }
+        }
+    }
+
+}

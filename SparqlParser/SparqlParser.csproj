@@ -123,6 +123,14 @@
       <Project>{5283693d-68cc-4b7a-b2bb-6e901592a272}</Project>
       <Name>NameTable</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RdfTrees\RdfTrees.csproj">
+      <Project>{ac8f68ba-df90-45bf-b7a2-47ce86cf5914}</Project>
+      <Name>RdfTrees</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TripleInt\TripleIntClasses.csproj">
+      <Project>{4b88e673-1272-46cf-817c-ac76111dac46}</Project>
+      <Name>TripleIntClasses</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="obj\" />

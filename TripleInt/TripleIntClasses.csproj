@@ -1,26 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3165CDE6-FA27-4FC4-BDBC-01967BB4F0E5}</ProjectGuid>
+    <ProjectGuid>{4B88E673-1272-46CF-817C-AC76111DAC46}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TrueRdfViewer</RootNamespace>
-    <AssemblyName>TrueRdfViewer</AssemblyName>
+    <RootNamespace>TripleIntClasses</RootNamespace>
+    <AssemblyName>TripleIntClasses</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,56 +28,28 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="allproducts.cs" />
-    <Compile Include="BerlinTestsInt.cs" />
-    <Compile Include="DiapasonScanner.cs" />
-    <Compile Include="DiapLinksScanner.cs" />
-    <Compile Include="EntitiesMemoryHashTable.cs" />
-    <Compile Include="EntitiesWideTable.cs" />
-    <Compile Include="FlexIndexView.cs" />
-    <Compile Include="GroupedEntities.cs" />
-    <Compile Include="LiteralStore.cs" />
-    <Compile Include="OValRowInt.cs" />
-    <Compile Include="ONames.cs" />
-    <Compile Include="PaKeyValueTable.cs" />
-    <Compile Include="ProgramInt.cs" />
+    <Compile Include="DTripleInt.cs" />
+    <Compile Include="Literal.cs" />
+    <Compile Include="OTripleInt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RPackInt.cs" />
-    <Compile Include="Scale2.cs" />
-    <Compile Include="Tracing.cs" />
-    <Compile Include="TripleStoreInt.cs" />
-    <Compile Include="TurtleInt.cs" />
+    <Compile Include="SPComparer.cs" />
+    <Compile Include="SPOComparer.cs" />
+    <Compile Include="SubjPredInt.cs" />
+    <Compile Include="SubjPredObjInt.cs" />
+    <Compile Include="Text.cs" />
+    <Compile Include="TripleInt.cs" />
+    <Compile Include="TypedObject.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Description.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\PolarDB\PolarDB.csproj">
-      <Project>{907bb4af-fbc9-4a1e-8f80-194af9337aa4}</Project>
-      <Name>PolarDB</Name>
-    </ProjectReference>
     <ProjectReference Include="..\NameTable\NameTable.csproj">
       <Project>{5283693d-68cc-4b7a-b2bb-6e901592a272}</Project>
       <Name>NameTable</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TripleInt\TripleIntClasses.csproj">
-      <Project>{4b88e673-1272-46cf-817c-ac76111dac46}</Project>
-      <Name>TripleIntClasses</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

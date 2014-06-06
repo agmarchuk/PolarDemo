@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using PolarDB;
+﻿using PolarDB;
+using TrueRdfViewer;
+
 
 namespace RdfTrees
 {
     /// <summary>
     /// Класс, представляющий собой хранилище триплетов, его методов, способ загрузки данных и формирования структуры
     /// </summary>
-    public partial class RdfTrees
+    public partial class RdfTrees     :TripleStoreInt
     {
         // Типы
         private PType tp_entitiesTree;
@@ -32,7 +29,7 @@ namespace RdfTrees
         /// Конструктор
         /// </summary>
         /// <param name="path">директория базы данных с (обратным) слешем</param>
-        public RdfTrees(string path)
+        public RdfTrees(string path) 
         {
             this.path = path;
             // Построим типы
@@ -84,28 +81,28 @@ namespace RdfTrees
                 new NamedType("offset", new PType(PTypeEnumeration.longinteger))));
         }
         // Генерация литерала из объектного представления, соответствующего tp_literal 
-        public static Literal GenerateLiteral(object pobj)
-        {
-            object[] uni = (object[])pobj;
-            int tag = (int)uni[0];
-            if (tag == 1) // целое
-            {
-                return new Literal() { vid = LiteralVidEnumeration.integer, value = uni[1] };
-            }
-            else if (tag == 2) // строка
-            {
-                object[] strlangpair = (object[])uni[1];
-                return new Literal()
-                {
-                    vid = LiteralVidEnumeration.text,
-                    value = new Text() { s = (string)strlangpair[0], l = (string)strlangpair[1] }
-                };
-            }
-            else if (tag == 3) // дата в виде двойного целого
-            {
-                return new Literal() { vid = LiteralVidEnumeration.date, value = uni[1] };
-            }
-            else return null; // такого варианта нет
-        }
+        //public static Literal GenerateLiteral(object pobj)
+        //{
+        //    object[] uni = (object[])pobj;
+        //    int tag = (int)uni[0];
+        //    if (tag == 1) // целое
+        //    {
+        //        return new Literal() { vid = LiteralVidEnumeration.integer, value = uni[1] };
+        //    }
+        //    else if (tag == 2) // строка
+        //    {
+        //        object[] strlangpair = (object[])uni[1];
+        //        return new Literal()
+        //        {
+        //            vid = LiteralVidEnumeration.text,
+        //            value = new Text() { s = (string)strlangpair[0], l = (string)strlangpair[1] }
+        //        };
+        //    }
+        //    else if (tag == 3) // дата в виде двойного целого
+        //    {
+        //        return new Literal() { vid = LiteralVidEnumeration.date, value = uni[1] };
+        //    }
+        //    else return null; // такого варианта нет
+        //}
     }
 }
