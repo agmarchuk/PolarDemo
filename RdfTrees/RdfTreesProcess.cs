@@ -13,48 +13,91 @@ namespace RdfTrees
     {
         public override bool ChkOSubjPredObj(int subj, int pred, int obj)
         {
-            var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int)ent.Field(0).Get()).CompareTo(subj));
-            if (rec_ent.IsEmpty) return false;
-            object[] pairs = (object[])rec_ent.Field(2).Get();
-            return pairs.Cast<object[]>().Any(pair => (int)pair[0] == pred && (int)pair[1] == obj);  
+            IEnumerable<KeyValuePair<int, int>> op;
+            if (!sPOCache.TryGetValue(subj, out op))
+            {
+                var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
+                if (rec_ent.IsEmpty) return false;
+                object[] pairs = (object[]) rec_ent.Field(2).Get();
+                op = pairs.Cast<object[]>()
+                           .Select(objects => new KeyValuePair<int, int>((int) objects[1], (int) objects[0]))
+                           .ToArray();
+                sPOCache.Add(subj, op);
+            }
+            return op.Any(pair => pair.Value==pred&& pair.Key==obj);
         }
         public override IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
         {
-            var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int)ent.Field(0).Get()).CompareTo(subj));
-            if (rec_ent.IsEmpty) return Enumerable.Empty<Literal>();
-            object[] pairs = (object[])rec_ent.Field(1).Get();
-            PaEntry dtriple_entry = dtriples.Root.Element(0);
-            var query = pairs.Cast<object[]>().Where(pair => (int)pair[0] == pred)
-                .Select(pair => 
+            Literal[] dp;
+            var key = new KeyValuePair<int, int>(subj, pred);
+            if (!spDCache.TryGetValue(key, out dp))
+            {
+                var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
+                if (rec_ent.IsEmpty) dp = new Literal[0];
+                else
                 {
-                    dtriple_entry.offset = (long)pair[1];
-                    var literal_obj = dtriple_entry.Field(2).Get();
-                    return Literal.ToLiteral((object[]) literal_obj);
-                });
-            return query;
+                    object[] pairs = (object[]) rec_ent.Field(1).Get();
+                    PaEntry dtriple_entry = dtriples.Root.Element(0);
+                    dp = pairs.Cast<object[]>()
+                        .Where(pair => (int) pair[0] == pred)
+                        .Select(pair =>
+                        {
+                            dtriple_entry.offset = (long) pair[1];
+                            var literal_obj = dtriple_entry.Field(2).Get();
+                            return Literal.ToLiteral((object[]) literal_obj);
+                        })
+                        .ToArray();  
+                    spDCache.Add(key, dp);
+                }
+            }
+            return dp;
         }
         public override IEnumerable<int> GetObjBySubjPred(int subj, int pred)
         {
-            var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int)ent.Field(0).Get()).CompareTo(subj));
-            if (rec_ent.IsEmpty) return Enumerable.Empty<int>();
-            object[] pairs = (object[])rec_ent.Field(2).Get();
-            var query = pairs.Cast<object[]>().Where(pair => (int)pair[0] == pred)
-                .Select(pair => (int)pair[1]);
-            return query;
+            var key = new KeyValuePair<int, int>(subj, pred);
+            int[] objects;
+            if (!spOCache.TryGetValue(key, out objects))
+            {
+                var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
+                if (rec_ent.IsEmpty) objects = new int[0];
+                else
+                {
+                    object[] pairs = (object[]) rec_ent.Field(2).Get();
+                    objects = pairs.Cast<object[]>().Where(pair => (int) pair[0] == pred)
+                        .Select(pair => (int) pair[1])
+                        .ToArray();
+                }
+                spOCache.Add(key, objects);
+            }
+
+            return objects;
         }
+
         public override IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
         {
-            var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int)ent.Field(0).Get()).CompareTo(obj));
-            if (rec_ent.IsEmpty) return Enumerable.Empty<int>();
-            object[] subjs = null;
-            foreach (var pred_subjseq in rec_ent.Field(3).Elements())
+            int[] subjects;
+            var key = new KeyValuePair<int, int>(obj, pred);
+            if (!SpoCache.TryGetValue(key, out subjects))
             {
-                var p = (int)pred_subjseq.Field(0).Get();
-                if (p == pred) { subjs = (object[])pred_subjseq.Field(1).Get(); break; }
+                var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(obj));
+                if (rec_ent.IsEmpty) subjects = new int[0];
+                else
+                {
+                    object[] subjs = null;
+                    foreach (var pred_subjseq in rec_ent.Field(3).Elements())
+                    {
+                        var p = (int) pred_subjseq.Field(0).Get();
+                        if (p == pred)
+                        {
+                            subjs = (object[]) pred_subjseq.Field(1).Get();
+                            break;
+                        }
+                    }
+                    subjects = subjs == null ? new int[0] : subjs.Cast<int>().ToArray();
+                    SpoCache.Add(key, subjects);
+                }
             }
-            if (subjs == null) return Enumerable.Empty<int>();
-            var query = subjs.Cast<int>();
-            return query;
+            return subjects;
         }
 
 
@@ -65,27 +108,48 @@ namespace RdfTrees
         /// <returns></returns>
         public override IEnumerable<KeyValuePair<int, int>> GetObjBySubj(int subj)
         {
-            var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int)ent.Field(0).Get()).CompareTo(subj));
-            if (rec_ent.IsEmpty) return Enumerable.Empty<KeyValuePair<int, int>>();
-            object[] pairs = (object[])rec_ent.Field(2).Get();
-            var query = pairs.Cast<object[]>().Select(pair => new KeyValuePair<int, int>((int)pair[1], (int) pair[0]));
-            return query;
+            IEnumerable<KeyValuePair<int, int>> op;
+            if (!sPOCache.TryGetValue(subj, out op))
+            {
+                var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
+
+                if (rec_ent.IsEmpty) op = new KeyValuePair<int, int>[0];
+                else
+                {
+                    object[] pairs = (object[]) rec_ent.Field(2).Get();
+                    op = pairs.Cast<object[]>()
+                        .Select(pair => new KeyValuePair<int, int>((int) pair[1], (int) pair[0]))
+                            .ToArray();
+                }
+                sPOCache.Add(subj, op);
+            }  
+            return op;
         }
-     
+
         public override IEnumerable<KeyValuePair<Literal, int>> GetDataBySubj(int subj)
         {
-            var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int)ent.Field(0).Get()).CompareTo(subj));
-            if (rec_ent.IsEmpty) return Enumerable.Empty<KeyValuePair<Literal, int>>();
-            object[] pairs = (object[])rec_ent.Field(1).Get();
-            PaEntry dtriple_entry = dtriples.Root.Element(0);
-            var query = pairs.Cast<object[]>()
-                .Select(pair =>
+            IEnumerable<KeyValuePair<Literal, int>> pd;
+            if (!sPDCache.TryGetValue(subj, out pd))
+            {   
+                var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
+                if (rec_ent.IsEmpty) pd = new KeyValuePair<Literal, int>[0];
+                else
                 {
-                    dtriple_entry.offset = (long)pair[1];
-                    var literal_obj = dtriple_entry.Field(2).Get();
-                    return new KeyValuePair<Literal, int>(Literal.ToLiteral((object[])literal_obj), (int) pair[0]); 
-                });
-            return query;
+                    object[] pairs = (object[]) rec_ent.Field(1).Get();
+                    PaEntry dtriple_entry = dtriples.Root.Element(0);
+                    pd = pairs.Cast<object[]>()
+                        .Select(pair =>
+                        {
+                            dtriple_entry.offset = (long) pair[1];
+                            var literal_obj = dtriple_entry.Field(2).Get();
+                            return new KeyValuePair<Literal, int>(Literal.ToLiteral((object[]) literal_obj),
+                                (int) pair[0]);
+                        })
+                        .ToArray();
+                    sPDCache.Add(subj, pd);
+                }
+            }
+            return pd;
         }
         /// <summary>
         /// keys entities
@@ -94,15 +158,34 @@ namespace RdfTrees
         /// <returns></returns>
         public override IEnumerable<KeyValuePair<int, int>> GetSubjectByObj(int obj)
         {
-            var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int)ent.Field(0).Get()).CompareTo(obj));
-            if (rec_ent.IsEmpty) return Enumerable.Empty<KeyValuePair<int, int>>();
-            List<KeyValuePair<int,int>> subjs = new List<KeyValuePair<int, int>>();
-            foreach (var pred_subjseq in rec_ent.Field(3).Elements())
+            IEnumerable<KeyValuePair<int, int>> sp;
+            if (!SPoCache.TryGetValue(obj, out sp))
             {
-                var p = (int)pred_subjseq.Field(0).Get();
-                subjs.AddRange(from int s in (object[]) pred_subjseq.Field(1).Get() select new KeyValuePair<int, int>(s, p));
+                var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(obj));
+                if (rec_ent.IsEmpty) sp = new KeyValuePair<int, int>[0];
+                else
+                {
+                    List<KeyValuePair<int, int>> subjs = new List<KeyValuePair<int, int>>();
+                    foreach (var pred_subjseq in rec_ent.Field(3).Elements())
+                    {
+                        var p = (int) pred_subjseq.Field(0).Get();
+                        subjs.AddRange(from int s in (object[]) pred_subjseq.Field(1).Get()
+                            select new KeyValuePair<int, int>(s, p));
+                    }
+                    sp = subjs;
+                }
+                SPoCache.Add(obj, sp);
             }
-            return subjs;
+            return sp;
+        }
+
+        public override void WarmUp()
+        {
+            foreach (var element in entitiesTree.Root.Elements())
+            {
+                element.Get();
+            }
+            
         }
     }
 }

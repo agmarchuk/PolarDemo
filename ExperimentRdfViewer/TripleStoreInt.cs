@@ -18,12 +18,12 @@ namespace TrueRdfViewer
         private PType tp_dtriple_spf_two;
         internal EntitiesWideTable ewt;
         internal EntitiesMemoryHashTable ewtHash;
-        private readonly Dictionary<int, IEnumerable<KeyValuePair<Int32, int>>> SPoCache = new Dictionary<int, IEnumerable<KeyValuePair<int, int>>>();
-        private Dictionary<int, IEnumerable<KeyValuePair<Int32, Int32>>> sPOCache = new Dictionary<int, IEnumerable<KeyValuePair<int, int>>>();
-        readonly Dictionary<int, IEnumerable<KeyValuePair<Literal, int>>> sPDCache = new Dictionary<int, IEnumerable<KeyValuePair<Literal, int>>>();
-        private Dictionary<KeyValuePair<int, int>, Literal[]> spDCache = new Dictionary<KeyValuePair<int, int>, Literal[]>();
-        private readonly Dictionary<KeyValuePair<int, int>, int[]> SpoCache = new Dictionary<KeyValuePair<int, int>, int[]>();
-        private readonly Dictionary<KeyValuePair<int, int>, int[]> spOCache = new Dictionary<KeyValuePair<int, int>, int[]>();
+        public readonly Dictionary<int, IEnumerable<KeyValuePair<Int32, int>>> SPoCache = new Dictionary<int, IEnumerable<KeyValuePair<int, int>>>();
+        public readonly Dictionary<int, IEnumerable<KeyValuePair<Int32, Int32>>> sPOCache = new Dictionary<int, IEnumerable<KeyValuePair<int, int>>>();
+        public readonly Dictionary<int, IEnumerable<KeyValuePair<Literal, int>>> sPDCache = new Dictionary<int, IEnumerable<KeyValuePair<Literal, int>>>();
+        public readonly Dictionary<KeyValuePair<int, int>, Literal[]> spDCache = new Dictionary<KeyValuePair<int, int>, Literal[]>();
+        public readonly Dictionary<KeyValuePair<int, int>, int[]> SpoCache = new Dictionary<KeyValuePair<int, int>, int[]>();
+        public readonly Dictionary<KeyValuePair<int, int>, int[]> spOCache = new Dictionary<KeyValuePair<int, int>, int[]>();
         private string otriplets_op_filePath;
         private string otriples_filePath;
         private string dtriples_filePath;
@@ -145,7 +145,7 @@ namespace TrueRdfViewer
             dtriples_sp.Close();
         }
 
-        public void WarmUp()
+        public virtual void WarmUp()
         {
             if (otriples.IsEmpty) return;
             foreach (var v in otriples.Root.ElementValues()) ;

@@ -66,12 +66,12 @@ namespace SparqlParser
             }
             else
             {
-              //  ts.WarmUp();
+                ts.WarmUp();
                 spent = (DateTime.Now - start).Ticks / 10000;
                 using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                     wr.WriteLine("warm up " + spent + " мс.");
-                //   RunBerlinsWithConstants( ts);
-                RunBerlinsParameters(ts);      
+                 //   RunBerlinsWithConstants( ts);
+               RunBerlinsParameters(ts);      
             }
             spent = (DateTime.Now - start).Ticks/10000;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))   
