@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Xml.Linq;
 using Antlr4.Runtime;
 using NameTable;
 using TrueRdfViewer;
@@ -20,38 +22,41 @@ namespace SparqlParser
 
            Console.WriteLine(Millions = 1);
 
-        
-                
-         //   var count =  1000;
+
+         //   XElement x = XElement.Load(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\1mln\tracing.xml");
+         //   Console.WriteLine(x.Elements().Count());
+         //   new XElement("tracing", x.Elements().Take(100 * 1000)).Save(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\1mln\tracing100.xml");
+         //   new XElement("tracing", x.Elements().Take(1000 * 1000)).Save(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\1mln\tracing1000.xml");
+         ////   var count =  1000;
          //   TestPerfomanceCoding(new StringIntRAMDIctionary(@"..\..\codeTests\"), Enumerable.Range(0, count).Select(i => Guid.NewGuid().ToString()).ToArray(), count);
 
-        //    Test();
+           Test();
 
            Console.WriteLine(Millions = 10);         
-            //Test();
+             //Test();
 
            Console.WriteLine(Millions = 100);
                 
           
 
-         // Test();
+       //   Test();
            Console.WriteLine(Millions = 1000);
-        Test();
+      //  Test();
 
         }    
 
         private static void Test()
         {
            // Console.WriteLine(Millions);
-           TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
+            TripleStoreInt ts = new TracingTripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
 
            TripleInt.EntitiesCodeCache.Clear();
            TripleInt.PredicatesCodeCache.Clear();
            Query.decodesCasheEntities.Clear();
             //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\undecoded\" + Millions + @"mln\");
 
-             bool load = false;
-                  //          bool load = true;
+                bool load = false;
+                     //    bool load = true;
               using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;
@@ -72,6 +77,7 @@ namespace SparqlParser
             spent = (DateTime.Now - start).Ticks/10000;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))   
                 wr.WriteLine("total " + spent + " мс.");
+       //     (ts as TracingTripleStoreInt).x.Save((ts as TracingTripleStoreInt).xPath);
         }
 
         private static void RunBerlinsParameters(TripleStoreInt ts)

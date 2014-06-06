@@ -454,7 +454,7 @@ namespace TrueRdfViewer
             Console.WriteLine("{0} {1} {2}", c, c1, ntriples);
         }
 
-        public IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
+        public virtual IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
         {
             if (obj == Int32.MinValue || pred == Int32.MinValue) return Enumerable.Empty<int>();
             int[] res;
@@ -553,7 +553,7 @@ namespace TrueRdfViewer
 
         #endregion
 
-        public IEnumerable<int> GetObjBySubjPred(int subj, int pred)
+        public virtual IEnumerable<int> GetObjBySubjPred(int subj, int pred)
         {
             if (subj == Int32.MinValue || pred == Int32.MinValue) return Enumerable.Empty<int>();
             int[] res;
@@ -695,7 +695,7 @@ namespace TrueRdfViewer
         //}
 
 
-        public IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
+        public virtual IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
         {
             if (subj == Int32.MinValue || pred == Int32.MinValue) return Enumerable.Empty<Literal>();
             Literal[] res;
@@ -752,7 +752,7 @@ namespace TrueRdfViewer
         {
             return ToLiteral((object[])pobj);
         }
-        public bool ChkOSubjPredObj(int subj, int pred, int obj)
+        public virtual bool ChkOSubjPredObj(int subj, int pred, int obj)
         {
             if (subj == Int32.MinValue || obj == Int32.MinValue || pred == Int32.MinValue) return false;
 
@@ -947,7 +947,7 @@ namespace TrueRdfViewer
 
 
 
-        public IEnumerable<KeyValuePair<int, int>> GetSubjectByObj(int obj)
+        public virtual IEnumerable<KeyValuePair<int, int>> GetSubjectByObj(int obj)
         {
             if (obj == Int32.MinValue) return Enumerable.Empty<KeyValuePair<int, int>>();
             IEnumerable<KeyValuePair<Int32, int>> res;
@@ -970,7 +970,7 @@ namespace TrueRdfViewer
         }
 
 
-        public IEnumerable<KeyValuePair<Int32, Int32>> GetObjBySubj(int subj)
+        public virtual IEnumerable<KeyValuePair<Int32, Int32>> GetObjBySubj(int subj)
         {
             if (subj == Int32.MinValue) return Enumerable.Empty<KeyValuePair<int, int>>();
             IEnumerable<KeyValuePair<int, int>> res;
@@ -985,7 +985,7 @@ namespace TrueRdfViewer
             return res;
         }
 
-        public IEnumerable<KeyValuePair<Literal, int>> GetDataBySubj(int subj)
+        public virtual IEnumerable<KeyValuePair<Literal, int>> GetDataBySubj(int subj)
         {
             if (subj == Int32.MinValue) return Enumerable.Empty<KeyValuePair<Literal, int>>();
             IEnumerable<KeyValuePair<Literal, int>> res;
