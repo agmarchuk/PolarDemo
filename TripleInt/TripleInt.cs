@@ -13,9 +13,10 @@ namespace TripleIntClasses
         public static Dictionary<string, int> PredicatesCodeCache = new Dictionary<string, int>();
      
         public static long totalMilisecondsCodingUsages = 0;
-        
+        public static bool useSimpleCoding;
         public static int CodeEntities(string s)
-        {   
+        {
+            if (useSimpleCoding) return Code(s);
             int c;
             if(!EntitiesCodeCache.TryGetValue(s, out c))
             {
@@ -29,12 +30,14 @@ namespace TripleIntClasses
         }              
         public static string DecodeEntities(int e)
         {
+            if (useSimpleCoding) return Decode(e);
             //   return e.ToString();
             return SiCodingEntities.GetName(e);
         }
 
         public static int CodePredicates(string s)
         {
+            if (useSimpleCoding) return Code(s);
             int c;
             // if (!PredicatesCodeCache.TryGetValue(s, out c))
             {
@@ -49,6 +52,7 @@ namespace TripleIntClasses
         }
         public static string DecodePredicates(int e)
         {
+            if (useSimpleCoding) return Decode(e);
             //   return e.ToString();
             return SiCodingPredicates.GetName(e);
         }

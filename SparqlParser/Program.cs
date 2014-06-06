@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Xml.Linq;
 using Antlr4.Runtime;
 using NameTable;
 using TripleIntClasses;
 using TrueRdfViewer;
+
 
 namespace SparqlParser
 {
@@ -49,7 +46,8 @@ namespace SparqlParser
         private static void Test()
         {
            // Console.WriteLine(Millions);
-            TripleStoreInt ts = new TracingTripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
+            TripleInt.useSimpleCoding = true;
+            TripleStoreInt ts = new RdfTrees.RdfTrees(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
 
            TripleInt.EntitiesCodeCache.Clear();
            TripleInt.PredicatesCodeCache.Clear();
@@ -68,7 +66,7 @@ namespace SparqlParser
             }
             else
             {
-                ts.WarmUp();
+              //  ts.WarmUp();
                 spent = (DateTime.Now - start).Ticks / 10000;
                 using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                     wr.WriteLine("warm up " + spent + " мс.");

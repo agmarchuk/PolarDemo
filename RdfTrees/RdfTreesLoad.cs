@@ -9,7 +9,7 @@ namespace RdfTrees
 {
     public partial class RdfTrees
     {
-        public void LoadTurtle(string filename)
+        public override void LoadTurtle(string filename)
         {
             // Дополнительные ячейки и индексы
             PaCell otriples = new PaCell(tp_otriple_seq, path + "otriples.pac", false);

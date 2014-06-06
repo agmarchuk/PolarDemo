@@ -170,7 +170,7 @@ namespace TrueRdfViewer
 
 
 
-        public void LoadTurtle(string filepath)
+        public virtual void LoadTurtle(string filepath)
         {
             DateTime tt0 = DateTime.Now;
 
