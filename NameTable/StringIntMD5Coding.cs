@@ -147,6 +147,8 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
             Open(false);
             List<long> ofsets2NC = new List<long>(portion.Count);
             List<long> checkSumList = new List<long>(portion.Count);
+            foreach (var q in nc_cell.Root.ElementValues()) ; //14гб
+            foreach (var q in md5_index.Root.ElementValues()) ;
             var insertPortion = new Dictionary<string, int>(portion.Count);
             foreach (var name in portion)
             {
@@ -194,10 +196,7 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
                     md5_index.Root.AppendElement(new object[] {checkSums[portionIndex], offsetsNC[portionIndex]});
 
                 md5_index.Flush();
-
-
-                foreach (var q in nc_cell.Root.ElementValues()) ;
-                foreach (var q in md5_index.Root.ElementValues()) ;
+                                          
 
                 //Count += insertPortion.Count;
                 return insertPortion;
