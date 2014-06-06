@@ -16,10 +16,16 @@ namespace RdfTrees
         private PType tp_entitiesTree;
         private PType tp_literalsTree;
         private PType tp_literal;
+            // Дополнительные типы
+        private PType tp_entity;
+        private PType tp_otriple_seq;
+        private PType tp_dtriple_seq;
+        private PType tp_dtriple_spf;
+        
         // Ячейки
         private PxCell entitiesTree;
-        private PxCell literalsTree;
-
+        //private PxCell literalsTree;
+        private PaCell dtriples;
         // Место для базы данных
         private string path;
         /// <summary>
@@ -33,9 +39,9 @@ namespace RdfTrees
             InitTypes();
             // Создадим или откроем ячейки
             this.entitiesTree = new PxCell(tp_entitiesTree, path + "entitiesTree.pxc", false);
-            this.literalsTree = new PxCell(tp_literalsTree, path + "literalsTree.pxc", false);
+            //this.literalsTree = new PxCell(tp_literalsTree, path + "literalsTree.pxc", false);
+            this.dtriples = new PaCell(tp_dtriple_seq, path + "dtriples.pac", false); // Это вместо не работающего дерева литералов       }
         }
-
         // Построение типов
         private void InitTypes()
         {
@@ -62,6 +68,44 @@ namespace RdfTrees
                 new NamedType("litpairs", new PTypeSequence(new PTypeRecord(
                     new NamedType("source", new PType(PTypeEnumeration.integer)),
                     new NamedType("lit", tp_literal))))));
+            // Дополнительные типы
+            tp_entity = new PType(PTypeEnumeration.integer);
+            tp_otriple_seq = new PTypeSequence(new PTypeRecord(
+                new NamedType("subject", tp_entity),
+                new NamedType("predicate", tp_entity),
+                new NamedType("object", tp_entity)));
+            tp_dtriple_seq = new PTypeSequence(new PTypeRecord(
+                new NamedType("subject", tp_entity),
+                new NamedType("predicate", tp_entity),
+                new NamedType("data", tp_literal)));
+            tp_dtriple_spf = new PTypeSequence(new PTypeRecord(
+                new NamedType("subject", tp_entity),
+                new NamedType("predicate", tp_entity),
+                new NamedType("offset", new PType(PTypeEnumeration.longinteger))));
+        }
+        // Генерация литерала из объектного представления, соответствующего tp_literal 
+        public static Literal GenerateLiteral(object pobj)
+        {
+            object[] uni = (object[])pobj;
+            int tag = (int)uni[0];
+            if (tag == 1) // целое
+            {
+                return new Literal() { vid = LiteralVidEnumeration.integer, value = uni[1] };
+            }
+            else if (tag == 2) // строка
+            {
+                object[] strlangpair = (object[])uni[1];
+                return new Literal()
+                {
+                    vid = LiteralVidEnumeration.text,
+                    value = new Text() { s = (string)strlangpair[0], l = (string)strlangpair[1] }
+                };
+            }
+            else if (tag == 3) // дата в виде двойного целого
+            {
+                return new Literal() { vid = LiteralVidEnumeration.date, value = uni[1] };
+            }
+            else return null; // такого варианта нет
         }
     }
 }
