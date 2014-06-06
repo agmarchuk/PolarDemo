@@ -31,6 +31,12 @@ namespace RdfTrees
                 default: return value.ToString();
             }
         }
+        public override bool Equals(object obj)
+        {
+            //TODO: Надо еще язык приделать
+            if (vid == LiteralVidEnumeration.text) return ((Text)value).s.CompareTo(obj) == 0;
+            return value.Equals(obj);
+        }
     }
     public class Text { public string s, l; }
 
