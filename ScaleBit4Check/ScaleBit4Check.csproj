@@ -1,26 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2053B201-18A6-4B4C-B1EC-1FE2B2D77F15}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{7860CD10-44EF-4300-8872-8EBEF9F122E8}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TrueRdfViewer</RootNamespace>
-    <AssemblyName>TrueRdfViewer</AssemblyName>
+    <RootNamespace>ScaleBit4Check</RootNamespace>
+    <AssemblyName>ScaleBit4Check</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,10 +28,6 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -44,38 +39,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="allproducts.cs" />
-    <Compile Include="BerlinTestsInt.cs" />
-    <Compile Include="DiapasonScanner.cs" />
-    <Compile Include="DiapLinksScanner.cs" />
-    <Compile Include="EntitiesMemoryHashTable.cs" />
-    <Compile Include="EntitiesWideTable.cs" />
-    <Compile Include="FlexIndexView.cs" />
-    <Compile Include="GroupedEntities.cs" />
-    <Compile Include="OValRowInt.cs" />
-    <Compile Include="ONames.cs" />
-    <Compile Include="PaKeyValueTable.cs" />
-    <Compile Include="ProgramInt.cs" />
-    <Compile Include="RPackInt.cs" />
-    <Compile Include="TripleInt.cs" />
-    <Compile Include="TripleStoreInt.cs" />
-    <Compile Include="TurtleInt.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Description.txt" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scale.cs" />
+    <Compile Include="Scale1.cs" />
+    <Compile Include="Scale2.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\PolarDB\PolarDB.csproj">
       <Project>{907bb4af-fbc9-4a1e-8f80-194af9337aa4}</Project>
       <Name>PolarDB</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ScaleBit4Check\ScaleBit4Check.csproj">
-      <Project>{7860cd10-44ef-4300-8872-8ebef9f122e8}</Project>
-      <Name>ScaleBit4Check</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

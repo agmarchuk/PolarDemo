@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using NameTable;
 using PolarDB;
+using ScaleBit4Check;
 using TripleIntClasses;
 
 namespace TrueRdfViewer
@@ -24,6 +25,8 @@ namespace TrueRdfViewer
         public readonly Dictionary<KeyValuePair<int, int>, Literal[]> spDCache = new Dictionary<KeyValuePair<int, int>, Literal[]>();
         public readonly Dictionary<KeyValuePair<int, int>, int[]> SpoCache = new Dictionary<KeyValuePair<int, int>, int[]>();
         public readonly Dictionary<KeyValuePair<int, int>, int[]> spOCache = new Dictionary<KeyValuePair<int, int>, int[]>();
+        public readonly Dictionary<OTripleInt, bool> spoCache = new Dictionary<OTripleInt, bool>();
+
         private string otriplets_op_filePath;
         private string otriples_filePath;
         private string dtriples_filePath;
@@ -54,8 +57,7 @@ namespace TrueRdfViewer
         private FlexIndexView<SubjPredObjInt> spo_o_index = null;
         private FlexIndexView<SubjPredInt> sp_d_index = null;
         private FlexIndexView<SubjPredInt> op_o_index = null;
-        private PaCell oscale;
-        private bool filescale = true;
+
         //private bool memoryscale = false; // Наоборот от filescale
         private int range = 0;
         //// Идея хорошая, но надо менять схему реализации
@@ -75,8 +77,8 @@ namespace TrueRdfViewer
             LiteralStore.Literals = new LiteralStore(path);
 
             Open(File.Exists(otriples_filePath));
-            if (!oscale.IsEmpty)
-                CalculateRange();
+            if (!scale.Cell.IsEmpty)
+               scale.CalculateRange();
 
 
             ewt = new EntitiesWideTable(path, 3);
@@ -106,7 +108,7 @@ namespace TrueRdfViewer
                 dtriples_sp = new PaCell(tp_dtriple_spf, dtriples_filePath + "tmp", false);
             }                          
               LiteralStore.Literals.Open(readOnlyMode);
-            oscale = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)), path + "oscale.pac", readOnlyMode);
+            scale = new ScaleCell(path);
         }
 
 
@@ -153,20 +155,13 @@ namespace TrueRdfViewer
             LiteralStore.Literals.WarmUp();
             foreach (var v in dtriples_sp.Root.ElementValues()) ;
 
-            if (filescale)
-                foreach (var v in oscale.Root.ElementValues()) ;
+            if (scale.Filescale)
+                foreach (var v in scale.Cell.Root.ElementValues()) ;
             foreach (var v in ewt.EWTable.Root.ElementValues()) ; // этая ячейка "подогревается" при начале программы
             TripleInt.SiCodingEntities.WarmUp();
             TripleInt.SiCodingPredicates.WarmUp();
         }
-        private void CalculateRange()
-        {
-            long len = oscale.Root.Count() - 1;
-            if (len == -1) return;
-            int r = 1;
-            while (len != 0) { len = len >> 1; r++; }
-            range = r + 4;
-        }
+        
 
 
 
@@ -208,19 +203,7 @@ namespace TrueRdfViewer
             }, sp_compare);
             Console.WriteLine("dtriples_sp.Root.Sort ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
-
-            if (filescale)
-            {
-                // Создание шкалы (Надо переделать)
-                CreateScale();
-                //ShowScale();
-                oscale.Clear();
-                oscale.Fill(new object[0]);
-                if (scale != null)
-                    foreach (int v in scale.Values()) oscale.Root.AppendElement(v);
-                oscale.Flush();
-                CalculateRange(); // Наверное, range считается в CreateScale() 
-            }
+          scale.WriteScale(otriples);
             Console.WriteLine("CreateScale ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
 
@@ -366,7 +349,7 @@ namespace TrueRdfViewer
             dtriples_sp.Close();
             otriples.Close();
             otriples_op.Close();
-            oscale.Close();
+            scale.Cell.Close();
         }
 
         //public void LoadXML(string filepath)
@@ -422,41 +405,14 @@ namespace TrueRdfViewer
         //    oscale.Flush();
         //}
 
-        private Scale1 scale = null;
+        public ScaleCell scale = null;
 
         protected TripleStoreInt()
         {
         }
 
-        private void CreateScale()
-        {
-            long len = otriples.Root.Count() - 1;
-            if (len == -1) return;
-            int r = 1;
-            while (len != 0) { len = len >> 1; r++; }
-
-            range = r + 2; //r + 4; // здесь 4 - фактор "разрежения" шкалы, можно меньше
-            scale = new Scale1(range);
-            foreach (object[] tr in otriples.Root.ElementValues())
-            {
-                int subj = (int)tr[0];
-                int pred = (int)tr[1];
-                int obj = (int)tr[2];
-                int code = Scale1.Code(range, subj, pred, obj);
-                scale[code] = 1;
-            }
-        }
-        public void ShowScale(long ntriples)
-        {
-            int c = scale.Count();
-            int c1 = 0;
-            for (int i = 0; i < c; i++)
-            {
-                int bit = scale[i];
-                if (bit > 0) c1++;
-            }
-            Console.WriteLine("{0} {1} {2}", c, c1, ntriples);
-        }
+     
+     
 
         public virtual IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
         {
@@ -759,8 +715,20 @@ namespace TrueRdfViewer
         public virtual bool ChkOSubjPredObj(int subj, int pred, int obj)
         {
             if (subj == Int32.MinValue || obj == Int32.MinValue || pred == Int32.MinValue) return false;
+            bool exists;
+            var key = new OTripleInt() {subject = subj, obj = obj, predicate = pred};
+            if (!spoCache.TryGetValue(key, out exists))
+            {
+                exists = CheckContains(subj, pred, obj);
+                spoCache.Add(key, exists);
+            }
+            return exists;
+        }
 
-            if (!ChkInScale(subj, pred, obj)) return false;
+        private bool CheckContains(int subj, int pred, int obj)
+        {
+            if (!scale.ChkInScale(subj, pred, obj)) return false;
+
             //SubjPredObjInt key = new SubjPredObjInt() { subj = subj, pred = pred, obj = obj };
             //var entry = otriples.Root.BinarySearchFirst(ent => (new SubjPredObjInt(ent.Get())).CompareTo(key));
             int[] resSubj, resObj;
@@ -800,25 +768,25 @@ namespace TrueRdfViewer
             {
                 subjDiapason = GetDiapasonFromHash(subj, 0);
                 if (subjDiapason == null) return false;
-                subjLength = (long)subjDiapason[1];
+                subjLength = (long) subjDiapason[1];
             }
             object[] objDiapason = null;
             if (!objExists)
             {
                 objDiapason = GetDiapasonFromHash(obj, 1);
                 if (objDiapason == null) return false;
-                objLength = (long)objDiapason[1];
+                objLength = (long) objDiapason[1];
             }
 
             if (subjLength < objLength)
             {
                 if (!subjExists)
                 {
-                    resSubj = otriples.Root.ElementValues((long)subjDiapason[0], subjLength)
+                    resSubj = otriples.Root.ElementValues((long) subjDiapason[0], subjLength)
                         .Cast<object[]>()
-                        .SkipWhile(entry => pred != (int)entry[0])
-                        .TakeWhile(entry => pred == (int)entry[0])
-                        .Select(entry => (int)entry[1])
+                        .SkipWhile(entry => pred != (int) entry[0])
+                        .TakeWhile(entry => pred == (int) entry[0])
+                        .Select(entry => (int) entry[1])
                         .ToArray();
                     spOCache.Add(keySub, resSubj);
                 }
@@ -828,11 +796,11 @@ namespace TrueRdfViewer
             {
                 if (!objExists)
                 {
-                    resObj = otriples_op.Root.ElementValues((long)objDiapason[0], objLength)
+                    resObj = otriples_op.Root.ElementValues((long) objDiapason[0], objLength)
                         .Cast<object[]>()
-                        .SkipWhile(entry => pred != (int)entry[0])
-                        .TakeWhile(entry => pred == (int)entry[0])
-                        .Select(entry => (int)entry[1])
+                        .SkipWhile(entry => pred != (int) entry[0])
+                        .TakeWhile(entry => pred == (int) entry[0])
+                        .Select(entry => (int) entry[1])
                         .ToArray();
                     SpoCache.Add(keyObj, resObj);
                 }
@@ -840,26 +808,6 @@ namespace TrueRdfViewer
             }
         }
 
-        // Проверка наличия объектного триплета через шкалу. Если false - точно нет, при true надо продолжать проверку
-        public bool ChkInScale(int subj, int pred, int obj)
-        {
-            if (range > 0)
-            {
-                int code = Scale1.Code(range, subj, pred, obj);
-                int bit;
-                if (filescale)
-                {
-                    int word = (int)oscale.Root.Element(Scale1.GetArrIndex(code)).Get();
-                    bit = Scale1.GetFromWord(word, code);
-                }
-                else // if (memoryscale)
-                {
-                    bit = scale[code];
-                }
-                if (bit == 0) return false;
-            }
-            return true;
-        }
         public bool ChkOSubjPredObj0(int subj, int pred, int obj)
         {
             // Шкалу добавлю позднее
@@ -868,7 +816,7 @@ namespace TrueRdfViewer
                 int code = Scale1.Code(range, subj, pred, obj);
                 //int word = (int)oscale.Root.Element(Scale1.GetArrIndex(code)).Get();
                 //int tb = Scale1.GetFromWord(word, code);
-                int tb = scale[code];
+                int tb = scale.Scale1[code];
                 if (tb == 0) return false;
                 // else if (tb == 1) return true; -- это был источник ошибки
                 // else надо считаль длинно, см. далее

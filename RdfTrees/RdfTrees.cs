@@ -1,4 +1,5 @@
 ﻿using PolarDB;
+using ScaleBit4Check;
 using TrueRdfViewer;
 
 
@@ -25,6 +26,7 @@ namespace RdfTrees
         private PaCell dtriples;
         // Место для базы данных
         private string path;
+        private ScaleCell scale;
         /// <summary>
         /// Конструктор
         /// </summary>
@@ -38,6 +40,9 @@ namespace RdfTrees
             this.entitiesTree = new PxCell(tp_entitiesTree, path + "entitiesTree.pxc", false);
             //this.literalsTree = new PxCell(tp_literalsTree, path + "literalsTree.pxc", false);
             this.dtriples = new PaCell(tp_dtriple_seq, path + "dtriples.pac", false); // Это вместо не работающего дерева литералов       }
+            scale=new ScaleCell(path);
+            if (!scale.Filescale) scale.CreateScale(otriples);
+
         }
         // Построение типов
         private void InitTypes()

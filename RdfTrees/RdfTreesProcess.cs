@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using PolarDB;
 
@@ -13,18 +14,16 @@ namespace RdfTrees
     {
         public override bool ChkOSubjPredObj(int subj, int pred, int obj)
         {
-            IEnumerable<KeyValuePair<int, int>> op;
-            if (!sPOCache.TryGetValue(subj, out op))
+            if (subj == Int32.MinValue || obj == Int32.MinValue || pred == Int32.MinValue) return false;
+            bool exists;
+            var key = new OTripleInt() { subject = subj, obj = obj, predicate = pred };
+            if (!spoCache.TryGetValue(key, out exists))
             {
-                var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
-                if (rec_ent.IsEmpty) return false;
-                object[] pairs = (object[]) rec_ent.Field(2).Get();
-                op = pairs.Cast<object[]>()
-                           .Select(objects => new KeyValuePair<int, int>((int) objects[1], (int) objects[0]))
-                           .ToArray();
-                sPOCache.Add(subj, op);
+                
+                exists = scale.ChkInScale(subj,pred,obj) && GetObjBySubjPred(subj, pred).Contains(obj);
+                spoCache.Add(key, exists);
             }
-            return op.Any(pair => pair.Value==pred&& pair.Key==obj);
+            return exists;      
         }
         public override IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
         {

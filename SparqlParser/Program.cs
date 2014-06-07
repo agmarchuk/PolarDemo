@@ -6,6 +6,7 @@ using Antlr4.Runtime;
 using NameTable;
 using TripleIntClasses;
 using TrueRdfViewer;
+using RdfTrees = RdfTrees.RdfTrees;
 
 
 namespace SparqlParser
@@ -47,15 +48,15 @@ namespace SparqlParser
         {
            // Console.WriteLine(Millions);
             TripleInt.useSimpleCoding = true;
-            TripleStoreInt ts = new RdfTrees.RdfTrees(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
+            TripleStoreInt ts = new global::RdfTrees.RdfTrees(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
 
            TripleInt.EntitiesCodeCache.Clear();
            TripleInt.PredicatesCodeCache.Clear();
            Query.decodesCasheEntities.Clear();
             //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\undecoded\" + Millions + @"mln\");
 
-                bool load = false;
-                     //    bool load = true;
+                  bool load = false;
+                    //   bool load = true;
               using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;
@@ -76,7 +77,7 @@ namespace SparqlParser
             spent = (DateTime.Now - start).Ticks/10000;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))   
                 wr.WriteLine("total " + spent + " мс.");
-       //     (ts as TracingTripleStoreInt).x.Save((ts as TracingTripleStoreInt).xPath);
+          //  (ts as TracingTripleStoreInt).x.Save((ts as TracingTripleStoreInt).xPath);
         }
 
         private static void RunBerlinsParameters(TripleStoreInt ts)
