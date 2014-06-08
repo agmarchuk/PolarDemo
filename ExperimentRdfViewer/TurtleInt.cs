@@ -1,27 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NameTable;
+using TripleIntClasses;
 
 namespace TrueRdfViewer
 {
+
+    public class TripletGraph
+    {
+        public string subject;
+        public List<KeyValuePair<int, string>> PredicateObjValuePairs=new List<KeyValuePair<int, string>>(); 
+        public List<KeyValuePair<int, Literal>> PredicateDataValuePairs = new List<KeyValuePair<int, Literal>>();
+    }
+   
     public static class TurtleInt
     {
-        public static int BufferMax = 1000 * 1000;
+        public static int BufferMax =30*1000 * 1000;
         // (Только для специальных целей) Это для накапливания идентификаторов собираемых сущностей:
         public static List<string> sarr = new List<string>();
 
-        public static IEnumerable<TripleInt> LoadGraph(string datafile)
-        //EngineVirtuoso engine, string graph, string datafile)
+        public static IEnumerable<TripletGraph> LoadGraph(string datafile)
+            //EngineVirtuoso engine, string graph, string datafile)
         {
             int ntriples = 0;
+            int nTripletsInBuffer = 0;
             string subject = null;
             var namespaces = new Dictionary<string, string>();
-            var tripletsBuffer = new List<Tuple<string, string, object>>();
+            
+            List<TripletGraph> bufferTripletsGrpah=new List<TripletGraph>(BufferMax);
+            TripletGraph currentTripletGraph = null;
+            HashSet<string> entitiesStrings=new HashSet<string>();
             using (var sr = new StreamReader(datafile))
                 while (!sr.EndOfStream)
                 {
@@ -49,16 +57,24 @@ namespace TrueRdfViewer
                     }
                     else if (line[0] != ' ')
                     {
-                        if (tripletsBuffer.Count >= BufferMax)
+                        //if (bufferTripletsGrpah.Count >= BufferMax)
+                        if (nTripletsInBuffer>=BufferMax)
                         {
-                            foreach (var tripleInt in TripleIntsCode(tripletsBuffer))
-                                yield return tripleInt;
-                            tripletsBuffer.Clear();
+
+                            TripleInt.EntitiesCodeCache = TripleInt.SiCodingEntities.InsertPortion(entitiesStrings);
+                            foreach (var tripletGraph in bufferTripletsGrpah)
+                                yield return tripletGraph;
+                            bufferTripletsGrpah.Clear();
+                            entitiesStrings.Clear();
+                            GC.Collect();
+                            nTripletsInBuffer = 0;
                         }
                         // Subject
                         line = line.Trim();
                         subject = GetEntityString(namespaces, line);
-
+                        entitiesStrings.Add(subject);
+                        currentTripletGraph=new TripletGraph(){subject = subject};
+                       bufferTripletsGrpah.Add(currentTripletGraph);
                     }
                     else
                     {
@@ -71,13 +87,16 @@ namespace TrueRdfViewer
                             continue;
                         }
                         string pred_line = line1.Substring(0, first_blank);
-                        string predicate = GetEntityString(namespaces, pred_line);
+                        string predicateString = GetEntityString(namespaces, pred_line);
+                        int predicate;
+                        if (!TripleInt.PredicatesCodeCache.TryGetValue(predicateString, out predicate))
+                            TripleInt.PredicatesCodeCache.Add(predicateString,
+                                predicate = TripleInt.PredicatesCodeCache.Count);
                         string rest_line = line1.Substring(first_blank + 1).Trim();
                         // Уберем последний символ
                         rest_line = rest_line.Substring(0, rest_line.Length - 1).Trim();
                         bool isDatatype = rest_line[0] == '\"';
                         // объект может быть entity или данное, у данного может быть языковый спецификатор или тип
-                        string entity = null;
                         string sdata = null;
                         string datatype = null;
                         string lang = null;
@@ -101,89 +120,35 @@ namespace TrueRdfViewer
                                     : GetEntityString(namespaces, qname);
                             }
 
-                            tripletsBuffer.Add(Tuple.Create(subject, predicate, (object)
-                                (datatype == "http://www.w3.org/2001/XMLSchema#integer" ||
-                                 datatype == "http://www.w3.org/2001/XMLSchema#float" ||
-                                 datatype == "http://www.w3.org/2001/XMLSchema#double"
-                                    ? new Literal(LiteralVidEnumeration.integer)
-                                    {
-                                        Value = double.Parse(sdata, NumberStyles.Any)
-                                    }
-                                    : datatype == "http://www.w3.org/2001/XMLSchema#boolean"
-                                        ? new Literal(LiteralVidEnumeration.date) { Value = bool.Parse(sdata) }
-                                        : datatype == "http://www.w3.org/2001/XMLSchema#dateTime" ||
-                                          datatype == "http://www.w3.org/2001/XMLSchema#date"
-                                            ? new Literal(LiteralVidEnumeration.date) { Value = DateTime.Parse(sdata).ToBinary() }
-                                            : datatype == null || datatype == "http://www.w3.org/2001/XMLSchema#string"
-                                                ? new Literal(LiteralVidEnumeration.text) { Value = new Text() { Value = sdata, Lang = lang ?? string.Empty } }
-                                                : new Literal(LiteralVidEnumeration.typedObject) { Value = new TypedObject() { Value = sdata, Type = datatype } })));
+                            currentTripletGraph.PredicateDataValuePairs.Add(new KeyValuePair<int, Literal>(predicate, LiteralStore.Literals.Write(Literal.Create(datatype, sdata, lang))));
                         }
                         else
                         {
-                            entity = rest_line[0] == '<'
+                            string obj = rest_line[0] == '<'
                                 ? rest_line.Substring(1, rest_line.Length - 2)
                                 : GetEntityString(namespaces, rest_line);
-                            // (Только для специальных целей) Накапливание:
-                            if (predicate == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" &&
-                                entity == "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Product")
-                                sarr.Add(subject);
-                            tripletsBuffer.Add(Tuple.Create(subject, predicate, (object)entity));
+                            entitiesStrings.Add(obj);
+                            currentTripletGraph.PredicateObjValuePairs.Add(new KeyValuePair<int, string>(predicate, obj));
                         }
                         ntriples++;
+                        nTripletsInBuffer++;
+                        if (ntriples % 100000 == 0) Console.Write("r{0} ", ntriples / 100000); 
                     }
                 }
-            foreach (var tripleInt in TripleIntsCode(tripletsBuffer)) yield return tripleInt;
+            TripleInt.EntitiesCodeCache = TripleInt.SiCodingEntities.InsertPortion(entitiesStrings);
+            foreach (var tripletGraph in bufferTripletsGrpah)
+                yield return tripletGraph;
+            bufferTripletsGrpah.Clear();
             TripleInt.SiCodingEntities.MakeIndexed();
-            TripleInt.SiCodingPredicates.MakeIndexed();
+            entitiesStrings.Clear();
+            GC.Collect();
+
+            //TripleInt.SiCodingPredicates.MakeIndexed();
+            
             Console.WriteLine("ntriples={0}", ntriples);
         }
 
-        //   public static Dictionary<string, int> CodingCashe=new Dictionary<string, int>();
-        private static IEnumerable<TripleInt> TripleIntsCode(List<Tuple<string, string, object>> tripletsBuffer)
-        {
 
-            // Array.Sort(arr);
-            //  var codes = arr.ToDictionary(s =>s, s=> s.GetHashCode());
-
-            var codesEntities = TripleInt.SiCodingEntities.InsertPortion(tripletsBuffer
-                                                                 .Select(tuple => tuple.Item1)
-                                                                 .Concat(tripletsBuffer
-                                                                     .Select(tuple => tuple.Item3)
-                                                                     .Where(o => o is string)
-                                                                     .Cast<string>())
-                                                                 .ToArray());
-            //return Enumerable.Empty<TripleInt>();
-            //var codesEntities = tripletsBuffer
-            //    .Select(tuple => tuple.Item1)
-            //    .Concat(tripletsBuffer
-            //        .Select(tuple => tuple.Item3)
-            //        .Where(o => o is string)
-            //        .Cast<string>())
-            //.ToDictionary(s => s, TripleInt.SiCodingEntities.GetCode);
-            var codesPredicates = TripleInt.SiCodingPredicates.InsertPortion(tripletsBuffer.Select(tuple => tuple.Item2).ToArray());
-            return tripletsBuffer.Select(tuple =>
-            {
-                int subject = codesEntities[tuple.Item1];
-                int predicate = codesPredicates[tuple.Item2];
-                var data = tuple.Item3 as Literal;
-                if (data != null)
-                    return (TripleInt)
-                        new DTripleInt
-                        {
-                            subject = subject,
-                            predicate = predicate,
-                            data = data
-                        };
-                int @object = codesEntities[(string)tuple.Item3];
-
-                return new OTripleInt()
-                {
-                    subject = subject,
-                    predicate = predicate,
-                    obj = @object
-                };
-            });
-        }
 
         private static string GetEntityString(Dictionary<string, string> namespaces, string line)
         {

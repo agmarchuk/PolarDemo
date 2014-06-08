@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using PolarDB;
+using ScaleBit4Check;
 using sema2012m;
 
 namespace TrueRdfViewer
@@ -17,6 +18,12 @@ namespace TrueRdfViewer
         private PType tp_dtriple_spf;
         internal EntitiesWideTable ewt;
         internal EntitiesMemoryHashTable ewtHash;
+
+        public ScaleCell Scale
+        {
+            get { return scale; }
+        }
+
         private void InitTypes()
         {
             tp_entity = new PType(PTypeEnumeration.integer);
@@ -50,10 +57,14 @@ namespace TrueRdfViewer
         private FlexIndexView<SubjPredObjInt> spo_o_index = null;
         private FlexIndexView<SubjPredInt> sp_d_index = null;
         private FlexIndexView<SubjPredInt> op_o_index = null;
-        private PaCell oscale;
-        private bool filescale = true;
         //private bool memoryscale = false; // Наоборот от filescale
-        private int range = 0;
+        private Dictionary<KeyValuePair<int, int>, Literal[]> spDCache = new Dictionary<KeyValuePair<int, int>, Literal[]>();
+
+        protected TripleStoreInt()
+        {
+           
+        }
+
         //// Идея хорошая, но надо менять схему реализации
         //private GroupedEntities getable;
         //private Dictionary<int, object[]> geHash;
@@ -66,11 +77,8 @@ namespace TrueRdfViewer
             otriples_op = new PaCell(tp_otriple_seq, path + "otriples_op.pac", false);
             dtriples = new PaCell(tp_dtriple_seq, path + "dtriples.pac", false);
             dtriples_sp = new PaCell(tp_dtriple_spf, path + "dtriples_spf.pac", false);
-            oscale = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)), path + "oscale.pac", false);
-            if (!oscale.IsEmpty)
-            {
-                CalculateRange();
-            }
+
+            scale = new ScaleCell(path);
             if (!otriples.IsEmpty)
             {
                 OpenCreateIndexes();
@@ -95,16 +103,9 @@ namespace TrueRdfViewer
             foreach (var v in otriples_op.Root.ElementValues()) ;
             foreach (var v in dtriples.Root.ElementValues()) ;
             foreach (var v in dtriples_sp.Root.ElementValues()) ;
-            if (filescale) 
-                foreach (var v in oscale.Root.ElementValues()) ;
+            if (Scale.Filescale) 
+                foreach (var v in Scale.Cell.Root.ElementValues()) ;
             foreach (var v in ewt.EWTable.Root.ElementValues()) ; // этая ячейка "подогревается" при начале программы
-        }
-        private void CalculateRange()
-        {
-            long len = oscale.Root.Count() - 1;
-            int r = 1;
-            while (len != 0) { len = len >> 1; r++; }
-            range = r + 4;
         }
 
         private void OpenCreateIndexes()
@@ -115,7 +116,7 @@ namespace TrueRdfViewer
                 ent => new SubjPredInt() { subj = (int)ent.Field(0).Get(), pred = (int)ent.Field(1).Get() });
             op_o_index = new FlexIndexView<SubjPredInt>(path + "obj_o_index", otriples.Root,
                 ent => new SubjPredInt() { subj = (int)ent.Field(2).Get(), pred = (int)ent.Field(1).Get() });
-            if (!filescale) CreateScale();
+            if (!Scale.Filescale) Scale.CreateScale(otriples);
         }
 
         public void LoadTurtle(string filepath)
@@ -153,17 +154,7 @@ namespace TrueRdfViewer
             Console.WriteLine("dtriples_sp.Root.Sort ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
 
-            if (filescale)
-            {
-                // Создание шкалы (Надо переделать)
-                CreateScale();
-                //ShowScale();
-                oscale.Clear();
-                oscale.Fill(new object[0]);
-                foreach (int v in scale.Values()) oscale.Root.AppendElement(v);
-                oscale.Flush();
-                CalculateRange(); // Наверное, range считается в CreateScale() 
-            }
+           Scale.WriteScale(otriples);
             Console.WriteLine("CreateScale ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
             // Создание "широкой" таблицы
@@ -175,6 +166,8 @@ namespace TrueRdfViewer
             Console.WriteLine("ewtHash.Load() ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
             
         }
+
+      
 
         private void PrepareArrays()
         {
@@ -304,37 +297,8 @@ namespace TrueRdfViewer
         //    oscale.Flush();
         //}
 
-        private Scale1 scale = null;
-        private void CreateScale()
-        {
-            long len = otriples.Root.Count() - 1;
-            int r = 1;
-            while (len != 0) { len = len >> 1; r++; }
-
-            range = r + 2; //r + 4; // здесь 4 - фактор "разрежения" шкалы, можно меньше
-            scale = new Scale1(range);
-            foreach (object[] tr in otriples.Root.ElementValues())
-            {
-                int subj = (int)tr[0];
-                int pred = (int)tr[1];
-                int obj = (int)tr[2];
-                int code = Scale1.Code(range, subj, pred, obj);
-                scale[code] = 1;
-            }
-        }
-        public void ShowScale(long ntriples)
-        {
-            int c = scale.Count();
-            int c1 = 0;
-            for (int i=0; i<c; i++)
-            {
-                int bit = scale[i];
-                if (bit > 0) c1++;
-            }
-            Console.WriteLine("{0} {1} {2}", c, c1, ntriples);
-        }
         private Dictionary<KeyValuePair<int, int>, int[]> SpoCache = new Dictionary<KeyValuePair<int, int>, int[]>();
-        public IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
+        public virtual IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
         {
             int[] res;
             var key = new KeyValuePair<int, int>(obj, pred);
@@ -421,7 +385,9 @@ namespace TrueRdfViewer
         }
 
         private Dictionary<KeyValuePair<int, int>, int[]> spOCache = new Dictionary<KeyValuePair<int, int>, int[]>();
-        public IEnumerable<int> GetObjBySubjPred(int subj, int pred)
+        private readonly ScaleCell scale;
+
+        public virtual IEnumerable<int> GetObjBySubjPred(int subj, int pred)
         {
             int[] res;
             var key = new KeyValuePair<int, int>(subj, pred);
@@ -539,8 +505,9 @@ namespace TrueRdfViewer
         //    if (diap == null) return null;//new object[] { 0L, 0L };
         //    return diap;
         //}
-        private Dictionary<KeyValuePair<int, int>, Literal[]> spDCache = new Dictionary<KeyValuePair<int, int>, Literal[]>();
-        public IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
+
+
+        public virtual IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
         {
             Literal[] res;
             var key = new KeyValuePair<int, int>(subj, pred);
@@ -756,42 +723,23 @@ namespace TrueRdfViewer
             }
             return lit;
         }
-        public bool ChkOSubjPredObj(int subj, int pred, int obj)
+        public virtual bool ChkOSubjPredObj(int subj, int pred, int obj)
         {
-            if (!ChkInScale(subj, pred, obj)) return false;
+            if (!Scale.ChkInScale(subj, pred, obj)) return false;
             SubjPredObjInt key = new SubjPredObjInt() { subj = subj, pred = pred, obj = obj };
             var entry = otriples.Root.BinarySearchFirst(ent => (new SubjPredObjInt(ent.Get())).CompareTo(key));
             return !entry.IsEmpty;
         }
         // Проверка наличия объектного триплета через шкалу. Если false - точно нет, при true надо продолжать проверку
-        public bool ChkInScale(int subj, int pred, int obj)
-        {
-            if (range > 0)
-            {
-                int code = Scale1.Code(range, subj, pred, obj);
-                int bit;
-                if (filescale)
-                {
-                    int word = (int)oscale.Root.Element(Scale1.GetArrIndex(code)).Get();
-                    bit = Scale1.GetFromWord(word, code);
-                }
-                else // if (memoryscale)
-                {
-                    bit = scale[code];
-                }
-                if (bit == 0) return false;
-            }
-            return true;
-        }
         public bool ChkOSubjPredObj0(int subj, int pred, int obj)
         {
             // Шкалу добавлю позднее
-            if (false && range > 0)
+            if (false && Scale.Range > 0)
             {
-                int code = Scale1.Code(range, subj, pred, obj);
+                int code = Scale1.Code(Scale.Range, subj, pred, obj);
                 //int word = (int)oscale.Root.Element(Scale1.GetArrIndex(code)).Get();
                 //int tb = Scale1.GetFromWord(word, code);
-                int tb = scale[code];
+                int tb = Scale.Scale1[code];
                 if (tb == 0) return false;
                 // else if (tb == 1) return true; -- это был источник ошибки
                 // else надо считаль длинно, см. далее

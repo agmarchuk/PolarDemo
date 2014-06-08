@@ -52,6 +52,14 @@ namespace NameTable
           
                 Clear();
 
+            foreach (var str_code in ReWrite)
+            {
+                nc_cell.Root.AppendElement(new object[]
+                {
+                    str_code.Value, str_code.Key
+                });
+            }
+            nc_cell.Flush();
             // Открытие ячеек в режиме работы (чтения)
             codeByString = ReWrite;
             stringByCode = ReWrite.Select(pair => pair.Key).ToArray();

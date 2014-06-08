@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RdfTrees
+namespace TrueRdfViewer
 {
-    public abstract class TripleInt
-    {
+    public abstract class TripleInt 
+    { 
         public int subject, predicate;
         public static int Code(string s) { return s.GetHashCode(); }
         public static string Decode(int e) { return "noname" + e; }
@@ -15,9 +15,9 @@ namespace RdfTrees
     public class OTripleInt : TripleInt { public int obj; }
     public class DTripleInt : TripleInt { public Literal data; }
     public enum LiteralVidEnumeration { unknown, integer, text, date }
-    public class Literal
-    {
-        public LiteralVidEnumeration vid;
+    public class Literal 
+    { 
+        public LiteralVidEnumeration vid; 
         public object value;
         public override string ToString()
         {
@@ -31,10 +31,10 @@ namespace RdfTrees
                 default: return value.ToString();
             }
         }
-    }
+    } 
     public class Text { public string s, l; }
 
-    public class SubjPredInt : IComparable
+    public class SubjPredInt
     {
         public int subj, pred;
         public int CompareTo(object sp)
@@ -43,11 +43,6 @@ namespace RdfTrees
             if (cmp != 0) return cmp;
             return pred.CompareTo(((SubjPredInt)sp).pred);
         }
-        public static SubjPredInt MinValue
-        {
-            get { return new SubjPredInt() { subj = Int32.MinValue, pred = Int32.MinValue }; }
-        }
-    
     }
     public class SubjPredObjInt : IComparable
     {
@@ -67,7 +62,7 @@ namespace RdfTrees
             if (cmp != 0) return cmp;
             cmp = pred.CompareTo(target.pred);
             if (cmp != 0) return cmp;
-            return obj.CompareTo(target.obj);
+            return obj.CompareTo(target.obj); 
         }
     }
     public class SPComparer : IComparer<SubjPredInt>

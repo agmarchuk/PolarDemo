@@ -19,6 +19,7 @@ options
     using Sparql;
     using TrueRdfViewer;
 	using System.Linq.Expressions;
+	using TripleIntClasses;
 }
 
 
@@ -364,9 +365,9 @@ objectList returns [Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> f]
 ( ',' o1=graphNode { var valueClone=$f.Clone() as Func<IEnumerable<RPackInt>,IEnumerable<RPackInt>>; var o11=$o1.f; $f=packs=>o11(valueClone(packs)); } )*;
 
 verb
-: varOrIRIref { $verbObjectList::PredicateVariable=$varOrIRIref.p; } 
+: varOrIRIref { $verbObjectList::PredicateVariable=$varOrIRIref.p; $varOrIRIref.p.isPredicate=true; } 
 | 'a' {	
-var PredicateVariable=new Variable();							   
+var PredicateVariable=new Variable(){isPredicate=true};							   
 PredicateVariable.pacElement =  TripleInt.CodePredicates("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");  
 PredicateVariable.graph	= new GraphIsDataProperty(){IsData=false};
 $verbObjectList::PredicateVariable=PredicateVariable;	   

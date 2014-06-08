@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+                        
+using TripleIntClasses;
 
 namespace RdfTrees
 {
@@ -93,13 +92,7 @@ namespace RdfTrees
                         {
                             subject = TripleInt.Code(subject),
                             predicate = TripleInt.Code(predicate),
-                            data = // d
-                                datatype == "http://www.w3.org/2001/XMLSchema#integer" ?
-                                    new Literal() { vid = LiteralVidEnumeration.integer, value = int.Parse(sdata) } :
-                                (datatype == "http://www.w3.org/2001/XMLSchema#date" ?
-                                    new Literal() { vid = LiteralVidEnumeration.date, value = DateTime.Parse(sdata).ToBinary() } :
-                                (new Literal() { vid = LiteralVidEnumeration.text, value = new Text() { s = sdata, l = "en" } }))
-
+                            data =Literal.Create(datatype,sdata,lang)
                         };
                     }
                     else
