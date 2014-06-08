@@ -19,6 +19,7 @@ options
     using Sparql;
     using TrueRdfViewer;
 	using System.Linq.Expressions;
+	using TripleIntClasses;
 }
 
 

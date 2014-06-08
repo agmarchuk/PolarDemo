@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using PolarDB;
+using TripleIntClasses;
 
 namespace TrueRdfViewer
 {
@@ -169,7 +170,7 @@ namespace TrueRdfViewer
                 OVal pred_oval = row[pred];
                 OVal obj_oval = row[obj];
                 // Проверим через шкалу
-                if (!ovr.Store.ChkInScale(subj_oval.entity, pred_oval.entity, obj_oval.entity)) return false;
+                if (!ovr.Store.scale.ChkInScale(subj_oval.entity, pred_oval.entity, obj_oval.entity)) return false;
                 Diapason diap = new Diapason();
                 if (subj_oval.spo_number >= 0)
                 { // Диапазон определен

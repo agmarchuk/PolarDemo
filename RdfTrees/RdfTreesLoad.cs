@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using PolarDB;
+using TripleIntClasses;
+
 
 namespace RdfTrees
 {
     public partial class RdfTrees
     {
-        public void LoadTurtle(string filename)
+        public override void LoadTurtle(string filename)
         {
             // Дополнительные ячейки и индексы
             PaCell otriples = new PaCell(tp_otriple_seq, path + "otriples.pac", false);
@@ -72,7 +72,8 @@ namespace RdfTrees
                 return new SubjPredInt() { pred = (int)r[1], subj = (int)r[0] };
             }, sp_compare);
             Console.WriteLine("dtriples_sp.Root.Sort ok. Duration={0} msec.", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-
+            scale.WriteScale(otriples);
+            Console.WriteLine("CreateScale ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
             //int cnt_e = MakeTreeFree(otriples, otriples_op, dtriples_sp);
             //Console.WriteLine("Scan3 ok. Duration={0} msec. cnt_e={1} ", (DateTime.Now - tt0).Ticks / 10000L, cnt_e); tt0 = DateTime.Now;
             //Console.WriteLine("otriples={0} otriples_op={1} dtriples_sp={2}", otriples.Root.Count(), otriples_op.Root.Count(), dtriples_sp.Root.Count());
@@ -369,24 +370,14 @@ namespace RdfTrees
                 else
                 {
                     var tr = (DTripleInt)triple;
-                    Literal lit = tr.data;
-                    object[] da;
-                    if (lit.vid == LiteralVidEnumeration.integer)
-                        da = new object[] { 1, lit.value };
-                    else if (lit.vid == LiteralVidEnumeration.date)
-                        da = new object[] { 3, lit.value };
-                    else if (lit.vid == LiteralVidEnumeration.text)
-                    {
-                        Text t = (Text)lit.value;
-                        da = new object[] { 2, new object[] { t.s, t.l } };
-                    }
-                    else
-                        da = new object[] { 0, null };
+                  Literal lit = tr.data;
+                    
+                    
                     dtriples.Root.AppendElement(new object[] 
                     { 
                         tr.subject, 
                         tr.predicate, 
-                        da 
+                        Literal.ToObjects(lit) 
                     });
                 }
             }

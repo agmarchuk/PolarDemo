@@ -876,3 +876,195 @@ total parse 1119, 325, 2245, 1787, 3427, 382, 421, 2242, 20, 2431, 26, 250
 total run 198516, 37225, 25601, 100385, 2895452, 3683755, 1190170, 433659, 53899, 588285, 47102, 60031
 countCodingUsages 17717 totalMillisecondsCodingUsages 253
 total 27 474 613 мс.
+millions 1
+warm up 14267 мс.
+millions 1
+warm up 1253 мс.
+millions 1
+warm up 679 мс.
+milions 1
+max memory usage 3852396432
+average 881, 128, 429, 497, 30, 22, 170, 189, 2631, 238, 3355, 1111
+minimums 0, 0, 0, 0, 3, 25, 0, 1, 0, 0, 0, 0
+maximums 14, 671, 42, 29, 114, 118, 28, 53, 16, 36, 12, 24
+total parse 444, 262, 1043, 830, 1595, 427, 608, 1174, 58, 1017, 57, 287
+total run 84, 3550, 75, 109, 14395, 21237, 2112, 1287, 132, 899, 91, 146
+countCodingUsages 9133 totalMillisecondsCodingUsages 133
+total 105409 мс.
+millions 10
+total 156755 мс.
+millions 1
+warm up 676 мс.
+milions 1
+max memory usage 5442944632
+average 751, 96, 477, 431, 15, 10, 139, 195, 2118, 192, 3289, 1466
+minimums 0, 2, 0, 0, 10, 72, 1, 1, 0, 1, 0, 0
+maximums 49, 982, 13, 95, 218, 203, 37, 65, 7, 95, 4, 13
+total parse 424, 217, 780, 626, 1393, 354, 452, 885, 37, 909, 44, 195
+total run 162, 4868, 156, 377, 31178, 45687, 2914, 1482, 196, 1490, 107, 140
+countCodingUsages 9133 totalMillisecondsCodingUsages 114
+total 196463 мс.
+millions 1
+warm up 696 мс.
+milions 1
+max memory usage 5707139520
+average 857, 127, 484, 473, 14, 8, 136, 214, 1851, 215, 2923, 1519
+minimums 0, 1, 0, 0, 8, 92, 0, 0, 0, 1, 0, 0
+maximums 16, 719, 15, 18, 213, 1013, 58, 59, 12, 47, 19, 10
+total parse 315, 181, 754, 574, 1149, 346, 439, 835, 42, 732, 36, 190
+total run 196, 3657, 164, 307, 32174, 58287, 3015, 1278, 224, 1386, 135, 136
+countCodingUsages 9133 totalMillisecondsCodingUsages 105
+total 222190 мс.
+millions 10
+warm up 6099 мс.
+millions 1
+warm up 11916 мс.
+milions 1
+max memory usage 17613888
+average 1344, 3703, 570, 620, 307, 1706, 1655, 566, 14705, 523, 9433, 3448
+minimums 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0
+maximums 7, 5, 11, 10, 8, 21, 6, 5, 1, 8, 4, 5
+total parse 365, 129, 863, 797, 1612, 284, 298, 869, 22, 947, 47, 144
+total run 5, 5, 7, 5, 7, 7, 2, 7, 12, 5, 6, 1
+countCodingUsages 9133 totalMillisecondsCodingUsages 156
+total 31457 мс.
+millions 1
+warm up 967 мс.
+milions 1
+max memory usage 18488832
+average 1126, 3067, 514, 594, 286, 1506, 1457, 484, 12500, 482, 10204, 2732
+minimums 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0
+maximums 11, 3, 28, 7, 22, 15, 5, 19, 3, 22, 3, 8
+total parse 419, 154, 965, 822, 1725, 329, 340, 1011, 39, 1021, 42, 181
+total run 16, 8, 3, 10, 12, 3, 2, 11, 1, 10, 7, 2
+countCodingUsages 9133 totalMillisecondsCodingUsages 106
+total 20297 мс.
+millions 1
+warm up 728 мс.
+milions 1
+max memory usage 19797688
+average 2049, 4032, 838, 907, 424, 2380, 2212, 800, 20833, 723, 17241, 4032
+minimums 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0
+maximums 2, 2, 3, 3, 5, 2, 2, 3, 1, 3, 1, 4
+total parse 242, 120, 587, 537, 1170, 206, 222, 618, 19, 685, 28, 121
+total run 1, 3, 4, 7, 3, 3, 4, 3, 5, 2, 1, 2
+countCodingUsages 9133 totalMillisecondsCodingUsages 81
+total 15618 мс.
+millions 1
+warm up 646 мс.
+milions 1
+max memory usage 20541816
+average 2145, 4716, 929, 984, 455, 2380, 2083, 881, 21739, 788, 31250, 4464
+minimums 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0
+maximums 2, 1, 3, 3, 4, 2, 2, 3, 1, 5, 1, 2
+total parse 227, 104, 529, 502, 1092, 207, 236, 557, 17, 627, 15, 111
+total run 6, 2, 5, 4, 5, 4, 3, 7, 5, 3, 1, 1
+countCodingUsages 9133 totalMillisecondsCodingUsages 78
+total 14821 мс.
+millions 1
+warm up 609 мс.
+milions 1
+max memory usage 20311104
+average 2212, 5000, 1033, 1066, 478, 2369, 2164, 927, 41666, 796, 27777, 4273
+minimums 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0
+maximums 2, 1, 2, 3, 5, 1, 2, 3, 1, 3, 1, 1
+total parse 221, 96, 477, 464, 1039, 209, 228, 526, 9, 624, 16, 116
+total run 5, 4, 2, 2, 4, 2, 3, 5, 3, 2, 2, 1
+countCodingUsages 9133 totalMillisecondsCodingUsages 70
+total 14173 мс.
+millions 1
+warm up 612 мс.
+milions 1
+max memory usage 31451512
+average 2016, 4132, 915, 1075, 461, 2475, 1984, 877, 27777, 787, 27777, 5208
+minimums 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0
+maximums 2, 1, 4, 3, 4, 2, 2, 4, 1, 3, 1, 1
+total parse 247, 117, 541, 453, 1074, 201, 250, 563, 14, 627, 16, 92
+total run 1, 4, 1, 6, 6, 1, 1, 2, 4, 5, 2, 4
+countCodingUsages 9133 totalMillisecondsCodingUsages 77
+total 16848 мс.
+
+rdfTree
+
+milions 1
+max memory usage 18432032
+average 426, 31, 331, 237, 2, 1, 55, 105, 2074, 103, 2564, 564
+minimums 0, 15, 0, 0, 46, 569, 0, 0, 0, 0, 0, 0
+maximums 31, 78, 31, 62, 1031, 640, 46, 31, 15, 31, 15, 15
+total parse 420, 150, 754, 647, 1160, 391, 391, 826, 45, 676, 45, 166
+total run 752, 15783, 753, 1452, 197960, 294094, 8619, 3896, 196, 4168, 150, 720
+countCodingUsages 0 totalMillisecondsCodingUsages 0
+total 1083 538 мс.
+millions 1
+warm up 0 мс.
+millions 1
+warm up 2179 мс.
+millions 1
+warm up 2078 мс.
+millions 1
+warm up 2046 мс.
+milions 1
+max memory usage 17828456
+average 378, 31, 420, 230, 2, 1, 54, 110, 1515, 109, 1754, 520
+minimums 0, 0, 0, 0, 31, 578, 0, 0, 0, 0, 0, 0
+maximums 31, 62, 31, 46, 1031, 593, 46, 31, 15, 31, 15, 15
+total parse 555, 60, 645, 510, 1200, 405, 465, 615, 45, 495, 75, 165
+total run 766, 15932, 543, 1658, 197536, 293560, 8656, 3919, 285, 4055, 210, 795
+countCodingUsages 0 totalMillisecondsCodingUsages 0
+total 1083627 мс.
+
+с кшем
+millions 1
+warm up 2218 мс.
+millions 1
+warm up 2140 мс.
+milions 1
+max memory usage 88314712
+average 2032, 514, 562, 677, 142, 126, 90, 145, 2283, 156, 2500, 620
+minimums 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+maximums 15, 15, 15, 15, 15, 46, 46, 31, 15, 31, 15, 15
+total parse 228, 137, 839, 690, 1134, 317, 522, 909, 36, 905, 50, 226
+total run 17, 822, 48, 48, 2341, 3585, 5006, 2499, 183, 2261, 149, 568
+countCodingUsages 0 totalMillisecondsCodingUsages 0
+total 59 724 мс.
+
+spO=>sPO
+spD=>sPD
+
+milions 1
+max memory usage 48871760
+average 1805, 511, 748, 945, 32, 27, 170, 283, 5208, 291, 4132, 3012
+minimums 0, 0, 0, 0, 5, 33, 0, 0, 0, 0, 0, 0
+maximums 2, 8, 3, 7, 79, 73, 19, 14, 1, 11, 1, 2
+total parse 261, 125, 642, 490, 1068, 309, 366, 749, 20, 688, 30, 95
+total run 14, 763, 14, 18, 13910, 17985, 2382, 836, 76, 867, 91, 69
+countCodingUsages 0 totalMillisecondsCodingUsages 0
+total 95056 мс.
+millions 1
+warm up 2037 мс.
+milions 1
+max memory usage 52042448
+average 1677, 547, 716, 1046, 34, 28, 179, 292, 5681, 296, 4716, 2659
+minimums 0, 0, 0, 0, 4, 33, 0, 1, 0, 0, 0, 0
+maximums 5, 6, 3, 2, 76, 48, 15, 8, 1, 14, 1, 3
+total parse 280, 112, 661, 442, 1049, 334, 380, 740, 13, 693, 26, 110
+total run 18, 724, 16, 17, 13457, 17263, 2240, 781, 75, 832, 80, 77
+countCodingUsages 0 totalMillisecondsCodingUsages 0
+total 93782 мс.
+
+ sPO=>spO
+sPD=>spD
+add spo cash
+scale
+			
+millions 1
+warm up 2119 мс.
+milions 1
+max memory usage 85830832
+average 1298, 486, 683, 819, 165, 148, 100, 155, 3703, 186, 3030, 1445
+minimums 0, 0, 0, 0, 2, 5, 0, 0, 0, 0, 0, 0
+maximums 4, 6, 6, 5, 13, 10, 31, 23, 1, 19, 1, 3
+total parse 284, 115, 620, 473, 1048, 258, 342, 701, 18, 694, 28, 109
+total run 83, 849, 53, 69, 1782, 2955, 4508, 2366, 117, 1828, 137, 191
+countCodingUsages 0 totalMillisecondsCodingUsages 0
+total 54916 мс.

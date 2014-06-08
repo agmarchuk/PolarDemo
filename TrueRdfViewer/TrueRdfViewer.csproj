@@ -57,7 +57,6 @@
     <Compile Include="PaKeyValueTable.cs" />
     <Compile Include="ProgramInt.cs" />
     <Compile Include="RPackInt.cs" />
-    <Compile Include="Scale2.cs" />
     <Compile Include="TripleInt.cs" />
     <Compile Include="TripleStoreInt.cs" />
     <Compile Include="TurtleInt.cs" />
@@ -69,6 +68,10 @@
     <ProjectReference Include="..\..\PolarDB\PolarDB.csproj">
       <Project>{907bb4af-fbc9-4a1e-8f80-194af9337aa4}</Project>
       <Name>PolarDB</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ScaleBit4Check\ScaleBit4Check.csproj">
+      <Project>{7860cd10-44ef-4300-8872-8ebef9f122e8}</Project>
+      <Name>ScaleBit4Check</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
