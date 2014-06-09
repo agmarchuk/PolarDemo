@@ -61,7 +61,6 @@
     <Compile Include="RPackInt.cs" />
     <Compile Include="Tracing.cs" />
     <Compile Include="TripleStoreInt.cs" />
-    <Compile Include="TurtleInt.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Description.txt" />

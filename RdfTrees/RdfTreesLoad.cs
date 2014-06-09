@@ -342,6 +342,7 @@ namespace RdfTrees
                 tree_fix.Root.Element(longindex).Set(record); longindex++;
             }
             tree_fix.Close();
+            this.entitiesTree = new PxCell(tp_entitiesTree, path + "entitiesTree.pxc", false);
             Console.WriteLine("Scan3fix ok. Duration={0} msec. cnt_e={1} ", (DateTime.Now - tt0).Ticks / 10000L, cnt_e); tt0 = DateTime.Now;
             return cnt_e;
         }
@@ -353,36 +354,37 @@ namespace RdfTrees
             dtriples.Fill(new object[0]);
             int i = 0;
             //Entity e = new Entity();
-            foreach (var triple in TurtleInt.LoadGraph(filepath))
+            TripleInt.SiCodingEntities.Clear();
+            TripleInt.SiCodingPredicates.Clear();
+            TripleInt.EntitiesCodeCache.Clear();
+            TripleInt.PredicatesCodeCache.Clear();
+
+
+            foreach (var tripletGrpah in TurtleInt.LoadGraphs(filepath))
             {
-                if (i % 1000000 == 0) Console.Write("{0} ", i / 1000000);
-                i++;
-                if (triple is OTripleInt)
-                {
-                    var tr = (OTripleInt)triple;
-                    otriples.Root.AppendElement(new object[] 
-                    { 
-                        tr.subject, 
-                        tr.predicate, 
-                        tr.obj 
+               
+                if (i % 100000 == 0) Console.Write("w{0} ", i / 100000); i += tripletGrpah.PredicateDataValuePairs.Count + tripletGrpah.PredicateObjValuePairs.Count;
+                var subject = TripleInt.EntitiesCodeCache[tripletGrpah.subject];
+
+                foreach (var predicateObjValuePair in tripletGrpah.PredicateObjValuePairs)
+                    otriples.Root.AppendElement(new object[]
+                    {
+                        subject,
+                        predicateObjValuePair.Key,
+                        TripleInt.EntitiesCodeCache[predicateObjValuePair.Value]
                     });
-                }
-                else
-                {
-                    var tr = (DTripleInt)triple;
-                  Literal lit = tr.data;
-                    
-                    
-                    dtriples.Root.AppendElement(new object[] 
-                    { 
-                        tr.subject, 
-                        tr.predicate, 
-                        Literal.ToObjects(lit) 
-                    });
-                }
+                foreach (var predicateDataValuePair in tripletGrpah.PredicateDataValuePairs)
+                    dtriples.Root.AppendElement(new object[]
+                    {
+                        subject,
+                        predicateDataValuePair.Key,
+                      Literal.ToObjects(predicateDataValuePair.Value)
+                    });               
             }
+            
             otriples.Flush();
             dtriples.Flush();
+            
         }
     }
 }

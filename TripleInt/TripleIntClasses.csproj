@@ -44,6 +44,8 @@
     <Compile Include="SubjPredObjInt.cs" />
     <Compile Include="Text.cs" />
     <Compile Include="TripleInt.cs" />
+    <Compile Include="TripletGraph.cs" />
+    <Compile Include="TurtleInt.cs" />
     <Compile Include="TypedObject.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1068,3 +1068,53 @@ total parse 284, 115, 620, 473, 1048, 258, 342, 701, 18, 694, 28, 109
 total run 83, 849, 53, 69, 1782, 2955, 4508, 2366, 117, 1828, 137, 191
 countCodingUsages 0 totalMillisecondsCodingUsages 0
 total 54916 мс.
+millions 1
+millions 1
+total 28281 мс.
+millions 1
+warm up 2062 мс.
+millions 1
+warm up 2322 мс.
+millions 1
+warm up 2308 мс.
+millions 1
+warm up 3 мс.
+millions 1
+total 28732 мс.
+millions 1
+warm up 2576 мс.
+millions 1
+total 21778 мс.
+millions 1
+warm up 2629 мс.
+millions 1
+total 21624 мс.
+millions 1
+warm up 2590 мс.
+millions 1
+warm up 2554 мс.
+millions 1
+total 22583 мс.
+millions 1
+warm up 2550 мс.
+millions 1
+warm up 2505 мс.
+millions 1
+warm up 5843 мс.
+millions 1
+millions 1
+millions 1
+warm up 51132 мс.
+milions 1
+countCodingUsages 151800 totalMillisecondsCodingUsages 0
+total 63164 мс.
+millions 1
+warm up 47750 мс.
+milions 1
+countCodingUsages 151800 totalMillisecondsCodingUsages 0
+total 50189 мс.
+millions 1
+warm up 3143 мс.
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 3
+total 5416 мс.

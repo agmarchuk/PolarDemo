@@ -49,7 +49,6 @@
     <Compile Include="RdfTrees.cs" />
     <Compile Include="RdfTreesLoad.cs" />
     <Compile Include="RdfTreesProcess.cs" />
-    <Compile Include="TurtleInt.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Description.txt" />
@@ -63,6 +62,10 @@
     <ProjectReference Include="..\ExperimentRdfViewer\ExperimentRdfViewer.csproj">
       <Project>{3165cde6-fa27-4fc4-bdbc-01967bb4f0e5}</Project>
       <Name>ExperimentRdfViewer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NameTable\NameTable.csproj">
+      <Project>{5283693D-68CC-4B7A-B2BB-6E901592A272}</Project>
+      <Name>NameTable</Name>
     </ProjectReference>
     <ProjectReference Include="..\ScaleBit4Check\ScaleBit4Check.csproj">
       <Project>{7860cd10-44ef-4300-8872-8ebef9f122e8}</Project>
