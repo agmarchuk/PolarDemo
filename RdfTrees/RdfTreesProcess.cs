@@ -57,9 +57,8 @@ namespace RdfTrees
             int[] objects;
             if (!spOCache.TryGetValue(key, out objects))
             {
-                var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
-                if (rec_ent.IsEmpty) objects = new int[0];
-                else
+                var rec_ent = this.entitiesTree.Root.Element(subj);// //.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
+                //if (rec_ent.IsEmpty) objects = new int[0]; else
                 {
                     object[] pairs = (object[]) rec_ent.Field(2).Get();
                     objects = pairs.Cast<object[]>().Where(pair => (int) pair[0] == pred)
@@ -78,9 +77,8 @@ namespace RdfTrees
             var key = new KeyValuePair<int, int>(obj, pred);
             if (!SpoCache.TryGetValue(key, out subjects))
             {
-                var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(obj));
-                if (rec_ent.IsEmpty) subjects = new int[0];
-                else
+                var rec_ent = this.entitiesTree.Root.Element(obj); //.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(obj));
+                //if (rec_ent.IsEmpty) subjects = new int[0];else
                 {
                     object[] subjs = null;
                     foreach (var pred_subjseq in rec_ent.Field(3).Elements())
@@ -110,10 +108,8 @@ namespace RdfTrees
             IEnumerable<KeyValuePair<int, int>> op;
             if (!sPOCache.TryGetValue(subj, out op))
             {
-                var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
-
-                if (rec_ent.IsEmpty) op = new KeyValuePair<int, int>[0];
-                else
+                var rec_ent = this.entitiesTree.Root.Element(subj);//.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
+                //if (rec_ent.IsEmpty) op = new KeyValuePair<int, int>[0]; else
                 {
                     object[] pairs = (object[]) rec_ent.Field(2).Get();
                     op = pairs.Cast<object[]>()
@@ -129,10 +125,9 @@ namespace RdfTrees
         {
             IEnumerable<KeyValuePair<Literal, int>> pd;
             if (!sPDCache.TryGetValue(subj, out pd))
-            {   
-                var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
-                if (rec_ent.IsEmpty) pd = new KeyValuePair<Literal, int>[0];
-                else
+            {
+                var rec_ent = this.entitiesTree.Root.Element(subj);//BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
+                //if (rec_ent.IsEmpty) pd = new KeyValuePair<Literal, int>[0];else
                 {
                     object[] pairs = (object[]) rec_ent.Field(1).Get();
                     PaEntry dtriple_entry = dtriples.Root.Element(0);
@@ -160,9 +155,8 @@ namespace RdfTrees
             IEnumerable<KeyValuePair<int, int>> sp;
             if (!SPoCache.TryGetValue(obj, out sp))
             {
-                var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(obj));
-                if (rec_ent.IsEmpty) sp = new KeyValuePair<int, int>[0];
-                else
+                var rec_ent = this.entitiesTree.Root.Element(obj);//.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(obj));
+                //if (rec_ent.IsEmpty) sp = new KeyValuePair<int, int>[0];else
                 {
                     List<KeyValuePair<int, int>> subjs = new List<KeyValuePair<int, int>>();
                     foreach (var pred_subjseq in rec_ent.Field(3).Elements())

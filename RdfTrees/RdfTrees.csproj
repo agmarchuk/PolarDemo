@@ -49,7 +49,6 @@
     <Compile Include="RdfTrees.cs" />
     <Compile Include="RdfTreesLoad.cs" />
     <Compile Include="RdfTreesProcess.cs" />
-    <Compile Include="TurtleInt.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Description.txt" />

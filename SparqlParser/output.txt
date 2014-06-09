@@ -1118,3 +1118,13 @@ warm up 3143 мс.
 milions 1
 countCodingUsages 14 totalMillisecondsCodingUsages 3
 total 5416 мс.
+millions 1
+warm up 4739 мс.
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 51
+total 12434 мс.
+millions 1
+warm up 3102 мс.
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 4
+total 4488 мс.
