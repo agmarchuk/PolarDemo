@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Xml.Linq;
 using TripleIntClasses;
+//using PolarDB;
 
 
 namespace RdfTrees
@@ -14,8 +15,6 @@ namespace RdfTrees
             //XElement tra2 = new XElement("tracing", tracing.Elements().Take(10000));
             //tra2.Save(@"D:\Users\Marchuk\Downloads\tra2.xml");
             //Console.WriteLine("N_tests = {0}", tracing.Elements().Count());
-            XElement tracing = XElement.Load(@"D:\Users\Marchuk\Downloads\tra2.xml");
-            Console.WriteLine("N_tests = {0}", tracing.Elements().Count());
 
             DateTime tt0 = DateTime.Now;
 
@@ -24,6 +23,9 @@ namespace RdfTrees
             RdfTrees rtrees = new RdfTrees(path);
             //rtrees.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset1M.ttl");
 
+            XElement tracing = XElement.Load(@"D:\Users\Marchuk\Downloads\tracing100th.xml");
+            Console.WriteLine("N_tests = {0}", tracing.Elements().Count());
+            tt0 = DateTime.Now;
             int ecnt = 0, ncnt = 0;
             foreach (XElement spo in tracing.Elements())
             {
@@ -65,18 +67,6 @@ namespace RdfTrees
                         s.GetHashCode(),
                         p.GetHashCode()).OrderBy(v => v).ToArray();
                     if (query.Count() == 0 && res == "") continue;
-                    //foreach (var v in query)
-                    //{
-                    //    Console.Write("{0} ", v);
-                    //}
-                    //Console.WriteLine();
-                    //int[] results = res.Split(' ').Select(ss => ss.GetHashCode()).OrderBy(v => v).ToArray();
-                    //Console.Write("res=");
-                    //foreach (var v in results)
-                    //{
-                    //    Console.Write("{0} ", v);
-                    //}
-                    //Console.WriteLine();
                     ecnt++;
                 }
                 else if (spo.Name == "Spo")
@@ -85,24 +75,11 @@ namespace RdfTrees
                         o.GetHashCode(),
                         p.GetHashCode()).OrderBy(v => v).ToArray();
                     if (query.Count() == 0 && res == "") continue;
-                    //foreach (var v in query)
-                    //{
-                    //    Console.Write("{0} ", v);
-                    //}
-                    //Console.WriteLine();
-                    //int[] results = res.Split(' ').Select(ss => ss.GetHashCode()).OrderBy(v => v).ToArray();
-                    //Console.Write("res=");
-                    //foreach (var v in results)
-                    //{
-                    //    Console.Write("{0} ", v);
-                    //}
-                    //Console.WriteLine();
                     ecnt++;
                 }
                 
             }
             Console.WriteLine("Equal {0} Not equal {1}", ecnt, ncnt);
-
             Console.WriteLine("TOTAL: {0} мс.", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
         }
     }
