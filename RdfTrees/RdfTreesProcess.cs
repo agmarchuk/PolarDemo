@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using PolarDB;
 
 using TripleIntClasses;
-
+using TrueRdfViewer;
 
 
 namespace RdfTrees
@@ -12,6 +13,8 @@ namespace RdfTrees
     // Файл 3 (3)
     public partial class RdfTrees
     {
+        
+
         public override bool ChkOSubjPredObj(int subj, int pred, int obj)
         {
             if (subj == Int32.MinValue || obj == Int32.MinValue || pred == Int32.MinValue) return false;
@@ -37,15 +40,11 @@ namespace RdfTrees
                 else
                 {
                     object[] pairs = (object[]) rec_ent.Field(1).Get();
-                    PaEntry dtriple_entry = dtriples.Root.Element(0);
+                    //PaEntry dtriple_entry = dtriples.Root.Element(0);
                     dp = pairs.Cast<object[]>()
                         .Where(pair => (int) pair[0] == pred)
-                        .Select(pair =>
-                        {
-                            dtriple_entry.offset = (long) pair[1];
-                            var literal_obj = dtriple_entry.Field(2).Get();
-                            return Literal.ToLiteral((object[]) literal_obj);
-                        })
+                        .Select(pair => (long) pair[1])
+                        .Select(LiteralStore.Literals.Read)
                         .ToArray();  
                     spDCache.Add(key, dp);
                 }
@@ -135,14 +134,13 @@ namespace RdfTrees
                 //if (rec_ent.IsEmpty) pd = new KeyValuePair<Literal, int>[0];else
                 {
                     object[] pairs = (object[]) rec_ent.Field(1).Get();
-                    PaEntry dtriple_entry = dtriples.Root.Element(0);
+                 //   PaEntry dtriple_entry = dtriples.Root.Element(0);
                     pd = pairs.Cast<object[]>()
                         .Select(pair =>
                         {
-                            dtriple_entry.offset = (long) pair[1];
-                            var literal_obj = dtriple_entry.Field(2).Get();
-                            return new KeyValuePair<Literal, int>(Literal.ToLiteral((object[]) literal_obj),
-                                (int) pair[0]);
+                           var offset = (long) pair[1];
+                            var literal_obj = LiteralStore.Literals.Read(offset);
+                            return new KeyValuePair<Literal, int>(literal_obj, (int) pair[0]);
                         })
                         .ToArray();
                     sPDCache.Add(subj, pd);
@@ -181,11 +179,10 @@ namespace RdfTrees
 
         public override void WarmUp()
         {
-            foreach (var element in entitiesTree.Root.Elements())
-            {
-                element.Get();
-            }
-            
+          entitiesTree.Close();
+            File.ReadAllBytes(entitiesTreePath);
+            entitiesTree=new PxCell(tp_entitiesTree, entitiesTreePath);
+                  LiteralStore.Literals.WarmUp();
         }
     }
 }

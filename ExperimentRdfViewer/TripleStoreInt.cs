@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using NameTable;
 using PolarDB;
 using ScaleBit4Check;
 using TripleIntClasses;
@@ -72,7 +71,7 @@ namespace TrueRdfViewer
             otriplets_op_filePath = path + "otriples_op.pac";
             otriples_filePath = path + "otriples.pac";
             dtriples_filePath = path + "dtriples_spf.pac";
-            LiteralStore.Literals = new LiteralStore(path);
+            LiteralStore.DataCellPath=path;
 
             Open(File.Exists(otriples_filePath));
             if (!scale.Cell.IsEmpty)
@@ -325,8 +324,8 @@ namespace TrueRdfViewer
                         predicateObjValuePair.Key,
                         TripleInt.EntitiesCodeCache[predicateObjValuePair.Value]
                     });
-                foreach (var predicateDataValuePair in tripletGrpah.PredicateDataValuePairs)
-                    LiteralStore.Literals.Write(predicateDataValuePair.Value);
+                //foreach (var predicateDataValuePair in tripletGrpah.PredicateDataValuePairs)
+                //    LiteralStore.Literals.Write(predicateDataValuePair.Value);
                 LiteralStore.Literals.WriteBufferForce();
 
                 foreach (var predicateDataValuePair in tripletGrpah.PredicateDataValuePairs)

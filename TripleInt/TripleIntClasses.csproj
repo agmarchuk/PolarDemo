@@ -36,6 +36,7 @@
   <ItemGroup>
     <Compile Include="DTripleInt.cs" />
     <Compile Include="Literal.cs" />
+    <Compile Include="LiteralStore.cs" />
     <Compile Include="OTripleInt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SPComparer.cs" />
@@ -49,6 +50,10 @@
     <Compile Include="TypedObject.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\PolarDB\PolarDB.csproj">
+      <Project>{907bb4af-fbc9-4a1e-8f80-194af9337aa4}</Project>
+      <Name>PolarDB</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NameTable\NameTable.csproj">
       <Project>{5283693d-68cc-4b7a-b2bb-6e901592a272}</Project>
       <Name>NameTable</Name>

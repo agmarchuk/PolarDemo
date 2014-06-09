@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using TrueRdfViewer;
 
 namespace TripleIntClasses
 {
@@ -107,7 +108,10 @@ namespace TripleIntClasses
                                     : GetEntityString(namespaces, qname);
                             }
 
-                            currentTripletGraph.PredicateDataValuePairs.Add(new KeyValuePair<int, Literal>(predicate, Literal.Create(datatype, sdata, lang)));
+                            currentTripletGraph.PredicateDataValuePairs.Add(
+                                new KeyValuePair<int, Literal>(predicate, 
+                                    LiteralStore.Literals.Write(
+                                        Literal.Create(datatype, sdata, lang))));
                         }
                         else
                         {
