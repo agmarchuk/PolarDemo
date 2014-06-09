@@ -27,6 +27,7 @@ namespace RdfTrees
         }
         public override IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
         {
+            if (subj == Int32.MinValue || pred == Int32.MinValue) return new Literal[0];
             Literal[] dp;
             var key = new KeyValuePair<int, int>(subj, pred);
             if (!spDCache.TryGetValue(key, out dp))
@@ -53,6 +54,7 @@ namespace RdfTrees
         }
         public override IEnumerable<int> GetObjBySubjPred(int subj, int pred)
         {
+            if (subj == Int32.MinValue || pred == Int32.MinValue) return new int[0];
             var key = new KeyValuePair<int, int>(subj, pred);
             int[] objects;
             if (!spOCache.TryGetValue(key, out objects))
@@ -74,6 +76,7 @@ namespace RdfTrees
         public override IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
         {
             int[] subjects;
+            if (obj == Int32.MinValue || pred == Int32.MinValue) return new int[0];
             var key = new KeyValuePair<int, int>(obj, pred);
             if (!SpoCache.TryGetValue(key, out subjects))
             {
@@ -106,6 +109,7 @@ namespace RdfTrees
         public override IEnumerable<KeyValuePair<int, int>> GetObjBySubj(int subj)
         {
             IEnumerable<KeyValuePair<int, int>> op;
+            if (subj == Int32.MinValue) return new KeyValuePair<int, int>[0];
             if (!sPOCache.TryGetValue(subj, out op))
             {
                 var rec_ent = this.entitiesTree.Root.Element(subj);//.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
@@ -123,6 +127,7 @@ namespace RdfTrees
 
         public override IEnumerable<KeyValuePair<Literal, int>> GetDataBySubj(int subj)
         {
+            if (subj == Int32.MinValue) return new KeyValuePair<Literal, int>[0];
             IEnumerable<KeyValuePair<Literal, int>> pd;
             if (!sPDCache.TryGetValue(subj, out pd))
             {
@@ -152,6 +157,8 @@ namespace RdfTrees
         /// <returns></returns>
         public override IEnumerable<KeyValuePair<int, int>> GetSubjectByObj(int obj)
         {
+            if (obj == Int32.MinValue) return new KeyValuePair<int, int>[0];
+
             IEnumerable<KeyValuePair<int, int>> sp;
             if (!SPoCache.TryGetValue(obj, out sp))
             {

@@ -29,16 +29,16 @@ namespace SparqlParser
          ////   var count =  1000;
          //   TestPerfomanceCoding(new StringIntRAMDIctionary(@"..\..\codeTests\"), Enumerable.Range(0, count).Select(i => Guid.NewGuid().ToString()).ToArray(), count);
 
-           Test();
+         //  Test();
 
            Console.WriteLine(Millions = 10);         
-             //Test();
+            //    Test();
 
            Console.WriteLine(Millions = 100);
                 
           
 
-       //   Test();
+       Test();
            Console.WriteLine(Millions = 1000);
       //  Test();
 
@@ -56,10 +56,10 @@ namespace SparqlParser
            TripleInt.PredicatesCodeCache.Clear();
            Query.decodesCasheEntities.Clear();
 
-            //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\undecoded\" + Millions + @"mln\");
+        
 
-                        bool load = false;
-             //    bool load = true;
+                   bool load = false;
+                   //   bool load = true;
               using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;
@@ -68,14 +68,14 @@ namespace SparqlParser
             {
                 ts.LoadTurtle(@"C:\deployed\" + Millions + "M.ttl");
               }
-           // else
+            else
             {
                 ts.WarmUp();
                 spent = (DateTime.Now - start).Ticks / 10000;
                 using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                     wr.WriteLine("warm up " + spent + " мс.");
-                  RunBerlinsWithConstants( ts);
-              //   RunBerlinsParameters(ts);      
+                //    RunBerlinsWithConstants( ts);
+               RunBerlinsParameters(ts);      
             }
             spent = (DateTime.Now - start).Ticks/10000;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))   

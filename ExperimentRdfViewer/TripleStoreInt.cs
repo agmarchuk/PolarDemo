@@ -69,10 +69,6 @@ namespace TrueRdfViewer
             this.path = path;
 
             InitTypes();
-            if (TripleInt.SiCodingEntities==null)
-            TripleInt.SiCodingEntities = new StringIntMD5RAMCollision(path + "entitiesCodes");
-            if (TripleInt.SiCodingPredicates==null)
-            TripleInt.SiCodingPredicates = new StringIntRAMDIctionary(path + "predicatesCodes");
             otriplets_op_filePath = path + "otriples_op.pac";
             otriples_filePath = path + "otriples.pac";
             dtriples_filePath = path + "dtriples_spf.pac";
