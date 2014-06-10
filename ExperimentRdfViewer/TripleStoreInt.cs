@@ -104,7 +104,7 @@ namespace TrueRdfViewer
                 otriples_op = new PaCell(tp_otriple_seq, otriplets_op_filePath + "tmp", false);
                 dtriples_sp = new PaCell(tp_dtriple_spf, dtriples_filePath + "tmp", false);
             }                          
-              LiteralStore.Literals.Open(readOnlyMode);
+             // LiteralStore.Literals.Open(readOnlyMode);
             scale = new ScaleCell(path);
         }
 
@@ -298,8 +298,7 @@ namespace TrueRdfViewer
 
             otriples.Clear();
             otriples.Fill(new object[0]);
-            LiteralStore.Literals.dataCell.Clear();
-            LiteralStore.Literals.dataCell.Fill(new object[0]);
+       
 
             dtriples_sp.Clear();
             dtriples_sp.Fill(new object[0]);
@@ -344,7 +343,7 @@ namespace TrueRdfViewer
 
         private void Close()
         {
-         LiteralStore.Literals.dataCell.Close();
+        // LiteralStore.Literals.dataCell.Close();
             dtriples_sp.Close();
             otriples.Close();
             otriples_op.Close();

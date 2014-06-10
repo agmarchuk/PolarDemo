@@ -22,11 +22,54 @@ namespace RdfTrees
             var key = new OTripleInt() { subject = subj, obj = obj, predicate = pred };
             if (!spoCache.TryGetValue(key, out exists))
             {
-                
-                exists = scale.ChkInScale(subj,pred,obj) && GetObjBySubjPred(subj, pred).Contains(obj);
+
+                exists = CheckContains(subj, pred, obj);
                 spoCache.Add(key, exists);
             }
             return exists;      
+        }
+    
+        private bool CheckContains(int subj, int pred, int obj)
+        {
+            if (!scale.ChkInScale(subj, pred, obj)) return false;
+
+            //SubjPredObjInt key = new SubjPredObjInt() { subj = subj, pred = pred, obj = obj };
+            //var entry = otriples.Root.BinarySearchFirst(ent => (new SubjPredObjInt(ent.Get())).CompareTo(key));
+            int[] resSubj, resObj;
+            var keySub = new KeyValuePair<int, int>(subj, pred);
+            var keyObj = new KeyValuePair<int, int>(obj, pred);
+
+            //если даже в оперативной памяти закешированы предикаты, но их больше, чем эта константа, то будет проверено количество предикатов в другом
+            const int limit = 1000;
+
+
+            // проверка кешей 
+            var subjExists = spOCache.TryGetValue(keySub, out resSubj);
+            var objExists = SpoCache.TryGetValue(keyObj, out resObj);
+            long subjLength = 0;
+            if (subjExists)
+            {
+                subjLength = resSubj.Length;
+                // но если и обратыне тоже есть в кеше, то будет сравниваться их количество
+                if (!objExists && subjLength < limit)
+                    return resSubj.Contains(obj);
+            }
+            long objLength = 0;
+            if (objExists)
+            {
+                objLength = resObj.Length;
+                if (!subjExists && objLength < limit)
+                    return resObj.Contains(subj);
+            }
+            if (subjExists && objExists)
+                if (subjLength > objLength)
+                    return resObj.Contains(subj);
+                else return resSubj.Contains(obj);
+
+            //теперь либо один из массивов есть в кеше и слишком большой, либо обоих нет.
+            resObj = (int[]) GetObjBySubjPred(subj, pred);
+                return resObj.Contains(subj);
+            
         }
         public override IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
         {
@@ -35,7 +78,7 @@ namespace RdfTrees
             var key = new KeyValuePair<int, int>(subj, pred);
             if (!spDCache.TryGetValue(key, out dp))
             {
-                var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
+                var rec_ent = this.entitiesTree.Root.Element(subj); ;//.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
                 if (rec_ent.IsEmpty) dp = new Literal[0];
                 else
                 {
