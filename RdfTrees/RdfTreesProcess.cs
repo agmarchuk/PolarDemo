@@ -51,7 +51,24 @@ namespace RdfTrees
             }
             return dp;
         }
+        public int debug_counter = 0;
         public override IEnumerable<int> GetObjBySubjPred(int subj, int pred)
+        {
+            int[] objects = new int[0];
+            var rec_ent = this.entitiesTree.Root.BinarySearchFirst(ent => ((int)ent.Field(0).Get()).CompareTo(subj));
+            debug_counter++;
+            if (rec_ent.IsEmpty) objects = new int[0];
+            else
+            {
+                //object[] pairs = (object[])rec_ent.Field(2).Get();
+                //objects = pairs.Cast<object[]>().Where(pair => (int)pair[0] == pred)
+                //    .Select(pair => (int)pair[1])
+                //    .ToArray();
+            }
+
+            return objects;
+        }
+        public IEnumerable<int> GetObjBySubjPred0(int subj, int pred)
         {
             var key = new KeyValuePair<int, int>(subj, pred);
             int[] objects;
@@ -178,13 +195,13 @@ namespace RdfTrees
             return sp;
         }
 
-        public override void WarmUp()
-        {
-            foreach (var element in entitiesTree.Root.Elements())
-            {
-                element.Get();
-            }
+        //public override void WarmUp()
+        //{
+        //    foreach (var element in entitiesTree.Root.Elements())
+        //    {
+        //        element.Get();
+        //    }
             
-        }
+        //}
     }
 }

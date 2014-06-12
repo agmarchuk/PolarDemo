@@ -20,7 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -72,6 +72,10 @@
     <ProjectReference Include="..\ScaleBit4Check\ScaleBit4Check.csproj">
       <Project>{7860cd10-44ef-4300-8872-8ebef9f122e8}</Project>
       <Name>ScaleBit4Check</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TripleInt\TripleIntClasses.csproj">
+      <Project>{4b88e673-1272-46cf-817c-ac76111dac46}</Project>
+      <Name>TripleIntClasses</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
