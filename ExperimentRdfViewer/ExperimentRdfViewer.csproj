@@ -52,7 +52,6 @@
     <Compile Include="EntitiesWideTable.cs" />
     <Compile Include="FlexIndexView.cs" />
     <Compile Include="GroupedEntities.cs" />
-    <Compile Include="LiteralStore.cs" />
     <Compile Include="OValRowInt.cs" />
     <Compile Include="ONames.cs" />
     <Compile Include="PaKeyValueTable.cs" />
@@ -61,7 +60,6 @@
     <Compile Include="RPackInt.cs" />
     <Compile Include="Tracing.cs" />
     <Compile Include="TripleStoreInt.cs" />
-    <Compile Include="TurtleInt.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Description.txt" />

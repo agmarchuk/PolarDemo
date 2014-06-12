@@ -1,25 +1,15 @@
-п»їusing System;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using TripleIntClasses;
+using TrueRdfViewer;
 
-namespace TrueRdfViewer
+namespace TripleIntClasses
 {
-
-    public class TripletGraph
-    {
-        public string subject;
-        public List<KeyValuePair<int, string>> PredicateObjValuePairs=new List<KeyValuePair<int, string>>(); 
-        public List<KeyValuePair<int, Literal>> PredicateDataValuePairs = new List<KeyValuePair<int, Literal>>();
-    }
-   
     public static class TurtleInt
     {
         public static int BufferMax =30*1000 * 1000;
-        // (РўРѕР»СЊРєРѕ РґР»СЏ СЃРїРµС†РёР°Р»СЊРЅС‹С… С†РµР»РµР№) Р­С‚Рѕ РґР»СЏ РЅР°РєР°РїР»РёРІР°РЅРёСЏ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂРѕРІ СЃРѕР±РёСЂР°РµРјС‹С… СЃСѓС‰РЅРѕСЃС‚РµР№:
-        public static List<string> sarr = new List<string>();
-
-        public static IEnumerable<TripletGraph> LoadGraph(string datafile)
+        
+        public static IEnumerable<TripletGraph> LoadGraphs(string datafile)
             //EngineVirtuoso engine, string graph, string datafile)
         {
             int ntriples = 0;
@@ -88,39 +78,40 @@ namespace TrueRdfViewer
                         }
                         string pred_line = line1.Substring(0, first_blank);
                         string predicateString = GetEntityString(namespaces, pred_line);
-                        int predicate;
-                        if (!TripleInt.PredicatesCodeCache.TryGetValue(predicateString, out predicate))
-                            TripleInt.PredicatesCodeCache.Add(predicateString,
-                                predicate = TripleInt.PredicatesCodeCache.Count);
+                        TripleInt.PredicatesCodeCache = TripleInt.SiCodingPredicates.InsertPortion(new[] {predicateString});
+                        int predicate = TripleInt.PredicatesCodeCache[predicateString];
                         string rest_line = line1.Substring(first_blank + 1).Trim();
-                        // РЈР±РµСЂРµРј РїРѕСЃР»РµРґРЅРёР№ СЃРёРјРІРѕР»
+                        // Уберем последний символ
                         rest_line = rest_line.Substring(0, rest_line.Length - 1).Trim();
                         bool isDatatype = rest_line[0] == '\"';
-                        // РѕР±СЉРµРєС‚ РјРѕР¶РµС‚ Р±С‹С‚СЊ entity РёР»Рё РґР°РЅРЅРѕРµ, Сѓ РґР°РЅРЅРѕРіРѕ РјРѕР¶РµС‚ Р±С‹С‚СЊ СЏР·С‹РєРѕРІС‹Р№ СЃРїРµС†РёС„РёРєР°С‚РѕСЂ РёР»Рё С‚РёРї
+                        // объект может быть entity или данное, у данного может быть языковый спецификатор или тип
                         string sdata = null;
                         string datatype = null;
                         string lang = null;
                         if (isDatatype)
                         {
-                            // РџРѕСЃР»РµРґРЅСЏСЏ РґРІРѕР№РЅР°СЏ РєР°РІС‹С‡РєР° 
+                            // Последняя двойная кавычка 
                             int lastqu = rest_line.LastIndexOf('\"');
-                            // Р—РЅР°С‡РµРЅРёРµ РґР°РЅРЅС‹С…
+                            // Значение данных
                             sdata = rest_line.Substring(1, lastqu - 1);
-                            // РЇР·С‹РєРѕРІС‹Р№ СЃРїРµС†РёР°Р»РёР·Р°С‚РѕСЂ:
+                            // Языковый специализатор:
                             int dog = rest_line.LastIndexOf('@');
                             if (dog == lastqu + 1) lang = rest_line.Substring(dog + 1, rest_line.Length - dog - 1);
                             int pp = rest_line.IndexOf("^^");
                             if (pp == lastqu + 1)
                             {
-                                //  РўРёРї РґР°РЅРЅС‹С…
+                                //  Тип данных
                                 string qname = rest_line.Substring(pp + 2);
-                                //  С‚РёРї РґР°РЅРЅС‹С… РјРѕР¶РµС‚ Р±С‹С‚СЊ "РїСЂРµС„РёРєСЃРЅС‹Рј" РёР»Рё РїРѕР»РЅС‹Рј
+                                //  тип данных может быть "префиксным" или полным
                                 datatype = qname[0] == '<'
                                     ? qname.Substring(1, qname.Length - 2)
                                     : GetEntityString(namespaces, qname);
                             }
 
-                            currentTripletGraph.PredicateDataValuePairs.Add(new KeyValuePair<int, Literal>(predicate, LiteralStore.Literals.Write(Literal.Create(datatype, sdata, lang))));
+                            currentTripletGraph.PredicateDataValuePairs.Add(
+                                new KeyValuePair<int, Literal>(predicate, 
+                                    LiteralStore.Literals.Write(
+                                        Literal.Create(datatype, sdata, lang))));
                         }
                         else
                         {
@@ -141,10 +132,7 @@ namespace TrueRdfViewer
             bufferTripletsGrpah.Clear();
             TripleInt.SiCodingEntities.MakeIndexed();
             entitiesStrings.Clear();
-            GC.Collect();
-
-            //TripleInt.SiCodingPredicates.MakeIndexed();
-            
+            GC.Collect();                
             Console.WriteLine("ntriples={0}", ntriples);
         }
 

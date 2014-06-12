@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using NameTable;
 using PolarDB;
 using ScaleBit4Check;
 using TripleIntClasses;
@@ -69,12 +68,10 @@ namespace TrueRdfViewer
             this.path = path;
 
             InitTypes();
-            TripleInt.SiCodingEntities = new StringIntMD5RAMColisions(path + "entitiesCodes");
-            TripleInt.SiCodingPredicates = new StringIntRAMDIctionary(path + "predicatesCodes");
             otriplets_op_filePath = path + "otriples_op.pac";
             otriples_filePath = path + "otriples.pac";
             dtriples_filePath = path + "dtriples_spf.pac";
-            LiteralStore.Literals = new LiteralStore(path);
+            LiteralStore.DataCellPath=path;
 
             Open(File.Exists(otriples_filePath));
             if (!scale.Cell.IsEmpty)
@@ -107,7 +104,7 @@ namespace TrueRdfViewer
                 otriples_op = new PaCell(tp_otriple_seq, otriplets_op_filePath + "tmp", false);
                 dtriples_sp = new PaCell(tp_dtriple_spf, dtriples_filePath + "tmp", false);
             }                          
-              LiteralStore.Literals.Open(readOnlyMode);
+             // LiteralStore.Literals.Open(readOnlyMode);
             scale = new ScaleCell(path);
         }
 
@@ -174,8 +171,7 @@ namespace TrueRdfViewer
             Open(false);
 
             Load(filepath);
-            TripleInt.SiCodingPredicates.Close();
-            TripleInt.SiCodingPredicates = new StringIntRAMDIctionary(path + "predicatesCodes", TripleInt.PredicatesCodeCache);
+
             Console.WriteLine("Load ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
             PrepareArrays();
@@ -302,9 +298,8 @@ namespace TrueRdfViewer
 
             otriples.Clear();
             otriples.Fill(new object[0]);
-            LiteralStore.Literals.dataCell.Clear();
-            LiteralStore.Literals.dataCell.Fill(new object[0]);
-            
+       
+
             dtriples_sp.Clear();
             dtriples_sp.Fill(new object[0]);
             int i = 0;
@@ -314,12 +309,12 @@ namespace TrueRdfViewer
             TripleInt.EntitiesCodeCache.Clear();
             TripleInt.PredicatesCodeCache.Clear();
 
-        
-            foreach (var tripletGrpah in TurtleInt.LoadGraph(filepath))
+
+            foreach (var tripletGrpah in TurtleInt.LoadGraphs(filepath))
             {
-                LiteralStore.Literals.WriteBufferForce();
-                if (i % 100000 == 0) Console.Write("w{0} ", i / 100000); i += tripletGrpah.PredicateDataValuePairs.Count + tripletGrpah.PredicateObjValuePairs.Count;
-                    var subject = TripleInt.EntitiesCodeCache[tripletGrpah.subject];
+                if (i%100000 == 0) Console.Write("w{0} ", i/100000);
+                i += tripletGrpah.PredicateDataValuePairs.Count + tripletGrpah.PredicateObjValuePairs.Count;
+                var subject = TripleInt.EntitiesCodeCache[tripletGrpah.subject];
 
                 foreach (var predicateObjValuePair in tripletGrpah.PredicateObjValuePairs)
                     otriples.Root.AppendElement(new object[]
@@ -328,6 +323,10 @@ namespace TrueRdfViewer
                         predicateObjValuePair.Key,
                         TripleInt.EntitiesCodeCache[predicateObjValuePair.Value]
                     });
+                //foreach (var predicateDataValuePair in tripletGrpah.PredicateDataValuePairs)
+                //    LiteralStore.Literals.Write(predicateDataValuePair.Value);
+                LiteralStore.Literals.WriteBufferForce();
+
                 foreach (var predicateDataValuePair in tripletGrpah.PredicateDataValuePairs)
                     dtriples_sp.Root.AppendElement(new object[]
                     {
@@ -335,9 +334,8 @@ namespace TrueRdfViewer
                         predicateDataValuePair.Key,
                         predicateDataValuePair.Value.Offset
                     });
-
             }
-            
+
             otriples.Flush();
           
             dtriples_sp.Flush();
@@ -345,7 +343,7 @@ namespace TrueRdfViewer
 
         private void Close()
         {
-         LiteralStore.Literals.dataCell.Close();
+        // LiteralStore.Literals.dataCell.Close();
             dtriples_sp.Close();
             otriples.Close();
             otriples_op.Close();

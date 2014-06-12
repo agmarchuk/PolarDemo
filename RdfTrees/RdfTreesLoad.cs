@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using PolarDB;
 using TripleIntClasses;
+using TrueRdfViewer;
 
 
 namespace RdfTrees
@@ -13,7 +14,7 @@ namespace RdfTrees
         {
             // Дополнительные ячейки и индексы
             PaCell otriples = new PaCell(tp_otriple_seq, path + "otriples.pac", false);
-            //PaCell dtriples = new PaCell(tp_dtriple_seq, path + "dtriples.pac", false); // Временно выведена в переменные класса, открывается при инициализации
+            PaCell dtriples = new PaCell(tp_dtriple_spf, path + "dtriples.pac", false); // Временно выведена в переменные класса, открывается при инициализации
 
             DateTime tt0 = DateTime.Now;
 
@@ -36,17 +37,17 @@ namespace RdfTrees
             //});
             //otriples_op.Flush();
 
-            PaCell dtriples_sp = new PaCell(tp_dtriple_spf, path + "dtriples_spf.pac", false);
-            dtriples_sp.Clear(); dtriples_sp.Fill(new object[0]);
-            dtriples.Root.Scan((off, pobj) =>
-            {
-                object[] tri = (object[])pobj;
-                int s = (int)tri[0];
-                int p = (int)tri[1];
-                dtriples_sp.Root.AppendElement(new object[] { s, p, off });
-                return true;
-            });
-            dtriples_sp.Flush();
+            //PaCell dtriples_sp = new PaCell(tp_dtriple_spf, path + "dtriples_spf.pac", false);
+            //dtriples_sp.Clear(); dtriples_sp.Fill(new object[0]);
+            //dtriples.Root.Scan((off, pobj) =>
+            //{
+            //    object[] tri = (object[])pobj;
+            //    int s = (int)tri[0];
+            //    int p = (int)tri[1];
+            //    dtriples_sp.Root.AppendElement(new object[] { s, p, off });
+            //    return true;
+            //});
+            //dtriples_sp.Flush();
             Console.WriteLine("Additional files ok. duration={0}", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             // Сортировки
@@ -66,7 +67,7 @@ namespace RdfTrees
             Console.WriteLine("otriples_op Sort ok. Duration={0} msec.", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             // Упорядочивание dtriples_sp по s-p
-            dtriples_sp.Root.SortByKey(rec =>
+            dtriples.Root.SortByKey(rec =>
             {
                 object[] r = (object[])rec;
                 return new SubjPredInt() { pred = (int)r[1], subj = (int)r[0] };
@@ -80,7 +81,7 @@ namespace RdfTrees
 
             otriples.Close();
             otriples_op.Close();
-            dtriples_sp.Close();
+            dtriples.Close();
             // Создает ячейку фиксированного формата tree_fix.pxc
             MakeTreeFix();
             
@@ -211,17 +212,17 @@ namespace RdfTrees
                 new NamedType("subject", tp_entity),
                 new NamedType("predicate", tp_entity),
                 new NamedType("object", tp_entity)));
-            PType tp_dtriple_seq = new PTypeSequence(new PTypeRecord(
-                new NamedType("subject", tp_entity),
-                new NamedType("predicate", tp_entity),
-                new NamedType("data", tp_literal)));
+            //PType tp_dtriple_seq = new PTypeSequence(new PTypeRecord(
+            //    new NamedType("subject", tp_entity),
+            //    new NamedType("predicate", tp_entity),
+            //    new NamedType("data", tp_literal)));
             PType tp_dtriple_spf = new PTypeSequence(new PTypeRecord(
                 new NamedType("subject", tp_entity),
                 new NamedType("predicate", tp_entity),
                 new NamedType("offset", new PType(PTypeEnumeration.longinteger))));
             PaCell otriples = new PaCell(tp_otriple_seq, path + "otriples.pac", true);
             PaCell otriples_op = new PaCell(tp_otriple_seq, path + "otriples_op.pac", true);
-            PaCell dtriples_sp = new PaCell(tp_dtriple_spf, path + "dtriples_spf.pac", true);
+            PaCell dtriples_sp = new PaCell(tp_dtriple_spf, path + "dtriples.pac", true);
 
             // ==== Определение количества сущностей ====
             // Делаю три упрощенных сканера
@@ -342,6 +343,7 @@ namespace RdfTrees
                 tree_fix.Root.Element(longindex).Set(record); longindex++;
             }
             tree_fix.Close();
+            this.entitiesTree = new PxCell(tp_entitiesTree, path + "entitiesTree.pxc", false);
             Console.WriteLine("Scan3fix ok. Duration={0} msec. cnt_e={1} ", (DateTime.Now - tt0).Ticks / 10000L, cnt_e); tt0 = DateTime.Now;
             return cnt_e;
         }
@@ -351,38 +353,42 @@ namespace RdfTrees
             otriples.Fill(new object[0]);
             dtriples.Clear();
             dtriples.Fill(new object[0]);
+            LiteralStore.Literals.dataCell.Clear();
+            LiteralStore.Literals.dataCell.Fill(new object[0]);
             int i = 0;
             //Entity e = new Entity();
-            foreach (var triple in TurtleInt.LoadGraph(filepath))
+            TripleInt.SiCodingEntities.Clear();
+            TripleInt.SiCodingPredicates.Clear();
+            TripleInt.EntitiesCodeCache.Clear();
+            TripleInt.PredicatesCodeCache.Clear();
+
+
+            foreach (var tripletGrpah in TurtleInt.LoadGraphs(filepath))
             {
-                if (i % 1000000 == 0) Console.Write("{0} ", i / 1000000);
-                i++;
-                if (triple is OTripleInt)
-                {
-                    var tr = (OTripleInt)triple;
-                    otriples.Root.AppendElement(new object[] 
-                    { 
-                        tr.subject, 
-                        tr.predicate, 
-                        tr.obj 
+               
+                if (i % 100000 == 0) Console.Write("w{0} ", i / 100000); i += tripletGrpah.PredicateDataValuePairs.Count + tripletGrpah.PredicateObjValuePairs.Count;
+                var subject = TripleInt.EntitiesCodeCache[tripletGrpah.subject];
+
+                foreach (var predicateObjValuePair in tripletGrpah.PredicateObjValuePairs)
+                    otriples.Root.AppendElement(new object[]
+                    {
+                        subject,
+                        predicateObjValuePair.Key,
+                        TripleInt.EntitiesCodeCache[predicateObjValuePair.Value]
                     });
-                }
-                else
-                {
-                    var tr = (DTripleInt)triple;
-                  Literal lit = tr.data;
-                    
-                    
-                    dtriples.Root.AppendElement(new object[] 
-                    { 
-                        tr.subject, 
-                        tr.predicate, 
-                        Literal.ToObjects(lit) 
-                    });
-                }
+                LiteralStore.Literals.WriteBufferForce();
+                foreach (var predicateDataValuePair in tripletGrpah.PredicateDataValuePairs)
+                    dtriples.Root.AppendElement(new object[]
+                    {
+                        subject,
+                        predicateDataValuePair.Key,
+                    predicateDataValuePair.Value.Offset
+                    });               
             }
+            
             otriples.Flush();
             dtriples.Flush();
+            
         }
     }
 }

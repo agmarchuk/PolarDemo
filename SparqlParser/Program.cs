@@ -29,16 +29,13 @@ namespace SparqlParser
          ////   var count =  1000;
          //   TestPerfomanceCoding(new StringIntRAMDIctionary(@"..\..\codeTests\"), Enumerable.Range(0, count).Select(i => Guid.NewGuid().ToString()).ToArray(), count);
 
-           Test();
+          Test();
 
            Console.WriteLine(Millions = 10);         
-             //Test();
+             //   Test();
 
            Console.WriteLine(Millions = 100);
-                
-          
-
-       //   Test();
+           //   Test();
            Console.WriteLine(Millions = 1000);
       //  Test();
 
@@ -47,32 +44,36 @@ namespace SparqlParser
         private static void Test()
         {
            // Console.WriteLine(Millions);
-            TripleInt.useSimpleCoding = true;
+            TripleInt.useSimpleCoding = false;
+            TripleInt.SiCodingEntities = new StringIntMD5RAMCollision(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\entitiesCodes");
+            TripleInt.SiCodingPredicates = new StringIntRAMDIctionary(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\predicatesCodes");
             TripleStoreInt ts = new global::RdfTrees.RdfTrees(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
+            //TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
 
            TripleInt.EntitiesCodeCache.Clear();
            TripleInt.PredicatesCodeCache.Clear();
            Query.decodesCasheEntities.Clear();
-            //  TripleStoreInt ts = new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\undecoded\" + Millions + @"mln\");
 
-                  bool load = false;
-                    //   bool load = true;
+
+
+               bool load = false;
+               //    bool load = true;
               using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;
             long spent = 0;
             if (load)
             {
-                ts.LoadTurtle(@"C:\deployed\" + Millions + "M.ttl");       
+                ts.LoadTurtle(@"C:\deployed\" + Millions + "M.ttl");
             }
             else
             {
                 ts.WarmUp();
-                spent = (DateTime.Now - start).Ticks / 10000;
+                spent = (DateTime.Now - start).Ticks/10000;
                 using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                     wr.WriteLine("warm up " + spent + " мс.");
-                 //   RunBerlinsWithConstants( ts);
-               RunBerlinsParameters(ts);      
+                //         RunBerlinsWithConstants( ts);
+                RunBerlinsParameters(ts);
             }
             spent = (DateTime.Now - start).Ticks/10000;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))   

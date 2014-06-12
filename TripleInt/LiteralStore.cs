@@ -20,17 +20,38 @@ namespace TrueRdfViewer
         private static PType tp_data_seq = new PTypeSequence(tp_rliteral);
         public PaCell dataCell;
         private List<Literal> writeBuffer;
-        public string pataCellPath;
-        public static LiteralStore Literals;
+        private static string pataCellPath;
+        private static LiteralStore literals;
 
         public LiteralStore(string path)
         {
             pataCellPath = path + "data.pac";              
         }
 
+        
+        public static LiteralStore Literals
+        {
+            get
+            {
+                if (literals == null)
+                {
+                    literals=new LiteralStore(pataCellPath);
+                    literals.Open(false);
+                }
+                return literals;
+            }
+        }
+
+        public static string DataCellPath
+        {
+            set { pataCellPath = value; }
+        }
+
         public void Open(bool readOnlyMode)
         {
             dataCell = new PaCell(tp_data_seq, pataCellPath, readOnlyMode);
+            if(dataCell.IsEmpty)
+                dataCell.Fill(new object[0]);
         }
 
         public void WarmUp()
@@ -56,6 +77,8 @@ namespace TrueRdfViewer
 
         public void WriteBufferForce()
         {
+        
+            
             foreach (var lit in writeBuffer)
             {
                 var da = Literal.ToObjects(lit);

@@ -12,21 +12,22 @@ namespace RdfTrees
     {
         // Типы
         private PType tp_entitiesTree;
-        private PType tp_literalsTree;
-        private PType tp_literal;
+    //    private PType tp_literalsTree;
+        //private PType tp_literal;
             // Дополнительные типы
         private PType tp_entity;
         private PType tp_otriple_seq;
-        private PType tp_dtriple_seq;
+      //  private PType tp_dtriple_seq;
         private PType tp_dtriple_spf;
         
         // Ячейки
         private PxCell entitiesTree;
         //private PxCell literalsTree;
-        private PaCell dtriples;
+       // private PaCell dtriples;
         // Место для базы данных
         private string path;
         private ScaleCell scale;
+        private string entitiesTreePath;
         /// <summary>
         /// Конструктор
         /// </summary>
@@ -37,12 +38,12 @@ namespace RdfTrees
             // Построим типы
             InitTypes();
             // Создадим или откроем ячейки
-            this.entitiesTree = new PxCell(tp_entitiesTree, path + "entitiesTree.pxc", false);
+            this.entitiesTree = new PxCell(tp_entitiesTree, entitiesTreePath = path + "entitiesTree.pxc", false);
             //this.literalsTree = new PxCell(tp_literalsTree, path + "literalsTree.pxc", false);
-            this.dtriples = new PaCell(tp_dtriple_seq, path + "dtriples.pac", false); // Это вместо не работающего дерева литералов       }
+          //  this.dtriples = new PaCell(tp_dtriple_spf, path + "dtriples.pac", false); // Это вместо не работающего дерева литералов       }
             scale=new ScaleCell(path);
             if (!scale.Filescale) scale.CreateScale(otriples);
-
+            LiteralStore.DataCellPath = path;        
         }
         // Построение типов
         private void InitTypes()
@@ -58,32 +59,21 @@ namespace RdfTrees
                 new NamedType("inverse", new PTypeSequence(new PTypeRecord(
                     new NamedType("prop", new PType(PTypeEnumeration.integer)),
                     new NamedType("sources", new PTypeSequence(new PType(PTypeEnumeration.integer))))))));
-  tp_literal = new PTypeUnion(
-   new NamedType("void", new PType(PTypeEnumeration.none)),
-   new NamedType("integer", new PType(PTypeEnumeration.real)),
-   new NamedType("string", new PTypeRecord(
-       new NamedType("s", new PType(PTypeEnumeration.sstring)),
-       new NamedType("l", new PType(PTypeEnumeration.sstring)))),
-   new NamedType("date", new PType(PTypeEnumeration.longinteger)),
-   new NamedType("bool", new PType(PTypeEnumeration.boolean)),
-   new NamedType("typedObject", new PTypeRecord(
-       new NamedType("s", new PType(PTypeEnumeration.sstring)),
-       new NamedType("t", new PType(PTypeEnumeration.sstring)))));
-            this.tp_literalsTree = new PTypeSequence(new PTypeRecord(
-                new NamedType("prop", new PType(PTypeEnumeration.integer)),
-                new NamedType("litpairs", new PTypeSequence(new PTypeRecord(
-                    new NamedType("source", new PType(PTypeEnumeration.integer)),
-                    new NamedType("lit", tp_literal))))));
+            //this.tp_literalsTree = new PTypeSequence(new PTypeRecord(
+            //    new NamedType("prop", new PType(PTypeEnumeration.integer)),
+            //    new NamedType("litpairs", new PTypeSequence(new PTypeRecord(
+            //        new NamedType("source", new PType(PTypeEnumeration.integer)),
+            //        new NamedType("lit", tp_literal))))));
             // Дополнительные типы
             tp_entity = new PType(PTypeEnumeration.integer);
             tp_otriple_seq = new PTypeSequence(new PTypeRecord(
                 new NamedType("subject", tp_entity),
                 new NamedType("predicate", tp_entity),
                 new NamedType("object", tp_entity)));
-            tp_dtriple_seq = new PTypeSequence(new PTypeRecord(
-                new NamedType("subject", tp_entity),
-                new NamedType("predicate", tp_entity),
-                new NamedType("data", tp_literal)));
+            //tp_dtriple_seq = new PTypeSequence(new PTypeRecord(
+            //    new NamedType("subject", tp_entity),
+            //    new NamedType("predicate", tp_entity),
+            //    new NamedType("data", new PType(PTypeEnumeration.longinteger))));
             tp_dtriple_spf = new PTypeSequence(new PTypeRecord(
                 new NamedType("subject", tp_entity),
                 new NamedType("predicate", tp_entity),
