@@ -49,7 +49,7 @@ namespace RdfTrees
             scale=new ScaleCell(path);
             
                 otriples = new PaCell(tp_otriple_seq, path + "otriples.pac", File.Exists(path + "otriples.pac"));
-                if (!scale.Filescale) scale.CreateScale(otriples);
+            if (!scale.Filescale) scale.CreateScale(otriples);
                 otriples.Close();
             
             LiteralStore.DataCellPath = path;        
@@ -88,6 +88,13 @@ namespace RdfTrees
                 new NamedType("predicate", tp_entity),
                 new NamedType("offset", new PType(PTypeEnumeration.longinteger))));
         }
+        // Разогрев
+        public override void WarmUp()
+        {
+            //entitiesTree.Flush();
+            //object ob = entitiesTree.Root.Get();
+            foreach (var v in dtriples.Root.ElementValues()) ;
+        }
 
         public IEnumerable<int> GetSubjectByDataPred(int p, Literal d)
         {
@@ -118,6 +125,5 @@ namespace RdfTrees
         //    }
         //    else return null; // такого варианта нет
         //}
-       
     }
 }
