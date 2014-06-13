@@ -36,7 +36,7 @@ namespace SparqlParser
 
         #region Run
 
-        public string Run(TripleStoreInt ts)
+        public string Run(IRDFIntStore ts)
         {
             if (AsqRun != null) return AsqRun(ts).ToString();
             if (SelectRun != null)
@@ -48,7 +48,7 @@ namespace SparqlParser
             throw new Exception();
         }
 
-        public Func<TripleStoreInt, IEnumerable<IEnumerable<object>>> SelectRun;
+        public Func<IRDFIntStore, IEnumerable<IEnumerable<object>>> SelectRun;
 
         internal void CreateSelectRun()
         {
@@ -83,12 +83,12 @@ namespace SparqlParser
             };
         }
 
-        private static IEnumerable<RPackInt> Repeat(object[] row, TripleStoreInt ts)
+        private static IEnumerable<RPackInt> Repeat(object[] row, IRDFIntStore ts)
         {                                    
            yield return new RPackInt(row, ts);
         }
 
-        public Func<TripleStoreInt, IEnumerable<IEnumerable<string>>> DescribeRun;
+        public Func<IRDFIntStore, IEnumerable<IEnumerable<string>>> DescribeRun;
 
         internal void CreateDescribeRun()
         {
@@ -161,7 +161,7 @@ namespace SparqlParser
         }
 
 
-        public Func<TripleStoreInt, IEnumerable<IEnumerable<object>>> ConstructRun;
+        public Func<IRDFIntStore, IEnumerable<IEnumerable<object>>> ConstructRun;
 
         internal void CreateConstructRun()
         {
@@ -181,7 +181,7 @@ namespace SparqlParser
             };
         }
 
-        public Func<TripleStoreInt, bool> AsqRun;
+        public Func<IRDFIntStore, bool> AsqRun;
         internal Func<RPackInt, IEnumerable<Tuple<string, string, string>>> constructTemplate;
 
         internal readonly List<Func<RPackInt, IEnumerable<Tuple<string, string, string>>>> constructTriples = new List<Func<RPackInt, IEnumerable<Tuple<string, string, string>>>>();

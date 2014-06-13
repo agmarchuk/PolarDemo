@@ -1,5 +1,8 @@
-﻿using PolarDB;
+﻿using System.Collections.Generic;
+using System.IO;
+using PolarDB;
 using ScaleBit4Check;
+using TripleIntClasses;
 using TrueRdfViewer;
 
 
@@ -8,7 +11,7 @@ namespace RdfTrees
     /// <summary>
     /// Класс, представляющий собой хранилище триплетов, его методов, способ загрузки данных и формирования структуры
     /// </summary>
-    public partial class RdfTrees     :TripleStoreInt
+    public partial class RdfTrees     :IRDFIntStore
     {
         // Типы
         private PType tp_entitiesTree;
@@ -28,6 +31,8 @@ namespace RdfTrees
         private string path;
         private ScaleCell scale;
         private string entitiesTreePath;
+        private PaCell otriples;
+
         /// <summary>
         /// Конструктор
         /// </summary>
@@ -42,11 +47,15 @@ namespace RdfTrees
             //this.literalsTree = new PxCell(tp_literalsTree, path + "literalsTree.pxc", false);
           //  this.dtriples = new PaCell(tp_dtriple_spf, path + "dtriples.pac", false); // Это вместо не работающего дерева литералов       }
             scale=new ScaleCell(path);
-            if (!scale.Filescale) scale.CreateScale(otriples);
+            
+                otriples = new PaCell(tp_otriple_seq, path + "otriples.pac", File.Exists(path + "otriples.pac"));
+                if (!scale.Filescale) scale.CreateScale(otriples);
+                otriples.Close();
+            
             LiteralStore.DataCellPath = path;        
         }
         // Построение типов
-        private void InitTypes()
+        public void InitTypes()
         {
             this.tp_entitiesTree = new PTypeSequence(new PTypeRecord(
                 new NamedType("id", new PType(PTypeEnumeration.integer)),
@@ -79,6 +88,12 @@ namespace RdfTrees
                 new NamedType("predicate", tp_entity),
                 new NamedType("offset", new PType(PTypeEnumeration.longinteger))));
         }
+
+        public IEnumerable<int> GetSubjectByDataPred(int p, Literal d)
+        {
+            throw new System.NotImplementedException();
+        }
+
         // Генерация литерала из объектного представления, соответствующего tp_literal 
         //public static Literal GenerateLiteral(object pobj)
         //{
@@ -103,5 +118,6 @@ namespace RdfTrees
         //    }
         //    else return null; // такого варианта нет
         //}
+       
     }
 }

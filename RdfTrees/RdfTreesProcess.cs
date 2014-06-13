@@ -15,131 +15,60 @@ namespace RdfTrees
     {
         
 
-        public override bool ChkOSubjPredObj(int subj, int pred, int obj)
+        public bool ChkOSubjPredObj(int subj, int pred, int obj)
         {
             if (subj == Int32.MinValue || obj == Int32.MinValue || pred == Int32.MinValue) return false;
-            bool exists;
-            var key = new OTripleInt() { subject = subj, obj = obj, predicate = pred };
-            if (!spoCache.TryGetValue(key, out exists))
-            {
 
-                exists = CheckContains(subj, pred, obj);
-                spoCache.Add(key, exists);
-            }
-            return exists;      
+            return CheckContains(subj, pred, obj);
         }
-    
+        public bool CheckInScale(int subj, int pred, int obj)
+        {
+            return scale.ChkInScale(subj, pred, obj);
+        }
+
         private bool CheckContains(int subj, int pred, int obj)
         {
             if (!scale.ChkInScale(subj, pred, obj)) return false;
-
-            //SubjPredObjInt key = new SubjPredObjInt() { subj = subj, pred = pred, obj = obj };
-            //var entry = otriples.Root.BinarySearchFirst(ent => (new SubjPredObjInt(ent.Get())).CompareTo(key));
-            int[] resSubj, resObj;
-            var keySub = new KeyValuePair<int, int>(subj, pred);
-            var keyObj = new KeyValuePair<int, int>(obj, pred);
-
-            //если даже в оперативной памяти закешированы предикаты, но их больше, чем эта константа, то будет проверено количество предикатов в другом
-            const int limit = 1000;
-
-
-            // проверка кешей 
-            var subjExists = spOCache.TryGetValue(keySub, out resSubj);
-            var objExists = SpoCache.TryGetValue(keyObj, out resObj);
-            long subjLength = 0;
-            if (subjExists)
-            {
-                subjLength = resSubj.Length;
-                // но если и обратыне тоже есть в кеше, то будет сравниваться их количество
-                if (!objExists && subjLength < limit)
-                    return resSubj.Contains(obj);
-            }
-            long objLength = 0;
-            if (objExists)
-            {
-                objLength = resObj.Length;
-                if (!subjExists && objLength < limit)
-                    return resObj.Contains(subj);
-            }
-            if (subjExists && objExists)
-                if (subjLength > objLength)
-                    return resObj.Contains(subj);
-                else return resSubj.Contains(obj);
-
-            //теперь либо один из массивов есть в кеше и слишком большой, либо обоих нет.
-            resObj = (int[]) GetObjBySubjPred(subj, pred);
-                return resObj.Contains(subj);
-            
+            return GetObjBySubjPred(subj, pred).Contains(subj);   
         }
-        public override IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
+     
+        public  IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
         {
             if (subj == Int32.MinValue || pred == Int32.MinValue) return new Literal[0];
-            Literal[] dp;
-            var key = new KeyValuePair<int, int>(subj, pred);
-            if (!spDCache.TryGetValue(key, out dp))
-            {
-                var rec_ent = this.entitiesTree.Root.Element(subj); ;//.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
-                if (rec_ent.IsEmpty) dp = new Literal[0];
-                else
-                {
-                    object[] pairs = (object[]) rec_ent.Field(1).Get();
-                    //PaEntry dtriple_entry = dtriples.Root.Element(0);
-                    dp = pairs.Cast<object[]>()
-                        .Where(pair => (int) pair[0] == pred)
-                        .Select(pair => (long) pair[1])
-                        .Select(LiteralStore.Literals.Read)
-                        .ToArray();  
-                    spDCache.Add(key, dp);
-                }
-            }
-            return dp;
+            var rec_ent = this.entitiesTree.Root.Element(subj);; //.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
+            if (rec_ent.IsEmpty) return new Literal[0];
+            object[] pairs = (object[]) rec_ent.Field(1).Get();
+            return pairs.Cast<object[]>()
+                .Where(pair => (int) pair[0] == pred)
+                .Select(pair => (long) pair[1])
+                .Select(LiteralStore.Literals.Read)
+                .ToArray();
         }
-        public override IEnumerable<int> GetObjBySubjPred(int subj, int pred)
+
+        public  IEnumerable<int> GetObjBySubjPred(int subj, int pred)
         {
             if (subj == Int32.MinValue || pred == Int32.MinValue) return new int[0];
             var key = new KeyValuePair<int, int>(subj, pred);
-            int[] objects;
-            if (!spOCache.TryGetValue(key, out objects))
-            {
-                var rec_ent = this.entitiesTree.Root.Element(subj);// //.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
-                //if (rec_ent.IsEmpty) objects = new int[0]; else
-                {
-                    object[] pairs = (object[]) rec_ent.Field(2).Get();
-                    objects = pairs.Cast<object[]>().Where(pair => (int) pair[0] == pred)
-                        .Select(pair => (int) pair[1])
-                        .ToArray();
-                }
-                spOCache.Add(key, objects);
-            }
-
-            return objects;
+            var rec_ent = this.entitiesTree.Root.Element(subj);// //.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
+            if (rec_ent.IsEmpty) return new int[0];
+            return ((object[]) rec_ent.Field(2).Get())
+                .Cast<object[]>()
+                .Where(pair => (int) pair[0] == pred)
+                .Select(pair => (int) pair[1])
+                .ToArray();
         }
 
-        public override IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
+        public  IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
         {
-            int[] subjects;
             if (obj == Int32.MinValue || pred == Int32.MinValue) return new int[0];
             var key = new KeyValuePair<int, int>(obj, pred);
-            if (!SpoCache.TryGetValue(key, out subjects))
-            {
-                var rec_ent = this.entitiesTree.Root.Element(obj); //.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(obj));
-                //if (rec_ent.IsEmpty) subjects = new int[0];else
-                {
-                    object[] subjs = null;
-                    foreach (var pred_subjseq in rec_ent.Field(3).Elements())
-                    {
-                        var p = (int) pred_subjseq.Field(0).Get();
-                        if (p == pred)
-                        {
-                            subjs = (object[]) pred_subjseq.Field(1).Get();
-                            break;
-                        }
-                    }
-                    subjects = subjs == null ? new int[0] : subjs.Cast<int>().ToArray();
-                    SpoCache.Add(key, subjects);
-                }
-            }
-            return subjects;
+            var rec_ent = this.entitiesTree.Root.Element(obj);
+                //.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(obj));
+            if (rec_ent.IsEmpty) return new int[0];
+            var pred_subj = rec_ent.Field(3).Elements()
+                .FirstOrDefault(pred_subjseq => (int) pred_subjseq.Field(0).Get() == pred);
+
+            return pred_subj.offset==0 ? new int[0] : ((object[])pred_subj.Field(1).Get()).Cast<int>().ToArray();
         }
 
 
@@ -148,82 +77,72 @@ namespace RdfTrees
         /// </summary>
         /// <param name="subj"></param>
         /// <returns></returns>
-        public override IEnumerable<KeyValuePair<int, int>> GetObjBySubj(int subj)
+        public  IEnumerable<KeyValuePair<int, int>> GetObjBySubj(int subj)
         {
-            IEnumerable<KeyValuePair<int, int>> op;
             if (subj == Int32.MinValue) return new KeyValuePair<int, int>[0];
-            if (!sPOCache.TryGetValue(subj, out op))
-            {
-                var rec_ent = this.entitiesTree.Root.Element(subj);//.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
-                //if (rec_ent.IsEmpty) op = new KeyValuePair<int, int>[0]; else
-                {
-                    object[] pairs = (object[]) rec_ent.Field(2).Get();
-                    op = pairs.Cast<object[]>()
-                        .Select(pair => new KeyValuePair<int, int>((int) pair[1], (int) pair[0]))
-                            .ToArray();
-                }
-                sPOCache.Add(subj, op);
-            }  
-            return op;
+            var rec_ent = this.entitiesTree.Root.Element(subj);//.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
+            if (rec_ent.IsEmpty) return new KeyValuePair<int, int>[0];
+            return ((object[]) rec_ent.Field(2).Get())
+                .Cast<object[]>()
+                .Select(pair => new KeyValuePair<int, int>((int) pair[1], (int) pair[0]))
+                .ToArray();
         }
 
-        public override IEnumerable<KeyValuePair<Literal, int>> GetDataBySubj(int subj)
+        public  IEnumerable<KeyValuePair<Literal, int>> GetDataBySubj(int subj)
         {
             if (subj == Int32.MinValue) return new KeyValuePair<Literal, int>[0];
-            IEnumerable<KeyValuePair<Literal, int>> pd;
-            if (!sPDCache.TryGetValue(subj, out pd))
-            {
-                var rec_ent = this.entitiesTree.Root.Element(subj);//BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
-                //if (rec_ent.IsEmpty) pd = new KeyValuePair<Literal, int>[0];else
+            var rec_ent = this.entitiesTree.Root.Element(subj);
+            //BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
+            //if (rec_ent.IsEmpty) pd = new KeyValuePair<Literal, int>[0];else
+
+            object[] pairs = (object[]) rec_ent.Field(1).Get();
+            //   PaEntry dtriple_entry = dtriples.Root.Element(0);
+            return pairs.Cast<object[]>()
+                .Select(pair =>
                 {
-                    object[] pairs = (object[]) rec_ent.Field(1).Get();
-                 //   PaEntry dtriple_entry = dtriples.Root.Element(0);
-                    pd = pairs.Cast<object[]>()
-                        .Select(pair =>
-                        {
-                           var offset = (long) pair[1];
-                            var literal_obj = LiteralStore.Literals.Read(offset);
-                            return new KeyValuePair<Literal, int>(literal_obj, (int) pair[0]);
-                        })
-                        .ToArray();
-                    sPDCache.Add(subj, pd);
-                }
-            }
-            return pd;
+                    var offset1 = (long) pair[1];
+                    var literalObj = LiteralStore.Literals.Read(offset1);
+                    return new KeyValuePair<Literal, int>(literalObj, (int) pair[0]);
+                })
+                .ToArray();
         }
+
         /// <summary>
         /// keys entities
         /// </summary>
         /// <param name="subj"></param>
         /// <returns></returns>
-        public override IEnumerable<KeyValuePair<int, int>> GetSubjectByObj(int obj)
+        public  IEnumerable<KeyValuePair<int, int>> GetSubjectByObj(int obj)
         {
             if (obj == Int32.MinValue) return new KeyValuePair<int, int>[0];
 
-            IEnumerable<KeyValuePair<int, int>> sp;
-            if (!SPoCache.TryGetValue(obj, out sp))
+            var rec_ent = this.entitiesTree.Root.Element(obj);
+            //.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(obj));
+            //if (rec_ent.IsEmpty) sp = new KeyValuePair<int, int>[0];else
+
+            List<KeyValuePair<int, int>> subjs = new List<KeyValuePair<int, int>>();
+            foreach (var pred_subjseq in rec_ent.Field(3).Elements())
             {
-                var rec_ent = this.entitiesTree.Root.Element(obj);//.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(obj));
-                //if (rec_ent.IsEmpty) sp = new KeyValuePair<int, int>[0];else
-                {
-                    List<KeyValuePair<int, int>> subjs = new List<KeyValuePair<int, int>>();
-                    foreach (var pred_subjseq in rec_ent.Field(3).Elements())
-                    {
-                        var p = (int) pred_subjseq.Field(0).Get();
-                        subjs.AddRange(from int s in (object[]) pred_subjseq.Field(1).Get()
-                            select new KeyValuePair<int, int>(s, p));
-                    }
-                    sp = subjs;
-                }
-                SPoCache.Add(obj, sp);
+                var p = (int) pred_subjseq.Field(0).Get();
+                subjs.AddRange(from int s in (object[]) pred_subjseq.Field(1).Get()
+                    select new KeyValuePair<int, int>(s, p));
             }
-            return sp;
+            return subjs;
         }
 
-        public override void WarmUp()
+        public  void WarmUp()
         {
           entitiesTree.Close();
-            File.ReadAllBytes(entitiesTreePath);
+            using (FileStream reader =new FileStream(entitiesTreePath,FileMode.Open))
+            {
+                int read=1;
+                while (read>0)
+                {
+                    byte[] temp=new byte[500];
+                    read = reader.Read(temp, 0, 500);
+                    
+                }
+            }
             entitiesTree=new PxCell(tp_entitiesTree, entitiesTreePath);
                   LiteralStore.Literals.WarmUp();
         }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using PolarDB;
 using TrueRdfViewer;
 
 namespace TripleIntClasses
@@ -8,7 +9,55 @@ namespace TripleIntClasses
     public static class TurtleInt
     {
         public static int BufferMax =30*1000 * 1000;
-        
+        public static void LoadTriplets(string filepath, ref PaCell otriples, ref PaCell dtriplets)
+        {
+            //Directory.Delete(path);               
+            //Directory.CreateDirectory(path);
+
+
+            otriples.Clear();
+            otriples.Fill(new object[0]);
+
+
+            dtriplets.Clear();
+            dtriplets.Fill(new object[0]);
+            int i = 0;
+            //Entity e = new Entity();
+            TripleInt.SiCodingEntities.Clear();
+            TripleInt.SiCodingPredicates.Clear();
+            TripleInt.EntitiesCodeCache.Clear();
+            TripleInt.PredicatesCodeCache.Clear();
+
+
+            foreach (var tripletGrpah in TurtleInt.LoadGraphs(filepath))
+            {
+                if (i % 100000 == 0) Console.Write("w{0} ", i / 100000);
+                i += tripletGrpah.PredicateDataValuePairs.Count + tripletGrpah.PredicateObjValuePairs.Count;
+                var subject = TripleInt.EntitiesCodeCache[tripletGrpah.subject];
+
+                foreach (var predicateObjValuePair in tripletGrpah.PredicateObjValuePairs)
+                    otriples.Root.AppendElement(new object[]
+                    {
+                        subject,
+                        predicateObjValuePair.Key,
+                        TripleInt.EntitiesCodeCache[predicateObjValuePair.Value]
+                    });
+                //foreach (var predicateDataValuePair in tripletGrpah.PredicateDataValuePairs)
+                //    LiteralStore.Literals.Write(predicateDataValuePair.Value);
+                LiteralStore.Literals.WriteBufferForce();
+
+                foreach (var predicateDataValuePair in tripletGrpah.PredicateDataValuePairs)
+                    dtriplets.Root.AppendElement(new object[]
+                    {
+                        subject,
+                        predicateDataValuePair.Key,
+                        predicateDataValuePair.Value.Offset
+                    });
+            }
+
+            otriples.Flush();
+            dtriplets.Flush();
+        }            
         public static IEnumerable<TripletGraph> LoadGraphs(string datafile)
             //EngineVirtuoso engine, string graph, string datafile)
         {

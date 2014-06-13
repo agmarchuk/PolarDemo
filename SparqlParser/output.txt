@@ -1245,5 +1245,15 @@ total parse 360, 153, 723, 589, 1123, 275, 417, 876, 18, 738, 55, 160
 total run 56, 160, 71, 66, 1908, 3293, 900, 575, 72, 339, 62, 102
 countCodingUsages 9133 totalMillisecondsCodingUsages 181
 total 31249 мс.
-millions 1
-warm up 285 мс.
+
+millions 100
+load 2806612 мс.
+millions 100
+millions 100
+millions 100
+millions 100
+millions 100
+millions 100
+millions 100
+millions 100
+warm up 109146 мс.

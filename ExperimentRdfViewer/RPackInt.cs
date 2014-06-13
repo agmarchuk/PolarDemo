@@ -10,10 +10,10 @@ namespace TrueRdfViewer
     {
         //public bool result;
         public object[] row;
-        private readonly TripleStoreInt ts;
-        public TripleStoreInt Store { get { return ts; } }
+        private readonly IRDFIntStore ts;
+        public IRDFIntStore Store { get { return ts; } }
 
-        public RPackInt(object[] row, TripleStoreInt ts)
+        public RPackInt(object[] row, IRDFIntStore ts)
         {
             this.row = row;
             this.ts = ts;
