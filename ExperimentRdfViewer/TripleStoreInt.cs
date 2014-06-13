@@ -67,8 +67,16 @@ namespace TrueRdfViewer
             otriples_filePath = path + "otriples.pac";
             dtriples_filePath = path + "dtriples_spf.pac";
             LiteralStore.DataCellPath=path;
+            if (File.Exists(otriples_filePath))
+                Open(true);
+            else
+            {
+                otriples = new PaCell(tp_triple_seq_two, otriples_filePath, false);
+                otriples_op = new PaCell(tp_triple_seq_two, otriplets_op_filePath, false);
+                dtriples_sp = new PaCell(tp_dtriple_spf_two, dtriples_filePath, false);
+                scale = new ScaleCell(path);
+            }
 
-            Open(File.Exists(otriples_filePath));
             if (!scale.Cell.IsEmpty)
                scale.CalculateRange();
 

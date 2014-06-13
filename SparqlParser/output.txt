@@ -1246,14 +1246,39 @@ total run 56, 160, 71, 66, 1908, 3293, 900, 575, 72, 339, 62, 102
 countCodingUsages 9133 totalMillisecondsCodingUsages 181
 total 31249 мс.
 
+
+millions 1
+load 26305 мс.
+millions 1
+warm up 316 мс.
+milions 1
+max memory usage 95184984
+average 1440, 1237, 736, 914, 151, 124, 375, 393, 5494, 434, 7462, 2525
+minimums 0, 0, 0, 0, 2, 6, 0, 0, 0, 0, 0, 0
+maximums 3, 4, 3, 3, 14, 12, 9, 6, 1, 5, 1, 2
+total parse 269, 105, 612, 460, 1068, 268, 328, 693, 22, 674, 25, 114
+total run 67, 243, 37, 46, 2067, 3647, 843, 425, 69, 333, 42, 83
+countCodingUsages 9133 totalMillisecondsCodingUsages 146
+total 33483 мс.
+millions 10
+warm up 2962 мс.
+milions 10
+max memory usage 231542608
+average 1428, 919, 652, 793, 31, 13, 239, 319, 3378, 363, 6849, 2202
+minimums 0, 0, 0, 0, 8, 67, 0, 0, 0, 0, 0, 0
+maximums 5, 3, 7, 9, 84, 122, 19, 14, 1, 6, 1, 2
+total parse 300, 105, 646, 512, 1090, 335, 405, 753, 31, 716, 27, 129
+total run 36, 340, 77, 74, 14577, 35445, 1491, 619, 117, 474, 46, 97
+countCodingUsages 15446 totalMillisecondsCodingUsages 216
+total 128046 мс.
 millions 100
-load 2806612 мс.
-millions 100
-millions 100
-millions 100
-millions 100
-millions 100
-millions 100
-millions 100
-millions 100
-warm up 109146 мс.
+warm up 30419 мс.
+milions 100
+max memory usage 1142589400
+average 135, 247, 124, 148, 6, 1, 7, 19, 83, 13, 35, 34
+minimums 0, 0, 0, 1, 9, 685, 1, 1, 0, 1, 0, 0
+maximums 165, 29, 211, 66, 437, 902, 780, 222, 68, 301, 99, 94
+total parse 925, 420, 1722, 1375, 2023, 339, 488, 1758, 4248, 2017, 6125, 6299
+total run 2496, 1410, 2060, 1773, 78032, 357242, 63529, 23194, 1577, 35245, 7922, 8148
+countCodingUsages 15988 totalMillisecondsCodingUsages 16788
+total 1107940 мс.

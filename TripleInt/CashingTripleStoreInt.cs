@@ -77,16 +77,18 @@ namespace TripleIntClasses
         public IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
         {
             Literal[] res;
-            if (!spDCache.TryGetValue(new KeyValuePair<int, int>(subj, pred), out res))
-                res = @base.GetDataBySubjPred(subj, pred) as Literal[];
+            var key = new KeyValuePair<int, int>(subj, pred);
+            if (!spDCache.TryGetValue(key, out res))
+               spDCache.Add(key, res = @base.GetDataBySubjPred(subj, pred) as Literal[]);
             return res;
         }
 
         public IEnumerable<int> GetObjBySubjPred(int subj, int pred)
         {
             int[] objects;
-            if (!spOCache.TryGetValue(new KeyValuePair<int, int>(subj, pred), out objects))
-                objects = @base.GetObjBySubjPred(subj, pred) as int[];
+            var key = new KeyValuePair<int, int>(subj, pred);
+            if (!spOCache.TryGetValue(key, out objects))
+               spOCache.Add(key, objects = @base.GetObjBySubjPred(subj, pred) as int[]);
             return objects;
         }
 
@@ -108,8 +110,9 @@ namespace TripleIntClasses
         public IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
         {
             int[] subjects;
-            if (!SpoCache.TryGetValue(new KeyValuePair<int, int>(obj, pred), out subjects))
-                subjects = @base.GetSubjectByObjPred(obj, pred) as int[];
+            var key = new KeyValuePair<int, int>(obj, pred);
+            if (!SpoCache.TryGetValue(key, out subjects))
+               SpoCache.Add(key,  subjects = @base.GetSubjectByObjPred(obj, pred) as int[]);
             return subjects;
         }
 
@@ -122,14 +125,14 @@ namespace TripleIntClasses
         {
             IEnumerable<KeyValuePair<int, int>> op;
             if (!sPOCache.TryGetValue(subj, out op))
-                op = @base.GetObjBySubj(subj);
+                sPOCache.Add(subj, op = @base.GetObjBySubj(subj)); 
             return op;
         }
         public IEnumerable<KeyValuePair<Literal, int>> GetDataBySubj(int subj)
         {
             IEnumerable<KeyValuePair<Literal, int>> dp;
             if (!sPDCache.TryGetValue(subj, out dp))
-                dp = @base.GetDataBySubj(subj);
+                sPDCache.Add(subj, dp = @base.GetDataBySubj(subj)); 
             return dp;
         }
 
@@ -137,7 +140,7 @@ namespace TripleIntClasses
         {
             IEnumerable<KeyValuePair<int, int>> sp;
             if (!SPoCache.TryGetValue(obj, out sp))
-                sp = @base.GetSubjectByObj(obj);
+                SPoCache.Add(obj, sp = @base.GetSubjectByObj(obj)); 
             return sp;
         }
     }
