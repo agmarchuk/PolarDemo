@@ -78,7 +78,7 @@ namespace RdfTrees
                 }
                 
             }
-            Console.WriteLine("Equal {0} Not equal {1} debug counter {2}", ecnt, ncnt, rtrees.debug_counter);
+         //   Console.WriteLine("Equal {0} Not equal {1} debug counter {2}", ecnt, ncnt, rtrees.debug_counter);
             Console.WriteLine("TOTAL: {0} мс.", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
         }
     }

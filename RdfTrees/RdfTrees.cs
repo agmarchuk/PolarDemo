@@ -89,12 +89,7 @@ namespace RdfTrees
                 new NamedType("offset", new PType(PTypeEnumeration.longinteger))));
         }
         // Разогрев
-        public override void WarmUp()
-        {
-            //entitiesTree.Flush();
-            //object ob = entitiesTree.Root.Get();
-            foreach (var v in dtriples.Root.ElementValues()) ;
-        }
+
 
         public IEnumerable<int> GetSubjectByDataPred(int p, Literal d)
         {

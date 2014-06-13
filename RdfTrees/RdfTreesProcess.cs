@@ -129,23 +129,22 @@ namespace RdfTrees
                     }
             return subjs;
         }
-
-        public  void WarmUp()
+        public void WarmUp()
         {
-          entitiesTree.Close();
-            using (FileStream reader =new FileStream(entitiesTreePath,FileMode.Open))
+            entitiesTree.Close();
+            using (FileStream reader = new FileStream(entitiesTreePath, FileMode.Open))
             {
-                int read=1;
-                while (read>0)
+                int read = 1;
+                while (read > 0)
                 {
-                    byte[] temp=new byte[500];
+                    byte[] temp = new byte[500];
                     read = reader.Read(temp, 0, 500);
-                    
+
                 }
             }
-            entitiesTree=new PxCell(tp_entitiesTree, entitiesTreePath);
-                  LiteralStore.Literals.WarmUp();
+            entitiesTree = new PxCell(tp_entitiesTree, entitiesTreePath);
+            LiteralStore.Literals.WarmUp();
         }
->>>>>>> 94d25e470b24e1e4b390d714352cfe532bcf289c
+     
     }
 }
