@@ -12,6 +12,7 @@ namespace TrueRdfViewer
     {
         private PType tp_otriple_seq;
 
+        private Dictionary<int, Dictionary<int,object>[]> positionBy_bjectPredicateCashe=new Dictionary<int, Dictionary<int, object>[]>();
 
         private PType tp_entity;
         private PType tp_dtriple_spf;
@@ -269,33 +270,76 @@ namespace TrueRdfViewer
         public  IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
         {
             if (obj == Int32.MinValue || pred == Int32.MinValue) return Enumerable.Empty<int>();
-            object[] diapason = GetDiapasonFromHash(obj, 1);
-            if (diapason == null) return new int[0];
-            return TakeValuesByPrevaricate<int>(pred, diapason, inversePredicates, inverses);
+            return TakeValuesByPrevaricate<int>(obj, pred, 1, inversePredicates, inverses);
         }
 
-        private static IEnumerable<T> TakeValuesByPrevaricate<T>(int pred, object[] diapason, PaCell predicateColumn, PaCell valueColumn)
-        {
-            long startIndex = (long) diapason[0];
+        private IEnumerable<T> TakeValuesByPrevaricate<T>(int _bject, int pred, int direction, PaCell predicateColumn, PaCell valueColumn, object[] diapason=null)
+        {                     
+            Dictionary<int, object>[] subDiapasonsAllDirections;
+            if (!positionBy_bjectPredicateCashe.TryGetValue(_bject, out subDiapasonsAllDirections))
+                positionBy_bjectPredicateCashe.Add(_bject, subDiapasonsAllDirections=Enumerable.Range(0,3).Select(i=>new Dictionary<int, object>()).ToArray());
+            Dictionary<int, object> subDiapasons = subDiapasonsAllDirections[direction];
+            object subDiapason;
+            if (!subDiapasons.TryGetValue(pred, out subDiapason))
+            {
+                if (subDiapasons.ContainsKey(-1)) subDiapason = new Diapason();    
+                else
+                {
+                    diapason = diapason ?? GetDiapasonFromHash(_bject, direction);
+                    if (diapason == null) subDiapason = new Diapason();
+                    else
+                    {
+                        Diapason readed = new Diapason();
+                        var last = subDiapasons.LastOrDefault();
+                        if (!last.Equals(default(KeyValuePair<int, object>)))
+                            if (last.Value is Diapason)
+                            {
+                                var lastSubDiapason = ((Diapason)last.Value);
+                                readed.start = lastSubDiapason.start + lastSubDiapason.numb;
+                            }
+                            else readed.start = (long)last.Value + 1;
+                        else readed.start = (long) diapason[0];
 
-            long count = predicateColumn.Root.ElementValues((long) diapason[0], (long) diapason[1])
-                .Cast<int>()
-                .SkipWhile(predicate => pred != predicate && (startIndex++) >= 0)
-                .TakeWhile(predicate => pred == predicate)
-                .Count();
-            return valueColumn.Root.ElementValues(startIndex, count).Cast<T>().ToArray();
+                        long all = (long) diapason[1] + (long) diapason[0] - readed.start;
+                        long countReaded = 0;
+                        int lastPredicate=-1;
+                        foreach (int predicateReaded in predicateColumn.Root.ElementValues(readed.start, all)
+                            .Cast<int>()
+                            .TakeWhile(predicate => predicate <= pred)
+                            .Select(p =>
+                            {
+                                countReaded++;
+                                return p;
+                            }))
+                        {
+                            if (lastPredicate==predicateReaded) {readed.numb++; continue;}
+                            if(lastPredicate>-1)    
+                            subDiapasons.Add(lastPredicate, readed.numb == 1 ? (object) readed.start : readed);
+                            readed = new Diapason() {start = readed.start + readed.numb, numb = 1};
+                            lastPredicate = predicateReaded;
+                        }
+                        if (lastPredicate > -1)
+                            subDiapasons.Add(lastPredicate, readed.numb == 1 ? (object)readed.start : readed);
+
+                        if (countReaded == all)
+                            subDiapasons.Add(-1, null);
+                        if (!subDiapasons.TryGetValue(pred, out subDiapason))
+                            subDiapason = new Diapason();
+                    }
+                }
+            }
+            return (subDiapason is long
+                ? valueColumn.Root.ElementValues((long) subDiapason, 1)
+                : valueColumn.Root.ElementValues(((Diapason) subDiapason).start, ((Diapason) subDiapason).numb))
+                    .Cast<T>()
+                    .ToArray();
         }
 
 
         public  IEnumerable<int> GetObjBySubjPred(int subj, int pred)
         {
             if (subj == Int32.MinValue || pred == Int32.MinValue) return Enumerable.Empty<int>();
-         
-            object[] diapason = GetDiapasonFromHash(subj, 0);
-            if (diapason == null) return Enumerable.Empty<int>();
-
-
-            return TakeValuesByPrevaricate<int>(pred, diapason, objPredicates, objects);
+            return TakeValuesByPrevaricate<int>(subj, pred, 0, objPredicates, objects);
         }
 
         private object[] GetDiapasonFromHash(int key, int direction)
@@ -310,11 +354,7 @@ namespace TrueRdfViewer
         public  IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
         {
             if (subj == Int32.MinValue || pred == Int32.MinValue) return Enumerable.Empty<Literal>();
-
-
-            object[] diapason = GetDiapasonFromHash(subj, 2);
-            if (diapason == null) return new Literal[0];
-            var offsets = TakeValuesByPrevaricate<long>(pred, diapason, dataPredicates, data);
+            var offsets = TakeValuesByPrevaricate<long>(subj, pred, 2, dataPredicates, data);
             
                 return offsets
                     .Select(LiteralStore.Literals.Read)
@@ -344,12 +384,12 @@ namespace TrueRdfViewer
 
             if (subjLength < objLength)
             {
-                resSubj = TakeValuesByPrevaricate<int>(pred, subjDiapason, objPredicates, objects);
+                resSubj = TakeValuesByPrevaricate<int>(subj, pred, 0, objPredicates, objects, subjDiapason);
                 return resSubj.Contains(obj);
             }
             else
             {
-                resObj = TakeValuesByPrevaricate<int>(pred, objDiapason, inversePredicates, inverses);
+                resObj = TakeValuesByPrevaricate<int>(obj,pred, 1, inversePredicates, inverses,objDiapason);
                 return resObj.Contains(subj);
             }
         }
