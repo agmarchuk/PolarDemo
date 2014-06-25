@@ -1496,38 +1496,8 @@ total parse 321, 156, 658, 529, 1036, 385, 451, 754, 22, 725, 37, 123
 total run 59, 262, 40, 32, 14639, 35072, 1797, 672, 129, 539, 67, 60
 countCodingUsages 15446 totalMillisecondsCodingUsages 243
 total 131658 мс.
-millions 1
-millions 1
-millions 1
-millions 1
-millions 1
-millions 1
-total 48112 мс.
-millions 1
-warm up 628 мс.
-millions 1
-total 48196 мс.
-millions 1
-warm up 619 мс.
-millions 1
-warm up 683 мс.
-millions 1
-total 605671 мс.
-millions 1
-warm up 1581 мс.
-millions 1
-warm up 1518 мс.
-millions 1
-warm up 1528 мс.
-millions 1
-warm up 1549 мс.
-millions 1
-total 52305 мс.
-millions 1
-warm up 1673 мс.
-milions 1
-countCodingUsages 14 totalMillisecondsCodingUsages 2
-total 2603 мс.
+
+zipped strings literals
 millions 1
 warm up 965 мс.
 milions 1
