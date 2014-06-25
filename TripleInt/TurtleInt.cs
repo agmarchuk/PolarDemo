@@ -9,6 +9,9 @@ namespace TripleIntClasses
     public static class TurtleInt
     {
         public static int BufferMax =30*1000 * 1000;
+     
+      
+
         public static void LoadTriplets(string filepath, ref PaCell otriples, ref PaCell dtriplets)
         {
             //Directory.Delete(path);               
@@ -24,10 +27,10 @@ namespace TripleIntClasses
             int i = 0;
             //Entity e = new Entity();
             TripleInt.SiCodingEntities.Clear();
-            TripleInt.SiCodingPredicates.Clear();
+            TripleInt.PredicatesCoding.Clear();
             TripleInt.EntitiesCodeCache.Clear();
             TripleInt.PredicatesCodeCache.Clear();
-
+            LiteralStoreSplited.Literals.Clear();
 
             foreach (var tripletGrpah in TurtleInt.LoadGraphs(filepath))
             {
@@ -44,7 +47,7 @@ namespace TripleIntClasses
                     });
                 //foreach (var predicateDataValuePair in tripletGrpah.PredicateDataValuePairs)
                 //    LiteralStore.Literals.Write(predicateDataValuePair.Value);
-                LiteralStore.Literals.WriteBufferForce();
+                LiteralStoreSplited.Literals.WriteBufferForce();
 
                 foreach (var predicateDataValuePair in tripletGrpah.PredicateDataValuePairs)
                     dtriplets.Root.AppendElement(new object[]
@@ -57,18 +60,19 @@ namespace TripleIntClasses
 
             otriples.Flush();
             dtriplets.Flush();
-        }            
-        public static IEnumerable<TripletGraph> LoadGraphs(string datafile)
-            //EngineVirtuoso engine, string graph, string datafile)
+        //    LiteralStoreSplited.Literals.Compress(dtriplets);
+
+        }
+        private static IEnumerable<TripletGraph> LoadGraphs(string datafile)
         {
             int ntriples = 0;
             int nTripletsInBuffer = 0;
             string subject = null;
             var namespaces = new Dictionary<string, string>();
-            
-            List<TripletGraph> bufferTripletsGrpah=new List<TripletGraph>(BufferMax);
+
+            List<TripletGraph> bufferTripletsGrpah = new List<TripletGraph>(BufferMax);
             TripletGraph currentTripletGraph = null;
-            HashSet<string> entitiesStrings=new HashSet<string>();
+            HashSet<string> entitiesStrings = new HashSet<string>();
             using (var sr = new StreamReader(datafile))
                 while (!sr.EndOfStream)
                 {
@@ -97,7 +101,7 @@ namespace TripleIntClasses
                     else if (line[0] != ' ')
                     {
                         //if (bufferTripletsGrpah.Count >= BufferMax)
-                        if (nTripletsInBuffer>=BufferMax)
+                        if (nTripletsInBuffer >= BufferMax)
                         {
 
                             TripleInt.EntitiesCodeCache = TripleInt.SiCodingEntities.InsertPortion(entitiesStrings);
@@ -112,8 +116,8 @@ namespace TripleIntClasses
                         line = line.Trim();
                         subject = GetEntityString(namespaces, line);
                         entitiesStrings.Add(subject);
-                        currentTripletGraph=new TripletGraph(){subject = subject};
-                       bufferTripletsGrpah.Add(currentTripletGraph);
+                        currentTripletGraph = new TripletGraph() { subject = subject };
+                        bufferTripletsGrpah.Add(currentTripletGraph);
                     }
                     else
                     {
@@ -125,14 +129,16 @@ namespace TripleIntClasses
                             Console.WriteLine("Err in line: " + line);
                             continue;
                         }
-                        string pred_line = line1.Substring(0, first_blank);
-                        string predicateString = GetEntityString(namespaces, pred_line);
-                        TripleInt.PredicatesCodeCache = TripleInt.SiCodingPredicates.InsertPortion(new[] {predicateString});
-                        int predicate = TripleInt.PredicatesCodeCache[predicateString];
+                  
                         string rest_line = line1.Substring(first_blank + 1).Trim();
                         // Уберем последний символ
                         rest_line = rest_line.Substring(0, rest_line.Length - 1).Trim();
                         bool isDatatype = rest_line[0] == '\"';
+
+                        string pred_line = line1.Substring(0, first_blank);
+                        string predicateString = GetEntityString(namespaces, pred_line);
+                      
+
                         // объект может быть entity или данное, у данного может быть языковый спецификатор или тип
                         string sdata = null;
                         string datatype = null;
@@ -157,22 +163,24 @@ namespace TripleIntClasses
                                     : GetEntityString(namespaces, qname);
                             }
 
+                            Literal literal = Literal.Create(datatype, sdata, lang);
+                              TripleInt.PredicatesCodeCache = TripleInt.PredicatesCoding.InsertPortion(new[] { new KeyValuePair<string, LiteralVidEnumeration?>(predicateString, literal.vid)});
                             currentTripletGraph.PredicateDataValuePairs.Add(
-                                new KeyValuePair<int, Literal>(predicate, 
-                                    LiteralStore.Literals.Write(
-                                        Literal.Create(datatype, sdata, lang))));
+                                new KeyValuePair<int, Literal>(TripleInt.PredicatesCodeCache[predicateString],
+                                    LiteralStoreSplited.Literals.Write(literal)));
                         }
                         else
                         {
+                              TripleInt.PredicatesCodeCache = TripleInt.PredicatesCoding.InsertPortion(new[] { new KeyValuePair<string, LiteralVidEnumeration?>(predicateString,null)});
                             string obj = rest_line[0] == '<'
                                 ? rest_line.Substring(1, rest_line.Length - 2)
                                 : GetEntityString(namespaces, rest_line);
                             entitiesStrings.Add(obj);
-                            currentTripletGraph.PredicateObjValuePairs.Add(new KeyValuePair<int, string>(predicate, obj));
+                            currentTripletGraph.PredicateObjValuePairs.Add(new KeyValuePair<int, string>(TripleInt.PredicatesCodeCache[predicateString], obj));
                         }
                         ntriples++;
                         nTripletsInBuffer++;
-                        if (ntriples % 100000 == 0) Console.Write("r{0} ", ntriples / 100000); 
+                        if (ntriples % 100000 == 0) Console.Write("r{0} ", ntriples / 100000);
                     }
                 }
             TripleInt.EntitiesCodeCache = TripleInt.SiCodingEntities.InsertPortion(entitiesStrings);
@@ -181,7 +189,7 @@ namespace TripleIntClasses
             bufferTripletsGrpah.Clear();
             TripleInt.SiCodingEntities.MakeIndexed();
             entitiesStrings.Clear();
-            GC.Collect();                
+            GC.Collect();
             Console.WriteLine("ntriples={0}", ntriples);
         }
 

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using PolarDB;
 using TripleIntClasses;
 
@@ -44,7 +45,10 @@ namespace TrueRdfViewer
 
         public static string DataCellPath
         {
-            set { pataCellPath = value; }
+            set
+            {
+              
+            }
         }
 
         public void Open(bool readOnlyMode)

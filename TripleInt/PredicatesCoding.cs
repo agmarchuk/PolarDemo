@@ -2,29 +2,31 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using PolarDB;
+using TripleIntClasses;
 
 namespace NameTable
 {
-    public class StringIntRAMDIctionary : IStringIntCoding
+    public class PredicatesCoding 
     {
 
         private PType tp_nc = new PTypeSequence(
             new PTypeRecord(
                 new NamedType("code", new PType(PTypeEnumeration.integer)),
-                new NamedType("name", new PType(PTypeEnumeration.sstring))));
+                new NamedType("name", new PType(PTypeEnumeration.sstring)),
+                new NamedType("literal type", new PType(PTypeEnumeration.integer))));
         private PaCell nc_cell;
 
         private bool? openMode;
         private readonly Dictionary<string, int> codeByString = new Dictionary<string, int>();
         private string[] stringByCode;
+        public LiteralVidEnumeration?[] LiteralVid;
         private string niCell;
 
-        public StringIntRAMDIctionary(string path)
+        public PredicatesCoding(string path)
         {
 
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             niCell = path + "/n_index.pac";
 
             // Создание ячеек, предполагается, что все либо есть либо их нет и надо создавать
@@ -33,39 +35,19 @@ namespace NameTable
 
             // Открытие ячеек в режиме работы (чтения)
             var stringByCodeList = new List<string>();
+            var LiteralVidList = new List<int>();
             Open(true);
             foreach (object[] code_name in nc_cell.Root.ElementValues())
             {   
                 codeByString.Add((string) code_name[1], (int) code_name[0]);
                 stringByCodeList.Add((string)code_name[1]);
+                LiteralVidList.Add((int) code_name[2]);
             }
             stringByCode = stringByCodeList.ToArray();
+            LiteralVid = LiteralVidList.Select(i => i==-1 ? null : new LiteralVidEnumeration?((LiteralVidEnumeration)i)).ToArray();
             Count = stringByCode.Length;
           Close();
-        }
-
-        public StringIntRAMDIctionary(string path, Dictionary<string, int> ReWrite)      
-        {
-            niCell = path + "n_index.pac";
-
-            // Создание ячеек, предполагается, что все либо есть либо их нет и надо создавать
-          
-                Clear();
-
-            foreach (var str_code in ReWrite)
-            {
-                nc_cell.Root.AppendElement(new object[]
-                {
-                    str_code.Value, str_code.Key
-                });
-            }
-            nc_cell.Flush();
-            // Открытие ячеек в режиме работы (чтения)
-            codeByString = ReWrite;
-            stringByCode = ReWrite.Select(pair => pair.Key).ToArray();
-            Count = stringByCode.Length;
-            Close();
-        }
+        }              
 
         public void WarmUp()
         {
@@ -105,6 +87,7 @@ namespace NameTable
             Count = 0;
             codeByString.Clear();
             stringByCode = new string[0];
+            LiteralVid=new LiteralVidEnumeration?[0];
             
         }
 
@@ -126,26 +109,32 @@ namespace NameTable
         }
 
 
-        public Dictionary<string, int> InsertPortion(string[] portion)
+        public Dictionary<string, int> InsertPortion(KeyValuePair<string, LiteralVidEnumeration?>[] portion)
         {
             Open(false);
-            List<string> stringByCodeList = new List<string>();
-            stringByCodeList.AddRange(stringByCode);
+            List<string> stringByCodeList = new List<string>(stringByCode);
+            List<LiteralVidEnumeration?> literalsTypes=new List<LiteralVidEnumeration?>(LiteralVid);
             var insertPortion = new Dictionary<string, int>();
             for (int i = 0; i < portion.Length; i++)
-                if (!insertPortion.ContainsKey(portion[i]))
+                if (!insertPortion.ContainsKey(portion[i].Key))
                 {
-                    var code = GetCode(portion[i]);
+                    var code = GetCode(portion[i].Key);
                     if (code == Int32.MinValue)
                     {
-                        codeByString.Add(portion[i], code = Count++);
-                        nc_cell.Root.AppendElement(new object[] { code, portion[i] });
-                        stringByCodeList.Add(portion[i]);
+                        codeByString.Add(portion[i].Key, code = Count++);
+                        nc_cell.Root.AppendElement(new object[] { code, portion[i].Key, (object) portion[i].Value ?? -1 });
+                        stringByCodeList.Add(portion[i].Key);
+                        literalsTypes.Add(portion[i].Value);
                     }
-                    insertPortion.Add(portion[i], code);
+                    else
+                    {
+                        if (LiteralVid[code] != portion[i].Value) throw new Exception("literal types different in same predicate " + portion[i]);
+                    }
+                    insertPortion.Add(portion[i].Key, code);
                 }
             nc_cell.Flush();
             stringByCode = stringByCodeList.ToArray();
+            LiteralVid = literalsTypes.ToArray();
             return insertPortion;
         }
 
@@ -155,9 +144,6 @@ namespace NameTable
         }
 
         public int Count { get; private set; }
-        public Dictionary<string, int> InsertPortion(HashSet<string> entities)
-        {
-            return InsertPortion(entities.ToArray());
-        }
+   
     }
 }

@@ -1446,3 +1446,96 @@ total parse 294, 141, 641, 519, 1042, 352, 417, 748, 29, 699, 36, 139
 total run 55, 293, 39, 51, 15175, 36393, 1839, 711, 128, 579, 62, 94
 countCodingUsages 15446 totalMillisecondsCodingUsages 263
 total 136867 мс.
+millions 1
+warm up 4 мс.
+millions 1
+millions 1
+millions 1
+millions 1
+millions 1
+millions 1
+total 55917 мс.
+millions 1
+total 86206 мс.
+millions 1
+millions 1
+millions 1
+millions 1
+millions 1
+millions 1
+millions 1
+millions 1
+millions 1
+
+splitted literals
+millions 1
+total 54174 мс.
+
+
+millions 1
+warm up 549 мс.
+milions 1
+max memory usage 148568760
+average 1373, 1061, 714, 848, 159, 122, 360, 400, 4807, 452, 5747, 2890
+minimums 0, 0, 0, 0, 2, 6, 0, 0, 0, 0, 0, 0
+maximums 2, 63, 7, 4, 15, 12, 8, 7, 1, 5, 4, 2
+total parse 279, 127, 632, 528, 1008, 295, 352, 711, 29, 681, 33, 113
+total run 72, 285, 25, 23, 1932, 3661, 877, 403, 75, 280, 54, 59
+countCodingUsages 9133 totalMillisecondsCodingUsages 174
+total 33500 мс.
+millions 10
+total 244071 мс.
+millions 10
+warm up 5341 мс.
+milions 10
+max memory usage 323531808
+average 1265, 956, 681, 843, 31, 14, 205, 307, 3311, 344, 4807, 2673
+minimums 0, 0, 0, 0, 9, 67, 0, 1, 0, 0, 0, 0
+maximums 7, 6, 5, 5, 88, 140, 11, 10, 1, 6, 1, 2
+total parse 321, 156, 658, 529, 1036, 385, 451, 754, 22, 725, 37, 123
+total run 59, 262, 40, 32, 14639, 35072, 1797, 672, 129, 539, 67, 60
+countCodingUsages 15446 totalMillisecondsCodingUsages 243
+total 131658 мс.
+millions 1
+millions 1
+millions 1
+millions 1
+millions 1
+millions 1
+total 48112 мс.
+millions 1
+warm up 628 мс.
+millions 1
+total 48196 мс.
+millions 1
+warm up 619 мс.
+millions 1
+warm up 683 мс.
+millions 1
+total 605671 мс.
+millions 1
+warm up 1581 мс.
+millions 1
+warm up 1518 мс.
+millions 1
+warm up 1528 мс.
+millions 1
+warm up 1549 мс.
+millions 1
+total 52305 мс.
+millions 1
+warm up 1673 мс.
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 2
+total 2603 мс.
+millions 1
+warm up 965 мс.
+milions 1
+max memory usage 149557080
+average 1373, 646, 672, 853, 140, 110, 324, 112, 4901, 394, 6329, 2551
+minimums 0, 0, 0, 0, 2, 7, 0, 0, 0, 0, 0, 0
+maximums 4, 11, 8, 4, 18, 32, 9, 25, 2, 11, 1, 4
+total parse 279, 111, 666, 498, 1111, 250, 325, 734, 27, 760, 28, 118
+total run 68, 573, 42, 44, 2251, 4140, 1071, 3560, 75, 359, 51, 76
+countCodingUsages 9133 totalMillisecondsCodingUsages 134
+total 44518 мс.

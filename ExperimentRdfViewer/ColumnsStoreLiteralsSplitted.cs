@@ -8,7 +8,7 @@ using TripleIntClasses;
 
 namespace TrueRdfViewer
 {
-    public class ColumnsStore : IRDFIntStore
+    public class ColumnsStoreLiteralsSplitted : IRDFIntStore
     {
         private PType tp_otriple_seq;
 
@@ -61,7 +61,7 @@ namespace TrueRdfViewer
         //private GroupedEntities getable;
         //private Dictionary<int, object[]> geHash;
 
-        public ColumnsStore(string path)
+        public ColumnsStoreLiteralsSplitted(string path)
         {
             this.path = path;
 
@@ -75,7 +75,7 @@ namespace TrueRdfViewer
             invSubjectsColumn_filePath = path + "invSubjectsColumn.pac";
             objectsColumn_filePath = path + "objectsColumn.pac";
             dataColumn_filePath = path + "dataColumn.pac";
-            LiteralStore.DataCellPath=path;
+            LiteralStoreSplitedZipped.DataCellPath=path;
             
                 Open(File.Exists(otriples_filePath));
             
@@ -165,7 +165,7 @@ namespace TrueRdfViewer
             if (ewt.EWTable.IsEmpty) return;
             foreach (var v in objPredicates.Root.ElementValues()) ;
             foreach (var v in objects.Root.ElementValues()) ;
-            LiteralStore.Literals.WarmUp();
+            LiteralStoreSplitedZipped.Literals.WarmUp();
             foreach (var v in dataPredicates.Root.ElementValues()) ;
             foreach (var v in data.Root.ElementValues()) ;
             foreach (var v in inversePredicates.Root.ElementValues()) ;
@@ -357,7 +357,7 @@ namespace TrueRdfViewer
             var offsets = TakeValuesByPrevaricate<long>(subj, pred, 2, dataPredicates, data);
             
                 return offsets
-                    .Select(LiteralStore.Literals.Read)
+                    .Select((l, i) =>  LiteralStoreSplitedZipped.Literals.Read(l,pred))
                     .ToArray();
         }    
    
@@ -445,11 +445,12 @@ namespace TrueRdfViewer
 
             var values = data.Root.ElementValues((long)diapason[0], (long)diapason[1])
                .Cast<long>()
-               .Select(LiteralStore.Literals.Read)
                .ToArray();
             return dataPredicates.Root.ElementValues((long)diapason[0], (long)diapason[1])
                 .Cast<int>()
-                .Select((pred, i) => new KeyValuePair<Literal, int>(values[i], pred))
+                .Select((pred, i) => new KeyValuePair<long, int>(values[i], pred))
+                .ToArray()
+                .Select(pair => new KeyValuePair<Literal, int>(LiteralStoreSplitedZipped.Literals.Read(pair.Key,pair.Value),pair.Value))
                 .ToArray(); 
         }  
       

@@ -159,7 +159,7 @@ namespace TrueRdfViewer
                 foreach (var v in scale.Cell.Root.ElementValues()) ;
             foreach (var v in ewt.EWTable.Root.ElementValues()) ; // этая ячейка "подогревается" при начале программы
             TripleInt.SiCodingEntities.WarmUp();
-            TripleInt.SiCodingPredicates.WarmUp();
+            TripleInt.PredicatesCoding.WarmUp();
         }
         
 
@@ -893,8 +893,8 @@ namespace TrueRdfViewer
             var enumerator = triplets.GetEnumerator();
             //TODO переделать
             Dictionary<int, string> predicatesCodes = new Dictionary<int, string>();
-            for (int i = 0; i < TripleInt.SiCodingPredicates.Count; i++)
-                predicatesCodes.Add(i, TripleInt.SiCodingPredicates.GetName(i));
+            for (int i = 0; i < TripleInt.PredicatesCoding.Count; i++)
+                predicatesCodes.Add(i, TripleInt.PredicatesCoding.GetName(i));
             int subjectCodesBuffer = 100 * 1000 * 1000;
 
             var entitiesCodes = new Dictionary<int, string>(subjectCodesBuffer);

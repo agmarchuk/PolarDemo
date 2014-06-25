@@ -34,12 +34,16 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Archive Huffman.cs" />
     <Compile Include="CashingTripleStoreInt.cs" />
     <Compile Include="DTripleInt.cs" />
     <Compile Include="IRDFIntStore.cs" />
     <Compile Include="Literal.cs" />
+    <Compile Include="LiteralStoreSplitedZipped.cs" />
+    <Compile Include="LiteralStoreSplited.cs" />
     <Compile Include="LiteralStore.cs" />
     <Compile Include="OTripleInt.cs" />
+    <Compile Include="PredicatesCoding.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SPComparer.cs" />
     <Compile Include="SPOComparer.cs" />

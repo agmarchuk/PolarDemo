@@ -8,7 +8,7 @@ namespace TripleIntClasses
     { 
         public int subject, predicate;
         public static IStringIntCoding SiCodingEntities;
-        public static IStringIntCoding SiCodingPredicates;
+        public static PredicatesCoding PredicatesCoding;
         public static Dictionary<string, int> EntitiesCodeCache = new Dictionary<string, int>();
         public static Dictionary<string, int> PredicatesCodeCache = new Dictionary<string, int>();
      
@@ -42,7 +42,8 @@ namespace TripleIntClasses
             // if (!PredicatesCodeCache.TryGetValue(s, out c))
             {
                 DateTime st = DateTime.Now;
-                c = SiCodingPredicates.GetCode(s);
+                //c = SiCodingPredicates.GetCode(s);
+                c = PredicatesCoding.GetCode(s);
                 //  c = s.GetHashCode();
                 totalMilisecondsCodingUsages += (DateTime.Now - st).Ticks / 10000;
                 //    PredicatesCodeCache.Add(s, c); //s.GetHashCode() 
@@ -54,7 +55,8 @@ namespace TripleIntClasses
         {
             if (useSimpleCoding) return Decode(e);
             //   return e.ToString();
-            return SiCodingPredicates.GetName(e);
+            //return SiCodingPredicates.GetName(e);
+            return PredicatesCoding.GetName(e);
         }
         public static int Code(string s) { return s.GetHashCode(); }
         public static string Decode(int e) { return "noname" + e; }
