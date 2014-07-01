@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using PolarDB;
@@ -9,8 +10,6 @@ namespace TrueRdfViewer
     public class LiteralStoreSplited
     {                   
         public PaCell stringsCell;   
-        public PaCell doublesCell;
-        public PaCell boolsCell;
         public PaCell typedObjectsCell;
         private List<Literal> writeBuffer;
         private static string dataCellPath;
@@ -46,35 +45,27 @@ namespace TrueRdfViewer
 
         public void Open(bool readOnlyMode)
         {
-            doublesCell = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.real)), dataCellPath + "/doublesLiterals.pac", readOnlyMode);
             var pTypeString = new PType(PTypeEnumeration.sstring);
             var pTypeStringsPair = new PTypeRecord(new NamedType("value", pTypeString),
                 new NamedType("add info", pTypeString));
             stringsCell = new PaCell(new PTypeSequence(pTypeStringsPair), dataCellPath + "/stringsLiterals.pac", readOnlyMode);
-            boolsCell = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.boolean)), dataCellPath + "/booleansLiterals.pac", readOnlyMode);
             typedObjectsCell = new PaCell(new PTypeSequence(pTypeStringsPair), dataCellPath + "/typedObjectsLiterals.pac", readOnlyMode);
 
             
         }
 
         public void Clear()
-        {
-             doublesCell.Clear();
-                doublesCell.Fill(new object[0]);
+        {  
             stringsCell.Clear();
                 stringsCell.Fill(new object[0]);
             typedObjectsCell.Clear();
-                typedObjectsCell.Fill(new object[0]);
-            boolsCell.Clear();
-                boolsCell.Fill(new object[0]);
+                typedObjectsCell.Fill(new object[0]);    
         }
 
         public void WarmUp()
         {
             foreach (var t in stringsCell.Root.ElementValues()) ;
-            foreach (var t in boolsCell.Root.ElementValues()) ;
             foreach (var t in typedObjectsCell.Root.ElementValues()) ;
-            foreach (var t in doublesCell.Root.ElementValues()) ;
         }
 
         public Literal Read(long offset, int predicateCode)
@@ -93,7 +84,7 @@ namespace TrueRdfViewer
                     };
                     break;
                 case LiteralVidEnumeration.integer:
-                    literal.Value = Read(doublesCell, offset);
+                    literal.Value = BitConverter.Int64BitsToDouble(offset);
                     break;
                 case LiteralVidEnumeration.text:
                     object[] stringLiteralObj = (object[]) Read(stringsCell, offset);
@@ -107,7 +98,7 @@ namespace TrueRdfViewer
                     literal.Value = offset;
                     break;
                 case LiteralVidEnumeration.boolean:
-                    literal.Value = Read(boolsCell, offset);
+                    literal.Value = offset > 0;
                     break;
                 case LiteralVidEnumeration.nil: 
                     break;
@@ -144,7 +135,7 @@ namespace TrueRdfViewer
                         lit.Offset = typedObjectsCell.Root.AppendElement(new object[] { valu.Value, valu.Type});
                         break;
                     case LiteralVidEnumeration.integer:
-                        lit.Offset = doublesCell.Root.AppendElement(lit.Value);
+                        lit.Offset = BitConverter.DoubleToInt64Bits(System.Convert.ToDouble(lit.Value));
                         break;
                     case LiteralVidEnumeration.text:
                         Text value = (Text) lit.Value;
@@ -154,7 +145,7 @@ namespace TrueRdfViewer
                         lit.Offset = (long) lit.Value;
                         break;
                     case LiteralVidEnumeration.boolean:
-                        lit.Offset = boolsCell.Root.AppendElement(lit.Value);
+                        lit.Offset = (bool) lit.Value ? 1 : 0;
                         break;
                     case LiteralVidEnumeration.nil:
                         lit.Offset = long.MaxValue;
@@ -174,9 +165,8 @@ namespace TrueRdfViewer
         private void Flush()
         {
             typedObjectsCell.Flush();
-            stringsCell.Flush();
-            boolsCell.Flush();
-             doublesCell.Flush();
+            stringsCell.Flush();  
+             
         }
     }
 }

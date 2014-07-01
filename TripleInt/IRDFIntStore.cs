@@ -19,5 +19,7 @@ namespace TrueRdfViewer
         IEnumerable<Int32> GetSubjectByDataPred(int p, Literal d);
         IEnumerable<KeyValuePair<Int32, Int32>> GetObjBySubj(int subj);
         IEnumerable<KeyValuePair<Literal, int>> GetDataBySubj(int subj);
+
+     
     }
 }

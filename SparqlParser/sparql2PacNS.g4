@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-grammar sparql2Pac;
+grammar sparql2PacNS;
 options
 {
 	language = CSharp2;
@@ -368,7 +368,7 @@ verb
 : varOrIRIref { $verbObjectList::PredicateVariable=$varOrIRIref.p; $varOrIRIref.p.isPredicate=true; } 
 | 'a' {	
 var PredicateVariable=new Variable(){isPredicate=true};							   
-PredicateVariable.pacElement =  TripleInt.CodePredicates("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");  
+PredicateVariable.pacElement =  TripleInt.CodePredicates(NameSpaceStore.@type.Coded);  
 PredicateVariable.graph	= new GraphIsDataProperty(){IsData=false};
 $verbObjectList::PredicateVariable=PredicateVariable;	   
 } ;
@@ -534,34 +534,35 @@ var type = $iRIref.value;
 DateTime tempDate;
 Double tempNum;
 bool tempBool;
-if(type =="http://www.w3.org/2001/XMLSchema#dateTime" || type =="http://www.w3.org/2001/XMLSchema#date")
+if(type == Literal.dateTime.Coded || type ==Literal.date.Coded)
 {
 if(!DateTime.TryParse(s, out tempDate)) throw new Exception("7");
 	 $value=new Literal(LiteralVidEnumeration.date){Value = tempDate.ToBinary()};
 }
-else if(type =="http://www.w3.org/2001/XMLSchema#boolean")
+else if(type == Literal.boolean.Coded)
 {
 if(!bool.TryParse(s, out tempBool)) throw new Exception("7");
 	$value=new Literal(LiteralVidEnumeration.boolean){Value = tempBool };
 }
-else if(type =="http://www.w3.org/2001/XMLSchema#integer" || type =="http://www.w3.org/2001/XMLSchema#double" || type =="http://www.w3.org/2001/XMLSchema#float" )
+else if(type == Literal.integer.Coded || type == Literal.@double.Coded || type == Literal.@float.Coded)
 {															 
 if(!double.TryParse(s, out tempNum) && !double.TryParse(s.Replace(".",","), out tempNum)) throw new Exception("7");
 	$value=new Literal(LiteralVidEnumeration.integer){Value = tempNum };
 }
-else if(type =="http://www.w3.org/2001/XMLSchema#string") {  $literalText.Lang ="en"; }
+else if(type == Literal.@string.Coded) {  $literalText.Lang ="en"; }
 else $value = new Literal(LiteralVidEnumeration.typedObject){ Value = new TypedObject{Value=$literalText.Value, Type=type} };
 }))? ;
 
 
 iRIref returns [string value]	 
 :	IRI_REF  	{	
-		var iri=$IRI_REF.text;
-		$value = iri.Substring(1,iri.Length-2);
+		var iri=$IRI_REF.text;	
+		$value = NameSpaceStore.SplitCodeNameSpace(iri);
 		 } 
 |	PREFIXED_NAME 	{	
 var match = PrefixNSSlpit.Match($PREFIXED_NAME.text);		            
- $value = q.prefixes[match.Groups[1].Value] + match.Groups[2].Value; } ;	
+ $value = new IRI(q.prefixes[match.Groups[1].Value], match.Groups[2].Value).Coded; 
+ } ;	
  		
  						 
 numeric returns [double num] : numericLiteral	{double value; string txt=$numericLiteral.text; if(!double.TryParse(txt, out value) && !double.TryParse(txt.Replace(".",","), out value)) throw new Exception("qe5645");   $num=value;}	 ;

@@ -1446,26 +1446,7 @@ total parse 294, 141, 641, 519, 1042, 352, 417, 748, 29, 699, 36, 139
 total run 55, 293, 39, 51, 15175, 36393, 1839, 711, 128, 579, 62, 94
 countCodingUsages 15446 totalMillisecondsCodingUsages 263
 total 136867 мс.
-millions 1
-warm up 4 мс.
-millions 1
-millions 1
-millions 1
-millions 1
-millions 1
-millions 1
-total 55917 мс.
-millions 1
-total 86206 мс.
-millions 1
-millions 1
-millions 1
-millions 1
-millions 1
-millions 1
-millions 1
-millions 1
-millions 1
+
 
 splitted literals
 millions 1
@@ -1509,3 +1490,55 @@ total parse 279, 111, 666, 498, 1111, 250, 325, 734, 27, 760, 28, 118
 total run 68, 573, 42, 44, 2251, 4140, 1071, 3560, 75, 359, 51, 76
 countCodingUsages 9133 totalMillisecondsCodingUsages 134
 total 44518 мс.
+millions 1
+millions 1
+total 29821 мс.
+millions 1
+millions 1
+warm up 822 мс.
+milions 1
+max memory usage 154763944
+average 1136, 698, 608, 728, 122, 87, 265, 370, 3759, 380, 5376, 1712
+minimums 0, 0, 0, 0, 2, 9, 0, 0, 0, 0, 0, 0
+maximums 3, 4, 5, 4, 20, 18, 11, 8, 1, 7, 2, 2
+total parse 338, 179, 707, 569, 1154, 278, 428, 589, 41, 689, 51, 210
+total run 65, 383, 73, 68, 2763, 5293, 1262, 599, 92, 479, 41, 70
+countCodingUsages 9133 totalMillisecondsCodingUsages 210
+total 42540 мс.
+millions 1
+warm up 591 мс.
+milions 1
+max memory usage 148749256
+average 1210, 996, 650, 800, 133, 103, 312, 342, 4424, 396, 5747, 2673
+minimums 0, 0, 0, 0, 3, 7, 0, 0, 0, 0, 0, 0
+maximums 7, 4, 6, 6, 32, 35, 19, 30, 2, 7, 4, 2
+total parse 315, 132, 660, 543, 1192, 265, 348, 791, 32, 739, 39, 114
+total run 72, 293, 58, 43, 2358, 4405, 1073, 529, 80, 379, 48, 68
+countCodingUsages 9133 totalMillisecondsCodingUsages 178
+total 37944 мс.
+
+millions 100
+total 4139826 мс.
+millions 100
+millions 1
+millions 1
+millions 1
+millions 1
+total 33288 мс.
+millions 1
+warm up 773 мс.
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 10
+total 1751 мс.
+millions 1
+total 32944 мс.
+millions 1
+warm up 766 мс.
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 12
+total 1546 мс.
+millions 1
+warm up 720 мс.
+milions 1
+countCodingUsages 14 totalMillisecondsCodingUsages 10
+total 1505 мс.

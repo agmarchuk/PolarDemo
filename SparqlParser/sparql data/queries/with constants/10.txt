@@ -1,2 +1,2 @@
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor21/Offer36055, "3294.69"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor21/Offer37478, "4120.17"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
+89Offer36055, "3294.69"^^6USD
+89Offer37478, "4120.17"^^6USD

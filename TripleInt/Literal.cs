@@ -8,7 +8,15 @@ namespace TripleIntClasses
     {
 
 
-        public long Offset;
+        public long Offset;      
+        public LiteralVidEnumeration vid;
+        public static IRI integer;
+        public static IRI @double;
+        public static IRI @float;
+        public static IRI boolean;
+        public static IRI date;
+        public static IRI @string;
+        public static IRI dateTime;
 
         protected bool Equals(Literal other)
         {
@@ -23,7 +31,6 @@ namespace TripleIntClasses
             }
         }
 
-        public LiteralVidEnumeration vid;
 
         public string GetString()
         {
@@ -48,10 +55,7 @@ namespace TripleIntClasses
             this.vid = vid;
         }
 
-        public Literal()
-        {
-            
-        }
+       
 
         public object Value { get; set; }
 
@@ -78,22 +82,23 @@ namespace TripleIntClasses
             return Equals((Literal)obj);
         }
 
+
+     
+
         public static Literal Create(string datatype, string sdata, string lang)
-        {
-            return (datatype == "http://www.w3.org/2001/XMLSchema#integer" ||
-                    datatype == "http://www.w3.org/2001/XMLSchema#float" ||
-                    datatype == "http://www.w3.org/2001/XMLSchema#double"
+        {            
+            return (datatype == integer.Coded ||
+                    datatype ==  @float.Coded ||
+                    datatype ==  @double.Coded
                 ? new Literal(LiteralVidEnumeration.integer)
                 {
                     Value = Double.Parse(sdata, NumberStyles.Any)
                 }
-                : datatype == "http://www.w3.org/2001/XMLSchema#boolean"
+                : datatype ==  boolean.Coded
                     ? new Literal(LiteralVidEnumeration.date) { Value = Boolean.Parse(sdata) }
-                    : datatype == "http://www.w3.org/2001/XMLSchema#dateTime" ||
-                      datatype == "http://www.w3.org/2001/XMLSchema#date"
+                    : datatype ==  dateTime.Coded || datatype ==  date.Coded
                         ? new Literal(LiteralVidEnumeration.date) { Value = DateTime.Parse(sdata).ToBinary() }
-                        : datatype == null ||
-                          datatype == "http://www.w3.org/2001/XMLSchema#string"
+                        : datatype == null ||   datatype ==  @string.Coded
                             ? new Literal(LiteralVidEnumeration.text)
                             {
                                 Value = new Text() { Value = sdata, Lang = lang ?? String.Empty }

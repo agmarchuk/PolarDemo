@@ -34,8 +34,14 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Antlr3.Runtime">
+      <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
+    </Reference>
     <Reference Include="Antlr4.Runtime.v4.5">
       <HintPath>bin\Debug\Antlr4.Runtime.v4.5.dll</HintPath>
+    </Reference>
+    <Reference Include="Moppet.Lapa">
+      <HintPath>..\packages\Moppet.Lapa.1.2.3\lib\Moppet.Lapa.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -53,16 +59,15 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RPackComplexExtensionInt.cs" />
     <Compile Include="sparq.cs" />
-    <Compile Include="sparql data\queries\parameters\Sarr.cs" />
+    <Compile Include="sparql2PacNS.g4.lexer.cs">
+      <DependentUpon>sparql2PacNS.g4</DependentUpon>
+    </Compile>
+    <Compile Include="sparql2PacNS.g4.parser.cs">
+      <DependentUpon>sparql2PacNS.g4</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <Antlr4 Include="sparql2XML.g4">
-      <Generator>MSBuild:Compile</Generator>
-      <CustomToolNamespace>SparqlParser</CustomToolNamespace>
-      <Listener>True</Listener>
-      <Visitor>True</Visitor>
-    </Antlr4>
     <None Include="packages.config" />
     <None Include="sparql data\queries\parameters\1.rq" />
     <None Include="sparql data\queries\parameters\10.rq" />
@@ -76,10 +81,6 @@
     <None Include="sparql data\queries\parameters\7.rq" />
     <None Include="sparql data\queries\parameters\8.rq" />
     <None Include="sparql data\queries\parameters\9.rq" />
-    <Antlr4 Include="sparql2Pac.g4">
-      <Generator>MSBuild:Compile</Generator>
-      <CustomToolNamespace>SparqlParser</CustomToolNamespace>
-    </Antlr4>
     <None Include="sparql data\queries\with constants\1.rq" />
     <None Include="sparql data\queries\with constants\10.rq" />
     <None Include="sparql data\queries\with constants\11.rq" />
@@ -92,6 +93,10 @@
     <None Include="sparql data\queries\with constants\7.rq" />
     <None Include="sparql data\queries\with constants\8.rq" />
     <None Include="sparql data\queries\with constants\9.rq" />
+    <Antlr4 Include="sparql2PacNS.g4">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>SparqlParser</CustomToolNamespace>
+    </Antlr4>
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Debug\Antlr4.Runtime.v4.5.dll" />

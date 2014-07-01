@@ -6,6 +6,14 @@ namespace TripleIntClasses
     public class OTripleInt : TripleInt
     {
         public int obj;
+
+        public OTripleInt(int subject, int predicate, int @object)
+        {   
+            this.subject=subject;
+            this.predicate = predicate;
+            obj = @object;
+        }
+
         // override object.Equals
         public override bool Equals(object obj)
         {

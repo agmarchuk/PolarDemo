@@ -1,8 +1,8 @@
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor1/Offer1 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/product http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer46/Product2161
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor1/Offer1 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/productlabel "hypnotherapy antiques forehoofs"
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor1/Offer1 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/vendor "sixpencesl"
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor1/Offer1 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/vendorhomepage http://www.vendor1.com/
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor1/Offer1 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/offerURL http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor1/Offer1/
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor1/Offer1 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/price "7683.53"^^http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/USD
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor1/Offer1 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/deliveryDays 5
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor1/Offer1 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/export/validuntil 633566880000000000
+69Offer1 57155product 53Product2161
+69Offer1 57155productlabel "hypnotherapy antiques forehoofs"
+69Offer1 57155vendor "sixpences"
+69Offer1 57155vendorhomepage 165
+69Offer1 57155offerURL 166
+69Offer1 57155price "7683.53"^^6USD
+69Offer1 57155deliveryDays 5
+69Offer1 57155validuntil 633566880000000000

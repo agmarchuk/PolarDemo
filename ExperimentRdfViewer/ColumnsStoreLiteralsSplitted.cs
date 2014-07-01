@@ -75,7 +75,7 @@ namespace TrueRdfViewer
             invSubjectsColumn_filePath = path + "invSubjectsColumn.pac";
             objectsColumn_filePath = path + "objectsColumn.pac";
             dataColumn_filePath = path + "dataColumn.pac";
-            LiteralStoreSplitedZipped.DataCellPath=path;
+            LiteralStoreSplited.DataCellPath=path;
             
                 Open(File.Exists(otriples_filePath));
             
@@ -94,6 +94,7 @@ namespace TrueRdfViewer
             //getable.CheckGroupedEntities();
             //geHash = getable.GroupedEntitiesHash();
 
+            
         }
 
         private void Open(bool readOnlyMode)
@@ -165,7 +166,7 @@ namespace TrueRdfViewer
             if (ewt.EWTable.IsEmpty) return;
             foreach (var v in objPredicates.Root.ElementValues()) ;
             foreach (var v in objects.Root.ElementValues()) ;
-            LiteralStoreSplitedZipped.Literals.WarmUp();
+            LiteralStoreSplited.Literals.WarmUp();
             foreach (var v in dataPredicates.Root.ElementValues()) ;
             foreach (var v in data.Root.ElementValues()) ;
             foreach (var v in inversePredicates.Root.ElementValues()) ;
@@ -193,7 +194,7 @@ namespace TrueRdfViewer
             PaCell otriples=new PaCell(tp_otriple_seq, otriples_filePath, false);
             PaCell dtriples_sp=new PaCell(tp_dtriple_spf, dtriples_filePath,false);
             
-            TurtleInt.LoadTriplets(filepath, ref otriples, ref dtriples_sp);
+            TurtleInt.LoadTriplets(filepath, otriples, dtriples_sp);
 
             Console.WriteLine("Load ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
@@ -357,7 +358,7 @@ namespace TrueRdfViewer
             var offsets = TakeValuesByPrevaricate<long>(subj, pred, 2, dataPredicates, data);
             
                 return offsets
-                    .Select((l, i) =>  LiteralStoreSplitedZipped.Literals.Read(l,pred))
+                    .Select((l, i) => LiteralStoreSplited.Literals.Read(l, pred))
                     .ToArray();
         }    
    
@@ -450,9 +451,10 @@ namespace TrueRdfViewer
                 .Cast<int>()
                 .Select((pred, i) => new KeyValuePair<long, int>(values[i], pred))
                 .ToArray()
-                .Select(pair => new KeyValuePair<Literal, int>(LiteralStoreSplitedZipped.Literals.Read(pair.Key,pair.Value),pair.Value))
+                .Select(pair => new KeyValuePair<Literal, int>(LiteralStoreSplited.Literals.Read(pair.Key, pair.Value), pair.Value))
                 .ToArray(); 
-        }  
-      
+        }
+
+        
     }
 }

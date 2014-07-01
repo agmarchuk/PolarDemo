@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using PolarDB;
 
 namespace Huffman
 {
-    class Archive
+    public class Archive
     {
         private readonly Dictionary<char, ArchiveEntity> codesHelp = new Dictionary<char, ArchiveEntity>();
         private readonly PxCell codesCell;
@@ -29,49 +30,11 @@ namespace Huffman
         }
 
 
-        private class ArchiveEntity
+        public class ArchiveEntity
         {
             public string Char;
             public long Frequency=1;
             public readonly List<bool> Code=new List<bool>(); 
-        }
-
-        internal class BinaryTree<T>
-        {
-            public T Current;
-            private BinaryTree<T> r;
-            private BinaryTree<T> l;
-
-            public BinaryTree(BinaryTree<T> r, BinaryTree<T> l)
-            {
-                this.r = r;
-                this.l = l;
-            }
-
-            public BinaryTree<T> RCreate
-            {
-                get { return r ?? (r=new BinaryTree<T>(null,null)); }
-            }
-
-            public BinaryTree<T> LCreate
-            {
-                get { return l ?? (l=new BinaryTree<T>(null,null)); }
-            }
-            public BinaryTree<T> R
-            {
-                get { return r ; }
-            }
-
-            public BinaryTree<T> L
-            {
-                get { return l; }
-            }
-
-            public void Clear()
-            {
-                l = r = null;
-                Current = default(T);
-            }
         }
 
         public void Test()
@@ -138,9 +101,10 @@ namespace Huffman
             string text = "";
             var bits = new BitArray(readAllBytes);
             var tree = decodeTree;
-            for (int i = 0; i < bits.Length; i++)
+            var bitArray = bits.Cast<bool>().SkipWhile((b, i) => b == bits[0] && i < 8).ToArray();
+            for (int i = 0; i < bitArray.Length; i++)
             {
-                tree = bits[i] ? tree.R : tree.L;
+                tree = bitArray[i] ? tree.R : tree.L;
                 if (tree.Current == default(char)) continue;
                 text += tree.Current;
                 tree = decodeTree;
@@ -161,10 +125,13 @@ namespace Huffman
 
         public byte[] Compress(string readAllText)
         {
-            var bits = new BitArray(readAllText.SelectMany(c => codes[c]).ToArray());
-            int bytesCount = bits.Length/8 + (bits.Length%8 > 0 ? 1 : 0);
+            var bits = readAllText.SelectMany(c => codes[c]).ToArray();
+            int rest = bits.Length % 8;
+            bool antiFirst = !bits[0];
+            var bitsArray = new BitArray(Enumerable.Repeat(antiFirst, 8 - rest).Concat(bits).ToArray());
+            int bytesCount = bits.Length/8 + 1;//(rest > 0 ? 1 : 0);
             var bytes = new byte[bytesCount];
-            bits.CopyTo(bytes, 0);
+            bitsArray.CopyTo(bytes, 0);
             return bytes;
         }
 
@@ -174,6 +141,44 @@ namespace Huffman
             codes.Clear();
             decodeTree.Clear();
             codesHelp.Clear();
+        }
+    }
+
+    internal class BinaryTree<T>
+    {
+        public T Current;
+        private BinaryTree<T> r;
+        private BinaryTree<T> l;
+
+        public BinaryTree(BinaryTree<T> r, BinaryTree<T> l)
+        {
+            this.r = r;
+            this.l = l;
+        }
+
+        public BinaryTree<T> RCreate
+        {
+            get { return r ?? (r=new BinaryTree<T>(null,null)); }
+        }
+
+        public BinaryTree<T> LCreate
+        {
+            get { return l ?? (l=new BinaryTree<T>(null,null)); }
+        }
+        public BinaryTree<T> R
+        {
+            get { return r ; }
+        }
+
+        public BinaryTree<T> L
+        {
+            get { return l; }
+        }
+
+        public void Clear()
+        {
+            l = r = null;
+            Current = default(T);
         }
     }
 }

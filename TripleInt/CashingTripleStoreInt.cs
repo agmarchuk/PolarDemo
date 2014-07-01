@@ -23,7 +23,7 @@ namespace TripleIntClasses
         public bool ChkOSubjPredObj(int subj, int pred, int obj)
         {
             bool exists;
-            var key = new OTripleInt() {subject = subj, obj = obj, predicate = pred};
+            var key = new OTripleInt(subj, obj,  pred);
             if (!spoCache.TryGetValue(key, out exists))
                 spoCache.Add(key, exists = CheckContains(subj, pred, obj));
             return exists;

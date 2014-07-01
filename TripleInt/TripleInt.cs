@@ -10,7 +10,6 @@ namespace TripleIntClasses
         public static IStringIntCoding SiCodingEntities;
         public static PredicatesCoding PredicatesCoding;
         public static Dictionary<string, int> EntitiesCodeCache = new Dictionary<string, int>();
-        public static Dictionary<string, int> PredicatesCodeCache = new Dictionary<string, int>();
      
         public static long totalMilisecondsCodingUsages = 0;
         public static bool useSimpleCoding;
@@ -60,6 +59,22 @@ namespace TripleIntClasses
         }
         public static int Code(string s) { return s.GetHashCode(); }
         public static string Decode(int e) { return "noname" + e; }
+
+        public static NameSpaceStore nameSpaceStore;
+        public static int GetNamespaceCode(string @namespace)
+        {
+         //   @namespace = @namespace.ToLower();
+            if (@namespace[@namespace.Length-1] == '/' || @namespace[@namespace.Length-1] == '\\' ||
+                          @namespace[@namespace.Length-1] == '#')
+                @namespace = @namespace.Substring(0, @namespace.Length - 1);
+            int code;
+            if (!nameSpaceStore.Codes.TryGetValue(@namespace, out code))
+            {
+                nameSpaceStore.Codes.Add(@namespace, code = nameSpaceStore.Codes.Count);
+                nameSpaceStore.NameSpaceStrings.Add(@namespace);
+            }
+            return code;
+        }
 
     }
 }

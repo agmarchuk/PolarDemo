@@ -36,23 +36,24 @@ namespace SparqlParser
 
         #region Run
 
-        public string Run(IRDFIntStore ts)
+        public string Run()
         {
+           
             if (AsqRun != null) return AsqRun(ts).ToString();
             if (SelectRun != null)
-                return string.Join(Environment.NewLine, SelectRun(ts).Select(spo => string.Join(", ", spo)));
+                return string.Join(Environment.NewLine, SelectRun().Select(spo => string.Join(", ", spo)));
             if (DescribeRun != null)
-                return string.Join(Environment.NewLine, DescribeRun(ts).Select(spo => string.Join(" ", spo)));
+                return string.Join(Environment.NewLine, DescribeRun().Select(spo => string.Join(" ", spo)));
             if (ConstructRun != null)
-                return string.Join(Environment.NewLine, ConstructRun(ts).Select(spo => string.Join(" ", spo)));
+                return string.Join(Environment.NewLine, ConstructRun().Select(spo => string.Join(" ", spo)));
             throw new Exception();
         }
 
-        public Func<IRDFIntStore, IEnumerable<IEnumerable<object>>> SelectRun;
+        public Func<IEnumerable<IEnumerable<object>>> SelectRun;
 
         internal void CreateSelectRun()
         {
-            SelectRun = ts =>
+            SelectRun = ()=>
             {
                 var row = new object[Variables.Count];
 
@@ -88,11 +89,11 @@ namespace SparqlParser
            yield return new RPackInt(row, ts);
         }
 
-        public Func<IRDFIntStore, IEnumerable<IEnumerable<string>>> DescribeRun;
+        public Func<IEnumerable<IEnumerable<string>>> DescribeRun;
 
         internal void CreateDescribeRun()
         {
-            DescribeRun = ts =>
+            DescribeRun = () =>
             {
                 var result = Where != null
                     ? Where(Enumerable.Repeat(new RPackInt(Variables.Values.Select(variable => variable.pacElement).ToArray(), ts), 1))
@@ -161,11 +162,11 @@ namespace SparqlParser
         }
 
 
-        public Func<IRDFIntStore, IEnumerable<IEnumerable<object>>> ConstructRun;
+        public Func<IEnumerable<IEnumerable<object>>> ConstructRun;
 
         internal void CreateConstructRun()
         {
-            ConstructRun = ts =>
+            ConstructRun = () =>
             {
                 IEnumerable<RPackInt> result = Where != null
                     ? Where(Enumerable.Repeat(new RPackInt(Variables.Values.Select(variable => variable.pacElement).ToArray(), ts), 1))
@@ -187,6 +188,12 @@ namespace SparqlParser
         internal readonly List<Func<RPackInt, IEnumerable<Tuple<string, string, string>>>> constructTriples = new List<Func<RPackInt, IEnumerable<Tuple<string, string, string>>>>();
         public static readonly Dictionary<int, string> decodesCasheEntities = new Dictionary<int, string>();
         public static readonly Dictionary<int, string> decodesCashePredicates = new Dictionary<int, string>();
+        private IRDFIntStore ts;
+
+        public Query(IRDFIntStore ts)
+        {
+            this.ts = ts;
+        }
 
         internal void CreateAsqRun()
         {
@@ -227,7 +234,7 @@ namespace SparqlParser
 
         }
         
-        internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> CreateTriplet(Variable s, Variable p, Variable o, Literal d)
+        internal Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> CreateTriplet(Variable s, Variable p, Variable o, Literal d)
         {   
            GraphIsDataProperty.Sync(o.graph, p.graph);
             var triplet = s.isNew
@@ -348,7 +355,7 @@ namespace SparqlParser
 
         internal static Expression Call(string name, IEnumerable<Expression> args)
         {   
-            if (name == @"http://www.w3.org/2001/XMLSchema#double")
+            if (name == Literal.@double.Coded)
                 return Expression.Call(typeof(double).GetMethod("Parse", new[] { typeof(string), typeof(NumberStyles), typeof(CultureInfo) }), args.First(), Expression.Constant(NumberStyles.Any), Expression.Constant(new CultureInfo("en-us")));
             throw new NotImplementedException("mathod call " + name);
         }

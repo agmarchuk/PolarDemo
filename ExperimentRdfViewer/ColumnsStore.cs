@@ -452,6 +452,5 @@ namespace TrueRdfViewer
                 .Select((pred, i) => new KeyValuePair<Literal, int>(values[i], pred))
                 .ToArray(); 
         }  
-      
     }
 }

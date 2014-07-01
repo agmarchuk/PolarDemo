@@ -6,7 +6,7 @@ using Antlr4.Runtime;
 using NameTable;
 using TripleIntClasses;
 using TrueRdfViewer;
-using RdfTrees = RdfTrees.RdfTrees;
+
 
 
 namespace SparqlParser
@@ -17,16 +17,16 @@ namespace SparqlParser
 
         private static void Main(string[] args)
         {
-
+       
             Console.WriteLine(Millions = 1);      
 
-                Test();
+               Test();
 
             Console.WriteLine(Millions = 10);
        // Test();
           
             Console.WriteLine(Millions = 100);
-      //  Test();
+      //   Test();
             Console.WriteLine(Millions = 1000);
             //  Test();
 
@@ -35,19 +35,21 @@ namespace SparqlParser
         private static void Test()
         {                  
             TripleInt.useSimpleCoding = false;
-            TripleInt.SiCodingEntities = new StringIntMD5RAMCollision(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\entitiesCodes");
+            TripleInt.SiCodingEntities = new StringIntEncoded(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\entitiesCodes");
             TripleInt.PredicatesCoding = new PredicatesCoding(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\predicatesCodes");
+            TripleInt.nameSpaceStore=new NameSpaceStore(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
+           NameSpaceStore.InitConstants();
+           
             IRDFIntStore ts = new CashingTripleStoreInt(new ColumnsStoreLiteralsSplitted(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\"));
            //   IRDFIntStore ts = new CashingTripleStoreInt(new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\"));
 
             TripleInt.EntitiesCodeCache.Clear();
-            TripleInt.PredicatesCodeCache.Clear();
             Query.decodesCasheEntities.Clear();
 
 
            
-              bool load = false;
-          //    bool load = true;
+             bool load = false;
+             //  bool load = true;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;
@@ -62,8 +64,8 @@ namespace SparqlParser
                 spent = (DateTime.Now - start).Ticks / 10000;
                 using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                     wr.WriteLine("warm up " + spent + " мс.");
-                //           RunBerlinsWithConstants( ts);
-              RunBerlinsParameters(ts);
+                          RunBerlinsWithConstants( ts);
+              // RunBerlinsParameters(ts);
             }
             spent = (DateTime.Now - start).Ticks / 10000;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
@@ -104,7 +106,7 @@ namespace SparqlParser
                 for (int j = 0; j < 500; j++)
                     fileInfos.Select(file => QueryReadParameters(File.ReadAllText(file.FullName),
                         streamQueryParameters))
-                        .Select(queryReadParameters => Parse(queryReadParameters).Run(ts))
+                        .Select(queryReadParameters => Parse(queryReadParameters, ts).Run())
                         .ToArray();
 
                 SubTestRun(ts, fileInfos, streamQueryParameters, 500);
@@ -130,10 +132,10 @@ namespace SparqlParser
                     readAllText = QueryReadParameters(readAllText, streamQueryParameters);
 
                     var st = DateTime.Now;
-                    var q = Parse(readAllText);
+                    var q = Parse(readAllText, ts);
                     totalparseMS[i] += (DateTime.Now - st).Ticks / 10000L;
                     var st1 = DateTime.Now;
-                    var resultString = q.Run(ts);
+                    var resultString = q.Run();
                     var totalMilliseconds = (DateTime.Now - st).Ticks / 10000L;
                     totalrun[i] += (DateTime.Now - st1).Ticks / 10000L;
 
@@ -198,10 +200,10 @@ namespace SparqlParser
                     var readAllText = File.ReadAllText(file.FullName);
 
                     //   var st = DateTime.Now;
-                    var q = Parse(readAllText);
+                    var q = Parse(readAllText, ts);
 
 
-                    var resultString = q.Run(ts);
+                    var resultString = q.Run();
                     //var totalMilliseconds = (long)(DateTime.Now - st).TotalMilliseconds;
                     // results[i++] += totalMilliseconds;
                     //   File.WriteAllText(Path.ChangeExtension(file.FullName, ".txt"), resultString);
@@ -215,8 +217,8 @@ namespace SparqlParser
                 {
                     var readAllText = File.ReadAllText(file.FullName);
                     var st = DateTime.Now;
-                    var q = Parse(readAllText);
-                    var resultString = q.Run(ts);
+                    var q = Parse(readAllText, ts);
+                    var resultString = q.Run();
                     var totalMilliseconds = (DateTime.Now - st).Ticks / 10000L;
                     results[i++] += totalMilliseconds;
                     File.WriteAllText(Path.ChangeExtension(file.FullName, ".txt"), resultString);
@@ -232,7 +234,7 @@ namespace SparqlParser
 
         }
 
-        private static Query Parse(string te)
+        private static Query Parse(string te, IRDFIntStore ts)
         {
             ICharStream input = new AntlrInputStream(te);
 
@@ -248,10 +250,11 @@ namespace SparqlParser
             //parser.calc();
             DateTime tm = DateTime.Now;
 
-            var lexer = new sparql2PacLexer(input);
+            var lexer = new sparql2PacNSLexer(input);
 
             var commonTokenStream = new CommonTokenStream(lexer);
-            var sparqlParser = new sparql2PacParser(commonTokenStream);
+            var sparqlParser = new sparql2PacNSParser(commonTokenStream);
+            sparqlParser.q = new Query(ts);
             sparqlParser.query();
             //   Console.WriteLine((DateTime.Now-tm).TotalMilliseconds);
             return sparqlParser.q;

@@ -109,33 +109,28 @@ namespace NameTable
         }
 
 
-        public Dictionary<string, int> InsertPortion(KeyValuePair<string, LiteralVidEnumeration?>[] portion)
+        public void Insert(string predicate, LiteralVidEnumeration? vid)
         {
             Open(false);
             List<string> stringByCodeList = new List<string>(stringByCode);
-            List<LiteralVidEnumeration?> literalsTypes=new List<LiteralVidEnumeration?>(LiteralVid);
-            var insertPortion = new Dictionary<string, int>();
-            for (int i = 0; i < portion.Length; i++)
-                if (!insertPortion.ContainsKey(portion[i].Key))
-                {
-                    var code = GetCode(portion[i].Key);
-                    if (code == Int32.MinValue)
-                    {
-                        codeByString.Add(portion[i].Key, code = Count++);
-                        nc_cell.Root.AppendElement(new object[] { code, portion[i].Key, (object) portion[i].Value ?? -1 });
-                        stringByCodeList.Add(portion[i].Key);
-                        literalsTypes.Add(portion[i].Value);
-                    }
-                    else
-                    {
-                        if (LiteralVid[code] != portion[i].Value) throw new Exception("literal types different in same predicate " + portion[i]);
-                    }
-                    insertPortion.Add(portion[i].Key, code);
-                }
+            List<LiteralVidEnumeration?> literalsTypes = new List<LiteralVidEnumeration?>(LiteralVid);
+            var code = GetCode(predicate);
+            if (code == Int32.MinValue)
+            {
+                codeByString.Add(predicate, code = Count++);
+                nc_cell.Root.AppendElement(new object[] {code, predicate, (object) vid ?? -1});
+                stringByCodeList.Add(predicate);
+                literalsTypes.Add(vid);
+            }
+            else
+            {
+                if (LiteralVid[code] !=vid)
+                    throw new Exception("literal types different in same predicate " + predicate);
+            }
             nc_cell.Flush();
             stringByCode = stringByCodeList.ToArray();
             LiteralVid = literalsTypes.ToArray();
-            return insertPortion;
+           
         }
 
         public void MakeIndexed()
@@ -144,6 +139,10 @@ namespace NameTable
         }
 
         public int Count { get; private set; }
-   
+
+        public int this[string predicateString]
+        {
+            get { return codeByString[predicateString]; }
+        }
     }
 }
