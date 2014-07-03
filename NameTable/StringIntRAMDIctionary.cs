@@ -73,6 +73,11 @@ namespace NameTable
            
         }
 
+        public int InsertOne(string entity)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Open(bool readonlyMode)
         {
             if (openMode == null)

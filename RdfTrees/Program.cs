@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Xml.Linq;
+using NameTable;
 using TripleIntClasses;
 
 
-namespace RdfTrees
+namespace RdfTreesNamespace
 {
     public class Program
     {
@@ -14,7 +15,8 @@ namespace RdfTrees
 
             string path = @"..\..\..\Databases\";
             Console.WriteLine("Start RdfTrees");
-            RdfTrees rtrees = new RdfTrees(path);
+            NameSpaceStore nameSpaceStore = new NameSpaceStore(path);
+            RdfTrees rtrees = new RdfTrees(path, new StringIntMD5RAMCollision(path), new PredicatesCoding(path), nameSpaceStore,   new LiteralStoreSplited(path, nameSpaceStore));
             
             //rtrees.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset1M.ttl");
             //return;

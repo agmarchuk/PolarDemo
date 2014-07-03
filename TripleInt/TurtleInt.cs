@@ -1,22 +1,19 @@
-using System;
+п»їusing System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Security.Cryptography;
 using NameTable;
 using PolarDB;
 using TrueRdfViewer;
 
 namespace TripleIntClasses
 {
-    public static partial class TurtleInt
+    public static class TurtleInt
     {
-        public static int BufferMax =30*1000 * 1000;
-        public static void LoadTriplets(string filepath, ref PaCell otriples, ref PaCell dtriplets)
+        public static int BufferMax = 30 * 1000 * 1000;
+        public static void LoadByGraphsBuffer(string filepath, PaCell otriples, PaCell dtriplets, RDFIntStoreAbstract rdfIntStore)
         {
             //Directory.Delete(path);               
             //Directory.CreateDirectory(path);
-
 
             otriples.Clear();
             otriples.Fill(new object[0]);
@@ -26,28 +23,20 @@ namespace TripleIntClasses
             dtriplets.Fill(new object[0]);
             int i = 0;
             //Entity e = new Entity();
-            TripleInt.SiCodingEntities.Clear();
-            TripleInt.PredicatesCoding.Clear();
-            TripleInt.EntitiesCodeCache.Clear();
-            
-            LiteralStoreSplited.Literals.Clear();
-
-            foreach (var tripletGrpah in TurtleInt.LoadGraphs(filepath))
+            rdfIntStore.Clear();      
+            foreach (var tripletGrpah in LoadGraphs(filepath, rdfIntStore))
             {
                 if (i % 100000 == 0) Console.Write("w{0} ", i / 100000);
                 i += tripletGrpah.PredicateDataValuePairs.Count + tripletGrpah.PredicateObjValuePairs.Count;
-                var subject = TripleInt.EntitiesCodeCache[tripletGrpah.subject];
+                var subject = rdfIntStore.EntityCoding.GetCode(tripletGrpah.subject);
 
                 foreach (var predicateObjValuePair in tripletGrpah.PredicateObjValuePairs)
                     otriples.Root.AppendElement(new object[]
                     {
                         subject,
                         predicateObjValuePair.Key,
-                        TripleInt.EntitiesCodeCache[predicateObjValuePair.Value]
-                    });
-                //foreach (var predicateDataValuePair in tripletGrpah.PredicateDataValuePairs)
-                //    LiteralStore.Literals.Write(predicateDataValuePair.Value);
-                LiteralStoreSplited.Literals.WriteBufferForce();
+                       rdfIntStore.EntityCoding.GetCode(predicateObjValuePair.Value)
+                    }); 
 
                 foreach (var predicateDataValuePair in tripletGrpah.PredicateDataValuePairs)
                     dtriplets.Root.AppendElement(new object[]
@@ -60,15 +49,14 @@ namespace TripleIntClasses
 
             otriples.Flush();
             dtriplets.Flush();
-        //    LiteralStoreSplited.Literals.Compress(dtriplets);
-
+            rdfIntStore.NameSpaceStore.Flush();
+            rdfIntStore.LiteralStore.Flush();
         }
-        private static IEnumerable<TripletGraph> LoadGraphs(string datafile)
+        private static IEnumerable<TripletGraph> LoadGraphs(string datafile, RDFIntStoreAbstract rdfIntStore)
         {
             int ntriples = 0;
             int nTripletsInBuffer = 0;
-            string subject = null;
-            var namespaces = new Dictionary<string, string>();
+            string subject = null;       
 
             List<TripletGraph> bufferTripletsGrpah = new List<TripletGraph>(BufferMax);
             TripletGraph currentTripletGraph = null;
@@ -96,7 +84,7 @@ namespace TripleIntClasses
                             continue;
                         }
                         nsname = nsname.Substring(1, nsname.Length - 2);
-                        namespaces.Add(pref, nsname);
+                        rdfIntStore.NameSpaceStore.AddPrefix(pref, nsname);
                     }
                     else if (line[0] != ' ')
                     {
@@ -104,7 +92,7 @@ namespace TripleIntClasses
                         if (nTripletsInBuffer >= BufferMax)
                         {
 
-                            TripleInt.EntitiesCodeCache = TripleInt.SiCodingEntities.InsertPortion(entitiesStrings);
+                             rdfIntStore.EntityCoding.InsertPortion(entitiesStrings);
                             foreach (var tripletGraph in bufferTripletsGrpah)
                                 yield return tripletGraph;
                             bufferTripletsGrpah.Clear();
@@ -114,7 +102,7 @@ namespace TripleIntClasses
                         }
                         // Subject
                         line = line.Trim();
-                        subject = GetEntityString(namespaces, line);
+                        subject = rdfIntStore.NameSpaceStore.GetShortFromFullOrPrefixed(line);
                         entitiesStrings.Add(subject);
                         currentTripletGraph = new TripletGraph() { subject = subject };
                         bufferTripletsGrpah.Add(currentTripletGraph);
@@ -129,84 +117,71 @@ namespace TripleIntClasses
                             Console.WriteLine("Err in line: " + line);
                             continue;
                         }
-                  
+
                         string rest_line = line1.Substring(first_blank + 1).Trim();
-                        // Уберем последний символ
+                        // Г“ГЎГҐГ°ГҐГ¬ ГЇГ®Г±Г«ГҐГ¤Г­ГЁГ© Г±ГЁГ¬ГўГ®Г«
                         rest_line = rest_line.Substring(0, rest_line.Length - 1).Trim();
                         bool isDatatype = rest_line[0] == '\"';
 
                         string pred_line = line1.Substring(0, first_blank);
-                        string predicateString = GetEntityString(namespaces, pred_line);
-                      
+                        string predicateString = rdfIntStore.NameSpaceStore.GetShortFromFullOrPrefixed(pred_line);
 
-                        // объект может быть entity или данное, у данного может быть языковый спецификатор или тип
+
+                        // Г®ГЎГєГҐГЄГІ Г¬Г®Г¦ГҐГІ ГЎГ»ГІГј entity ГЁГ«ГЁ Г¤Г Г­Г­Г®ГҐ, Гі Г¤Г Г­Г­Г®ГЈГ® Г¬Г®Г¦ГҐГІ ГЎГ»ГІГј ГїГ§Г»ГЄГ®ГўГ»Г© Г±ГЇГҐГ¶ГЁГґГЁГЄГ ГІГ®Г° ГЁГ«ГЁ ГІГЁГЇ
                         string sdata = null;
                         string datatype = null;
                         string lang = null;
                         if (isDatatype)
                         {
-                            // Последняя двойная кавычка 
+                            // ГЏГ®Г±Г«ГҐГ¤Г­ГїГї Г¤ГўГ®Г©Г­Г Гї ГЄГ ГўГ»Г·ГЄГ  
                             int lastqu = rest_line.LastIndexOf('\"');
-                            // Значение данных
+                            // Г‡Г­Г Г·ГҐГ­ГЁГҐ Г¤Г Г­Г­Г»Гµ
                             sdata = rest_line.Substring(1, lastqu - 1);
-                            // Языковый специализатор:
+                            // ГџГ§Г»ГЄГ®ГўГ»Г© Г±ГЇГҐГ¶ГЁГ Г«ГЁГ§Г ГІГ®Г°:
                             int dog = rest_line.LastIndexOf('@');
                             if (dog == lastqu + 1) lang = rest_line.Substring(dog + 1, rest_line.Length - dog - 1);
                             int pp = rest_line.IndexOf("^^");
                             if (pp == lastqu + 1)
                             {
-                                //  Тип данных
+                                //  Г’ГЁГЇ Г¤Г Г­Г­Г»Гµ
                                 string qname = rest_line.Substring(pp + 2);
-                                //  тип данных может быть "префиксным" или полным
-                                datatype = qname[0] == '<'
-                                    ? qname.Substring(1, qname.Length - 2)
-                                    : GetEntityString(namespaces, qname);
+                                //  ГІГЁГЇ Г¤Г Г­Г­Г»Гµ Г¬Г®Г¦ГҐГІ ГЎГ»ГІГј "ГЇГ°ГҐГґГЁГЄГ±Г­Г»Г¬" ГЁГ«ГЁ ГЇГ®Г«Г­Г»Г¬
+                                //datatype = qname[0] == '<'
+                                //    ? qname.Substring(1, qname.Length - 2)
+                                //    : GetEntityString(namespaces, qname);
+                                datatype = rdfIntStore.NameSpaceStore.GetShortFromFullOrPrefixed(qname);
                             }
 
-                            Literal literal = Literal.Create(datatype, sdata, lang);
-                            TripleInt.PredicatesCoding.Insert(predicateString, literal.vid);
+                            Literal literal = rdfIntStore.LiteralStore.Create(datatype, sdata, lang);
+                          rdfIntStore.PredicatesCoding.Insert(predicateString, literal.vid);
                             currentTripletGraph.PredicateDataValuePairs.Add(
-                                new KeyValuePair<int, Literal>(TripleInt.PredicatesCoding[predicateString],
-                                    LiteralStoreSplited.Literals.Write(literal)));
+                                new KeyValuePair<int, Literal>(rdfIntStore.PredicatesCoding[predicateString],
+                                    rdfIntStore.LiteralStore.Write(literal)));
                         }
                         else
                         {
-                             TripleInt.PredicatesCoding.Insert(predicateString,null);
-                            string obj = rest_line[0] == '<'
-                                ? rest_line.Substring(1, rest_line.Length - 2)
-                                : GetEntityString(namespaces, rest_line);
+                           rdfIntStore.PredicatesCoding.Insert(predicateString, null);
+                            string obj = rdfIntStore.NameSpaceStore.GetShortFromFullOrPrefixed(rest_line);
                             entitiesStrings.Add(obj);
-                            currentTripletGraph.PredicateObjValuePairs.Add(new KeyValuePair<int, string>(TripleInt.PredicatesCoding[predicateString], obj));
+                            currentTripletGraph.PredicateObjValuePairs.Add(new KeyValuePair<int, string>(rdfIntStore.PredicatesCoding[predicateString], obj));
                         }
                         ntriples++;
                         nTripletsInBuffer++;
                         if (ntriples % 100000 == 0) Console.Write("r{0} ", ntriples / 100000);
                     }
                 }
-            TripleInt.EntitiesCodeCache = TripleInt.SiCodingEntities.InsertPortion(entitiesStrings);
+          rdfIntStore.EntityCoding.InsertPortion(entitiesStrings);
             foreach (var tripletGraph in bufferTripletsGrpah)
                 yield return tripletGraph;
             bufferTripletsGrpah.Clear();
-            TripleInt.SiCodingEntities.MakeIndexed();
+           rdfIntStore.MakeIndexed();
+            
             entitiesStrings.Clear();
             GC.Collect();
             Console.WriteLine("ntriples={0}", ntriples);
-        }            
-        private static string GetEntityString(Dictionary<string, string> namespaces, string line)
-        {
-            string subject = null;
-            int colon = line.IndexOf(':');
-            if (colon == -1) { Console.WriteLine("Err in line: " + line); goto End; }
-            string prefix = line.Substring(0, colon + 1);
-            if (!namespaces.ContainsKey(prefix)) { Console.WriteLine("Err in line: " + line); goto End; }
-            subject = namespaces[prefix] + line.Substring(colon + 1);
-        End:
-            return subject;
-        }
+        }                 
 
-
-
-        public static void LoadTriplets(string filepath, PaCell otriples, PaCell dtriplets)
+        public static void LoadTriplets(string filepath, PaCell otriples, PaCell dtriplets, RDFIntStoreAbstract rdf)
         {
             //Directory.Delete(path);               
             //Directory.CreateDirectory(path);
@@ -220,15 +195,10 @@ namespace TripleIntClasses
             dtriplets.Fill(new object[0]);
             int i = 0;
             //Entity e = new Entity();
-            TripleInt.SiCodingEntities.Clear();
-            TripleInt.PredicatesCoding.Clear();
-            TripleInt.EntitiesCodeCache.Clear();
-            TripleInt.nameSpaceStore.Clear();
-            IRI.namespacesByPrefix.Clear();
-            TripleInt.nameSpaceStore.Clear();
-            LiteralStoreSplited.Literals.Clear();
+            rdf.Clear();
+         
 
-            foreach (var triplet in Buffer(LoadTriplets(filepath)))
+            foreach (var triplet in LoadTriplets(filepath, rdf))
             {
                 if (i%100000 == 0) Console.Write("w{0} ", i/100000);
                 i++;
@@ -255,39 +225,15 @@ namespace TripleIntClasses
             }
 
             otriples.Flush();
-            dtriplets.Flush();
-            //    LiteralStoreSplited.Literals.Compress(dtriplets);
-
-        }
-
-        private static IEnumerable<T> Buffer<T>(IEnumerable<T> triplets)
+            dtriplets.Flush();    
+        }       
+       
+        private static IEnumerable<TripleInt> LoadTriplets(string datafile, RDFIntStoreAbstract rdf)
         {
-            var buffer = new List<T>();
-
-            foreach (var triplet in triplets)
-                if (buffer.Count < BufferMax)
-                    buffer.Add(triplet);
-                else
-                {
-                    LiteralStoreSplited.Literals.WriteBufferForce();
-                    foreach (var tripleInt in buffer)
-                        yield return tripleInt;
-                    buffer.Clear();
-                }
-            LiteralStoreSplited.Literals.WriteBufferForce();
-            foreach (var tripleInt in buffer)
-                yield return tripleInt;
-        }
-
-        private static IEnumerable<TripleInt> LoadTriplets(string datafile)
-        {
-            
             int ntriples = 0;
             int nTripletsInBuffer = 0;
             string subject = null;
-            int subjectCode = 0;
-            StringIntEncoded stringIntEncoded = ((StringIntEncoded)TripleInt.SiCodingEntities);
-       
+            int subjectCode = 0;         
             using (var sr = new StreamReader(datafile))
                 while (!sr.EndOfStream)
                 {
@@ -311,15 +257,26 @@ namespace TripleIntClasses
                             continue;
                         }
                         nsname = nsname.Substring(1, nsname.Length - 2);   
-                        IRI.namespacesByPrefix.Add(pref, nsname);
-                        TripleInt.GetNamespaceCode(nsname);  
+                       rdf.NameSpaceStore.namespacesByPrefix.Add(pref, nsname);
+                        string ns = nsname;
+                        //   @namespace = @namespace.ToLower();
+                        if (ns[ns.Length-1] == '/' || ns[ns.Length-1] == '\\' ||
+                            ns[ns.Length-1] == '#')
+                            ns = ns.Substring(0, ns.Length - 1);
+                        int code;
+                        if (!rdf.NameSpaceStore.Codes.TryGetValue(ns, out code))
+                        {
+                            rdf.NameSpaceStore.Codes.Add(ns, code = rdf.NameSpaceStore.Codes.Count);
+                            rdf.NameSpaceStore.NameSpaceStrings.Add(ns);
+                        }
+                        int temp = code;  
                     }
                     else if (line[0] != ' ')
                     {
                         // Subject
                         line = line.Trim();
-                        subject = new IRI(line).Coded;
-                        subjectCode = stringIntEncoded.InsertOne(subject);
+                        subject = rdf.NameSpaceStore.GetShortFromFullOrPrefixed(line);
+                        subjectCode = rdf.EntityCoding.InsertOne(subject);
                     }
                     else
                     {
@@ -333,48 +290,48 @@ namespace TripleIntClasses
                         }
 
                         string rest_line = line1.Substring(first_blank + 1).Trim();
-                        // Уберем последний символ
+                        // РЈР±РµСЂРµРј РїРѕСЃР»РµРґРЅРёР№ СЃРёРјРІРѕР»
                         rest_line = rest_line.Substring(0, rest_line.Length - 1).Trim();
                         bool isDatatype = rest_line[0] == '\"';
 
                         string pred_line = line1.Substring(0, first_blank);
-                        string predicateString = new IRI(pred_line).Coded;
+                        string predicateString = rdf.NameSpaceStore.GetShortFromFullOrPrefixed(pred_line);
 
 
-                        // объект может быть entity или данное, у данного может быть языковый спецификатор или тип
+                        // РѕР±СЉРµРєС‚ РјРѕР¶РµС‚ Р±С‹С‚СЊ entity РёР»Рё РґР°РЅРЅРѕРµ, Сѓ РґР°РЅРЅРѕРіРѕ РјРѕР¶РµС‚ Р±С‹С‚СЊ СЏР·С‹РєРѕРІС‹Р№ СЃРїРµС†РёС„РёРєР°С‚РѕСЂ РёР»Рё С‚РёРї
                         string sdata = null;
                         string datatype = null;
                         string lang = null;
                         if (isDatatype)
                         {
-                            // Последняя двойная кавычка 
+                            // РџРѕСЃР»РµРґРЅСЏСЏ РґРІРѕР№РЅР°СЏ РєР°РІС‹С‡РєР° 
                             int lastqu = rest_line.LastIndexOf('\"');
-                            // Значение данных
+                            // Р—РЅР°С‡РµРЅРёРµ РґР°РЅРЅС‹С…
                             sdata = rest_line.Substring(1, lastqu - 1);
-                            // Языковый специализатор:
+                            // РЇР·С‹РєРѕРІС‹Р№ СЃРїРµС†РёР°Р»РёР·Р°С‚РѕСЂ:
                             int dog = rest_line.LastIndexOf('@');
                             if (dog == lastqu + 1) lang = rest_line.Substring(dog + 1, rest_line.Length - dog - 1);
                             int pp = rest_line.IndexOf("^^");
                             if (pp == lastqu + 1)
                             {
-                                //  Тип данных
+                                //  РўРёРї РґР°РЅРЅС‹С…
                                 string qname = rest_line.Substring(pp + 2);
-                                //  тип данных может быть "префиксным" или полным
-                                datatype = NameSpaceStore.SplitCodeNameSpace(qname);
+                                //  С‚РёРї РґР°РЅРЅС‹С… РјРѕР¶РµС‚ Р±С‹С‚СЊ "РїСЂРµС„РёРєСЃРЅС‹Рј" РёР»Рё РїРѕР»РЅС‹Рј
+                                datatype = rdf.NameSpaceStore.GetShortFromFullOrPrefixed(qname);
                             }
 
-                            Literal literal = Literal.Create(datatype, sdata, lang);
-                          TripleInt.PredicatesCoding.Insert(predicateString, literal.vid);
-                            yield return new DTripleInt(subjectCode, TripleInt.PredicatesCoding[predicateString],
-                                LiteralStoreSplited.Literals.Write(literal));
+                            Literal literal = rdf.LiteralStore.Create(datatype, sdata, lang);
+                            rdf.PredicatesCoding.Insert(predicateString, literal.vid);
+                            yield return new DTripleInt(subjectCode, rdf.PredicatesCoding[predicateString],
+                             rdf.LiteralStore.Write(literal));
                         }
                         else
                         {
-                            TripleInt.PredicatesCoding.Insert(predicateString, null);
-                            string obj = NameSpaceStore.SplitCodeNameSpace(rest_line);
+                            rdf.PredicatesCoding.Insert(predicateString, null);
+                            string obj = rdf.NameSpaceStore.GetShortFromFullOrPrefixed(rest_line);
                             yield return
-                                new OTripleInt(subjectCode, TripleInt.PredicatesCoding[predicateString],
-                                    stringIntEncoded.InsertOne(obj));
+                                new OTripleInt(subjectCode, rdf.PredicatesCoding[predicateString],
+                                    rdf.EntityCoding.InsertOne(obj));
                         }
                         ntriples++;
                         nTripletsInBuffer++;
@@ -382,11 +339,9 @@ namespace TripleIntClasses
                     }
                 }
             
-            TripleInt.SiCodingEntities.MakeIndexed();
+            rdf.MakeIndexed();
             GC.Collect();
             Console.WriteLine("ntriples={0}", ntriples);
-            TripleInt.nameSpaceStore.Flush();
-            Console.WriteLine("writed namespaces ");
         }
     }
 }

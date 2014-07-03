@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using NameTable;
 using TrueRdfViewer;
 
 namespace TripleIntClasses
 {
-    public class CashingTripleStoreInt : IRDFIntStore
-    {             
-        IRDFIntStore @base;
+    public class CashingTripleStoreInt : RDFIntStoreAbstract
+    {
+        readonly RDFIntStoreAbstract @base;
         private readonly Dictionary<int, IEnumerable<KeyValuePair<int, int>>> SPoCache = new Dictionary<int, IEnumerable<KeyValuePair<int, int>>>();
         private readonly Dictionary<int, IEnumerable<KeyValuePair<int, int>>> sPOCache = new Dictionary<int, IEnumerable<KeyValuePair<int, int>>>();
         private readonly Dictionary<int, IEnumerable<KeyValuePair<Literal, int>>> sPDCache = new Dictionary<int, IEnumerable<KeyValuePair<Literal, int>>>();
@@ -15,12 +16,12 @@ namespace TripleIntClasses
         private readonly Dictionary<KeyValuePair<int, int>, int[]> SpoCache = new Dictionary<KeyValuePair<int, int>, int[]>();
         private readonly Dictionary<KeyValuePair<int, int>, int[]> spOCache = new Dictionary<KeyValuePair<int, int>, int[]>();
         private readonly Dictionary<OTripleInt, bool> spoCache = new Dictionary<OTripleInt, bool>();
-        public CashingTripleStoreInt(IRDFIntStore @base)
+        public CashingTripleStoreInt(RDFIntStoreAbstract @base) : base(@base.EntityCoding, @base.PredicatesCoding, @base.NameSpaceStore, @base.LiteralStore)
         {
             this.@base = @base;    
           
         }
-        public bool ChkOSubjPredObj(int subj, int pred, int obj)
+        public override bool ChkOSubjPredObj(int subj, int pred, int obj)
         {
             bool exists;
             var key = new OTripleInt(subj, obj,  pred);
@@ -29,7 +30,7 @@ namespace TripleIntClasses
             return exists;
         }
 
-        public bool CheckInScale(int subj, int pred, int obj)
+        public override bool CheckInScale(int subj, int pred, int obj)
         {
             return @base.CheckInScale(subj, pred, obj);
         }
@@ -74,7 +75,7 @@ namespace TripleIntClasses
             return GetObjBySubjPred(subj, pred).Contains(obj);
         }
 
-        public IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
+        public override IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
         {
             Literal[] res;
             var key = new KeyValuePair<int, int>(subj, pred);
@@ -83,7 +84,7 @@ namespace TripleIntClasses
             return res;
         }
 
-        public IEnumerable<int> GetObjBySubjPred(int subj, int pred)
+        public override IEnumerable<int> GetObjBySubjPred(int subj, int pred)
         {
             int[] objects;
             var key = new KeyValuePair<int, int>(subj, pred);
@@ -92,22 +93,22 @@ namespace TripleIntClasses
             return objects;
         }
 
-        public void InitTypes()
+        public override void InitTypes()
         {
             throw new NotImplementedException();
         }
 
-        public void WarmUp()
+        public override void WarmUp()
         {
            @base.WarmUp();
         }
 
-        public void LoadTurtle(string filepath)
+        public override void LoadTurtle(string filepath)
         {
             @base.LoadTurtle(filepath);
         }
 
-        public IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
+        public override IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
         {
             int[] subjects;
             var key = new KeyValuePair<int, int>(obj, pred);
@@ -116,19 +117,19 @@ namespace TripleIntClasses
             return subjects;
         }
 
-        public IEnumerable<int> GetSubjectByDataPred(int p, Literal d)
+        public override IEnumerable<int> GetSubjectByDataPred(int p, Literal d)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<KeyValuePair<Int32, Int32>> GetObjBySubj(int subj)
+        public override IEnumerable<KeyValuePair<Int32, Int32>> GetObjBySubj(int subj)
         {
             IEnumerable<KeyValuePair<int, int>> op;
             if (!sPOCache.TryGetValue(subj, out op))
                 sPOCache.Add(subj, op = @base.GetObjBySubj(subj)); 
             return op;
         }
-        public IEnumerable<KeyValuePair<Literal, int>> GetDataBySubj(int subj)
+        public override IEnumerable<KeyValuePair<Literal, int>> GetDataBySubj(int subj)
         {
             IEnumerable<KeyValuePair<Literal, int>> dp;
             if (!sPDCache.TryGetValue(subj, out dp))
@@ -136,12 +137,43 @@ namespace TripleIntClasses
             return dp;
         }
 
-        public IEnumerable<KeyValuePair<int, int>> GetSubjectByObj(int obj)
+        public override IEnumerable<KeyValuePair<int, int>> GetSubjectByObj(int obj)
         {
             IEnumerable<KeyValuePair<int, int>> sp;
             if (!SPoCache.TryGetValue(obj, out sp))
                 SPoCache.Add(obj, sp = @base.GetSubjectByObj(obj)); 
             return sp;
         }
+
+        public override LiteralStoreAbstract LiteralStore
+        {
+            get { return @base.LiteralStore; }
+        }
+
+        public override IStringIntCoding EntityCoding
+        {
+            get { return @base.EntityCoding; }
+        }
+
+        public override NameSpaceStore NameSpaceStore
+        {
+            get { return @base.NameSpaceStore; }
+        }
+
+        public override PredicatesCoding PredicatesCoding
+        {
+            get { return @base.PredicatesCoding; }
+        }
+
+        public override void Clear()
+        {
+            @base.Clear();
+        }
+
+        public override void MakeIndexed()
+        {
+            @base.MakeIndexed();
+        }
     }
+
 }

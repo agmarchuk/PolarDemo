@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using PolarDB;
@@ -10,10 +10,10 @@ namespace TrueRdfViewer
     {
         //public bool result;
         public object[] row;
-        private readonly IRDFIntStore ts;
-        public IRDFIntStore Store { get { return ts; } }
+        private readonly RDFIntStoreAbstract ts;
+        public RDFIntStoreAbstract StoreAbstract { get { return ts; } }
 
-        public RPackInt(object[] row, IRDFIntStore ts)
+        public RPackInt(object[] row, RDFIntStoreAbstract ts)
         {
             this.row = row;
             this.ts = ts;
@@ -21,11 +21,11 @@ namespace TrueRdfViewer
         public string Get(object si)
         {
             if (!(si is short)) 
-                return TripleInt.DecodeEntities((int)si);
+                return ts.EntityCoding.GetName((int)si);
             var index = (short)si;
             var literal = (row[index] as Literal);
             if (literal != null) return literal.ToString();
-            else return TripleInt.DecodeEntities((int) row[index]);
+            else return ts.EntityCoding.GetName((int)row[index]);
         }
 
         public int GetE(object si)
@@ -147,15 +147,15 @@ namespace TrueRdfViewer
                 } 
                 else 
                 {
-                    Diapason di = rw.Store.GetDiap_op(obj_oval.entity);
+                    Diapason di = rw.StoreAbstract.GetDiap_op(obj_oval.entity);
                     diap.start = obj_oval.spo_start = di.start;
                     diap.numb = obj_oval.spo_number = di.numb;
                 }
-                return rw.Store.GetSubjInDiapason(diap, row[pred].entity)
+                return rw.StoreAbstract.GetSubjInDiapason(diap, row[pred].entity)
                     .Select(su => 
                     {
                         row[subj].entity = su; row[subj].op_number = -1; row[subj].spd_number = -1; row[subj].spo_number = -1;
-                        return new OValRowInt(rw.Store, row);
+                        return new OValRowInt(rw.StoreAbstract, row);
                     });
             });
             return query;
@@ -170,7 +170,7 @@ namespace TrueRdfViewer
                 OVal pred_oval = row[pred];
                 OVal obj_oval = row[obj];
                 // Проверим через шкалу
-                if (!ovr.Store.scale.ChkInScale(subj_oval.entity, pred_oval.entity, obj_oval.entity)) return false;
+                if (!ovr.StoreAbstract.scale.ChkInScale(subj_oval.entity, pred_oval.entity, obj_oval.entity)) return false;
                 Diapason diap = new Diapason();
                 if (subj_oval.spo_number >= 0)
                 { // Диапазон определен
@@ -179,12 +179,12 @@ namespace TrueRdfViewer
                 }
                 else
                 {
-                    Diapason di = ovr.Store.GetDiap_spo(subj_oval.entity);
+                    Diapason di = ovr.StoreAbstract.GetDiap_spo(subj_oval.entity);
                     diap.start = subj_oval.spo_start = di.start;
                     diap.numb = subj_oval.spo_number = di.numb;
                 }
 
-                return ovr.Store.CheckPredObjInDiapason(diap, ovr.row[pred].entity, ovr.row[obj].entity);
+                return ovr.StoreAbstract.CheckPredObjInDiapason(diap, ovr.row[pred].entity, ovr.row[obj].entity);
             });
             return query;
         }
@@ -205,15 +205,15 @@ namespace TrueRdfViewer
                 }
                 else
                 {
-                    Diapason di = ovr.Store.GetDiapason_spd(subj_oval.entity);
+                    Diapason di = ovr.StoreAbstract.GetDiapason_spd(subj_oval.entity);
                     diap.start = subj_oval.spd_start = di.start;
                     diap.numb = subj_oval.spd_number = di.numb;
                 }
-                return ovr.Store.GetDatInDiapason(diap, row[pred].entity)
+                return ovr.StoreAbstract.GetDatInDiapason(diap, row[pred].entity)
                     .Select(lit =>
                     {
                         row[dat].lit = lit;
-                        return new OValRowInt(ovr.Store, row);
+                        return new OValRowInt(ovr.StoreAbstract, row);
                     });
             });
             return query;
@@ -223,42 +223,42 @@ namespace TrueRdfViewer
         public static IEnumerable<RPackInt> spo(this IEnumerable<RPackInt> pack, object subj, object pred, object obj)
         {
             //subj = P(subj); pred = P(pred); obj = P(obj);
-            return pack.Where(pk => pk.Store.ChkOSubjPredObj(pk.GetE(subj), pk.GetE(pred), pk.GetE(obj)));
+            return pack.Where(pk => pk.StoreAbstract.ChkOSubjPredObj(pk.GetE(subj), pk.GetE(pred), pk.GetE(obj)));
         }
         public static IEnumerable<RPackInt> Spo(this IEnumerable<RPackInt> pack, object subj, object pred, object obj)
         {
             if (!(subj is short)) throw new Exception("subject must be an index");
             //pred = P(pred); obj = P(obj);
-            return pack.SelectMany(pk => pk.Store
+            return pack.SelectMany(pk => pk.StoreAbstract
                 .GetSubjectByObjPred(pk.GetE(obj), pk.GetE(pred))
                 .Select(su =>
                 {
                     pk.Set(subj, su);
-                    return new RPackInt(pk.row, pk.Store);
+                    return new RPackInt(pk.row, pk.StoreAbstract);
                 }));
         }
         public static IEnumerable<RPackInt> spO(this IEnumerable<RPackInt> pack, object subj, object pred, object obj)
         {
             if (!(obj is short)) throw new Exception("object must be an index");
             //subj = P(subj); pred = P(pred);
-            return pack.SelectMany(pk => pk.Store
+            return pack.SelectMany(pk => pk.StoreAbstract
                 .GetObjBySubjPred(pk.GetE(subj), pk.GetE(pred))
                 .Select(ob =>
                 {
                     pk.Set(obj, ob);
-                    return new RPackInt(pk.row, pk.Store);
+                    return new RPackInt(pk.row, pk.StoreAbstract);
                 }));
         }
         public static IEnumerable<RPackInt> spD(this IEnumerable<RPackInt> pack, object subj, object pred, object dat)
         {
             if (!(dat is short)) throw new Exception("data must be an index");
             //subj = P(subj); pred = P(pred);
-            return pack.SelectMany(pk => pk.Store
+            return pack.SelectMany(pk => pk.StoreAbstract
                 .GetDataBySubjPred(pk.GetE(subj), pk.GetE(pred))
                 .Select(da =>
                 {
                     pk.Set(dat, da); //((Text)da.value).s);
-                    return new RPackInt(pk.row, pk.Store);
+                    return new RPackInt(pk.row, pk.StoreAbstract);
                 }));
         }
     }

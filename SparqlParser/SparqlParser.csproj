@@ -53,6 +53,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GraphIsDataProperty.cs" />
+    <Compile Include="obj\Release\sparql2PacNSBaseListener.cs" />
+    <Compile Include="obj\Release\sparql2PacNSBaseVisitor.cs" />
+    <Compile Include="obj\Release\sparql2PacNSLexer.cs" />
+    <Compile Include="obj\Release\sparql2PacNSListener.cs" />
+    <Compile Include="obj\Release\sparql2PacNSParser.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Query.cs" />
     <Compile Include="Program.cs" />
@@ -137,9 +142,7 @@
       <Name>TripleIntClasses</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="obj\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Antlr4.4.2.0-alpha001\build\Antlr4.targets" Condition="Exists('..\packages\Antlr4.4.2.0-alpha001\build\Antlr4.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

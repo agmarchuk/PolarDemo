@@ -8,20 +8,20 @@ using TripleIntClasses;
 using TrueRdfViewer;
 
 
-namespace RdfTrees
+namespace RdfTreesNamespace
 {
     // Файл 3 (3)
     public partial class RdfTrees
     {
         
 
-        public bool ChkOSubjPredObj(int subj, int pred, int obj)
+        public override bool ChkOSubjPredObj(int subj, int pred, int obj)
         {
             if (subj == Int32.MinValue || obj == Int32.MinValue || pred == Int32.MinValue) return false;
 
             return CheckContains(subj, pred, obj);
             }
-        public bool CheckInScale(int subj, int pred, int obj)
+        public override bool CheckInScale(int subj, int pred, int obj)
         {
             return scale.ChkInScale(subj, pred, obj);
         }
@@ -32,20 +32,22 @@ namespace RdfTrees
             return GetObjBySubjPred(subj, pred).Contains(subj);   
             }
 
-        public  IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
+        public override IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
         {
             if (subj == Int32.MinValue || pred == Int32.MinValue) return new Literal[0];
-            var rec_ent = this.entitiesTree.Root.Element(subj);; //.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
+            var rec_ent = this.entitiesTree.Root.Element(subj);
+            ; //.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
             if (rec_ent.IsEmpty) return new Literal[0];
-                    object[] pairs = (object[]) rec_ent.Field(1).Get();
+            var pairs = (object[]) rec_ent.Field(1).Get();
+            var literalVidEnumeration = PredicatesCoding.LiteralVid[pred];
             return pairs.Cast<object[]>()
-                        .Where(pair => (int) pair[0] == pred)
-                        .Select(pair => (long) pair[1])
-                        .Select(LiteralStore.Literals.Read)
-                        .ToArray();  
-                }
+                .Where(pair => (int) pair[0] == pred)
+                .Select(pair => (long) pair[1])
+                .Select(l => LiteralStore.Read(l, literalVidEnumeration))
+                .ToArray();
+        }
 
-        public  IEnumerable<int> GetObjBySubjPred(int subj, int pred)
+        public override IEnumerable<int> GetObjBySubjPred(int subj, int pred)
         {
             if (subj == Int32.MinValue || pred == Int32.MinValue) return new int[0];
             var key = new KeyValuePair<int, int>(subj, pred);
@@ -58,7 +60,7 @@ namespace RdfTrees
                         .ToArray();
                 }
 
-        public  IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
+        public override IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
         {
             if (obj == Int32.MinValue || pred == Int32.MinValue) return new int[0];
             var key = new KeyValuePair<int, int>(obj, pred);
@@ -77,7 +79,7 @@ namespace RdfTrees
         /// </summary>
         /// <param name="subj"></param>
         /// <returns></returns>
-        public  IEnumerable<KeyValuePair<int, int>> GetObjBySubj(int subj)
+        public override IEnumerable<KeyValuePair<int, int>> GetObjBySubj(int subj)
         {
             if (subj == Int32.MinValue) return new KeyValuePair<int, int>[0];
                 var rec_ent = this.entitiesTree.Root.Element(subj);//.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
@@ -88,7 +90,7 @@ namespace RdfTrees
                             .ToArray();
                 }
 
-        public  IEnumerable<KeyValuePair<Literal, int>> GetDataBySubj(int subj)
+        public override IEnumerable<KeyValuePair<Literal, int>> GetDataBySubj(int subj)
         {
             if (subj == Int32.MinValue) return new KeyValuePair<Literal, int>[0];
             var rec_ent = this.entitiesTree.Root.Element(subj);
@@ -101,7 +103,7 @@ namespace RdfTrees
                         .Select(pair =>
                         {
                     var offset1 = (long) pair[1];
-                    var literalObj = LiteralStore.Literals.Read(offset1);
+                    var literalObj = LiteralStore.Read(offset1, PredicatesCoding.LiteralVid[(int)pair[0]]);
                     return new KeyValuePair<Literal, int>(literalObj, (int) pair[0]);
                         })
                         .ToArray();
@@ -112,7 +114,7 @@ namespace RdfTrees
         /// </summary>
         /// <param name="subj"></param>
         /// <returns></returns>
-        public  IEnumerable<KeyValuePair<int, int>> GetSubjectByObj(int obj)
+        public override IEnumerable<KeyValuePair<int, int>> GetSubjectByObj(int obj)
         {
             if (obj == Int32.MinValue) return new KeyValuePair<int, int>[0];
 
@@ -129,7 +131,7 @@ namespace RdfTrees
                     }
             return subjs;
         }
-        public void WarmUp()
+        public override void WarmUp()
         {
             entitiesTree.Close();
             using (FileStream reader = new FileStream(entitiesTreePath, FileMode.Open))
@@ -143,7 +145,7 @@ namespace RdfTrees
                 }
             }
             entitiesTree = new PxCell(tp_entitiesTree, entitiesTreePath);
-            LiteralStore.Literals.WarmUp();
+            LiteralStore.WarmUp();
         }
      
     }

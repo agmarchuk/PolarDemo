@@ -6,11 +6,11 @@ using TripleIntClasses;
 using TrueRdfViewer;
 
 
-namespace RdfTrees
+namespace RdfTreesNamespace
 {
     public partial class RdfTrees
     {
-        public  void LoadTurtle(string filename)
+        public override void LoadTurtle(string filename)
         {
             // Дополнительные ячейки и индексы
             otriples = new PaCell(tp_otriple_seq, path + "otriples.pac", false);
@@ -19,7 +19,7 @@ namespace RdfTrees
             DateTime tt0 = DateTime.Now;
 
             // Загрузка otriples, dtriples
-            TurtleInt.LoadTriplets(filename, ref otriples, ref dtriples);
+            TurtleInt.LoadByGraphsBuffer(filename, otriples, dtriples, this);
             Console.WriteLine("Load ok. duration={0}", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             
             // Формирование дополнительных файлов

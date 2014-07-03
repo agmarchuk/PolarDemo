@@ -1,13 +1,10 @@
-using System.Collections.Generic;
-using System.IO;
 using PolarDB;
-using TripleIntClasses;
 
-namespace TrueRdfViewer
+namespace TripleIntClasses
 {
-    public class LiteralStore
+    public class LiteralStore   :LiteralStoreAbstract
     {
-        public static PType tp_rliteral = new PTypeUnion(
+        private static readonly PType tp_rliteral = new PTypeUnion(
    new NamedType("void", new PType(PTypeEnumeration.none)),
    new NamedType("integer", new PType(PTypeEnumeration.real)),
    new NamedType("string", new PTypeRecord(
@@ -18,80 +15,53 @@ namespace TrueRdfViewer
    new NamedType("typedObject", new PTypeRecord(
        new NamedType("s", new PType(PTypeEnumeration.sstring)),
        new NamedType("t", new PType(PTypeEnumeration.sstring)))));
-        private static PType tp_data_seq = new PTypeSequence(tp_rliteral);
-        public PaCell dataCell;
-        private List<Literal> writeBuffer;
-        private static string pataCellPath;
-        private static LiteralStore literals;
+        private static readonly PType tp_data_seq = new PTypeSequence(tp_rliteral);
+        public PaCell dataCell;      
+     
 
-        public LiteralStore(string path)
+        public LiteralStore(string path, NameSpaceStore nameSpaceStore) : base(path,nameSpaceStore)
         {
-            pataCellPath = path + "data.pac";              
-        }
-
+            dataCellPath = path + "data.pac";              
+        }   
         
-        public static LiteralStore Literals
+        public override void Open(bool readOnlyMode)
         {
-            get
-            {
-                if (literals == null)
-                {
-                    literals=new LiteralStore(pataCellPath);
-                    literals.Open(false);
-                }
-                return literals;
-            }
-        }
-
-        public static string DataCellPath
-        {
-            set
-            {
-              
-            }
-        }
-
-        public void Open(bool readOnlyMode)
-        {
-            dataCell = new PaCell(tp_data_seq, pataCellPath, readOnlyMode);
+            dataCell = new PaCell(tp_data_seq, dataCellPath, readOnlyMode);
             if(dataCell.IsEmpty)
                 dataCell.Fill(new object[0]);
         }
 
-        public void WarmUp()
+        public override void Clear()
+        {
+            dataCell.Clear();
+            dataCell.Fill(new object[0]);
+        }
+
+        public override void WarmUp()
         {
             foreach (var t in dataCell.Root.ElementValues()) ;
         }
 
-        public Literal Read(long offset)
-        {
+        public override Literal Read(long offset, LiteralVidEnumeration? vid)
+        {               
             var paEntry = dataCell.Root.Element(0);
             paEntry.offset = offset;
             return Literal.ToLiteral((object[])paEntry.Get());
         }
 
-        public Literal Write(Literal literal)
+        public override Literal Write(Literal literal)
         {
-            if (writeBuffer == null) writeBuffer = new List<Literal>();
-            writeBuffer.Add(literal);
-            if (writeBuffer.Count >= 1000)
-                WriteBufferForce();
+            var da = Literal.ToObjects(literal);
+            //в памяти сам литерал уже не хранится
+            literal.Value = null;
+            literal.Offset = dataCell.Root.AppendElement(da);
             return literal;
         }
 
-        public void WriteBufferForce()
+        public override void Flush()
         {
-        
-            
-            foreach (var lit in writeBuffer)
-            {
-                var da = Literal.ToObjects(lit);
-                //в памяти сам литерал уже не хранится
-                lit.Value = null;
-                lit.Offset = dataCell.Root.AppendElement(da);
-            }
-            writeBuffer.Clear();
             dataCell.Flush();
-        }
+        }   
+       
     }
 }

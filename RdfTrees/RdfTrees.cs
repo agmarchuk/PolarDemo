@@ -1,17 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using NameTable;
 using PolarDB;
 using ScaleBit4Check;
 using TripleIntClasses;
 using TrueRdfViewer;
 
 
-namespace RdfTrees
+namespace RdfTreesNamespace
 {
     /// <summary>
     /// Класс, представляющий собой хранилище триплетов, его методов, способ загрузки данных и формирования структуры
     /// </summary>
-    public partial class RdfTrees     :IRDFIntStore
+    public partial class RdfTrees     :RDFIntStoreAbstract
     {
         // Типы
         private PType tp_entitiesTree;
@@ -27,8 +28,7 @@ namespace RdfTrees
         private PxCell entitiesTree;
         //private PxCell literalsTree;
        // private PaCell dtriples;
-        // Место для базы данных
-        private string path;
+        // Место для базы данных  
         private ScaleCell scale;
         private string entitiesTreePath;
         private PaCell otriples;
@@ -37,9 +37,13 @@ namespace RdfTrees
         /// Конструктор
         /// </summary>
         /// <param name="path">директория базы данных с (обратным) слешем</param>
-        public RdfTrees(string path) 
-        {
-            this.path = path;
+        /// <param name="literalStore"></param>
+        /// <param name="entityCoding"></param>
+        /// <param name="nameSpaceStore"></param>
+        /// <param name="predicatesCoding"></param>
+        public RdfTrees(string path, IStringIntCoding entityCoding, PredicatesCoding predicatesCoding, NameSpaceStore nameSpaceStore, LiteralStoreAbstract literalStore)
+            : base(entityCoding, predicatesCoding, nameSpaceStore, literalStore)
+        {             
             // Построим типы
             InitTypes();
             // Создадим или откроем ячейки
@@ -51,11 +55,10 @@ namespace RdfTrees
                 otriples = new PaCell(tp_otriple_seq, path + "otriples.pac", File.Exists(path + "otriples.pac"));
             if (!scale.Filescale) scale.CreateScale(otriples);
                 otriples.Close();
-            
-            LiteralStore.DataCellPath = path;        
+                
         }
         // Построение типов
-        public void InitTypes()
+        public override void InitTypes()
         {
             this.tp_entitiesTree = new PTypeSequence(new PTypeRecord(
                 new NamedType("id", new PType(PTypeEnumeration.integer)),
@@ -91,7 +94,7 @@ namespace RdfTrees
         // Разогрев
 
 
-        public IEnumerable<int> GetSubjectByDataPred(int p, Literal d)
+        public override IEnumerable<int> GetSubjectByDataPred(int p, Literal d)
         {
             throw new System.NotImplementedException();
         }

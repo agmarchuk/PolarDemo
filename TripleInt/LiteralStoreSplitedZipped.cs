@@ -9,39 +9,25 @@ using TripleIntClasses;
 
 namespace TrueRdfViewer
 {
-    public class LiteralStoreSplitedZipped
+    public class LiteralStoreSplitedZipped : LiteralStoreAbstract
     {                   
         public PaCell stringsCell;   
         public PaCell doublesCell;
         public PaCell boolsCell;
         public PaCell typedObjectsCell;
         private List<Literal> writeBuffer;
-        private static string dataCellPath;
-        private static LiteralStoreSplitedZipped literals;
+      
+     
         private Archive stringsArhive;
         private PaCell StringsArchedCell;
 
-        public static LiteralStoreSplitedZipped Literals
+        public LiteralStoreSplitedZipped(string path, NameSpaceStore nameSpaceStore) : base(path, nameSpaceStore)
         {
-            get
-            {
-                if (literals == null)
-                {
-                    literals = new LiteralStoreSplitedZipped();
-                    literals.Open(false);
-                }
-                return literals;
-            }
+            
         }
 
-        public static string DataCellPath
-        {
-            set
-            {
-               dataCellPath = value + "/literals";
-                if (!Directory.Exists(dataCellPath)) Directory.CreateDirectory(dataCellPath);
-            }
-        }
+     
+     
 
         public void Open(bool readOnlyMode)
         {
@@ -57,7 +43,7 @@ namespace TrueRdfViewer
             StringsArchedCell = new PaCell(new PTypeSequence(new PTypeRecord(new NamedType("string code", ptypeCode), new NamedType("lang code", ptypeCode))), dataCellPath + "/strings archive/binary data", false);
         }
 
-        public void Clear()
+        public override void Clear()
         {
              doublesCell.Clear();
                 doublesCell.Fill(new object[0]);
@@ -72,7 +58,7 @@ namespace TrueRdfViewer
             StringsArchedCell.Fill(new object[0]);
         }
 
-        public void WarmUp()
+        public override void WarmUp()
         {
           //  foreach (var t in stringsCell.Root.ElementValues()) ;
             foreach (var t in StringsArchedCell.Root.ElementValues()) ;
@@ -81,11 +67,12 @@ namespace TrueRdfViewer
             foreach (var t in doublesCell.Root.ElementValues()) ;
         }
 
-        public Literal Read(long offset, int predicateCode)
+        public override Literal Read(long offset, LiteralVidEnumeration? vid)
         {
-            LiteralVidEnumeration? literalVidEnumeration = TripleInt.PredicatesCoding.LiteralVid[predicateCode];
-            if (literalVidEnumeration == null) throw new Exception("object predicate call literal");
-            var literal = new Literal(literalVidEnumeration.Value);
+       
+          
+            if (vid == null) throw new Exception("object predicate call literal");
+            var literal = new Literal(vid.Value);
             switch (literal.vid)
             {
                 case LiteralVidEnumeration.typedObject:
@@ -121,26 +108,11 @@ namespace TrueRdfViewer
             return literal;
         }
 
-        object Read(PaCell fromCell, long offset)
-        {
-            var paEntry = fromCell.Root.Element(0);
-            paEntry.offset = offset;
-            return paEntry.Get();
-        }
+     
 
-        public Literal Write(Literal literal)
+        public override Literal Write(Literal lit)
         {
-            if (writeBuffer == null) writeBuffer = new List<Literal>();
-            writeBuffer.Add(literal);
-            if (writeBuffer.Count >= 1000)
-                WriteBufferForce();
-            return literal;
-        }
-
-        public void WriteBufferForce()
-        {         
-            foreach (var lit in writeBuffer)
-            {
+           
                 switch (lit.vid)
                 {
                     case LiteralVidEnumeration.typedObject:
@@ -170,14 +142,13 @@ namespace TrueRdfViewer
                 }
                 var da = Literal.ToObjects(lit);
                 //в памяти сам литерал уже не хранится
-                lit.Value = null;
-             
-            }
-            writeBuffer.Clear();
+                lit.Value = null;       
+          
            Flush();
+            return lit;
         }
 
-        private void Flush()
+        public override void Flush()
         {
             typedObjectsCell.Flush();
             stringsCell.Flush();
@@ -185,14 +156,14 @@ namespace TrueRdfViewer
              doublesCell.Flush();
         }
 
-        public void Compress(PaCell dtriplets)
+        public void Compress(PaCell dtriplets, PredicatesCoding predicatesCoding)
         {
             stringsArhive.WriteCell();
             PaEntry paEntry = stringsCell.Root.Element(0);
             foreach (var dtripletElement in dtriplets.Root.Elements())
             {
                 int predicateCode = (int) dtripletElement.Field(1).Get();
-                if (TripleInt.PredicatesCoding.LiteralVid[predicateCode] == LiteralVidEnumeration.text)
+                if (predicatesCoding.LiteralVid[predicateCode] == LiteralVidEnumeration.text)
                 {
                     PaEntry offsetElement = dtripletElement.Field(2);
                     long offset = (long) offsetElement.Get();

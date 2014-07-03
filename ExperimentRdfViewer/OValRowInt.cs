@@ -29,7 +29,7 @@ namespace TrueRdfViewer
     {
         public OVal[] row;
         private TripleStoreInt ts;
-        public TripleStoreInt Store { get { return ts; } }
+        public TripleStoreInt StoreAbstract { get { return ts; } }
         public OValRowInt(TripleStoreInt ts, OVal[] row)
         {
             this.row = row;

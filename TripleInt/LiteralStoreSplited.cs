@@ -1,78 +1,41 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using PolarDB;
-using TripleIntClasses;
 
-namespace TrueRdfViewer
+namespace TripleIntClasses
 {
-    public class LiteralStoreSplited
-    {                   
-        public PaCell stringsCell;   
+    public class LiteralStoreSplited : LiteralStoreAbstract
+    {
+        public PaCell stringsCell;
         public PaCell typedObjectsCell;
-        private List<Literal> writeBuffer;
-        private static string dataCellPath;
-        private static LiteralStoreSplited literals;
 
-        public LiteralStoreSplited()
+
+        public LiteralStoreSplited(string path, NameSpaceStore nameSpaceStore) : base(path, nameSpaceStore)
         {
-                    
+            stringsCell = new PaCell(new PTypeSequence(new PTypeRecord(new NamedType("string value", new PType(PTypeEnumeration.sstring)), new NamedType("lang", new PType(PTypeEnumeration.sstring)))), path + "strings.pac", false);
+            typedObjectsCell = new PaCell(new PTypeSequence(new PTypeRecord(new NamedType("string value", new PType(PTypeEnumeration.sstring)), new NamedType("type", new PType(PTypeEnumeration.sstring)))), path + "typedObject.pac", false);
         }
 
-
-        public static LiteralStoreSplited Literals
+        public override void Clear()
         {
-            get
-            {
-                if (literals == null)
-                {
-                    literals=new LiteralStoreSplited();
-                    literals.Open(false);
-                }
-                return literals;
-            }
-        }
-
-        public static string DataCellPath
-        {
-            set
-            {
-               dataCellPath = value + "/literals";
-                if (!Directory.Exists(dataCellPath)) Directory.CreateDirectory(dataCellPath);
-            }
-        }
-
-        public void Open(bool readOnlyMode)
-        {
-            var pTypeString = new PType(PTypeEnumeration.sstring);
-            var pTypeStringsPair = new PTypeRecord(new NamedType("value", pTypeString),
-                new NamedType("add info", pTypeString));
-            stringsCell = new PaCell(new PTypeSequence(pTypeStringsPair), dataCellPath + "/stringsLiterals.pac", readOnlyMode);
-            typedObjectsCell = new PaCell(new PTypeSequence(pTypeStringsPair), dataCellPath + "/typedObjectsLiterals.pac", readOnlyMode);
-
-            
-        }
-
-        public void Clear()
-        {  
             stringsCell.Clear();
-                stringsCell.Fill(new object[0]);
             typedObjectsCell.Clear();
-                typedObjectsCell.Fill(new object[0]);    
+            stringsCell.Fill(new object[0]);
+            typedObjectsCell.Fill(new object[0]);
         }
 
-        public void WarmUp()
+        public override void WarmUp()
         {
-            foreach (var t in stringsCell.Root.ElementValues()) ;
-            foreach (var t in typedObjectsCell.Root.ElementValues()) ;
+            foreach (var elementValue in stringsCell.Root.ElementValues()) ;
+            foreach (var elementValue in typedObjectsCell.Root.ElementValues()) ;
         }
 
-        public Literal Read(long offset, int predicateCode)
+        public override Literal Read(long offset, LiteralVidEnumeration? vid)
         {
-            LiteralVidEnumeration? literalVidEnumeration = TripleInt.PredicatesCoding.LiteralVid[predicateCode];
-            if (literalVidEnumeration == null) throw new Exception("object predicate call literal");
-            var literal = new Literal(literalVidEnumeration.Value);
+            
+            if (vid == null) throw new Exception("object predicate call literal");
+            var literal = new Literal(vid.Value);
             switch (literal.vid)
             {
                 case LiteralVidEnumeration.typedObject:
@@ -100,7 +63,7 @@ namespace TrueRdfViewer
                 case LiteralVidEnumeration.boolean:
                     literal.Value = offset > 0;
                     break;
-                case LiteralVidEnumeration.nil: 
+                case LiteralVidEnumeration.nil:
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -108,65 +71,43 @@ namespace TrueRdfViewer
             return literal;
         }
 
-        object Read(PaCell fromCell, long offset)
+        public override Literal Write(Literal lit)
         {
-            var paEntry = fromCell.Root.Element(0);
-            paEntry.offset = offset;
-            return paEntry.Get();
-        }
-
-        public Literal Write(Literal literal)
-        {
-            if (writeBuffer == null) writeBuffer = new List<Literal>();
-            writeBuffer.Add(literal);
-            if (writeBuffer.Count >= 1000)
-                WriteBufferForce();
-            return literal;
-        }
-
-        public void WriteBufferForce()
-        {         
-            foreach (var lit in writeBuffer)
+            switch (lit.vid)
             {
-                switch (lit.vid)
-                {
-                    case LiteralVidEnumeration.typedObject:
-                        TypedObject valu = (TypedObject) lit.Value;
-                        lit.Offset = typedObjectsCell.Root.AppendElement(new object[] { valu.Value, valu.Type});
-                        break;
-                    case LiteralVidEnumeration.integer:
-                        lit.Offset = BitConverter.DoubleToInt64Bits(System.Convert.ToDouble(lit.Value));
-                        break;
-                    case LiteralVidEnumeration.text:
-                        Text value = (Text) lit.Value;
-                        lit.Offset = stringsCell.Root.AppendElement(new object[]{ value.Value, value.Lang});
-                        break;
-                    case LiteralVidEnumeration.date:
-                        lit.Offset = (long) lit.Value;
-                        break;
-                    case LiteralVidEnumeration.boolean:
-                        lit.Offset = (bool) lit.Value ? 1 : 0;
-                        break;
-                    case LiteralVidEnumeration.nil:
-                        lit.Offset = long.MaxValue;
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-                var da = Literal.ToObjects(lit);
-                //в памяти сам литерал уже не хранится
-                lit.Value = null;
-             
+                case LiteralVidEnumeration.typedObject:
+                    TypedObject valu = (TypedObject) lit.Value;
+                    lit.Offset = typedObjectsCell.Root.AppendElement(new object[] {valu.Value, valu.Type});
+                    break;
+                case LiteralVidEnumeration.integer:
+                    lit.Offset = BitConverter.DoubleToInt64Bits(System.Convert.ToDouble(lit.Value));
+                    break;
+                case LiteralVidEnumeration.text:
+                    Text value = (Text) lit.Value;
+                    lit.Offset = stringsCell.Root.AppendElement(new object[] {value.Value, value.Lang});
+                    break;
+                case LiteralVidEnumeration.date:
+                    lit.Offset = (long) lit.Value;
+                    break;
+                case LiteralVidEnumeration.boolean:
+                    lit.Offset = (bool) lit.Value ? 1 : 0;
+                    break;
+                case LiteralVidEnumeration.nil:
+                    lit.Offset = long.MaxValue;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
-            writeBuffer.Clear();
-           Flush();
+            var da = Literal.ToObjects(lit);
+            //в памяти сам литерал уже не хранится
+            lit.Value = null;
+            return lit;
         }
 
-        private void Flush()
+        public override void Flush()
         {
             typedObjectsCell.Flush();
-            stringsCell.Flush();  
-             
+            stringsCell.Flush();
         }
     }
 }

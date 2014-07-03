@@ -62,7 +62,7 @@ q.CreateConstructRun();
 
 describeQuery	
  : 'DESCRIBE'  
-( (varLiteral {q.variables.Add($varLiteral.text);} | iRIref { q.constants.Add(TripleInt.CodeEntities( $iRIref.text)); } )+ 
+( (varLiteral {q.variables.Add($varLiteral.text);} | iRIref { q.constants.Add(q.ts.CodeEntityFullName( $iRIref.text)); } )+ 
 | '*' { q.all=true; }) datasetClause* whereClause? solutionModifier  
 {q.CreateDescribeRun();};
 
@@ -271,7 +271,7 @@ constraint	returns [Expression value]
 
 
 functionCall returns [Expression value]	 
-:iRIref argList {$value=Query.Call($iRIref.value, $argList.value);};
+:iRIref argList {$value=q.Call($iRIref.value, $argList.value);};
 
 
 argList		returns [List<Expression> value] 
@@ -368,7 +368,7 @@ verb
 : varOrIRIref { $verbObjectList::PredicateVariable=$varOrIRIref.p; $varOrIRIref.p.isPredicate=true; } 
 | 'a' {	
 var PredicateVariable=new Variable(){isPredicate=true};							   
-PredicateVariable.pacElement =  TripleInt.CodePredicates(NameSpaceStore.@type.Coded);  
+PredicateVariable.pacElement = q.ts.PredicatesCoding.GetCode(q.ts.NameSpaceStore.@type);  
 PredicateVariable.graph	= new GraphIsDataProperty(){IsData=false};
 $verbObjectList::PredicateVariable=PredicateVariable;	   
 } ;
@@ -388,7 +388,7 @@ graphNode  returns [Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> f]
 
 varOrTermSub 
 : var  { $triplesSameSubject::subj=$var.p; q.SetSubjectIsDataFalse($var.p);} 
-| graphTerm  {	$triplesSameSubject::subj.pacElement = TripleInt.CodeEntities($graphTerm.entity); };
+| graphTerm  {	$triplesSameSubject::subj.pacElement = q.ts.EntityCoding.GetCode($graphTerm.entity); };
 
 
  varOrTerm returns [Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> f]
@@ -406,7 +406,7 @@ varOrTermSub
 if($graphTerm.d==null)	
 		{		
 		 o.graph=new GraphIsDataProperty(){IsData=false};
-		o.pacElement = TripleInt.CodeEntities($graphTerm.entity);
+		o.pacElement = q.ts.EntityCoding.GetCode($graphTerm.entity);
 		}
 	else
 		{ 
@@ -420,14 +420,14 @@ varOrIRIref	  returns[Variable p]
 | iRIref 
 {	
 $p=new Variable(){
-    pacElement = TripleInt.CodePredicates($iRIref.value)	 };
+    pacElement = q.ts.PredicatesCoding.GetCode($iRIref.value)	 };
 	GraphIsDataProperty graph;
 	if (!q.isDataGraph.TryGetValue($p.pacElement, out graph)) 	
             {                
                 q.isDataGraph.Add($p.pacElement, graph = new GraphIsDataProperty());
             }
 			$p.graph= graph;
-			var  literalType=TripleInt.PredicatesCoding.LiteralVid[(int)$p.pacElement];
+			var  literalType=q.ts.PredicatesCoding.LiteralVid[(int)$p.pacElement];
 			if(literalType==null)
 			graph.IsData=false;
 			else graph.vid=literalType.Value;       
@@ -518,50 +518,38 @@ regexExpression	 returns [Expression value] : ( 'REGEX'| 'regex' | 'Regex' ) '('
 { $value=Query.RegExpression(q.Parameter($v.p), $rex.text, $extraParam==null ? null : $extraParam.text); };
 
 iRIrefOrFunction	returns [Expression value] 
-: iRIref { var code=TripleInt.CodeEntities($iRIref.value); if(code==int.MinValue) code=TripleInt.CodePredicates($iRIref.value);  $value = Expression.Constant(code);}
- (argList { $value = Query.Call($iRIref.value,  $argList.value);  })? ;
+: iRIref { var code=q.ts.EntityCoding.GetCode($iRIref.value); if(code==int.MinValue) code=q.ts.CodePredicateFullName($iRIref.value);  $value = Expression.Constant(code);}
+ (argList { $value = q.Call($iRIref.value,  $argList.value);  })? ;
 
-rDFLiteral	returns [Literal value, Text literalText] 
-: String {
+rDFLiteral	returns [Literal value] 
+: String LANGTAG 
+{
+var s1= $String.text;	 
+s1 = s1.Substring(1,s1.Length-2);
+$value = q.ts.LiteralStore.Create(null, s1, $LANGTAG.text.ToLower());
+} | String '^^' iRIref  
+{
+ var s2= $String.text;	 
+s2 = s2.Substring(1,s2.Length-2);
+var t=$iRIref.value;
+ $value = q.ts.LiteralStore.Create(t, s2, null);
+}
+| String
+{
 var s= $String.text;	 
 s = s.Substring(1,s.Length-2);
-$literalText =  new Text(){Value=s};
-$value=new Literal(LiteralVidEnumeration.text){Value=$literalText};	  
-}
-( LANGTAG { $literalText.Lang = $LANGTAG.text.ToLower(); } 
-| ( '^^' iRIref { 
-var type = $iRIref.value;		 
-DateTime tempDate;
-Double tempNum;
-bool tempBool;
-if(type == Literal.dateTime.Coded || type ==Literal.date.Coded)
-{
-if(!DateTime.TryParse(s, out tempDate)) throw new Exception("7");
-	 $value=new Literal(LiteralVidEnumeration.date){Value = tempDate.ToBinary()};
-}
-else if(type == Literal.boolean.Coded)
-{
-if(!bool.TryParse(s, out tempBool)) throw new Exception("7");
-	$value=new Literal(LiteralVidEnumeration.boolean){Value = tempBool };
-}
-else if(type == Literal.integer.Coded || type == Literal.@double.Coded || type == Literal.@float.Coded)
-{															 
-if(!double.TryParse(s, out tempNum) && !double.TryParse(s.Replace(".",","), out tempNum)) throw new Exception("7");
-	$value=new Literal(LiteralVidEnumeration.integer){Value = tempNum };
-}
-else if(type == Literal.@string.Coded) {  $literalText.Lang ="en"; }
-else $value = new Literal(LiteralVidEnumeration.typedObject){ Value = new TypedObject{Value=$literalText.Value, Type=type} };
-}))? ;
+$value= q.ts.LiteralStore.Create(null, s,null);} ;
 
 
 iRIref returns [string value]	 
 :	IRI_REF  	{	
 		var iri=$IRI_REF.text;	
-		$value = NameSpaceStore.SplitCodeNameSpace(iri);
+				    iri = iri.Substring(1, iri.Length - 2);
+		$value = q.ts.NameSpaceStore.FromFullName(iri);
 		 } 
 |	PREFIXED_NAME 	{	
 var match = PrefixNSSlpit.Match($PREFIXED_NAME.text);		            
- $value = new IRI(q.prefixes[match.Groups[1].Value], match.Groups[2].Value).Coded; 
+ $value = q.ts.NameSpaceStore.FromSplitted(q.prefixes[match.Groups[1].Value], match.Groups[2].Value); 
  } ;	
  		
  						 

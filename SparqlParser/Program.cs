@@ -4,8 +4,9 @@ using System.IO;
 using System.Linq;
 using Antlr4.Runtime;
 using NameTable;
+using RdfTreesNamespace;
 using TripleIntClasses;
-using TrueRdfViewer;
+
 
 
 
@@ -20,10 +21,10 @@ namespace SparqlParser
        
             Console.WriteLine(Millions = 1);      
 
-               Test();
+                 Test();
 
             Console.WriteLine(Millions = 10);
-       // Test();
+     // Test();
           
             Console.WriteLine(Millions = 100);
       //   Test();
@@ -33,23 +34,19 @@ namespace SparqlParser
         }
 
         private static void Test()
-        {                  
-            TripleInt.useSimpleCoding = false;
-            TripleInt.SiCodingEntities = new StringIntEncoded(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\entitiesCodes");
-            TripleInt.PredicatesCoding = new PredicatesCoding(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\predicatesCodes");
-            TripleInt.nameSpaceStore=new NameSpaceStore(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
-           NameSpaceStore.InitConstants();
+        {
+            string path = (@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
            
-            IRDFIntStore ts = new CashingTripleStoreInt(new ColumnsStoreLiteralsSplitted(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\"));
-           //   IRDFIntStore ts = new CashingTripleStoreInt(new TripleStoreInt(@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\"));
-
-            TripleInt.EntitiesCodeCache.Clear();
-            Query.decodesCasheEntities.Clear();
-
-
+            var   nameSpaceStore=new NameSpaceStore(path);  
            
-             bool load = false;
-             //  bool load = true;
+            RDFIntStoreAbstract ts = new CashingTripleStoreInt(new RdfTrees(path,
+                new CasheCoding(new StringIntMD5RAMCoding(path+"entitiesCodes")),
+                new PredicatesCoding(path),
+                nameSpaceStore,
+                new LiteralStoreSplited(path, nameSpaceStore) ));
+             
+                bool load = false;
+         //   bool load = true;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;
@@ -64,8 +61,8 @@ namespace SparqlParser
                 spent = (DateTime.Now - start).Ticks / 10000;
                 using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                     wr.WriteLine("warm up " + spent + " мс.");
-                          RunBerlinsWithConstants( ts);
-              // RunBerlinsParameters(ts);
+                        RunBerlinsWithConstants( ts);
+              //   RunBerlinsParameters(ts);
             }
             spent = (DateTime.Now - start).Ticks / 10000;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
@@ -73,7 +70,7 @@ namespace SparqlParser
             //  (ts as TracingTripleStoreInt).x.Save((ts as TracingTripleStoreInt).xPath);
         }
 
-        private static void RunBerlinsParameters(IRDFIntStore ts)
+        private static void RunBerlinsParameters(RDFIntStoreAbstract ts)
         {
 
             Console.WriteLine("antrl parametered");
@@ -113,7 +110,7 @@ namespace SparqlParser
             }
         }
 
-        private static void SubTestRun(IRDFIntStore ts, FileInfo[] fileInfos, StreamReader streamQueryParameters, int i1)
+        private static void SubTestRun(RDFIntStoreAbstract ts, FileInfo[] fileInfos, StreamReader streamQueryParameters, int i1)
         {
             int i;
             long[] results = new long[12];
@@ -161,16 +158,14 @@ namespace SparqlParser
                 r.WriteLine("maximums " + string.Join(", ", maximums));
                 r.WriteLine("total parse " + string.Join(", ", totalparseMS));
                 r.WriteLine("total run " + string.Join(", ", totalrun));
-                r.WriteLine("countCodingUsages {0} totalMillisecondsCodingUsages {1}", TripleInt.EntitiesCodeCache.Count, TripleInt.totalMilisecondsCodingUsages);
+            //    r.WriteLine("countCodingUsages {0} totalMillisecondsCodingUsages {1}", TripleInt.EntitiesCodeCache.Count, TripleInt.totalMilisecondsCodingUsages);
 
                 //r.WriteLine("EWT average search" + EntitiesMemoryHashTable.total / EntitiesMemoryHashTable.count);
-                //r.WriteLine("EWT average range" + EntitiesMemoryHashTable.totalRange / EntitiesMemoryHashTable.count);
-                TripleInt.EntitiesCodeCache.Clear();
-                TripleInt.totalMilisecondsCodingUsages = 0;
+                //r.WriteLine("EWT average range" + EntitiesMemoryHashTable.totalRange / EntitiesMemoryHashTable.count);  
             }
         }
 
-        private static void RunBerlinsWithConstants(IRDFIntStore ts)
+        private static void RunBerlinsWithConstants(RDFIntStoreAbstract ts)
         {
             long[] results = new long[12];
             Console.WriteLine("antrl with constants");
@@ -229,12 +224,12 @@ namespace SparqlParser
             using (StreamWriter r = new StreamWriter(@"..\..\output.txt", true))
             {
                 r.WriteLine("milions " + Millions);
-                r.WriteLine("countCodingUsages {0} totalMillisecondsCodingUsages {1}", TripleInt.EntitiesCodeCache.Count, TripleInt.totalMilisecondsCodingUsages);
+             //   r.WriteLine("countCodingUsages {0} totalMillisecondsCodingUsages {1}", TripleInt.EntitiesCodeCache.Count, TripleInt.totalMilisecondsCodingUsages);
             }
 
         }
 
-        private static Query Parse(string te, IRDFIntStore ts)
+        private static Query Parse(string te, RDFIntStoreAbstract ts)
         {
             ICharStream input = new AntlrInputStream(te);
 
@@ -265,14 +260,14 @@ namespace SparqlParser
         private static string[] words =
             File.ReadAllLines(@"..\..\sparql data\queries\parameters\titlewords.txt");
 
-        private static void QueryWriteParameters(string parameteredQuery, StreamWriter output, TripleStoreInt ts)
+        private static void QueryWriteParameters(string parameteredQuery, StreamWriter output, RDFIntStoreAbstract ts)
         {
             var productsCodes = ts.GetSubjectByObjPred(
-                TripleInt.CodeEntities("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Product"),
-                TripleInt.CodePredicates("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
+              ts.CodeEntityFullName("<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Product>"),
+                ts.CodePredicateFullName("<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>"));
             var codes = productsCodes as int[] ?? productsCodes.ToArray();
             int productCount = codes.Count();
-            var product = TripleInt.DecodeEntities(codes.ElementAt(random.Next(0, productCount)));
+            var product = ts.DecodeEntityFullName(codes.ElementAt(random.Next(0, productCount)));
             //Millions == 1000 ? 2855260 : Millions == 100 ? 284826 : Millions == 10 ? 284826 : 2785;
             int productFeatureCount =
                 Millions == 1000 ? 478840 : Millions == 100 ? 47884 : Millions == 10 ? 47450 : 4745;
@@ -283,15 +278,15 @@ namespace SparqlParser
             //var offer = random.Next(1, productCount*OffersPerProduct);
             //var vendor = offer/OffersPerVendor + 1;
             var offersCodes = ts.GetSubjectByObjPred(
-              TripleInt.CodeEntities("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Offer"),
-              TripleInt.CodePredicates("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
+             ts.CodeEntityFullName("<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Offer>"),
+          ts.CodePredicateFullName("<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>"));
             codes = offersCodes as int[] ?? offersCodes.ToArray();
-            var offer = TripleInt.DecodeEntities(codes[random.Next(0, codes.Length)]);
+            var offer = ts.DecodeEntityFullName(codes[random.Next(0, codes.Length)]);
             var reviewsCodes = ts.GetSubjectByObjPred(
-           TripleInt.CodeEntities("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Review"),
-           TripleInt.CodePredicates("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
+           ts.CodeEntityFullName("<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Review>"),
+           ts.CodePredicateFullName("<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>"));
             codes = reviewsCodes as int[] ?? reviewsCodes.ToArray();
-            var review = TripleInt.DecodeEntities(codes[random.Next(0, codes.Length)]);
+            var review = ts.DecodePredicateFullName(codes[random.Next(0, codes.Length)]);
             if (parameteredQuery.Contains("%ProductType%"))
                 output.WriteLine("bsbm-inst:ProductType" + random.Next(1, productTypesCount));
             if (parameteredQuery.Contains("%ProductFeature1%"))
@@ -453,8 +448,7 @@ namespace SparqlParser
 
 
             using (StreamWriter r = new StreamWriter(@"..\..\output.txt", true))
-            {
-
+            {            
                 r.WriteLine("milions " + Millions);
                 r.WriteLine("max " + max);
                 r.WriteLine("elements " + length);

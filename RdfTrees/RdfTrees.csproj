@@ -7,7 +7,7 @@
     <ProjectGuid>{AC8F68BA-DF90-45BF-B7A2-47CE86CF5914}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RdfTrees</RootNamespace>
+    <RootNamespace>RdfTreesNamespace</RootNamespace>
     <AssemblyName>RdfTrees</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

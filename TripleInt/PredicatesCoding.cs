@@ -10,7 +10,7 @@ namespace NameTable
     public class PredicatesCoding 
     {
 
-        private PType tp_nc = new PTypeSequence(
+        private readonly PType tp_nc = new PTypeSequence(
             new PTypeRecord(
                 new NamedType("code", new PType(PTypeEnumeration.integer)),
                 new NamedType("name", new PType(PTypeEnumeration.sstring)),
@@ -21,7 +21,7 @@ namespace NameTable
         private readonly Dictionary<string, int> codeByString = new Dictionary<string, int>();
         private string[] stringByCode;
         public LiteralVidEnumeration?[] LiteralVid;
-        private string niCell;
+        private readonly string niCell;
 
         public PredicatesCoding(string path)
         {

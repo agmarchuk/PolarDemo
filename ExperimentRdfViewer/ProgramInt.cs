@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using NameTable;
 using PolarDB;
 using TripleIntClasses;
 
@@ -39,7 +40,8 @@ namespace TrueRdfViewer
             Console.WriteLine("Start");
             string path = "../../../Databases/";
             //TripleStore<EntityS> ts = new TripleStore<EntityS>(path, new PolarDB.PType(PolarDB.PTypeEnumeration.sstring));
-            TripleStoreInt ts = new TripleStoreInt(path);
+            NameSpaceStore nameSpaceStore = new NameSpaceStore(path);
+            TripleStoreInt ts = new TripleStoreInt(path,new StringIntMD5RAMCollision(path), new PredicatesCoding(path), nameSpaceStore, new LiteralStore(path,nameSpaceStore));
             Console.WriteLine("InitTripleStore duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             
             bool toload = true;

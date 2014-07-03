@@ -84,7 +84,7 @@ namespace SparqlParser
             };
         }
 
-        private static IEnumerable<RPackInt> Repeat(object[] row, IRDFIntStore ts)
+        private static IEnumerable<RPackInt> Repeat(object[] row, RDFIntStoreAbstract ts)
         {                                    
            yield return new RPackInt(row, ts);
         }
@@ -106,8 +106,7 @@ namespace SparqlParser
                 else
                     try
                     {
-                        describeObjects =
-                            variables.Select(s => Variables[s].index).SelectMany(i => result.Select(pack => (int)pack[i]));
+                        describeObjects = variables.Select(s => Variables[s].index).SelectMany(i => result.Select(pack => (int)pack[i]));
                     }
                     catch (KeyNotFoundException e)
                     {
@@ -146,18 +145,18 @@ namespace SparqlParser
             };
         }
 
-        private static string GetNameEntity(object o)
+        private string GetNameEntity(object o)
         {
             string name;
             if (!decodesCasheEntities.TryGetValue((int) o, out name))
-                decodesCasheEntities.Add((int) o, name = TripleInt.DecodeEntities((int) o));
+                decodesCasheEntities.Add((int) o, name = ts.DecodeEntityFullName((int) o));
             return name;
         }
-        private static string GetNamePredicate(object o)
+        private string GetNamePredicate(object o)
         {
             string name;
             if (!decodesCashePredicates.TryGetValue((int)o, out name))
-                decodesCashePredicates.Add((int)o, name = TripleInt.DecodePredicates((int)o));
+                decodesCashePredicates.Add((int)o, name = ts.DecodePredicateFullName((int)o));
             return name;
         }
 
@@ -178,19 +177,32 @@ namespace SparqlParser
                 var constructResultSequences = constructResult.Select(tuple => new object[] { tuple.Item1, tuple.Item2, tuple.Item3 });
                 if (solutionModifierCount != null)
                     constructResultSequences = solutionModifierCount(constructResultSequences);
-                return constructResultSequences;
+                return constructResultSequences.Select(
+                        triplet =>
+                        {
+                            var o = triplet[2];
+                            return new[]
+                            {
+                                ts.NameSpaceStore.DecodeNsShortName((string) triplet[0]), ts.NameSpaceStore.DecodeNsShortName((string) triplet[1]),
+                                o is Int32
+                                    ? GetNameEntity(o)
+                                    : o != null ? o.ToString() : ""
+
+                            };
+
+                        }); ;
             };
         }
 
-        public Func<IRDFIntStore, bool> AsqRun;
+        public Func<RDFIntStoreAbstract, bool> AsqRun;
         internal Func<RPackInt, IEnumerable<Tuple<string, string, string>>> constructTemplate;
 
         internal readonly List<Func<RPackInt, IEnumerable<Tuple<string, string, string>>>> constructTriples = new List<Func<RPackInt, IEnumerable<Tuple<string, string, string>>>>();
         public static readonly Dictionary<int, string> decodesCasheEntities = new Dictionary<int, string>();
         public static readonly Dictionary<int, string> decodesCashePredicates = new Dictionary<int, string>();
-        private IRDFIntStore ts;
+        public RDFIntStoreAbstract ts;
 
-        public Query(IRDFIntStore ts)
+        public Query(RDFIntStoreAbstract ts)
         {
             this.ts = ts;
         }
@@ -353,9 +365,9 @@ namespace SparqlParser
             return varExpression;
         }
 
-        internal static Expression Call(string name, IEnumerable<Expression> args)
+        internal Expression Call(string name, IEnumerable<Expression> args)
         {   
-            if (name == Literal.@double.Coded)
+            if (name == ts.LiteralStore.@double)
                 return Expression.Call(typeof(double).GetMethod("Parse", new[] { typeof(string), typeof(NumberStyles), typeof(CultureInfo) }), args.First(), Expression.Constant(NumberStyles.Any), Expression.Constant(new CultureInfo("en-us")));
             throw new NotImplementedException("mathod call " + name);
         }

@@ -5,20 +5,11 @@ namespace TripleIntClasses
 {
     public enum LiteralVidEnumeration { typedObject, integer, text, date, boolean, nil }   
     public class Literal
-    {
-
-
+    {     
         public long Offset;      
         public LiteralVidEnumeration vid;
-        public static IRI integer;
-        public static IRI @double;
-        public static IRI @float;
-        public static IRI boolean;
-        public static IRI date;
-        public static IRI @string;
-        public static IRI dateTime;
 
-        protected bool Equals(Literal other)
+        private bool Equals(Literal other)
         {
             return vid == other.vid && Equals(Value, other.Value);
         }
@@ -41,7 +32,7 @@ namespace TripleIntClasses
                 case LiteralVidEnumeration.text:
                     return ((Text)Value).Value;
                 case LiteralVidEnumeration.date:
-                    return ((DateTime)Value).ToString(CultureInfo.InvariantCulture);
+                    return DateTime.FromBinary((long) Value).ToString(CultureInfo.InvariantCulture);
                 case LiteralVidEnumeration.integer:
                 case LiteralVidEnumeration.boolean:
                     return Value.ToString();
@@ -53,9 +44,7 @@ namespace TripleIntClasses
         public Literal(LiteralVidEnumeration vid)
         {
             this.vid = vid;
-        }
-
-       
+        }                     
 
         public object Value { get; set; }
 
@@ -71,7 +60,7 @@ namespace TripleIntClasses
 
         public override string ToString()
         {
-            return Value.ToString();
+            return GetString();
         }
 
         public override bool Equals(object obj)
@@ -80,31 +69,7 @@ namespace TripleIntClasses
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
             return Equals((Literal)obj);
-        }
-
-
-     
-
-        public static Literal Create(string datatype, string sdata, string lang)
-        {            
-            return (datatype == integer.Coded ||
-                    datatype ==  @float.Coded ||
-                    datatype ==  @double.Coded
-                ? new Literal(LiteralVidEnumeration.integer)
-                {
-                    Value = Double.Parse(sdata, NumberStyles.Any)
-                }
-                : datatype ==  boolean.Coded
-                    ? new Literal(LiteralVidEnumeration.date) { Value = Boolean.Parse(sdata) }
-                    : datatype ==  dateTime.Coded || datatype ==  date.Coded
-                        ? new Literal(LiteralVidEnumeration.date) { Value = DateTime.Parse(sdata).ToBinary() }
-                        : datatype == null ||   datatype ==  @string.Coded
-                            ? new Literal(LiteralVidEnumeration.text)
-                            {
-                                Value = new Text() { Value = sdata, Lang = lang ?? String.Empty }
-                            }
-                            : new Literal(LiteralVidEnumeration.typedObject) { Value = new TypedObject() { Value = sdata, Type = datatype } });
-        }
+        }      
 
         public static object[] ToObjects(Literal lit)
         {
@@ -167,6 +132,7 @@ namespace TripleIntClasses
                     return new Literal(LiteralVidEnumeration.nil);
             }
         }
+       
     }
 
 }

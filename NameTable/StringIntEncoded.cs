@@ -111,7 +111,10 @@ namespace NameTable
             bool hasNew;
             var longs=new Bytes2Longs(staticFreqEncoding.Encode(name, out hasNew));    
             if (hasNew) return int.MinValue;
-            return coding[longs];
+            int code;
+            if (!coding.TryGetValue(longs, out code))
+                return int.MinValue;
+            return code;
         }
    
 

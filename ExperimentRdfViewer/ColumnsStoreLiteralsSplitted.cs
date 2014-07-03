@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using NameTable;
 using PolarDB;
 using ScaleBit4Check;
 using TripleIntClasses;
 
 namespace TrueRdfViewer
 {
-    public class ColumnsStoreLiteralsSplitted : IRDFIntStore
+    public class ColumnsStoreLiteralsSplitted : RDFIntStoreAbstract
     {
         private PType tp_otriple_seq;
 
@@ -27,7 +28,7 @@ namespace TrueRdfViewer
         private string otriples_filePath;
         private string dtriples_filePath;
 
-        public void InitTypes()
+        public override void InitTypes()
         {
             tp_entity = new PType(PTypeEnumeration.integer);
             tp_otriple_seq = new PTypeSequence(new PTypeRecord(
@@ -61,7 +62,8 @@ namespace TrueRdfViewer
         //private GroupedEntities getable;
         //private Dictionary<int, object[]> geHash;
 
-        public ColumnsStoreLiteralsSplitted(string path)
+        public ColumnsStoreLiteralsSplitted(string path, IStringIntCoding entityCoding, PredicatesCoding predicatesCoding, NameSpaceStore nameSpaceStore, LiteralStoreAbstract literalStore)
+            : base(entityCoding, predicatesCoding, nameSpaceStore, literalStore)
         {
             this.path = path;
 
@@ -75,7 +77,7 @@ namespace TrueRdfViewer
             invSubjectsColumn_filePath = path + "invSubjectsColumn.pac";
             objectsColumn_filePath = path + "objectsColumn.pac";
             dataColumn_filePath = path + "dataColumn.pac";
-            LiteralStoreSplited.DataCellPath=path;
+            
             
                 Open(File.Exists(otriples_filePath));
             
@@ -161,12 +163,12 @@ namespace TrueRdfViewer
  
         }
 
-        public void WarmUp()
+        public override void WarmUp()
         {
             if (ewt.EWTable.IsEmpty) return;
             foreach (var v in objPredicates.Root.ElementValues()) ;
             foreach (var v in objects.Root.ElementValues()) ;
-            LiteralStoreSplited.Literals.WarmUp();
+          LiteralStore.WarmUp();
             foreach (var v in dataPredicates.Root.ElementValues()) ;
             foreach (var v in data.Root.ElementValues()) ;
             foreach (var v in inversePredicates.Root.ElementValues()) ;
@@ -176,14 +178,14 @@ namespace TrueRdfViewer
             if (scale.Filescale)
                 foreach (var v in scale.Cell.Root.ElementValues()) ;
             foreach (var v in ewt.EWTable.Root.ElementValues()) ; // этая ячейка "подогревается" при начале программы
-            TripleInt.SiCodingEntities.WarmUp();
-            TripleInt.PredicatesCoding.WarmUp();
+            WarmUp();
+            WarmUp();
         }
         
 
 
 
-        public  void LoadTurtle(string filepath)
+        public override void LoadTurtle(string filepath)
         {
             DateTime tt0 = DateTime.Now;
 
@@ -193,8 +195,9 @@ namespace TrueRdfViewer
 
             PaCell otriples=new PaCell(tp_otriple_seq, otriples_filePath, false);
             PaCell dtriples_sp=new PaCell(tp_dtriple_spf, dtriples_filePath,false);
-            
-            TurtleInt.LoadTriplets(filepath, otriples, dtriples_sp);
+
+            TurtleInt.LoadByGraphsBuffer(filepath, otriples, dtriples_sp, this);
+
 
             Console.WriteLine("Load ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
@@ -268,7 +271,7 @@ namespace TrueRdfViewer
 
 
 
-        public  IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
+        public override IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
         {
             if (obj == Int32.MinValue || pred == Int32.MinValue) return Enumerable.Empty<int>();
             return TakeValuesByPrevaricate<int>(obj, pred, 1, inversePredicates, inverses);
@@ -337,7 +340,7 @@ namespace TrueRdfViewer
         }
 
 
-        public  IEnumerable<int> GetObjBySubjPred(int subj, int pred)
+        public override IEnumerable<int> GetObjBySubjPred(int subj, int pred)
         {
             if (subj == Int32.MinValue || pred == Int32.MinValue) return Enumerable.Empty<int>();
             return TakeValuesByPrevaricate<int>(subj, pred, 0, objPredicates, objects);
@@ -352,17 +355,16 @@ namespace TrueRdfViewer
         }
       
 
-        public  IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
+        public override IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
         {
             if (subj == Int32.MinValue || pred == Int32.MinValue) return Enumerable.Empty<Literal>();
             var offsets = TakeValuesByPrevaricate<long>(subj, pred, 2, dataPredicates, data);
-            
                 return offsets
-                    .Select((l, i) => LiteralStoreSplited.Literals.Read(l, pred))
+                    .Select((l, i) => LiteralStore.Read(l, PredicatesCoding.LiteralVid[pred]))
                     .ToArray();
         }    
    
-        public  bool ChkOSubjPredObj(int subj, int pred, int obj)
+        public override bool ChkOSubjPredObj(int subj, int pred, int obj)
         {
             if (subj == Int32.MinValue || obj == Int32.MinValue || pred == Int32.MinValue) return false;
             return CheckContains(subj, pred, obj);
@@ -395,13 +397,13 @@ namespace TrueRdfViewer
             }
         }
      
-        public bool CheckInScale(int subj, int pred, int obj)
+        public override bool CheckInScale(int subj, int pred, int obj)
         {
             return scale.ChkInScale(subj, pred, obj);
         }
 
      
-       public  IEnumerable<KeyValuePair<int, int>> GetSubjectByObj(int obj)
+       public override IEnumerable<KeyValuePair<int, int>> GetSubjectByObj(int obj)
         {
             if (obj == Int32.MinValue) return Enumerable.Empty<KeyValuePair<int, int>>();
 
@@ -416,13 +418,13 @@ namespace TrueRdfViewer
                .Select((pred, i) => new KeyValuePair<int, int>(values[i], pred)).ToArray();       
         }
 
-        public IEnumerable<Int32> GetSubjectByDataPred(int p, Literal d)
+        public override IEnumerable<Int32> GetSubjectByDataPred(int p, Literal d)
         {
             return Enumerable.Empty<Int32>();
         }
 
 
-        public  IEnumerable<KeyValuePair<Int32, Int32>> GetObjBySubj(int subj)
+        public override IEnumerable<KeyValuePair<Int32, Int32>> GetObjBySubj(int subj)
         {
             if (subj == Int32.MinValue) return Enumerable.Empty<KeyValuePair<int, int>>();
 
@@ -437,7 +439,7 @@ namespace TrueRdfViewer
                 .ToArray(); 
         }
 
-        public  IEnumerable<KeyValuePair<Literal, int>> GetDataBySubj(int subj)
+        public override IEnumerable<KeyValuePair<Literal, int>> GetDataBySubj(int subj)
         {
             if (subj == Int32.MinValue) return Enumerable.Empty<KeyValuePair<Literal, int>>();
 
@@ -451,7 +453,7 @@ namespace TrueRdfViewer
                 .Cast<int>()
                 .Select((pred, i) => new KeyValuePair<long, int>(values[i], pred))
                 .ToArray()
-                .Select(pair => new KeyValuePair<Literal, int>(LiteralStoreSplited.Literals.Read(pair.Key, pair.Value), pair.Value))
+                .Select(pair => new KeyValuePair<Literal, int>(LiteralStore.Read(pair.Key, PredicatesCoding.LiteralVid[pair.Value]), pair.Value))
                 .ToArray(); 
         }
 

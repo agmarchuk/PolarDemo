@@ -229,5 +229,10 @@ namespace NameTable
             foreach (var q in c_index.Root.ElementValues()) ;
             foreach (var q in n_index.Root.ElementValues()) ; 
         }
+
+        public int InsertOne(string entity)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

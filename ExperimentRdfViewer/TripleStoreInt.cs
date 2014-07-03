@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using NameTable;
 using PolarDB;
 using ScaleBit4Check;
 using TripleIntClasses;
 
 namespace TrueRdfViewer
 {
-    public class TripleStoreInt : IRDFIntStore
+    public class TripleStoreInt : RDFIntStoreAbstract
     {
         private PType tp_otriple_seq;
         private PType tp_triple_seq_two;
@@ -24,7 +25,7 @@ namespace TrueRdfViewer
         private string otriples_filePath;
         private string dtriples_filePath;
 
-        public void InitTypes()
+        public override void InitTypes()
         {
             tp_entity = new PType(PTypeEnumeration.integer);
             tp_otriple_seq = new PTypeSequence(new PTypeRecord(
@@ -58,7 +59,8 @@ namespace TrueRdfViewer
         //private GroupedEntities getable;
         //private Dictionary<int, object[]> geHash;
 
-        public TripleStoreInt(string path)
+        public TripleStoreInt(string path, IStringIntCoding entityCoding, PredicatesCoding predicatesCoding, NameSpaceStore nameSpaceStore, LiteralStoreAbstract literalStore)
+            : base(path, entityCoding, predicatesCoding, nameSpaceStore, literalStore)
         {
             this.path = path;
 
@@ -66,7 +68,7 @@ namespace TrueRdfViewer
             otriplets_op_filePath = path + "otriples_op.pac";
             otriples_filePath = path + "otriples.pac";
             dtriples_filePath = path + "dtriples_spf.pac";
-            LiteralStore.DataCellPath=path;
+           
             if (File.Exists(otriples_filePath))
                 Open(true);
             else
@@ -147,25 +149,24 @@ namespace TrueRdfViewer
             dtriples_sp.Close();
         }
 
-        public void WarmUp()
+        public override void WarmUp()
         {
             if (otriples.IsEmpty) return;
             foreach (var v in otriples.Root.ElementValues()) ;
             foreach (var v in otriples_op.Root.ElementValues()) ;
-            LiteralStore.Literals.WarmUp();
+            literalStore.WarmUp();
             foreach (var v in dtriples_sp.Root.ElementValues()) ;
 
             if (scale.Filescale)
                 foreach (var v in scale.Cell.Root.ElementValues()) ;
             foreach (var v in ewt.EWTable.Root.ElementValues()) ; // этая ячейка "подогревается" при начале программы
-            TripleInt.SiCodingEntities.WarmUp();
-            TripleInt.PredicatesCoding.WarmUp();
+        base.WarmUp();
         }
         
 
 
 
-        public  void LoadTurtle(string filepath)
+        public override void LoadTurtle(string filepath)
         {
             DateTime tt0 = DateTime.Now;
 
@@ -173,7 +174,7 @@ namespace TrueRdfViewer
 
             Open(false);
 
-           TurtleInt.LoadTriplets(filepath, ref otriples, ref dtriples_sp);
+           TurtleInt.LoadTriplets(filepath, otriples, dtriples_sp, this);
 
             Console.WriteLine("Load ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
@@ -358,10 +359,10 @@ namespace TrueRdfViewer
         //}
 
         public ScaleCell scale = null;
+        private LiteralStoreAbstract literalStore;
 
-    
 
-        public  IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
+        public override IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
         {
             if (obj == Int32.MinValue || pred == Int32.MinValue) return Enumerable.Empty<int>();
             object[] diapason = GetDiapasonFromHash(obj, 1);
@@ -453,7 +454,7 @@ namespace TrueRdfViewer
 
         #endregion
 
-        public  IEnumerable<int> GetObjBySubjPred(int subj, int pred)
+        public override IEnumerable<int> GetObjBySubjPred(int subj, int pred)
         {
             if (subj == Int32.MinValue || pred == Int32.MinValue) return Enumerable.Empty<int>();
             var key = new KeyValuePair<int, int>(subj, pred);
@@ -489,7 +490,7 @@ namespace TrueRdfViewer
             return diap;
         }
 
-        public  IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
+        public override IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
         {
             if (subj == Int32.MinValue || pred == Int32.MinValue) return Enumerable.Empty<Literal>();
 
@@ -503,7 +504,7 @@ namespace TrueRdfViewer
                     .SkipWhile(entry => pred != (int)entry[0])
                     .TakeWhile(entry => pred == (int)entry[0])
                     .Select(en =>(long)en[1])
-                    .Select(LiteralStore.Literals.Read)
+                    .Select(offset=>literalStore.Read(offset, PredicatesCoding.LiteralVid[pred]))
                     .ToArray();
         }
 
@@ -542,7 +543,7 @@ namespace TrueRdfViewer
         {
             return ToLiteral((object[])pobj);
         }
-        public  bool ChkOSubjPredObj(int subj, int pred, int obj)
+        public override bool ChkOSubjPredObj(int subj, int pred, int obj)
         {
             if (subj == Int32.MinValue || obj == Int32.MinValue || pred == Int32.MinValue) return false;
             return CheckContains(subj, pred, obj);
@@ -666,7 +667,7 @@ namespace TrueRdfViewer
             }
         }
         */
-        public bool CheckInScale(int subj, int pred, int obj)
+        public override bool CheckInScale(int subj, int pred, int obj)
         {
             return scale.ChkInScale(subj, pred, obj);
         }
@@ -757,12 +758,12 @@ namespace TrueRdfViewer
             return dtriples_sp.Root.ElementValues(internal_diap.start, internal_diap.numb)
                 .Cast<object[]>()
                 .Select(en => (long)en[1])
-                    .Select(LiteralStore.Literals.Read);
+                    .Select(offset=>literalStore.Read(offset, PredicatesCoding.LiteralVid[pred]));
         }
 
 
 
-        public  IEnumerable<KeyValuePair<int, int>> GetSubjectByObj(int obj)
+        public override IEnumerable<KeyValuePair<int, int>> GetSubjectByObj(int obj)
         {
             if (obj == Int32.MinValue) return Enumerable.Empty<KeyValuePair<int, int>>();
 
@@ -776,13 +777,13 @@ namespace TrueRdfViewer
                     .Select(spo => new KeyValuePair<int, int>((int)spo[1], (int)spo[0])).ToArray();
         }
 
-        public IEnumerable<Int32> GetSubjectByDataPred(int p, Literal d)
+        public override IEnumerable<Int32> GetSubjectByDataPred(int p, Literal d)
         {
             return Enumerable.Empty<Int32>();
         }
 
 
-        public  IEnumerable<KeyValuePair<Int32, Int32>> GetObjBySubj(int subj)
+        public override IEnumerable<KeyValuePair<Int32, Int32>> GetObjBySubj(int subj)
         {
             if (subj == Int32.MinValue) return Enumerable.Empty<KeyValuePair<int, int>>();
 
@@ -795,7 +796,7 @@ namespace TrueRdfViewer
                     .Select(spo => new KeyValuePair<int, int>((int)spo[1], (int)spo[0])).ToArray();
         }
 
-        public  IEnumerable<KeyValuePair<Literal, int>> GetDataBySubj(int subj)
+        public override IEnumerable<KeyValuePair<Literal, int>> GetDataBySubj(int subj)
         {
             if (subj == Int32.MinValue) return Enumerable.Empty<KeyValuePair<Literal, int>>();
 
@@ -806,7 +807,7 @@ namespace TrueRdfViewer
                 ? new KeyValuePair<Literal, int>[0]
                 : dtriples_sp.Root.ElementValues((long)diapason[0], (long)diapason[1])
                     .Cast<object[]>()
-                    .Select(row => new KeyValuePair<Literal, int>(LiteralStore.Literals.Read((long)row[1]), (int)row[0])).ToArray();
+                    .Select(row => new KeyValuePair<Literal, int>(literalStore.Read((long)row[1], PredicatesCoding.LiteralVid[(int)row[0]]), (int)row[0])).ToArray();
         }
 
 
@@ -893,12 +894,12 @@ namespace TrueRdfViewer
             var enumerator = triplets.GetEnumerator();
             //TODO переделать
             Dictionary<int, string> predicatesCodes = new Dictionary<int, string>();
-            for (int i = 0; i < TripleInt.PredicatesCoding.Count; i++)
-                predicatesCodes.Add(i, TripleInt.PredicatesCoding.GetName(i));
+            for (int i = 0; i < predicatesCodes.Count; i++)
+                predicatesCodes.Add(i, DecodePredicateFullName(i));
             int subjectCodesBuffer = 100 * 1000 * 1000;
 
             var entitiesCodes = new Dictionary<int, string>(subjectCodesBuffer);
-            for (int kod = 0, bufferIndex = 0; kod < TripleInt.SiCodingEntities.Count; kod++, bufferIndex++)
+            for (int kod = 0, bufferIndex = 0; kod < entitiesCodes.Count; kod++, bufferIndex++)
             {
                 if (bufferIndex == subjectCodesBuffer)
                 {
@@ -916,14 +917,14 @@ namespace TrueRdfViewer
                             Tuple.Create(entitiesCodes[oTripleInt.subject], predicatesCodes[oTripleInt.predicate],
                                 entitiesCodes.TryGetValue(oTripleInt.obj, out obj)
                                     ? obj
-                                    : TripleInt.SiCodingEntities.GetName(oTripleInt.obj));
+                                    : DecodeEntityFullName(oTripleInt.obj));
                         }
                     }
 
                     bufferIndex = 0;
                     entitiesCodes.Clear();
                 }
-                entitiesCodes.Add(kod, TripleInt.SiCodingEntities.GetName(kod));
+                entitiesCodes.Add(kod, DecodeEntityFullName(kod));
             }
         }
         private void TestEWT()
