@@ -1,3 +1,4 @@
+using System.IO;
 using PolarDB;
 
 namespace TripleIntClasses
@@ -21,15 +22,13 @@ namespace TripleIntClasses
 
         public LiteralStore(string path, NameSpaceStore nameSpaceStore) : base(path,nameSpaceStore)
         {
-            dataCellPath = path + "data.pac";              
+            dataCellPath = path + "data.pac";      
+            dataCell = new PaCell(tp_data_seq, dataCellPath, false);
+            if (dataCell.IsEmpty)
+                dataCell.Fill(new object[0]);
         }   
         
-        public override void Open(bool readOnlyMode)
-        {
-            dataCell = new PaCell(tp_data_seq, dataCellPath, readOnlyMode);
-            if(dataCell.IsEmpty)
-                dataCell.Fill(new object[0]);
-        }
+      
 
         public override void Clear()
         {

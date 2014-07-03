@@ -101,6 +101,7 @@ namespace NameTable
             Open(false);
             //DateTime tt0 = DateTime.Now;
             string[] ssa = sorted_arr;
+            Array.Sort(ssa);
             if (ssa.Length == 0) return new Dictionary<string, int>();
 
             this.Close();

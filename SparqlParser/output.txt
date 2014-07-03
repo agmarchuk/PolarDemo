@@ -1743,3 +1743,35 @@ millions 1
 warm up 412 мс.
 milions 1
 total 1452 мс.
+millions 1
+millions 1
+millions 1
+total 30644 мс.
+millions 1
+total 28403 мс.
+millions 1
+millions 1
+millions 1
+warm up 867 мс.
+milions 1
+total 63379 мс.
+millions 1
+total 31539 мс.
+millions 1
+total 28207 мс.
+millions 1
+warm up 824 мс.
+millions 1
+warm up 747 мс.
+millions 1
+total 29102 мс.
+millions 1
+warm up 907 мс.
+millions 1
+warm up 770 мс.
+millions 1
+total 30609 мс.
+millions 1
+warm up 828 мс.
+milions 1
+total 6856 мс.

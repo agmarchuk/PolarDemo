@@ -177,9 +177,7 @@ namespace TrueRdfViewer
 
             if (scale.Filescale)
                 foreach (var v in scale.Cell.Root.ElementValues()) ;
-            foreach (var v in ewt.EWTable.Root.ElementValues()) ; // этая ячейка "подогревается" при начале программы
-       WarmUp();
-            
+            foreach (var v in ewt.EWTable.Root.ElementValues()) ; // этая ячейка "подогревается" при начале программы   
         }
         
 
@@ -196,7 +194,7 @@ namespace TrueRdfViewer
             PaCell otriples=new PaCell(tp_otriple_seq, otriples_filePath, false);
             PaCell dtriples_sp=new PaCell(tp_dtriple_spf, dtriples_filePath,false);
             
-            TurtleInt.LoadTriplets(filepath, otriples, dtriples_sp, this);
+            TurtleInt.LoadByGraphsBuffer(filepath, otriples, dtriples_sp, this);
 
             Console.WriteLine("Load ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 

@@ -33,9 +33,6 @@ namespace TripleIntClasses
                NameSpaceStrings.Add(nsString);
            }
            @type = GetShortFromFullOrPrefixed("<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>");
-           int t;
-           if(Codes.TryGetValue(@"http://downlode.org/rdf/iso-3166/countries#", out t))
-               Console.WriteLine(t);
        }
 
        public void Clear()

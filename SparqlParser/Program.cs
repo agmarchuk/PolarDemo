@@ -6,8 +6,7 @@ using Antlr4.Runtime;
 using NameTable;
 using RdfTreesNamespace;
 using TripleIntClasses;
-
-
+using TrueRdfViewer;
 
 
 namespace SparqlParser
@@ -39,14 +38,15 @@ namespace SparqlParser
            
             var   nameSpaceStore=new NameSpaceStore(path);  
            
-            RDFIntStoreAbstract ts = new CashingTripleStoreInt(new RdfTrees(path,
-                new CasheCoding(new StringIntMD5RAMCoding(path+"entitiesCodes")),
+            RDFIntStoreAbstract ts = new CashingTripleStoreInt(
+                new ColumnsStoreAbstract(path,
+                new CasheCoding(new StringIntCoding(path+"entitiesCodes")),
                 new PredicatesCoding(path),
                 nameSpaceStore,
-                new LiteralStoreSplited(path, nameSpaceStore) ));
+                new LiteralStore(path, nameSpaceStore) ));
              
                 bool load = false;
-         //   bool load = true;
+           // bool load = true;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;
