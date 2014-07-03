@@ -10,7 +10,7 @@ namespace RdfTreesNamespace
 {
     public partial class RdfTrees
     {
-        public override void LoadTurtle(string filename)
+        public override void LoadTurtle(string filepath, bool useBuffer)
         {
             // Дополнительные ячейки и индексы
             otriples = new PaCell(tp_otriple_seq, path + "otriples.pac", false);
@@ -19,7 +19,9 @@ namespace RdfTreesNamespace
             DateTime tt0 = DateTime.Now;
 
             // Загрузка otriples, dtriples
-            TurtleInt.LoadByGraphsBuffer(filename, otriples, dtriples, this);
+            if (useBuffer)
+                TurtleInt.LoadByGraphsBuffer(filepath, otriples, dtriples, this);
+            else TurtleInt.LoadTriplets(filepath, otriples, dtriples, this);
             Console.WriteLine("Load ok. duration={0}", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             
             // Формирование дополнительных файлов

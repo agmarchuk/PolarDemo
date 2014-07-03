@@ -166,7 +166,7 @@ namespace TrueRdfViewer
 
 
 
-        public override void LoadTurtle(string filepath)
+        public override void LoadTurtle(string filepath, bool useBuffer)
         {
             DateTime tt0 = DateTime.Now;
 
@@ -174,7 +174,9 @@ namespace TrueRdfViewer
 
             Open(false);
 
-           TurtleInt.LoadTriplets(filepath, otriples, dtriples_sp, this);
+                     if(useBuffer)
+            TurtleInt.LoadByGraphsBuffer(filepath, otriples, dtriples_sp, this);
+            else TurtleInt.LoadTriplets(filepath, otriples, dtriples_sp, this);
 
             Console.WriteLine("Load ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 

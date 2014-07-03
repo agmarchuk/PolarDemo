@@ -60,7 +60,7 @@ namespace TripleIntClasses
             PredicatesCoding.WarmUp();
         //    NameSpaceStore.WarmUp();
         }
-        public abstract void LoadTurtle(string filepath);
+        public abstract void LoadTurtle(string filepath, bool useBuffer=true);
         public abstract IEnumerable<int> GetSubjectByObjPred(int obj, int pred);
         public abstract IEnumerable<int> GetObjBySubjPred(int subj, int pred);
         public abstract IEnumerable<Literal> GetDataBySubjPred(int subj, int pred);
@@ -113,5 +113,6 @@ namespace TripleIntClasses
         {
             return PredicatesCoding.GetCode(NameSpaceStore.GetShortFromFullOrPrefixed(name));
         }
+
     }
 }

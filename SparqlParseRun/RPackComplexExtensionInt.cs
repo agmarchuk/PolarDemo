@@ -4,8 +4,7 @@ using System.Linq;
 using TripleIntClasses;
 using TrueRdfViewer;
 
-
-namespace SparqlParser
+namespace SparqlParseRun
 {
     public static class RPackComplexExtensionInt
     {

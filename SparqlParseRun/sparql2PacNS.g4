@@ -16,7 +16,7 @@ options
 	using System.Linq;
 	using System.Xml.Linq;		
 	using System.Text.RegularExpressions;
-    using Sparql;
+    using SparqlParseRun;
     using TrueRdfViewer;
 	using System.Linq.Expressions;
 	using TripleIntClasses;

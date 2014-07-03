@@ -4,20 +4,14 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
+using Antlr4.Runtime;
 using Sharpen;
+using SparqlParser;
 using TripleIntClasses;
 using TrueRdfViewer;
 
-namespace SparqlParser
+namespace SparqlParseRun
 {
-    public class Variable
-    {                  
-        public bool isNew;
-        public short index;
-        public object pacElement;
-        public GraphIsDataProperty graph;
-        public bool isPredicate;
-    }
     public class Query
     {                   
         internal Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> Where;
@@ -41,11 +35,11 @@ namespace SparqlParser
            
             if (AsqRun != null) return AsqRun(ts).ToString();
             if (SelectRun != null)
-                return string.Join(Environment.NewLine, SelectRun().Select(spo => string.Join(", ", spo)));
+                return String.Join(Environment.NewLine, SelectRun().Select(spo => String.Join(", ", spo)));
             if (DescribeRun != null)
-                return string.Join(Environment.NewLine, DescribeRun().Select(spo => string.Join(" ", spo)));
+                return String.Join(Environment.NewLine, DescribeRun().Select(spo => String.Join(" ", spo)));
             if (ConstructRun != null)
-                return string.Join(Environment.NewLine, ConstructRun().Select(spo => string.Join(" ", spo)));
+                return String.Join(Environment.NewLine, ConstructRun().Select(spo => String.Join(" ", spo)));
             throw new Exception();
         }
 
@@ -437,16 +431,6 @@ namespace SparqlParser
 
 
                      
-        //internal string ReplaceNamespacePrefix(string value)
-        //{
-
-        //    var nsO = value.Split(':');
-        //    string nsUri;
-        //    if (!prefixes.TryGetValue(nsO[0].Trim(), out nsUri))
-        //        throw new Exception("неизвестное пространство имён " + nsO[0]);
-        //    return nsUri + nsO[1].Trim();
-        //}
-
         internal static Expression BinaryCompareExpression(ExpressionType typeBinExp, Expression expressionLeft, Expression expressionRight)
         {   
             if (expressionLeft.Type == typeof (bool))
@@ -518,7 +502,7 @@ namespace SparqlParser
             return  SetVariableByType(varExpression, variable, forceType);   
         }
 
-        internal static Expression SetVariableByType(Expression expressionUnknown, Variable variableUnknown, Type type)
+        private static Expression SetVariableByType(Expression expressionUnknown, Variable variableUnknown, Type type)
         {
             if (expressionUnknown.Type == type) return expressionUnknown;
             if (type == typeof(int))
@@ -576,7 +560,7 @@ namespace SparqlParser
             {
                 case LiteralVidEnumeration.integer:
                     return Expression.NotEqual(Expression.Call(currentFilterParameter, typeof(RPackInt).GetMethod("Vai"),
-                        Expression.Constant(variable.index)), Expression.Constant(double.MinValue));
+                        Expression.Constant(variable.index)), Expression.Constant(Double.MinValue));
                 case LiteralVidEnumeration.date:
                     return Expression.NotEqual(Expression.ConvertChecked(
                         Expression.Call(currentFilterParameter, typeof(RPackInt).GetMethod("Val"), Expression.Constant(variable.index)),
@@ -591,7 +575,7 @@ namespace SparqlParser
                     return Expression.NotEqual(Expression.Property(Expression.Convert(Expression.Property(
                         Expression.ConvertChecked(
                             Expression.Call(currentFilterParameter,  typeof(RPackInt).GetMethod("Val"),  Expression.Constant(variable.index)),
-                            typeof (Literal)), "Value"), typeof(Text)),"Value"), Expression.Constant(string.Empty));
+                            typeof (Literal)), "Value"), typeof(Text)),"Value"), Expression.Constant(String.Empty));
                 default:
                     throw new ArgumentOutOfRangeException();
             }   
@@ -611,10 +595,10 @@ namespace SparqlParser
         internal Expression Langmatch(Expression expression, Variable variableLeft)
         {
             if(variableLeft==null)
-                          return Expression.NotEqual(expression, Expression.Constant(string.Empty));
+                          return Expression.NotEqual(expression, Expression.Constant(String.Empty));
             if (variableLeft.graph.IsData == null)
                 variableLeft.graph.Set(LiteralVidEnumeration.text);
-            return Expression.NotEqual(Parameter(variableLeft), Expression.Constant(string.Empty));
+            return Expression.NotEqual(Parameter(variableLeft), Expression.Constant(String.Empty));
 
         }
 
@@ -637,6 +621,19 @@ namespace SparqlParser
                          "Value"),
                                typeof(Text)),
                    "Lang");
+        }
+      
+
+        public void Parse(string te, RDFIntStoreAbstract ts)
+        {
+            ICharStream input = new AntlrInputStream(te);
+
+            var lexer = new sparql2PacNSLexer(input);
+
+            var commonTokenStream = new CommonTokenStream(lexer);
+            var sparqlParser = new sparql2PacNSParser(commonTokenStream) {q = this};
+            sparqlParser.query();       
+          
         }
         public static double Convert(object literal)
         {

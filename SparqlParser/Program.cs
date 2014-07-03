@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Antlr4.Runtime;
+
 using NameTable;
-using RdfTreesNamespace;
+
+using SparqlParseRun;
 using TripleIntClasses;
 using TrueRdfViewer;
 
@@ -53,7 +54,7 @@ namespace SparqlParser
             long spent = 0;
             if (load)
             {
-                ts.LoadTurtle(@"C:\deployed\" + Millions + "M.ttl");
+                ts.LoadTurtle(@"C:\deployed\" + Millions + "M.ttl", useBuffer:true);
             }
             else
             {
@@ -103,7 +104,10 @@ namespace SparqlParser
                 for (int j = 0; j < 500; j++)
                     fileInfos.Select(file => QueryReadParameters(File.ReadAllText(file.FullName),
                         streamQueryParameters))
-                        .Select(queryReadParameters => Parse(queryReadParameters, ts).Run())
+                        .Select(queryReadParameters =>
+                        {
+                            var q = new Query(ts); q.Parse(queryReadParameters, ts); return q.Run(); 
+                        })
                         .ToArray();
 
                 SubTestRun(ts, fileInfos, streamQueryParameters, 500);
@@ -129,7 +133,8 @@ namespace SparqlParser
                     readAllText = QueryReadParameters(readAllText, streamQueryParameters);
 
                     var st = DateTime.Now;
-                    var q = Parse(readAllText, ts);
+                    var q = new Query(ts);
+                    q.Parse(readAllText, ts);
                     totalparseMS[i] += (DateTime.Now - st).Ticks / 10000L;
                     var st1 = DateTime.Now;
                     var resultString = q.Run();
@@ -195,9 +200,8 @@ namespace SparqlParser
                     var readAllText = File.ReadAllText(file.FullName);
 
                     //   var st = DateTime.Now;
-                    var q = Parse(readAllText, ts);
-
-
+                    var q = new Query(ts);
+                    q.Parse(readAllText, ts);
                     var resultString = q.Run();
                     //var totalMilliseconds = (long)(DateTime.Now - st).TotalMilliseconds;
                     // results[i++] += totalMilliseconds;
@@ -212,7 +216,8 @@ namespace SparqlParser
                 {
                     var readAllText = File.ReadAllText(file.FullName);
                     var st = DateTime.Now;
-                    var q = Parse(readAllText, ts);
+                    var q = new Query(ts);
+                    q.Parse(readAllText, ts);
                     var resultString = q.Run();
                     var totalMilliseconds = (DateTime.Now - st).Ticks / 10000L;
                     results[i++] += totalMilliseconds;
@@ -227,32 +232,6 @@ namespace SparqlParser
              //   r.WriteLine("countCodingUsages {0} totalMillisecondsCodingUsages {1}", TripleInt.EntitiesCodeCache.Count, TripleInt.totalMilisecondsCodingUsages);
             }
 
-        }
-
-        private static Query Parse(string te, RDFIntStoreAbstract ts)
-        {
-            ICharStream input = new AntlrInputStream(te);
-
-
-            // Console.WriteLine(input);
-            // Настраиваем лексер на этот поток
-            //CalcLexer lexer = new CalcLexer(input);
-            //// Создаем поток токенов на основе лексера
-            //CommonTokenStream tokens = new CommonTokenStream(lexer);
-            //// Создаем парсер
-            //CalcParser parser = new CalcParser(tokens);
-            //// И запускаем первое правило грамматики!!!
-            //parser.calc();
-            DateTime tm = DateTime.Now;
-
-            var lexer = new sparql2PacNSLexer(input);
-
-            var commonTokenStream = new CommonTokenStream(lexer);
-            var sparqlParser = new sparql2PacNSParser(commonTokenStream);
-            sparqlParser.q = new Query(ts);
-            sparqlParser.query();
-            //   Console.WriteLine((DateTime.Now-tm).TotalMilliseconds);
-            return sparqlParser.q;
         }
 
         private static Random random = new Random(DateTime.Now.Millisecond);

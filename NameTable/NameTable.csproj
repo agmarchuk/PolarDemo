@@ -55,6 +55,7 @@
     <Compile Include="StaticFreqEncoding.cs" />
     <Compile Include="StringIntCoding.cs" />
     <Compile Include="StringIntEncoded.cs" />
+    <Compile Include="StringIntMD5RAMUnsafe.cs" />
     <Compile Include="StringIntMD5RAMCollision.cs" />
     <Compile Include="StringIntRAMDIctionary.cs" />
     <Compile Include="StringIntMD5RAMCoding.cs" />

@@ -103,9 +103,9 @@ namespace TripleIntClasses
            @base.WarmUp();
         }
 
-        public override void LoadTurtle(string filepath)
+        public override void LoadTurtle(string filepath, bool useBuffer)
         {
-            @base.LoadTurtle(filepath);
+            @base.LoadTurtle(filepath, useBuffer);
         }
 
         public override IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
