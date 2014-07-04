@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using LiteralStores;
 using NameTable;
 using PolarDB;
 using TripleIntClasses;

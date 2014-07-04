@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using LiteralStores;
 using NameTable;
-using TrueRdfViewer;
+using ScaleBit4Check;
+using TripleIntClasses;
 
-namespace TripleIntClasses
+namespace RDFStores
 {
     public class CashingTripleStoreInt : RDFIntStoreAbstract
     {
@@ -16,7 +18,7 @@ namespace TripleIntClasses
         private readonly Dictionary<KeyValuePair<int, int>, int[]> SpoCache = new Dictionary<KeyValuePair<int, int>, int[]>();
         private readonly Dictionary<KeyValuePair<int, int>, int[]> spOCache = new Dictionary<KeyValuePair<int, int>, int[]>();
         private readonly Dictionary<OTripleInt, bool> spoCache = new Dictionary<OTripleInt, bool>();
-        public CashingTripleStoreInt(RDFIntStoreAbstract @base) : base(@base.EntityCoding, @base.PredicatesCoding, @base.NameSpaceStore, @base.LiteralStore)
+        public CashingTripleStoreInt(RDFIntStoreAbstract @base) : base(@base.EntityCoding, @base.PredicatesCoding, @base.NameSpaceStore, @base.LiteralStore, @base.Scale)
         {
             this.@base = @base;    
           
@@ -173,6 +175,10 @@ namespace TripleIntClasses
         public override void MakeIndexed()
         {
             @base.MakeIndexed();
+        }
+        public override ScaleCell Scale
+        {
+            get { return @base.Scale; }
         }
     }
 

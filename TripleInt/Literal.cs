@@ -3,7 +3,6 @@ using System.Globalization;
 
 namespace TripleIntClasses
 {
-    public enum LiteralVidEnumeration { typedObject, integer, text, date, boolean, nil }   
     public class Literal
     {     
         public long Offset;      

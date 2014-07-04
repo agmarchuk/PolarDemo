@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
+using LiteralStores;
 using NameTable;
-
+using RDFStores;
+using RdfTreesNamespace;
 using SparqlParseRun;
 using TripleIntClasses;
-using TrueRdfViewer;
+
 
 
 namespace SparqlParser
@@ -40,21 +41,22 @@ namespace SparqlParser
             var   nameSpaceStore=new NameSpaceStore(path);  
            
             RDFIntStoreAbstract ts = new CashingTripleStoreInt(
-                new ColumnsStoreAbstract(path,
-                new CasheCoding(new StringIntCoding(path+"entitiesCodes")),
+                new ColumnsStore(path,
+               // new CasheCoding(new StringIntCoding(path+"entitiesCodes")),
+               new StringIntMD5RAMUnsafe(path), 
                 new PredicatesCoding(path),
                 nameSpaceStore,
                 new LiteralStore(path, nameSpaceStore) ));
              
                 bool load = false;
-           // bool load = true;
+        //    bool load = true;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;
             long spent = 0;
             if (load)
             {
-                ts.LoadTurtle(@"C:\deployed\" + Millions + "M.ttl", useBuffer:true);
+                ts.LoadTurtle(@"C:\deployed\" + Millions + "M.ttl", useBuffer:false);
             }
             else
             {

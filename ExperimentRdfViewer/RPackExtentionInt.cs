@@ -1,147 +1,24 @@
-п»їusing System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using PolarDB;
-using TripleIntClasses;
+using SparqlParseRun;
 
 namespace TrueRdfViewer
 {
-    public class RPackInt : ICloneable
-    {
-        //public bool result;
-        public object[] row;
-        private readonly RDFIntStoreAbstract ts;
-        public RDFIntStoreAbstract StoreAbstract { get { return ts; } }
-
-        public RPackInt(object[] row, RDFIntStoreAbstract ts)
-        {
-            this.row = row;
-            this.ts = ts;
-        }
-        public string Get(object si)
-        {
-            if (!(si is short)) 
-                return ts.EntityCoding.GetName((int)si);
-            var index = (short)si;
-            var literal = (row[index] as Literal);
-            if (literal != null) return literal.ToString();
-            else return ts.EntityCoding.GetName((int)row[index]);
-        }
-
-        public int GetE(object si)
-        {
-            return si is short ? (int)row[(short)si] : (int)si;
-        }
-
-        public bool Hasvalue(short si)
-        {
-            return
-                (row[si] is int && row[si] != (object)Int32.MinValue)
-                || (row[si] is Literal &&
-                    ((Literal)row[si]).HasValue);
-
-        }
-        public Literal Val(short ind)
-        {
-            return (Literal)row[ind];
-        }
-        public double Vai(short ind)
-        {
-            Literal lit = (Literal)row[ind];
-            //if (lit.vid != LiteralVidEnumeration.integer) throw new Exception("Wrong literal vid in Vai method");
-            return (double)lit.Value;
-        }
-        public void Set(object si, object valu)
-        {
-            if (!(si is short)) throw new Exception("argument must be an index");
-            short ind = (short)si;
-            row[ind] = valu;
-        }
-
-        public RPackInt ResetDiapason(short parametersStartIndex, short parametersEndIndex)
-        {
-            for (short i = parametersStartIndex; i < parametersEndIndex; i++)
-                Reset(i);
-            return this;
-        }
-        public void Reset(short si)
-        {
-            if (row[si] == null) return;
-            if (row[si] is int)
-                row[si] = int.MinValue;
-            else
-            {
-                var oldliteral = row[si] as Literal;
-                if (oldliteral == null) throw new Exception(); //return;
-                var newLiteral = new Literal(oldliteral.vid);
-                row[si] = newLiteral;
-                switch (oldliteral.vid)
-                {
-                    case LiteralVidEnumeration.integer:
-                        newLiteral.Value = 0.0;
-                        break;
-                    case LiteralVidEnumeration.typedObject:
-                        newLiteral.Value = new TypedObject();
-                        break;
-                    case LiteralVidEnumeration.text:
-                        newLiteral.Value = new Text { };
-                        break;
-                    case LiteralVidEnumeration.date:
-                        newLiteral.Value = DateTime.MinValue.ToBinary();
-                        break;
-                    case LiteralVidEnumeration.boolean:
-                        newLiteral.Value = false;
-                        break;
-                    case LiteralVidEnumeration.nil:
-                        break;
-                }
-            }
-        }
-
-        public object this[short index]
-        {
-            get { return row[index]; }
-            set
-            {
-                row[index] = value;
-            }
-        }
-        object ICloneable.Clone()
-        {
-            var newRow = new object[row.Length];
-            for (int i = 0; i < newRow.Length; i++)
-            {
-                var literal = row[i] as Literal;
-                if (literal != null)
-                {
-                    var value = literal.Value;
-                    if (value is Text)
-                        newRow[i] = new Literal(literal.vid) { Value = ((ICloneable)value).Clone() };
-                    else if (value is TypedObject)
-                        newRow[i] = new Literal(literal.vid) { Value = ((ICloneable)value).Clone() };
-                    else
-                        newRow[i] = new Literal(literal.vid) { Value = value };
-                }
-                else
-                    newRow[i] = row[i];
-            }
-            return new RPackInt(newRow, ts);
-        }
-    }
-
     public static class RPackExtentionInt
     {
         public static IEnumerable<OValRowInt> _Spo(this IEnumerable<OValRowInt> rows, short subj, short pred, short obj)
         {
-            // РћРїСЂРµРґРµР»РµРЅС‹ РѕР±СЉРµРєС‚ Рё РїСЂРµРґРёРєР°С‚, РЅСѓР¶РЅРѕ РЅР°Р№С‚Рё РјРЅРѕР¶РµСЃС‚РІРѕ СЃСѓР±СЉРµРєС‚РѕРІ, РїРѕР±РѕС‡РЅС‹Рј СЌС„С„РµРєС‚РѕРј Р±СѓРґРµС‚ РѕРїСЂРµРґРµР»РµРЅРёРµ 
-            // Рё С„РёРєСЃР°С†РёСЏ РґРёР°РїР°Р·РѕРЅР°. Р•СЃР»Рё РґРёР°РїР°Р·РѕРЅ СѓР¶Рµ РµСЃС‚СЊ, С‚Рѕ РґРёР°РїР°Р·РѕРЅ РЅРµ РІС‹С‡РёСЃР»СЏРµС‚СЃСЏ, Р° РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
+            // Определены объект и предикат, нужно найти множество субъектов, побочным эффектом будет определение 
+            // и фиксация диапазона. Если диапазон уже есть, то диапазон не вычисляется, а используется
             var query = rows.SelectMany(rw =>
             {
                 var row = rw.row;
                 OVal obj_oval = row[obj];
                 Diapason diap = new Diapason();
                 if (obj_oval.spo_number >= 0) 
-                { // Р”РёР°РїР°Р·РѕРЅ РѕРїСЂРµРґРµР»РµРЅ
+                { // Диапазон определен
                     diap.start = obj_oval.spo_start;
                     diap.numb = obj_oval.spo_number;
                 } 
@@ -165,15 +42,15 @@ namespace TrueRdfViewer
             var query = rows.Where(ovr => 
             {
                 OVal[] row = ovr.row;
-                // Р±СѓРґРµРј "РїР»СЏСЃР°С‚СЊ" РѕС‚ СЃСѓР±СЉРµРєС‚Р°. TODO: РЅР°РІРµСЂРЅРѕРµ РјРѕР¶РЅРѕ РєР°Рє-С‚Рѕ Р·Р°РґРµР№СЃС‚РІРѕРІР°С‚СЊ Рё РѕР±СЉРµРєС‚РЅСѓСЋ С†РµРїРѕС‡РєСѓ  
+                // будем "плясать" от субъекта. TODO: наверное можно как-то задействовать и объектную цепочку  
                 OVal subj_oval = row[subj];
                 OVal pred_oval = row[pred];
                 OVal obj_oval = row[obj];
-                // РџСЂРѕРІРµСЂРёРј С‡РµСЂРµР· С€РєР°Р»Сѓ
-                if (!ovr.StoreAbstract.scale.ChkInScale(subj_oval.entity, pred_oval.entity, obj_oval.entity)) return false;
+                // Проверим через шкалу
+                if (!ovr.StoreAbstract.Scale.ChkInScale(subj_oval.entity, pred_oval.entity, obj_oval.entity)) return false;
                 Diapason diap = new Diapason();
                 if (subj_oval.spo_number >= 0)
-                { // Р”РёР°РїР°Р·РѕРЅ РѕРїСЂРµРґРµР»РµРЅ
+                { // Диапазон определен
                     diap.start = subj_oval.spo_start;
                     diap.numb = subj_oval.spo_number;
                 }
@@ -188,7 +65,7 @@ namespace TrueRdfViewer
             });
             return query;
         }
-        // РћРїСЂРµРґРµР»РµРЅРёРµ РІСЃРµС… РґР°РЅРЅС‹С… РїРѕ Р·Р°РґР°РЅРЅС‹Рј s-p 
+        // Определение всех данных по заданным s-p 
         public static IEnumerable<OValRowInt> _spD(this IEnumerable<OValRowInt> rows, short subj, short pred, short dat)
         {
             var query = rows.SelectMany(ovr =>
@@ -199,7 +76,7 @@ namespace TrueRdfViewer
                 OVal dat_oval = row[dat];
                 Diapason diap = new Diapason();
                 if (subj_oval.spd_number >= 0)
-                { // Р”РёР°РїР°Р·РѕРЅ РѕРїСЂРµРґРµР»РµРЅ
+                { // Диапазон определен
                     diap.start = subj_oval.spd_start;
                     diap.numb = subj_oval.spd_number;
                 }
@@ -219,7 +96,7 @@ namespace TrueRdfViewer
             return query;
         }
 
-        // РґР»СЏ СЃР»РµРґСѓСЋС‰РёС… РјРµС‚РѕРґРѕРІ subj, pred, obj РёР»Рё short РёРЅРґРµРєСЃ РёР»Рё С†РµР»РѕРµ Р·РЅР°С‡РµРЅРёРµ Р·Р°РєРѕРґРёСЂРѕРІР°РЅРЅРѕРіРѕ Entity
+        // для следующих методов subj, pred, obj или short индекс или целое значение закодированного Entity
         public static IEnumerable<RPackInt> spo(this IEnumerable<RPackInt> pack, object subj, object pred, object obj)
         {
             //subj = P(subj); pred = P(pred); obj = P(obj);

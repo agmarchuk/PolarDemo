@@ -1,7 +1,7 @@
-using System.IO;
 using PolarDB;
+using TripleIntClasses;
 
-namespace TripleIntClasses
+namespace LiteralStores
 {
     public class LiteralStore   :LiteralStoreAbstract
     {

@@ -1,7 +1,7 @@
-﻿using System.Linq;
+using System.Linq;
 using PolarDB;
 
-namespace TrueRdfViewer
+namespace TripleIntClasses
 {
     public class EntitiesWideTable
     {

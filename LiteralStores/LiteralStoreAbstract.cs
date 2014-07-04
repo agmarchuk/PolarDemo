@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using PolarDB;
+using TripleIntClasses;
 
-namespace TripleIntClasses
+namespace LiteralStores
 {
     public abstract class LiteralStoreAbstract
     {

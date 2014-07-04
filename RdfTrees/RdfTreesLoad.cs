@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using PolarDB;
 using TripleIntClasses;
-using TrueRdfViewer;
 
 
 namespace RdfTreesNamespace
@@ -75,7 +74,7 @@ namespace RdfTreesNamespace
                 return new SubjPredInt() { pred = (int)r[1], subj = (int)r[0] };
             }, sp_compare);
             Console.WriteLine("dtriples_sp.Root.Sort ok. Duration={0} msec.", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            scale.WriteScale(otriples);
+            Scale.WriteScale(otriples);
             Console.WriteLine("CreateScale ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
             //int cnt_e = MakeTreeFree(otriples, otriples_op, dtriples_sp);
             //Console.WriteLine("Scan3 ok. Duration={0} msec. cnt_e={1} ", (DateTime.Now - tt0).Ticks / 10000L, cnt_e); tt0 = DateTime.Now;

@@ -5,7 +5,6 @@ using System.Linq;
 using PolarDB;
 
 using TripleIntClasses;
-using TrueRdfViewer;
 
 
 namespace RdfTreesNamespace
@@ -23,12 +22,12 @@ namespace RdfTreesNamespace
             }
         public override bool CheckInScale(int subj, int pred, int obj)
         {
-            return scale.ChkInScale(subj, pred, obj);
+            return Scale.ChkInScale(subj, pred, obj);
         }
     
         private bool CheckContains(int subj, int pred, int obj)
         {
-            if (!scale.ChkInScale(subj, pred, obj)) return false;
+            if (!Scale.ChkInScale(subj, pred, obj)) return false;
             return GetObjBySubjPred(subj, pred).Contains(subj);   
             }
 
@@ -145,7 +144,7 @@ namespace RdfTreesNamespace
                 }
             }
             entitiesTree = new PxCell(tp_entitiesTree, entitiesTreePath);
-            LiteralStore.WarmUp();
+            base.WarmUp();
         }
      
     }

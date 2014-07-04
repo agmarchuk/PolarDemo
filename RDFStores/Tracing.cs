@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using LiteralStores;
+using NameTable;
+using RDFStores;
+using ScaleBit4Check;
 using TripleIntClasses;
 
 namespace TrueRdfViewer
@@ -14,7 +18,7 @@ namespace TrueRdfViewer
         private int countCalls = 0, callsMaxCount=10*1000;
         private bool isWrite=true;
           RDFIntStoreAbstract @base;
-        public TracingTripleStoreAbstractInt(string path, RDFIntStoreAbstract @base) : base(@base.EntityCoding, @base.PredicatesCoding, @base.NameSpaceStore, @base.LiteralStore)
+        public TracingTripleStoreAbstractInt(string path, RDFIntStoreAbstract @base) : base(@base.EntityCoding, @base.PredicatesCoding, @base.NameSpaceStore, @base.LiteralStore, @base.Scale)
         {
             this.@base = @base;
 
@@ -148,5 +152,25 @@ namespace TrueRdfViewer
         }
 
         public override LiteralStoreAbstract LiteralStore{get { return @base.LiteralStore; }}
+
+        public override IStringIntCoding EntityCoding
+        {
+            get { return @base.EntityCoding; }
+        }
+
+        public override NameSpaceStore NameSpaceStore
+        {
+            get { return @base.NameSpaceStore; }    
+        }
+
+        public override PredicatesCoding PredicatesCoding
+        {
+            get { return @base.PredicatesCoding; }
+        }
+
+        public override ScaleCell Scale
+        {
+            get { return @base.Scale; }
+        }
     }
 }

@@ -99,13 +99,17 @@
       <Project>{907bb4af-fbc9-4a1e-8f80-194af9337aa4}</Project>
       <Name>PolarDB</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ExperimentRdfViewer\ExperimentRdfViewer.csproj">
-      <Project>{3165cde6-fa27-4fc4-bdbc-01967bb4f0e5}</Project>
-      <Name>ExperimentRdfViewer</Name>
+    <ProjectReference Include="..\LiteralStores\LiteralStores.csproj">
+      <Project>{722b7468-aeda-4b30-a600-cf7314594720}</Project>
+      <Name>LiteralStores</Name>
     </ProjectReference>
     <ProjectReference Include="..\NameTable\NameTable.csproj">
       <Project>{5283693d-68cc-4b7a-b2bb-6e901592a272}</Project>
       <Name>NameTable</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RDFStores\RDFStores.csproj">
+      <Project>{d7c13bce-098b-42d5-b37d-7187a858a85a}</Project>
+      <Name>RDFStores</Name>
     </ProjectReference>
     <ProjectReference Include="..\RdfTrees\RdfTrees.csproj">
       <Project>{ac8f68ba-df90-45bf-b7a2-47ce86cf5914}</Project>
@@ -122,6 +126,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="obj\Release\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

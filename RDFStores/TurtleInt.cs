@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using NameTable;
 using PolarDB;
-using TrueRdfViewer;
+using RDFStores;
 
 namespace TripleIntClasses
 {

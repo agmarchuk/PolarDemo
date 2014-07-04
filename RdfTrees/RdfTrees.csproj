@@ -59,9 +59,17 @@
       <Project>{907bb4af-fbc9-4a1e-8f80-194af9337aa4}</Project>
       <Name>PolarDB</Name>
     </ProjectReference>
+    <ProjectReference Include="..\LiteralStores\LiteralStores.csproj">
+      <Project>{722b7468-aeda-4b30-a600-cf7314594720}</Project>
+      <Name>LiteralStores</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NameTable\NameTable.csproj">
       <Project>{5283693D-68CC-4B7A-B2BB-6E901592A272}</Project>
       <Name>NameTable</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RDFStores\RDFStores.csproj">
+      <Project>{d7c13bce-098b-42d5-b37d-7187a858a85a}</Project>
+      <Name>RDFStores</Name>
     </ProjectReference>
     <ProjectReference Include="..\ScaleBit4Check\ScaleBit4Check.csproj">
       <Project>{7860cd10-44ef-4300-8872-8ebef9f122e8}</Project>

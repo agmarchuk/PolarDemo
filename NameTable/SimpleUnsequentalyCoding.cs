@@ -1,8 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using NameTable;
 
-namespace TripleIntClasses
+namespace NameTable
 {
     public class SimpleUnsequentalyCoding : IStringIntCoding
     {

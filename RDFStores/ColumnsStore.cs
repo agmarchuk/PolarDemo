@@ -1,26 +1,26 @@
-п»їusing System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using LiteralStores;
 using NameTable;
 using PolarDB;
-using ScaleBit4Check;
 using TripleIntClasses;
 
-namespace TrueRdfViewer
+namespace RDFStores
 {
-    public class ColumnsStoreAbstract : RDFIntStoreAbstract
+    public class ColumnsStore : RDFIntStoreAbstract
     {
         private PType tp_otriple_seq;
 
-        private Dictionary<int, Dictionary<int,object>[]> positionBy_bjectPredicateCashe=new Dictionary<int, Dictionary<int, object>[]>();
+        private Dictionary<int, Dictionary<int, object>[]> positionBy_bjectPredicateCashe=new Dictionary<int, Dictionary<int, object>[]>();
 
         private PType tp_entity;
         private PType tp_dtriple_spf;
 
         internal EntitiesWideTable ewt;
         internal EntitiesMemoryHashTable ewtHash;
-        public ScaleCell scale = null;
+     
         private PType tp_entities_column;
         private PTypeSequence tp_Data_column;
 
@@ -35,7 +35,7 @@ namespace TrueRdfViewer
                     new NamedType("subject", tp_entity),
                     new NamedType("predicate", tp_entity),
                     new NamedType("object", tp_entity)));
-            // РўРёРї РґР»СЏ СЌРєРѕРЅРѕРјРЅРѕРіРѕ РІС‹СЃС‚СЂР°РёРІР°РЅРёСЏ РёРЅРґРµРєСЃР° s-p РґР»СЏ dtriples
+            // Тип для экономного выстраивания индекса s-p для dtriples
             tp_dtriple_spf = new PTypeSequence(new PTypeRecord(
                     new NamedType("subject", tp_entity),
                     new NamedType("predicate", tp_entity),
@@ -44,11 +44,11 @@ namespace TrueRdfViewer
             tp_Data_column = new PTypeSequence(new PType(PTypeEnumeration.longinteger));
 
         }
-        private string path;
+     
         private PaCell objPredicates;
-        private PaCell objects; // РѕР±СЉРµРєС‚РЅС‹Рµ С‚СЂРёРїР»РµС‚С‹, СѓРїРѕСЂСЏРґРѕС‡РµРЅРЅС‹Рµ РїРѕ o-p
+        private PaCell objects; // объектные триплеты, упорядоченные по o-p
         private PaCell inversePredicates;
-        private PaCell inverses; // РѕР±СЉРµРєС‚РЅС‹Рµ С‚СЂРёРїР»РµС‚С‹, СѓРїРѕСЂСЏРґРѕС‡РµРЅРЅС‹Рµ РїРѕ o-p
+        private PaCell inverses; // объектные триплеты, упорядоченные по o-p
         private PaCell dataPredicates;
         private PaCell data;
         private string dataPredicatesColumn_filePath;
@@ -58,17 +58,15 @@ namespace TrueRdfViewer
         private string invSubjectsColumn_filePath;
         private string objectsColumn_filePath;
 
-        //// РРґРµСЏ С…РѕСЂРѕС€Р°СЏ, РЅРѕ РЅР°РґРѕ РјРµРЅСЏС‚СЊ СЃС…РµРјСѓ СЂРµР°Р»РёР·Р°С†РёРё
+        //// Идея хорошая, но надо менять схему реализации
         //private GroupedEntities getable;
         //private Dictionary<int, object[]> geHash;
 
-        public ColumnsStoreAbstract(string path, IStringIntCoding entityCoding, PredicatesCoding predicatesCoding, NameSpaceStore nameSpaceStore, LiteralStoreAbstract literalStore)
-            : base(entityCoding, predicatesCoding, nameSpaceStore, literalStore)
+        public ColumnsStore(string path, IStringIntCoding entityCoding, PredicatesCoding predicatesCoding, NameSpaceStore nameSpaceStore, LiteralStoreAbstract literalStore)
+            : base(path, entityCoding, predicatesCoding, nameSpaceStore, literalStore)
 
         {
-            this.path = path;
-
-            InitTypes();
+          InitTypes();
             otriplets_op_filePath = path + "otriples_op.pac";
             otriples_filePath = path + "otriples.pac";
             dtriples_filePath = path + "dtriples.pac";
@@ -83,8 +81,7 @@ namespace TrueRdfViewer
                 Open(File.Exists(otriples_filePath));
             
 
-            if (!scale.Cell.IsEmpty)
-               scale.CalculateRange();
+          
 
 
             ewt = new EntitiesWideTable(path, 3);
@@ -93,7 +90,7 @@ namespace TrueRdfViewer
 
 
 
-            //getable = new GroupedEntities(path); // Р­С‚Рѕ С…РѕСЂРѕС€Р°СЏ РёРґРµСЏ, РЅРѕ РЅСѓР¶РЅРѕ РјРµРЅСЏС‚СЊ СЃС…РµРјСѓ СЂРµР°Р»РёР·Р°С†РёРё
+            //getable = new GroupedEntities(path); // Это хорошая идея, но нужно менять схему реализации
             //getable.CheckGroupedEntities();
             //geHash = getable.GroupedEntitiesHash();
 
@@ -108,7 +105,7 @@ namespace TrueRdfViewer
             dataPredicates = new PaCell(tp_entities_column, dataPredicatesColumn_filePath, readOnlyMode);
             data = new PaCell(tp_Data_column, dataColumn_filePath, readOnlyMode);
             // LiteralStore.Literals.Open(readOnlyMode);
-            scale = new ScaleCell(path);
+         
 
         }
 
@@ -168,16 +165,16 @@ namespace TrueRdfViewer
             if (ewt.EWTable.IsEmpty) return;
             foreach (var v in objPredicates.Root.ElementValues()) ;
             foreach (var v in objects.Root.ElementValues()) ;
-           LiteralStore.WarmUp();
+           
             foreach (var v in dataPredicates.Root.ElementValues()) ;
             foreach (var v in data.Root.ElementValues()) ;
             foreach (var v in inversePredicates.Root.ElementValues()) ;
             foreach (var v in inverses.Root.ElementValues()) ;
 
 
-            if (scale.Filescale)
-                foreach (var v in scale.Cell.Root.ElementValues()) ;
-            foreach (var v in ewt.EWTable.Root.ElementValues()) ; // СЌС‚Р°СЏ СЏС‡РµР№РєР° "РїРѕРґРѕРіСЂРµРІР°РµС‚СЃСЏ" РїСЂРё РЅР°С‡Р°Р»Рµ РїСЂРѕРіСЂР°РјРјС‹   
+            
+            foreach (var v in ewt.EWTable.Root.ElementValues()) ; // этая ячейка "подогревается" при начале программы   
+            base.WarmUp();
         }
         
 
@@ -190,7 +187,7 @@ namespace TrueRdfViewer
             Close();
 
             Open(false);
-
+          
             PaCell otriples=new PaCell(tp_otriple_seq, otriples_filePath, false);
             PaCell dtriples_sp=new PaCell(tp_dtriple_spf, dtriples_filePath,false);
             
@@ -207,13 +204,13 @@ namespace TrueRdfViewer
             otriples = new PaCell(tp_otriple_seq, otriples_filePath, false);
             Console.WriteLine("copy objects ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
-            // РЈРїРѕСЂСЏРґРѕС‡РёРІР°РЅРёРµ otriples РїРѕ s-p-o
+            // Упорядочивание otriples по s-p-o
             otriples.Root.SortByKey(rec => new SubjPredObjInt(rec), new SPOComparer());
             Console.WriteLine("otriples.Root.Sort ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
             //SPOComparer spo_compare = new SPOComparer();
             SPComparer sp_compare = new SPComparer();
-            // РЈРїРѕСЂСЏРґРѕС‡РёРІР°РЅРёРµ otriples_op РїРѕ o-p
+            // Упорядочивание otriples_op по o-p
             otriples_op.Root.SortByKey(rec =>
             {
                 object[] r = (object[])rec;
@@ -221,7 +218,7 @@ namespace TrueRdfViewer
             }, sp_compare);
             Console.WriteLine("otriples_op Sort ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
-            // РЈРїРѕСЂСЏРґРѕС‡РёРІР°РЅРёРµ dtriples_sp РїРѕ s-p
+            // Упорядочивание dtriples_sp по s-p
             dtriples_sp.Root.SortByKey(rec =>
             {
                 object[] r = (object[])rec;
@@ -229,11 +226,11 @@ namespace TrueRdfViewer
             }, sp_compare);
             Console.WriteLine("dtriples_sp.Root.Sort ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
-          scale.WriteScale(otriples);
+          Scale.WriteScale(otriples);
             Console.WriteLine("CreateScale ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
 
-            // РЎРѕР·РґР°РЅРёРµ "С€РёСЂРѕРєРѕР№" С‚Р°Р±Р»РёС†С‹
+            // Создание "широкой" таблицы
             ewt.Load(new[]  
             {
                 new DiapasonScanner<int>(otriples, ent => (int)((object[])ent.Get())[0]),
@@ -242,7 +239,7 @@ namespace TrueRdfViewer
             });
             Console.WriteLine("ewt.Load() ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
-            // Р’С‹С‡РёСЃР»РµРЅРёРµ РєРµС€Р°. Р­С‚Рѕ РјРѕР¶РЅРѕ РЅРµ РґРµР»Р°С‚СЊ, РІСЃРµ СЂР°РІРЅРѕ - РєРµС€ РІ РѕРїРµСЂР°С‚РёРІРЅРѕР№ РїР°РјСЏС‚Рё
+            // Вычисление кеша. Это можно не делать, все равно - кеш в оперативной памяти
             //ewtHash.Load();
             // Console.WriteLine("ewtHash.Load() ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
@@ -264,7 +261,7 @@ namespace TrueRdfViewer
             inverses.Close();
             dataPredicates.Close();
             data.Close();
-            scale.Cell.Close();
+           
         }
 
 
@@ -399,7 +396,7 @@ namespace TrueRdfViewer
      
         public override bool CheckInScale(int subj, int pred, int obj)
         {
-            return scale.ChkInScale(subj, pred, obj);
+            return Scale.ChkInScale(subj, pred, obj);
         }
 
      
@@ -454,6 +451,6 @@ namespace TrueRdfViewer
                 .Select((pred, i) => new KeyValuePair<long, int>(values[i], pred))
                 .ToArray()
                 .Select(pair => new KeyValuePair<Literal, int>(LiteralStore.Read(pair.Key, PredicatesCoding.LiteralVid[pair.Value]), pair.Value) ); 
-        }  
+        }         
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using PolarDB;
 
-namespace TrueRdfViewer
+namespace TripleIntClasses
 {
     public class FlexIndexView<Tkey>
     {

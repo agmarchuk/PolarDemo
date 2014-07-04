@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using LiteralStores;
 using NameTable;
 using PolarDB;
-using ScaleBit4Check;
+using RDFStores;      
 using TripleIntClasses;
-using TrueRdfViewer;
 
 
 namespace RdfTreesNamespace
@@ -29,7 +29,7 @@ namespace RdfTreesNamespace
         //private PxCell literalsTree;
        // private PaCell dtriples;
         // Место для базы данных  
-        private ScaleCell scale;
+
         private string entitiesTreePath;
         private PaCell otriples;
 
@@ -42,7 +42,7 @@ namespace RdfTreesNamespace
         /// <param name="nameSpaceStore"></param>
         /// <param name="predicatesCoding"></param>
         public RdfTrees(string path, IStringIntCoding entityCoding, PredicatesCoding predicatesCoding, NameSpaceStore nameSpaceStore, LiteralStoreAbstract literalStore)
-            : base(entityCoding, predicatesCoding, nameSpaceStore, literalStore)
+            : base(path, entityCoding, predicatesCoding, nameSpaceStore, literalStore)
         {             
             // Построим типы
             InitTypes();
@@ -50,10 +50,10 @@ namespace RdfTreesNamespace
             this.entitiesTree = new PxCell(tp_entitiesTree, entitiesTreePath = path + "entitiesTree.pxc", false);
             //this.literalsTree = new PxCell(tp_literalsTree, path + "literalsTree.pxc", false);
           //  this.dtriples = new PaCell(tp_dtriple_spf, path + "dtriples.pac", false); // Это вместо не работающего дерева литералов       }
-            scale=new ScaleCell(path);
+      
             
                 otriples = new PaCell(tp_otriple_seq, path + "otriples.pac", File.Exists(path + "otriples.pac"));
-            if (!scale.Filescale) scale.CreateScale(otriples);
+
                 otriples.Close();
                 
         }

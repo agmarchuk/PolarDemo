@@ -48,6 +48,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Query.cs" />
     <Compile Include="RPackComplexExtensionInt.cs" />
+    <Compile Include="RPackInt.cs" />
     <Compile Include="sparql2PacNS.g4.lexer.cs">
       <DependentUpon>sparql2PacNS.g4</DependentUpon>
     </Compile>
@@ -63,13 +64,17 @@
     </Antlr4>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ExperimentRdfViewer\ExperimentRdfViewer.csproj">
-      <Project>{3165cde6-fa27-4fc4-bdbc-01967bb4f0e5}</Project>
-      <Name>ExperimentRdfViewer</Name>
+    <ProjectReference Include="..\LiteralStores\LiteralStores.csproj">
+      <Project>{722b7468-aeda-4b30-a600-cf7314594720}</Project>
+      <Name>LiteralStores</Name>
     </ProjectReference>
     <ProjectReference Include="..\NameTable\NameTable.csproj">
       <Project>{5283693d-68cc-4b7a-b2bb-6e901592a272}</Project>
       <Name>NameTable</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RDFStores\RDFStores.csproj">
+      <Project>{d7c13bce-098b-42d5-b37d-7187a858a85a}</Project>
+      <Name>RDFStores</Name>
     </ProjectReference>
     <ProjectReference Include="..\TripleInt\TripleIntClasses.csproj">
       <Project>{4b88e673-1272-46cf-817c-ac76111dac46}</Project>

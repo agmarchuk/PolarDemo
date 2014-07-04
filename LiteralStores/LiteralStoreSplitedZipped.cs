@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Huffman;
 using NameTable;
 using PolarDB;
 using TripleIntClasses;
 
-namespace TrueRdfViewer
+namespace LiteralStores
 {
     public class LiteralStoreSplitedZipped : LiteralStoreAbstract
     {                   
@@ -172,8 +171,8 @@ namespace TrueRdfViewer
                  
                 offsetElement.Set(
                     StringsArchedCell.Root.AppendElement(new object[]{ 
-                        stringsArhive.Compress((string)stri_lang[0]).Cast<object>().ToArray(),
-                        stringsArhive.Compress((string)stri_lang[01]).Cast<object>().ToArray()}));
+                        Enumerable.Cast<object>(stringsArhive.Compress((string)stri_lang[0])).ToArray(),
+                        Enumerable.Cast<object>(stringsArhive.Compress((string)stri_lang[01])).ToArray()}));
                 
                 }
             }

@@ -1,13 +1,13 @@
-п»їusing System;
+using System;
 using PolarDB;
 
-namespace TrueRdfViewer
+namespace TripleIntClasses
 {
     public class DiapasonScanner<Key> where Key: IComparable
     {
         private PaCell cell;
         private long count = Int64.MinValue;
-        private long i_current; // i_current == count - РєРѕРЅРµС† С„Р°Р№Р»Р°
+        private long i_current; // i_current == count - конец файла
         private Key key_current;
         public bool HasValue { get { return i_current < count; } }
         public Key KeyCurrent { get { return key_current; } }
@@ -47,9 +47,9 @@ namespace TrueRdfViewer
                 {
                     break;
                 }
-                // РљР»СЋС‡ С‚РѕС‚ Р¶Рµ - РїСЂРѕРґРѕР»Р¶РµРЅРёРµ С†РёРєР»Р°
+                // Ключ тот же - продолжение цикла
             }
-            // Р’С‹С€Р»Рё Р»РёР±Рѕ РїРѕ РєРѕРЅС†Сѓ С„Р°Р№Р»Р°, Р»РёР±Рѕ РїРѕ СѓРІРµР»РёС‡РµРЅРЅРѕРјСѓ Р·РЅР°С‡РµРЅРёСЋ РєР»СЋС‡Р°
+            // Вышли либо по концу файла, либо по увеличенному значению ключа
             return new Diapason() { start = i_start, numb = i_current - i_start };
         }
     }

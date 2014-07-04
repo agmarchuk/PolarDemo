@@ -94,6 +94,7 @@ namespace NameTable
                 nc_cell.Root.AppendElement(new object[] { code = Count++, newString });
                 codeByMd5.Add(newMD5, code);
             }
+            
             return code;
         }
 
@@ -187,6 +188,7 @@ namespace NameTable
             c_index.Clear();
             var offsets = new object[Count];
             int i = 0;
+            nc_cell.Flush();
             foreach (PaEntry entry in nc_cell.Root.Elements())
                 offsets[i++] = entry.offset;
             c_index.Fill(offsets);

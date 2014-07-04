@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using System.Linq;
-
 using System.Text.RegularExpressions;
-
 using PolarDB;
 
-namespace TripleIntClasses
+namespace LiteralStores
 {
    public class NameSpaceStore
    {

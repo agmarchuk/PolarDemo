@@ -1,13 +1,15 @@
-п»їusing System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using LiteralStores;
 using NameTable;
 using PolarDB;
+using RDFStores;
 using ScaleBit4Check;
-using TripleIntClasses;
 
-namespace TrueRdfViewer
+
+namespace TripleIntClasses
 {
     public class TripleStoreInt : RDFIntStoreAbstract
     {
@@ -32,7 +34,7 @@ namespace TrueRdfViewer
                     new NamedType("subject", tp_entity),
                     new NamedType("predicate", tp_entity),
                     new NamedType("object", tp_entity)));
-            // РўРёРї РґР»СЏ СЌРєРѕРЅРѕРјРЅРѕРіРѕ РІС‹СЃС‚СЂР°РёРІР°РЅРёСЏ РёРЅРґРµРєСЃР° s-p РґР»СЏ dtriples
+            // Тип для экономного выстраивания индекса s-p для dtriples
             tp_dtriple_spf = new PTypeSequence(new PTypeRecord(
                     new NamedType("subject", tp_entity),
                     new NamedType("predicate", tp_entity),
@@ -45,17 +47,17 @@ namespace TrueRdfViewer
                 new NamedType("_bject", tp_entity)));
 
         }
-        private string path;
+     
         private PaCell otriples;
-        private PaCell otriples_op; // РѕР±СЉРµРєС‚РЅС‹Рµ С‚СЂРёРїР»РµС‚С‹, СѓРїРѕСЂСЏРґРѕС‡РµРЅРЅС‹Рµ РїРѕ o-p
+        private PaCell otriples_op; // объектные триплеты, упорядоченные по o-p
         private PaCell dtriples_sp;
         private FlexIndexView<SubjPredObjInt> spo_o_index = null;
         private FlexIndexView<SubjPredInt> sp_d_index = null;
         private FlexIndexView<SubjPredInt> op_o_index = null;
 
-        //private bool memoryscale = false; // РќР°РѕР±РѕСЂРѕС‚ РѕС‚ filescale
+        //private bool memoryscale = false; // Наоборот от filescale
         private int range = 0;
-        //// РРґРµСЏ С…РѕСЂРѕС€Р°СЏ, РЅРѕ РЅР°РґРѕ РјРµРЅСЏС‚СЊ СЃС…РµРјСѓ СЂРµР°Р»РёР·Р°С†РёРё
+        //// Идея хорошая, но надо менять схему реализации
         //private GroupedEntities getable;
         //private Dictionary<int, object[]> geHash;
 
@@ -76,11 +78,11 @@ namespace TrueRdfViewer
                 otriples = new PaCell(tp_triple_seq_two, otriples_filePath, false);
                 otriples_op = new PaCell(tp_triple_seq_two, otriplets_op_filePath, false);
                 dtriples_sp = new PaCell(tp_dtriple_spf_two, dtriples_filePath, false);
-                scale = new ScaleCell(path);
+               
             }
 
-            if (!scale.Cell.IsEmpty)
-               scale.CalculateRange();
+            if (!Scale.Cell.IsEmpty)
+               Scale.CalculateRange();
 
 
             ewt = new EntitiesWideTable(path, 3);
@@ -89,7 +91,7 @@ namespace TrueRdfViewer
 
 
 
-            //getable = new GroupedEntities(path); // Р­С‚Рѕ С…РѕСЂРѕС€Р°СЏ РёРґРµСЏ, РЅРѕ РЅСѓР¶РЅРѕ РјРµРЅСЏС‚СЊ СЃС…РµРјСѓ СЂРµР°Р»РёР·Р°С†РёРё
+            //getable = new GroupedEntities(path); // Это хорошая идея, но нужно менять схему реализации
             //getable.CheckGroupedEntities();
             //geHash = getable.GroupedEntitiesHash();
 
@@ -108,9 +110,7 @@ namespace TrueRdfViewer
                 otriples = new PaCell(tp_otriple_seq, otriples_filePath + "tmp", false);
                 otriples_op = new PaCell(tp_otriple_seq, otriplets_op_filePath + "tmp", false);
                 dtriples_sp = new PaCell(tp_dtriple_spf, dtriples_filePath + "tmp", false);
-            }                          
-             // LiteralStore.Literals.Open(readOnlyMode);
-            scale = new ScaleCell(path);
+            }    
         }
 
 
@@ -154,12 +154,11 @@ namespace TrueRdfViewer
             if (otriples.IsEmpty) return;
             foreach (var v in otriples.Root.ElementValues()) ;
             foreach (var v in otriples_op.Root.ElementValues()) ;
-            literalStore.WarmUp();
+       
             foreach (var v in dtriples_sp.Root.ElementValues()) ;
 
-            if (scale.Filescale)
-                foreach (var v in scale.Cell.Root.ElementValues()) ;
-            foreach (var v in ewt.EWTable.Root.ElementValues()) ; // СЌС‚Р°СЏ СЏС‡РµР№РєР° "РїРѕРґРѕРіСЂРµРІР°РµС‚СЃСЏ" РїСЂРё РЅР°С‡Р°Р»Рµ РїСЂРѕРіСЂР°РјРјС‹
+        
+            foreach (var v in ewt.EWTable.Root.ElementValues()) ; // этая ячейка "подогревается" при начале программы
         base.WarmUp();
         }
         
@@ -183,13 +182,13 @@ namespace TrueRdfViewer
             PrepareArrays();
             Console.WriteLine("PrepareArrays ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
-            // РЈРїРѕСЂСЏРґРѕС‡РёРІР°РЅРёРµ otriples РїРѕ s-p-o
+            // Упорядочивание otriples по s-p-o
             otriples.Root.SortByKey(rec => new SubjPredObjInt(rec), new SPOComparer());
             Console.WriteLine("otriples.Root.Sort ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
             //SPOComparer spo_compare = new SPOComparer();
             SPComparer sp_compare = new SPComparer();
-            // РЈРїРѕСЂСЏРґРѕС‡РёРІР°РЅРёРµ otriples_op РїРѕ o-p
+            // Упорядочивание otriples_op по o-p
             otriples_op.Root.SortByKey(rec =>
             {
                 object[] r = (object[])rec;
@@ -197,7 +196,7 @@ namespace TrueRdfViewer
             }, sp_compare);
             Console.WriteLine("otriples_op Sort ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
-            // РЈРїРѕСЂСЏРґРѕС‡РёРІР°РЅРёРµ dtriples_sp РїРѕ s-p
+            // Упорядочивание dtriples_sp по s-p
             dtriples_sp.Root.SortByKey(rec =>
             {
                 object[] r = (object[])rec;
@@ -205,11 +204,11 @@ namespace TrueRdfViewer
             }, sp_compare);
             Console.WriteLine("dtriples_sp.Root.Sort ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
-          scale.WriteScale(otriples);
+          Scale.WriteScale(otriples);
             Console.WriteLine("CreateScale ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
 
-            // РЎРѕР·РґР°РЅРёРµ "С€РёСЂРѕРєРѕР№" С‚Р°Р±Р»РёС†С‹
+            // Создание "широкой" таблицы
             ewt.Load(new[]  
             {
                 new DiapasonScanner<int>(otriples, ent => (int)((object[])ent.Get())[0]),
@@ -218,7 +217,7 @@ namespace TrueRdfViewer
             });
             Console.WriteLine("ewt.Load() ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
-            // Р’С‹С‡РёСЃР»РµРЅРёРµ РєРµС€Р°. Р­С‚Рѕ РјРѕР¶РЅРѕ РЅРµ РґРµР»Р°С‚СЊ, РІСЃРµ СЂР°РІРЅРѕ - РєРµС€ РІ РѕРїРµСЂР°С‚РёРІРЅРѕР№ РїР°РјСЏС‚Рё
+            // Вычисление кеша. Это можно не делать, все равно - кеш в оперативной памяти
             //ewtHash.Load();
             // Console.WriteLine("ewtHash.Load() ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
 
@@ -266,7 +265,7 @@ namespace TrueRdfViewer
 
         private void PrepareArrays()
         {
-            // РЎРѕР·РґР°РЅРёРµ Рё СѓРїРѕСЂСЏРґРѕС‡РёРІР°РЅРёРµ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹С… СЃС‚СЂСѓРєС‚СѓСЂ
+            // Создание и упорядочивание дополнительных структур
 
             otriples_op.Close();
             otriples.Close();
@@ -304,7 +303,7 @@ namespace TrueRdfViewer
             dtriples_sp.Close();
             otriples.Close();
             otriples_op.Close();
-            scale.Cell.Close();
+            Scale.Cell.Close();
         }
 
         //public void LoadXML(string filepath)
@@ -327,12 +326,12 @@ namespace TrueRdfViewer
         //            string prop = el.Name.NamespaceName + el.Name.LocalName;
         //            var resource_att = el.Attribute(ONames.rdfresource);
         //            if (resource_att != null)
-        //            { // РћР±СЉРµРєС‚РЅР°СЏ СЃСЃС‹Р»РєР°
+        //            { // Объектная ссылка
         //                otriples.Root.AppendElement(
         //                    new object[] { id, prop, resource_att.Value } );
         //            }
         //            else
-        //            { // РџРѕР»Рµ РґР°РЅРЅС‹С…
+        //            { // Поле данных
         //                var lang_att = el.Attribute(ONames.xmllang);
         //                string lang = lang_att == null ? "" : lang_att.Value;
         //                dtriples.Root.AppendElement(
@@ -343,7 +342,7 @@ namespace TrueRdfViewer
         //    }
         //    otriples.Flush();
         //    dtriples.Flush();
-        //    // РРЅРґРµРєСЃРёСЂРѕРІР°РЅРёРµ
+        //    // Индексирование
         //    if (!otriples.IsEmpty)
         //    {
         //        OpenCreateIndexes();
@@ -351,7 +350,7 @@ namespace TrueRdfViewer
         //    spo_o_index.Load(null);
         //    sp_d_index.Load(null);
         //    op_o_index.Load(null);
-        //    // РЎРѕР·РґР°РЅРёРµ С€РєР°Р»С‹
+        //    // Создание шкалы
         //    CreateScale();
         //    ShowScale();
         //    oscale.Clear();
@@ -360,8 +359,7 @@ namespace TrueRdfViewer
         //    oscale.Flush();
         //}
 
-        public ScaleCell scale = null;
-        private LiteralStoreAbstract literalStore;
+
 
 
         public override IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
@@ -443,15 +441,14 @@ namespace TrueRdfViewer
 
         public IEnumerable<int> GetSubjectByObjPred0(int obj, int pred)
         {
-            return op_o_index.GetAll(ent =>
-            {
-                int ob = (int)ent.Field(2).Get();
-                int cmp = ob.CompareTo(obj);
-                if (cmp != 0) return cmp;
-                int pr = (int)ent.Field(1).Get();
-                return pr.CompareTo(pred);
-            })
-                .Select(en => (int)en.Field(0).Get());
+            return Enumerable.Select<PaEntry, int>(op_o_index.GetAll(ent =>
+                {
+                    int ob = (int)ent.Field(2).Get();
+                    int cmp = ob.CompareTo(obj);
+                    if (cmp != 0) return cmp;
+                    int pr = (int)ent.Field(1).Get();
+                    return pr.CompareTo(pred);
+                }), en => (int)en.Field(0).Get());
         }
 
         #endregion
@@ -506,7 +503,7 @@ namespace TrueRdfViewer
                     .SkipWhile(entry => pred != (int)entry[0])
                     .TakeWhile(entry => pred == (int)entry[0])
                     .Select(en =>(long)en[1])
-                    .Select(offset=>literalStore.Read(offset, PredicatesCoding.LiteralVid[pred]))
+                    .Select(offset=>LiteralStore.Read(offset, PredicatesCoding.LiteralVid[pred]))
                     .ToArray();
         }
 
@@ -596,18 +593,18 @@ namespace TrueRdfViewer
             var keySub = new KeyValuePair<int, int>(subj, pred);
             var keyObj = new KeyValuePair<int, int>(obj, pred);
 
-            //РµСЃР»Рё РґР°Р¶Рµ РІ РѕРїРµСЂР°С‚РёРІРЅРѕР№ РїР°РјСЏС‚Рё Р·Р°РєРµС€РёСЂРѕРІР°РЅС‹ РїСЂРµРґРёРєР°С‚С‹, РЅРѕ РёС… Р±РѕР»СЊС€Рµ, С‡РµРј СЌС‚Р° РєРѕРЅСЃС‚Р°РЅС‚Р°, С‚Рѕ Р±СѓРґРµС‚ РїСЂРѕРІРµСЂРµРЅРѕ РєРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРµРґРёРєР°С‚РѕРІ РІ РґСЂСѓРіРѕРј
+            //если даже в оперативной памяти закешированы предикаты, но их больше, чем эта константа, то будет проверено количество предикатов в другом
             const int limit = 1000;
 
 
-            // РїСЂРѕРІРµСЂРєР° РєРµС€РµР№ 
+            // проверка кешей 
             var subjExists = spOCache.TryGetValue(keySub, out resSubj);
             var objExists = SpoCache.TryGetValue(keyObj, out resObj);
             long subjLength = 0;
             if (subjExists)
             {
                 subjLength = resSubj.Length;
-                // РЅРѕ РµСЃР»Рё Рё РѕР±СЂР°С‚С‹РЅРµ С‚РѕР¶Рµ РµСЃС‚СЊ РІ РєРµС€Рµ, С‚Рѕ Р±СѓРґРµС‚ СЃСЂР°РІРЅРёРІР°С‚СЊСЃСЏ РёС… РєРѕР»РёС‡РµСЃС‚РІРѕ
+                // но если и обратыне тоже есть в кеше, то будет сравниваться их количество
                 if (!objExists && subjLength < limit)
                     return resSubj.Contains(obj);
             }
@@ -623,7 +620,7 @@ namespace TrueRdfViewer
                     return resObj.Contains(subj);
                 else return resSubj.Contains(obj);
 
-            //С‚РµРїРµСЂСЊ Р»РёР±Рѕ РѕРґРёРЅ РёР· РјР°СЃСЃРёРІРѕРІ РµСЃС‚СЊ РІ РєРµС€Рµ Рё СЃР»РёС€РєРѕРј Р±РѕР»СЊС€РѕР№, Р»РёР±Рѕ РѕР±РѕРёС… РЅРµС‚.
+            //теперь либо один из массивов есть в кеше и слишком большой, либо обоих нет.
             object[] subjDiapason = null;
             if (!subjExists)
             {
@@ -671,21 +668,21 @@ namespace TrueRdfViewer
         */
         public override bool CheckInScale(int subj, int pred, int obj)
         {
-            return scale.ChkInScale(subj, pred, obj);
+            return Scale.ChkInScale(subj, pred, obj);
         }
 
         public bool ChkOSubjPredObj0(int subj, int pred, int obj)
         {
-            // РЁРєР°Р»Сѓ РґРѕР±Р°РІР»СЋ РїРѕР·РґРЅРµРµ
+            // Шкалу добавлю позднее
             if (false && range > 0)
             {
                 int code = Scale1.Code(range, subj, pred, obj);
                 //int word = (int)oscale.Root.Element(Scale1.GetArrIndex(code)).Get();
                 //int tb = Scale1.GetFromWord(word, code);
-                int tb = scale.Scale1[code];
+                int tb = Scale.Scale1[code];
                 if (tb == 0) return false;
-                // else if (tb == 1) return true; -- СЌС‚Рѕ Р±С‹Р» РёСЃС‚РѕС‡РЅРёРє РѕС€РёР±РєРё
-                // else РЅР°РґРѕ СЃС‡РёС‚Р°Р»СЊ РґР»РёРЅРЅРѕ, СЃРј. РґР°Р»РµРµ
+                // else if (tb == 1) return true; -- это был источник ошибки
+                // else надо считаль длинно, см. далее
             }
             return !spo_o_index.GetFirst(ent =>
             {
@@ -702,8 +699,8 @@ namespace TrueRdfViewer
         }
       
 
-        // ================== РЎРµРјРµР№СЃС‚РІРѕ РјРµС‚РѕРґРѕРІ РґР»СЏ OValRowInt - РїСЂРµРґСЃС‚Р°РІР»РµРЅРёСЏ (РЅСѓР¶РЅРѕ РЅР°Р·РІР°С‚СЊ РјРµС‚РѕРґ РёР»Рё Р°Р»РіРѕСЂРёС‚Рј) =========
-        // РџРѕР»СѓС‡РµРЅРёРµ РґРёР°РїР°Р·РѕРЅРѕРІ
+        // ================== Семейство методов для OValRowInt - представления (нужно назвать метод или алгоритм) =========
+        // Получение диапазонов
         public Diapason GetDiap_spo(int subj)
         {
             return otriples.Root.BinarySearchDiapason(ent => ((int)ent.Field(0).Get()).CompareTo(subj));
@@ -760,7 +757,7 @@ namespace TrueRdfViewer
             return dtriples_sp.Root.ElementValues(internal_diap.start, internal_diap.numb)
                 .Cast<object[]>()
                 .Select(en => (long)en[1])
-                    .Select(offset=>literalStore.Read(offset, PredicatesCoding.LiteralVid[pred]));
+                    .Select(offset=>LiteralStore.Read(offset, PredicatesCoding.LiteralVid[pred]));
         }
 
 
@@ -773,9 +770,9 @@ namespace TrueRdfViewer
             return diapason == null
                 ? new KeyValuePair<int, int>[0]
                 : otriples_op.Root.ElementValues((long)diapason[0], (long)diapason[1])
-                    // РњРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ ElementValues РїРѕС‚РѕРјСѓ С‡С‚Рѕ СЂРµР·СѓР»СЊС‚Р°С‚ РЅРµ РёС‚РµСЂР°С†РёСЏ, Р° РјР°СЃСЃРёРІ
+                    // Можно использовать ElementValues потому что результат не итерация, а массив
                     .Cast<object[]>()
-                    //.Where(spo => pred == (int)spo[1]) // Р•СЃР»Рё РґРёР°РїР°Р·РѕРЅ СЃ СѓС‡РµС‚РѕРј РїСЂРµРґРёРєР°С‚Р°, СЌС‚Р° РїСЂРѕРІРµСЂРєР° РЅРµ РЅСѓР¶РЅР°, РЅРѕ РѕРїРµСЂР°С†РёСЏ РѕС‡РµРЅСЊ РґРµС€РµРІР°СЏ, РјРѕР¶РЅРѕ РѕСЃС‚Р°РІРёС‚СЊ
+                    //.Where(spo => pred == (int)spo[1]) // Если диапазон с учетом предиката, эта проверка не нужна, но операция очень дешевая, можно оставить
                     .Select(spo => new KeyValuePair<int, int>((int)spo[1], (int)spo[0])).ToArray();
         }
 
@@ -809,7 +806,7 @@ namespace TrueRdfViewer
                 ? new KeyValuePair<Literal, int>[0]
                 : dtriples_sp.Root.ElementValues((long)diapason[0], (long)diapason[1])
                     .Cast<object[]>()
-                    .Select(row => new KeyValuePair<Literal, int>(literalStore.Read((long)row[1], PredicatesCoding.LiteralVid[(int)row[0]]), (int)row[0])).ToArray();
+                    .Select(row => new KeyValuePair<Literal, int>(LiteralStore.Read((long)row[1], PredicatesCoding.LiteralVid[(int)row[0]]), (int)row[0])).ToArray();
         }
 
 
@@ -831,11 +828,11 @@ namespace TrueRdfViewer
                     int s_count = objDiapasons[0];
 
 
-                    //Р•СЃР»Рё С‚СЂРёРїР»РµС‚С‹ РЅСѓР¶РЅРѕ РІРѕР·СЂР°С‰Р°С‚СЊ РІ РїРѕСЂСЏРґРєРµ РІРѕР·СЂР°СЃС‚Р°РЅРёСЏ СЃСѓР±СЉРµРєС‚Р°  (Рё РїСЂРµРґРёРєР°С‚Р°), С‚Рѕ РЅСѓР¶РЅРѕ Р·Р°РїРѕР»РЅРёС‚СЊ РјР°СЃСЃРёРІ Рё Р·Р°С‚РµРј РІРѕР·СЂР°Р·С‰Р°С‚СЊ РїР°СЂС‹ СЃРїРёСЃРєРѕРІ РѕР±СЉРµРєС‚РЅС‹С… Рё Р»РёС‚РµСЂР°Р»РѕРІ (СЃРѕРµРґРёРЅРёС‚СЊ Рё РѕС‚СЃРѕСЂС‚РёСЂРѕРІР°С‚СЊ РїРѕ РїСЂРµРґРёРєР°С‚Сѓ)
+                    //Если триплеты нужно возращать в порядке возрастания субъекта  (и предиката), то нужно заполнить массив и затем возразщать пары списков объектных и литералов (соединить и отсортировать по предикату)
                     //List<KeyValuePair<int, int>>[] opLists = new List<KeyValuePair<int, int>>[bufferTripletsMax];
                     if (!otriples.IsEmpty && otriples.Root.Count() != 0)
                         foreach (object[] pred_obj in otriples.Root.ElementValues(objTrippletsBufferStart, objTrippletsBufferCount)
-                            //С‡С‚Рѕ Р±С‹ С‡С‚РµРЅРёРµ РЅРµ РїСЂРѕРІРѕРґРёР»РѕСЃСЊ РїР°СЂР°Р»РµР»Р»СЊРЅРѕ СЃ РґРµРєРѕРґРёСЂРѕРІР°РЅРёРµРј
+                            //что бы чтение не проводилось паралелльно с декодированием
                             .ToArray())
                         {
                             if (s_count-- == 0)
@@ -848,7 +845,7 @@ namespace TrueRdfViewer
                         }
                     if (!dataCell.IsEmpty && dataCell.Root.Count() > 0)
                     {
-                        //Р±СѓС„РµСЂ dtriples_sp Р·Р°РїРёСЃС‹РІР°РµС‚СЃСЏ РІ РјР°СЃСЃРёРІ, С‡С‚Рѕ Р±С‹ РЅРµ РїСЂС‹РіР°С‚СЊ РїРѕ РѕС„СЃРµС‚Р°Рј Рє Р»РёС‚РµСЂР°Р»Р°Рј
+                        //буфер dtriples_sp записывается в массив, что бы не прыгать по офсетам к литералам
                         var predicateLiteralsOfsset =
                             dtriples_sp.Root.ElementValues(literalsTrippletsBufferStart, literalsTrippletsBufferCount)
                                 .Cast<object[]>()
@@ -857,7 +854,7 @@ namespace TrueRdfViewer
                         s = kod - index_in_buffer;
                         s_local_index = 0;
                         s_count = objDiapasons[0];
-                        //РєРѕРіРґР° Р±СѓС‹С„С„РµСЂ dtriples_sp СЃС‡РёС‚Р°РЅ, С‡РёС‚Р°СЋС‚СЃСЏ Р»РёС‚РµСЂР°Р»С‹. С‚СѓС‚ РїСЂРёРґС‘С‚СЃСЏ РїРѕРїСЂС‹РіР°С‚СЊ.
+                        //когда буыффер dtriples_sp считан, читаются литералы. тут придётся попрыгать.
                         for (int j = 0; j < literalsTrippletsBufferCount; j++)
                         {
                             if (s_count-- == 0)
@@ -894,7 +891,7 @@ namespace TrueRdfViewer
         public IEnumerable<Tuple<string, string, string>> DecodeTriplets(IEnumerable<TripleInt> triplets)
         {
             var enumerator = triplets.GetEnumerator();
-            //TODO РїРµСЂРµРґРµР»Р°С‚СЊ
+            //TODO переделать
             Dictionary<int, string> predicatesCodes = new Dictionary<int, string>();
             for (int i = 0; i < predicatesCodes.Count; i++)
                 predicatesCodes.Add(i, DecodePredicateFullName(i));
@@ -934,7 +931,7 @@ namespace TrueRdfViewer
             DateTime tt0 = DateTime.Now;
             EntitiesMemoryHashTable hashTable = new EntitiesMemoryHashTable(ewt);
             hashTable.Load();
-            // РџСЂРѕРІРµСЂРєР° РїРѕСЃС‚СЂРѕРµРЅРЅРѕР№ ewt
+            // Проверка построенной ewt
             Console.WriteLine("n_entities={0}", this.ewt.EWTable.Root.Count());
             bool notfirst = false;
             int code = Int32.MinValue;
@@ -942,11 +939,11 @@ namespace TrueRdfViewer
             foreach (object[] row in ewt.EWTable.Root.ElementValues())
             {
                 int cd = (int)row[0];
-                // РџСЂРѕРІРµСЂРєР° РЅР° РІРѕР·СЂР°СЃС‚Р°РЅРёРµ Р·РЅР°С‡РµРЅРёР№ РєРѕРґР°
+                // Проверка на возрастание значений кода
                 if (notfirst && cd <= code) { Console.WriteLine("ERROR!"); }
                 code = cd;
                 notfirst = true;
-                // РџСЂРѕРІРµСЂРєР° РЅР° С‚Рѕ, С‡С‚Рѕ РєРѕРґС‹ РІ РґРёР°РїР°Р·РѕРЅР°С… РёРЅРґРµРєСЃРѕРІ СЃРѕРІРїР°РґР°СЋС‚ СЃ cd. РџРѕРґСЃС‡РёС‚С‹РІР°РµС‚СЃСЏ РєРѕР»РёС‡РµСЃС‚РІРѕ
+                // Проверка на то, что коды в диапазонах индексов совпадают с cd. Подсчитывается количество
                 object[] odia = (object[])row[1];
                 long start = (long)odia[0];
                 long number = (long)odia[1];
@@ -958,14 +955,14 @@ namespace TrueRdfViewer
                 cnt_otriples += number;
             }
             if (cnt_otriples != otriples.Root.Count()) Console.WriteLine("ERROR3! cnt_triples={0} otriples.Root.Count()={1}", cnt_otriples, otriples.Root.Count());
-            Console.WriteLine("РџСЂРѕРІРµСЂРєР° ewt OK. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            Console.WriteLine("Проверка ewt OK. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
         }
 
         public DateTime TestsOfMethods(string[] ids, TripleStoreInt ts)
         {
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             DateTime tt0 = DateTime.Now;
-            // ======================= РЎСЂР°РІРЅРµРЅРёРµ Р±РёРЅР°СЂРЅРѕРіРѕ РїРѕРёСЃРєР° СЃ РІС‹С‡РёСЃР»РµРЅРёРµРј РґРёР°РїР°Р·РѕРЅР° =============
+            // ======================= Сравнение бинарного поиска с вычислением диапазона =============
             int pf19 = ids[5].GetHashCode();
             List<long> trace = new List<long>();
             int counter=0;
@@ -1033,7 +1030,7 @@ namespace TrueRdfViewer
             Console.Write("Test of series: ");
             Console.WriteLine("swduration={0}", sw.ElapsedTicks); tt0 = DateTime.Now;
 
-            // ============ РљРѕРЅРµС† СЃСЂР°РІРЅРµРЅРёСЏ ================
+            // ============ Конец сравнения ================
             return tt0;
         }
     }

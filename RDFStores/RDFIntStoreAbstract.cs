@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using LiteralStores;
 using NameTable;
+using ScaleBit4Check;
+using TripleIntClasses;
 
-namespace TripleIntClasses
+namespace RDFStores
 {
     public abstract class RDFIntStoreAbstract
     {
@@ -10,24 +13,29 @@ namespace TripleIntClasses
         private readonly IStringIntCoding entityCoding;
         private readonly NameSpaceStore nameSpaceStore;
         private readonly PredicatesCoding predicatesCoding;
+        private readonly ScaleCell scale ;
+        
         protected string path;
 
-        protected RDFIntStoreAbstract(string path, IStringIntCoding entityCoding, PredicatesCoding predicatesCoding, NameSpaceStore nameSpaceStore, LiteralStoreAbstract literalStore)
+        protected RDFIntStoreAbstract(string path, IStringIntCoding entityCoding, PredicatesCoding predicatesCoding,
+            NameSpaceStore nameSpaceStore, LiteralStoreAbstract literalStore)
+            :this(entityCoding,predicatesCoding,nameSpaceStore,literalStore, new ScaleCell(path))
         {
             // TODO: Complete member initialization
             this.path = path;
-            this.literalStore = literalStore;
-            this.entityCoding = entityCoding;
-            this.nameSpaceStore = nameSpaceStore;
-            this.predicatesCoding = predicatesCoding;
+
         }
 
-        protected RDFIntStoreAbstract(IStringIntCoding entityCoding, PredicatesCoding predicatesCoding, NameSpaceStore nameSpaceStore, LiteralStoreAbstract literalStore)
+        protected RDFIntStoreAbstract(IStringIntCoding entityCoding, PredicatesCoding predicatesCoding, NameSpaceStore nameSpaceStore, LiteralStoreAbstract literalStore,
+            ScaleCell scale)
         {
             this.literalStore = literalStore;
             this.entityCoding = entityCoding;
             this.nameSpaceStore = nameSpaceStore;
             this.predicatesCoding = predicatesCoding;
+            this.scale = scale;
+            if (!scale.Cell.IsEmpty)
+                scale.CalculateRange();
         }
 
         public virtual NameSpaceStore NameSpaceStore
@@ -50,6 +58,11 @@ namespace TripleIntClasses
             get { return literalStore; }
         }
 
+        public virtual ScaleCell Scale
+        {
+            get { return scale; }
+        }
+
         public abstract void InitTypes();
 
         public virtual void WarmUp()
@@ -58,7 +71,28 @@ namespace TripleIntClasses
             LiteralStore.WarmUp();
             EntityCoding.WarmUp();
             PredicatesCoding.WarmUp();
-        //    NameSpaceStore.WarmUp();
+            if (Scale.Filescale)   
+            Scale.WarmUp();
+            //    NameSpaceStore.WarmUp();
+        }  
+        public virtual void Clear()
+        {
+            LiteralStore.Clear();
+            EntityCoding.Clear();
+            PredicatesCoding.Clear();
+            NameSpaceStore.Clear();
+            LiteralStore.InitConstants(NameSpaceStore);
+            Scale.Clear();
+        }
+
+        public virtual void MakeIndexed()
+        {
+            EntityCoding.MakeIndexed();
+            PredicatesCoding.MakeIndexed();
+            NameSpaceStore.Flush();
+            Scale.Flush();
+
+            LiteralStore.Flush();
         }
         public abstract void LoadTurtle(string filepath, bool useBuffer=true);
         public abstract IEnumerable<int> GetSubjectByObjPred(int obj, int pred);
@@ -71,23 +105,7 @@ namespace TripleIntClasses
         public abstract IEnumerable<KeyValuePair<Int32, Int32>> GetObjBySubj(int subj);
         public abstract IEnumerable<KeyValuePair<Literal, int>> GetDataBySubj(int subj);
 
-        public virtual void Clear()
-        {
-                       LiteralStore.Clear();
-            EntityCoding.Clear();
-            PredicatesCoding.Clear();
-            NameSpaceStore.Clear();
-            LiteralStore.InitConstants(NameSpaceStore);
-        }
-
-        public virtual void MakeIndexed()
-        {
-            EntityCoding.MakeIndexed();
-            PredicatesCoding.MakeIndexed();
-            NameSpaceStore.Flush();
-            Console.WriteLine("writed namespaces ");
-            LiteralStore.Flush();
-        }
+      
 
         public string DecodeEntityFullName(int code)
         {
@@ -112,7 +130,7 @@ namespace TripleIntClasses
         public int CodePredicateFullOrShort(string name)
         {
             return PredicatesCoding.GetCode(NameSpaceStore.GetShortFromFullOrPrefixed(name));
-        }
-
+        }     
+     
     }
 }

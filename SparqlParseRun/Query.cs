@@ -5,10 +5,10 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using Antlr4.Runtime;
+using RDFStores;
 using Sharpen;
 using SparqlParser;
 using TripleIntClasses;
-using TrueRdfViewer;
 
 namespace SparqlParseRun
 {

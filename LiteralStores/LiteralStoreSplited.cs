@@ -1,9 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
 using PolarDB;
+using TripleIntClasses;
 
-namespace TripleIntClasses
+namespace LiteralStores
 {
     public class LiteralStoreSplited : LiteralStoreAbstract
     {

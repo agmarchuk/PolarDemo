@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using TripleIntClasses;
-using TrueRdfViewer;
 
 namespace SparqlParseRun
 {
