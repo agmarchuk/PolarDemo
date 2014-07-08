@@ -1,14 +1,18 @@
-﻿using PolarDB;
-using ScaleBit4Check;
-using TrueRdfViewer;
+﻿using System.Collections.Generic;
+using System.IO;
+using LiteralStores;
+using NameTable;
+using PolarDB;
+using RDFStores;      
+using TripleIntClasses;
 
 
-namespace RdfTrees
+namespace RdfTreesNamespace
 {
     /// <summary>
     /// Класс, представляющий собой хранилище триплетов, его методов, способ загрузки данных и формирования структуры
     /// </summary>
-    public partial class RdfTrees     :TripleStoreInt
+    public partial class RdfTrees     :RDFIntStoreAbstract
     {
         // Типы
         private PType tp_entitiesTree;
@@ -24,29 +28,37 @@ namespace RdfTrees
         private PxCell entitiesTree;
         //private PxCell literalsTree;
        // private PaCell dtriples;
-        // Место для базы данных
-        private string path;
-        private ScaleCell scale;
+        // Место для базы данных  
+
         private string entitiesTreePath;
+        private PaCell otriples;
+
         /// <summary>
         /// Конструктор
         /// </summary>
         /// <param name="path">директория базы данных с (обратным) слешем</param>
-        public RdfTrees(string path) 
-        {
-            this.path = path;
+        /// <param name="literalStore"></param>
+        /// <param name="entityCoding"></param>
+        /// <param name="nameSpaceStore"></param>
+        /// <param name="predicatesCoding"></param>
+        public RdfTrees(string path, IStringIntCoding entityCoding, PredicatesCoding predicatesCoding, NameSpaceStore nameSpaceStore, LiteralStoreAbstract literalStore)
+            : base(path, entityCoding, predicatesCoding, nameSpaceStore, literalStore)
+        {             
             // Построим типы
             InitTypes();
             // Создадим или откроем ячейки
             this.entitiesTree = new PxCell(tp_entitiesTree, entitiesTreePath = path + "entitiesTree.pxc", false);
             //this.literalsTree = new PxCell(tp_literalsTree, path + "literalsTree.pxc", false);
           //  this.dtriples = new PaCell(tp_dtriple_spf, path + "dtriples.pac", false); // Это вместо не работающего дерева литералов       }
-            scale=new ScaleCell(path);
-            if (!scale.Filescale) scale.CreateScale(otriples);
-            LiteralStore.DataCellPath = path;        
+      
+            
+                otriples = new PaCell(tp_otriple_seq, path + "otriples.pac", File.Exists(path + "otriples.pac"));
+
+                otriples.Close();
+                
         }
         // Построение типов
-        private void InitTypes()
+        public override void InitTypes()
         {
             this.tp_entitiesTree = new PTypeSequence(new PTypeRecord(
                 new NamedType("id", new PType(PTypeEnumeration.integer)),
@@ -80,12 +92,13 @@ namespace RdfTrees
                 new NamedType("offset", new PType(PTypeEnumeration.longinteger))));
         }
         // Разогрев
-        public override void WarmUp()
+
+
+        public override IEnumerable<int> GetSubjectByDataPred(int p, Literal d)
         {
-            //entitiesTree.Flush();
-            //object ob = entitiesTree.Root.Get();
-            //foreach (var v in dtriples.Root.ElementValues()) ;
+            throw new System.NotImplementedException();
         }
+
         // Генерация литерала из объектного представления, соответствующего tp_literal 
         //public static Literal GenerateLiteral(object pobj)
         //{

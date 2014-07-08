@@ -31,7 +31,7 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
         private bool? openMode;
         private readonly Dictionary<long, int> offsetsByMd5Cache = new Dictionary<long, int>();
         private static Dictionary<string, IStringIntCoding> Opend=new Dictionary<string, IStringIntCoding>();
-        PaEntry ncEntry;
+      
 
         public StringIntMD5RAMCoding(string path)
         {
@@ -54,7 +54,7 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
             Count = Convert.ToInt32( c_index.Root.Count());
             Opend.Add(path, this);
             ReadOffsetsByMd5Cache();
-            ncEntry = nc_cell.Root.Element(0);
+           
         }
 
         private void ReadOffsetsByMd5Cache()
@@ -74,6 +74,11 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
             foreach (var q in nc_cell.Root.ElementValues()) ;
             foreach (var q in c_index.Root.ElementValues()) ;
             foreach (var q in md5_index.Root.ElementValues()) ;
+        }
+
+        public int InsertOne(string entity)
+        {
+            throw new NotImplementedException();
         }
 
         public void Open(bool readonlyMode)
@@ -131,7 +136,7 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
                  int index;
            if(!offsetsByMd5Cache.TryGetValue(newD5, out index)) return Int32.MinValue;
             
-         
+            var ncEntry = nc_cell.Root.Element(0);
             for (;;index++)
             {
                 var md5_offet=(object[])md5_index.Root.Element(index).Get();

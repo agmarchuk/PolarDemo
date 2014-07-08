@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Xml.Linq;
+using LiteralStores;
+using NameTable;
 using TripleIntClasses;
 
 
-namespace RdfTrees
+namespace RdfTreesNamespace
 {
     public class Program
     {
@@ -14,7 +16,8 @@ namespace RdfTrees
 
             string path = @"..\..\..\Databases\";
             Console.WriteLine("Start RdfTrees");
-            RdfTrees rtrees = new RdfTrees(path);
+            NameSpaceStore nameSpaceStore = new NameSpaceStore(path);
+            RdfTrees rtrees = new RdfTrees(path, new StringIntMD5RAMCollision(path), new PredicatesCoding(path), nameSpaceStore,   new LiteralStoreSplited(path, nameSpaceStore));
             
             rtrees.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset1M.ttl");
             return;
@@ -78,7 +81,7 @@ namespace RdfTrees
                 }
                 
             }
-            Console.WriteLine("Equal {0} Not equal {1} debug counter {2}", ecnt, ncnt, rtrees.debug_counter);
+         //   Console.WriteLine("Equal {0} Not equal {1} debug counter {2}", ecnt, ncnt, rtrees.debug_counter);
             Console.WriteLine("TOTAL: {0} мс.", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
         }
     }

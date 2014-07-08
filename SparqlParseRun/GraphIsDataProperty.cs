@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ANTLR_Test.Annotations;
 using TripleIntClasses;
 
-
-namespace SparqlParser
+namespace SparqlParseRun
 {
     public class GraphIsDataProperty
     {
@@ -14,7 +12,7 @@ namespace SparqlParser
         internal bool? IsData { get; set; }
         internal LiteralVidEnumeration vid;
 
-        private static void Connect([NotNull] GraphIsDataProperty g1, [NotNull] GraphIsDataProperty g2)
+        private static void Connect( GraphIsDataProperty g1, GraphIsDataProperty g2)
         {
             if (g1.connected == null)
                 if (g2.connected == null)
@@ -100,7 +98,7 @@ namespace SparqlParser
             foreach (var node in connected)
                 node.IsData = isData;
         }
-        internal static void Sync([NotNull] GraphIsDataProperty oGraph, [NotNull] GraphIsDataProperty pGraph)
+        internal static void Sync(GraphIsDataProperty oGraph, GraphIsDataProperty pGraph)
         {
             if (oGraph.IsData != null)
                 if (pGraph.IsData != null)

@@ -34,9 +34,14 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DiapasonScanner.cs" />
+    <Compile Include="DiapLinksScanner.cs" />
     <Compile Include="DTripleInt.cs" />
+    <Compile Include="EntitiesMemoryHashTable.cs" />
+    <Compile Include="EntitiesWideTable.cs" />
+    <Compile Include="FlexIndexView.cs" />
     <Compile Include="Literal.cs" />
-    <Compile Include="LiteralStore.cs" />
+    <Compile Include="LiteralVidEnumeration.cs" />
     <Compile Include="OTripleInt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SPComparer.cs" />
@@ -46,17 +51,12 @@
     <Compile Include="Text.cs" />
     <Compile Include="TripleInt.cs" />
     <Compile Include="TripletGraph.cs" />
-    <Compile Include="TurtleInt.cs" />
     <Compile Include="TypedObject.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\PolarDB\PolarDB.csproj">
       <Project>{907bb4af-fbc9-4a1e-8f80-194af9337aa4}</Project>
       <Name>PolarDB</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\NameTable\NameTable.csproj">
-      <Project>{5283693d-68cc-4b7a-b2bb-6e901592a272}</Project>
-      <Name>NameTable</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

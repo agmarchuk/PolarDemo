@@ -46,20 +46,13 @@
   <ItemGroup>
     <Compile Include="allproducts.cs" />
     <Compile Include="BerlinTestsInt.cs" />
-    <Compile Include="DiapasonScanner.cs" />
-    <Compile Include="DiapLinksScanner.cs" />
-    <Compile Include="EntitiesMemoryHashTable.cs" />
-    <Compile Include="EntitiesWideTable.cs" />
-    <Compile Include="FlexIndexView.cs" />
     <Compile Include="GroupedEntities.cs" />
     <Compile Include="OValRowInt.cs" />
     <Compile Include="ONames.cs" />
     <Compile Include="PaKeyValueTable.cs" />
     <Compile Include="ProgramInt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RPackInt.cs" />
-    <Compile Include="Tracing.cs" />
-    <Compile Include="TripleStoreInt.cs" />
+    <Compile Include="RPackExtentionInt.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Description.txt" />
@@ -69,13 +62,25 @@
       <Project>{907bb4af-fbc9-4a1e-8f80-194af9337aa4}</Project>
       <Name>PolarDB</Name>
     </ProjectReference>
+    <ProjectReference Include="..\LiteralStores\LiteralStores.csproj">
+      <Project>{722b7468-aeda-4b30-a600-cf7314594720}</Project>
+      <Name>LiteralStores</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NameTable\NameTable.csproj">
       <Project>{5283693d-68cc-4b7a-b2bb-6e901592a272}</Project>
       <Name>NameTable</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RDFStores\RDFStores.csproj">
+      <Project>{d7c13bce-098b-42d5-b37d-7187a858a85a}</Project>
+      <Name>RDFStores</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ScaleBit4Check\ScaleBit4Check.csproj">
       <Project>{7860cd10-44ef-4300-8872-8ebef9f122e8}</Project>
       <Name>ScaleBit4Check</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SparqlParseRun\SparqlParseRun.csproj">
+      <Project>{ae8cbedb-a66e-4705-953e-c16793426e89}</Project>
+      <Name>SparqlParseRun</Name>
     </ProjectReference>
     <ProjectReference Include="..\TripleInt\TripleIntClasses.csproj">
       <Project>{4b88e673-1272-46cf-817c-ac76111dac46}</Project>

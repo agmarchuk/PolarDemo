@@ -123,6 +123,22 @@ namespace ScaleBit4Check
             }
         }
 
-        public PaCell cecll { get; set; }
+       
+
+        public void WarmUp()
+        {
+            foreach (var elementValue in this.Cell.Root.ElementValues()) ;
+        }
+
+        public void Clear()
+        {
+                      Cell.Clear();
+            Cell.Fill(new object[0]);
+        }
+
+        public void Flush()
+        {
+            Cell.Flush();
+        }
     }
 }

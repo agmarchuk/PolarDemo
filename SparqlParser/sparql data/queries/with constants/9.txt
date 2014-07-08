@@ -16,6 +16,6 @@ http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite1/Rev
 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite1/Review14 http://purl.org/stuff/rev#reviewer http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite1/Reviewer1
 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite1/Review15 http://purl.org/stuff/rev#reviewer http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite1/Reviewer1
 http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite1/Review4 http://purl.org/stuff/rev#reviewer http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite1/Reviewer1
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite1/Reviewer1 http://purl.org/dc/elements/1.1/date 633561696000000000
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite1/Reviewer1 http://xmlns.com/foaf/0.1/name "Ruggiero-Delane"
-http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite1/Reviewer1 http://xmlns.com/foaf/0.1/mbox_sha1sum "fb3efd92e3c7a8d775a895ba476e11a3e8f3fac"
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite1/Reviewer1 http://purl.org/dc/elements/1.1/date 09/05/2008 00:00:00
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite1/Reviewer1 http://xmlns.com/foaf/0.1/name Ruggiero-Delane
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite1/Reviewer1 http://xmlns.com/foaf/0.1/mbox_sha1sum fb3efd92e3c7a8d775a895ba476e11a3e8f3fac

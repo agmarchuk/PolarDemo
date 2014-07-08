@@ -4,20 +4,14 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
+using Antlr4.Runtime;
+using RDFStores;
 using Sharpen;
+using SparqlParser;
 using TripleIntClasses;
-using TrueRdfViewer;
 
-namespace SparqlParser
+namespace SparqlParseRun
 {
-    public class Variable
-    {                  
-        public bool isNew;
-        public short index;
-        public object pacElement;
-        public GraphIsDataProperty graph;
-        public bool isPredicate;
-    }
     public class Query
     {                   
         internal Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> Where;
@@ -36,23 +30,24 @@ namespace SparqlParser
 
         #region Run
 
-        public string Run(TripleStoreInt ts)
+        public string Run()
         {
+           
             if (AsqRun != null) return AsqRun(ts).ToString();
             if (SelectRun != null)
-                return string.Join(Environment.NewLine, SelectRun(ts).Select(spo => string.Join(", ", spo)));
+                return String.Join(Environment.NewLine, SelectRun().Select(spo => String.Join(", ", spo)));
             if (DescribeRun != null)
-                return string.Join(Environment.NewLine, DescribeRun(ts).Select(spo => string.Join(" ", spo)));
+                return String.Join(Environment.NewLine, DescribeRun().Select(spo => String.Join(" ", spo)));
             if (ConstructRun != null)
-                return string.Join(Environment.NewLine, ConstructRun(ts).Select(spo => string.Join(" ", spo)));
+                return String.Join(Environment.NewLine, ConstructRun().Select(spo => String.Join(" ", spo)));
             throw new Exception();
         }
 
-        public Func<TripleStoreInt, IEnumerable<IEnumerable<object>>> SelectRun;
+        public Func<IEnumerable<IEnumerable<object>>> SelectRun;
 
         internal void CreateSelectRun()
         {
-            SelectRun = ts =>
+            SelectRun = ()=>
             {
                 var row = new object[Variables.Count];
 
@@ -83,16 +78,16 @@ namespace SparqlParser
             };
         }
 
-        private static IEnumerable<RPackInt> Repeat(object[] row, TripleStoreInt ts)
+        private static IEnumerable<RPackInt> Repeat(object[] row, RDFIntStoreAbstract ts)
         {                                    
            yield return new RPackInt(row, ts);
         }
 
-        public Func<TripleStoreInt, IEnumerable<IEnumerable<string>>> DescribeRun;
+        public Func<IEnumerable<IEnumerable<string>>> DescribeRun;
 
         internal void CreateDescribeRun()
         {
-            DescribeRun = ts =>
+            DescribeRun = () =>
             {
                 var result = Where != null
                     ? Where(Enumerable.Repeat(new RPackInt(Variables.Values.Select(variable => variable.pacElement).ToArray(), ts), 1))
@@ -105,8 +100,7 @@ namespace SparqlParser
                 else
                     try
                     {
-                        describeObjects =
-                            variables.Select(s => Variables[s].index).SelectMany(i => result.Select(pack => (int)pack[i]));
+                        describeObjects = variables.Select(s => Variables[s].index).SelectMany(i => result.Select(pack => (int)pack[i]));
                     }
                     catch (KeyNotFoundException e)
                     {
@@ -145,27 +139,27 @@ namespace SparqlParser
             };
         }
 
-        private static string GetNameEntity(object o)
+        private string GetNameEntity(object o)
         {
             string name;
             if (!decodesCasheEntities.TryGetValue((int) o, out name))
-                decodesCasheEntities.Add((int) o, name = TripleInt.DecodeEntities((int) o));
+                decodesCasheEntities.Add((int) o, name = ts.DecodeEntityFullName((int) o));
             return name;
         }
-        private static string GetNamePredicate(object o)
+        private string GetNamePredicate(object o)
         {
             string name;
             if (!decodesCashePredicates.TryGetValue((int)o, out name))
-                decodesCashePredicates.Add((int)o, name = TripleInt.DecodePredicates((int)o));
+                decodesCashePredicates.Add((int)o, name = ts.DecodePredicateFullName((int)o));
             return name;
         }
 
 
-        public Func<TripleStoreInt, IEnumerable<IEnumerable<object>>> ConstructRun;
+        public Func<IEnumerable<IEnumerable<object>>> ConstructRun;
 
         internal void CreateConstructRun()
         {
-            ConstructRun = ts =>
+            ConstructRun = () =>
             {
                 IEnumerable<RPackInt> result = Where != null
                     ? Where(Enumerable.Repeat(new RPackInt(Variables.Values.Select(variable => variable.pacElement).ToArray(), ts), 1))
@@ -177,16 +171,35 @@ namespace SparqlParser
                 var constructResultSequences = constructResult.Select(tuple => new object[] { tuple.Item1, tuple.Item2, tuple.Item3 });
                 if (solutionModifierCount != null)
                     constructResultSequences = solutionModifierCount(constructResultSequences);
-                return constructResultSequences;
+                return constructResultSequences.Select(
+                        triplet =>
+                        {
+                            var o = triplet[2];
+                            return new[]
+                            {
+                                ts.NameSpaceStore.DecodeNsShortName((string) triplet[0]), ts.NameSpaceStore.DecodeNsShortName((string) triplet[1]),
+                                o is Int32
+                                    ? GetNameEntity(o)
+                                    : o != null ? o.ToString() : ""
+
+                            };
+
+                        }); ;
             };
         }
 
-        public Func<TripleStoreInt, bool> AsqRun;
+        public Func<RDFIntStoreAbstract, bool> AsqRun;
         internal Func<RPackInt, IEnumerable<Tuple<string, string, string>>> constructTemplate;
 
         internal readonly List<Func<RPackInt, IEnumerable<Tuple<string, string, string>>>> constructTriples = new List<Func<RPackInt, IEnumerable<Tuple<string, string, string>>>>();
         public static readonly Dictionary<int, string> decodesCasheEntities = new Dictionary<int, string>();
         public static readonly Dictionary<int, string> decodesCashePredicates = new Dictionary<int, string>();
+        public RDFIntStoreAbstract ts;
+
+        public Query(RDFIntStoreAbstract ts)
+        {
+            this.ts = ts;
+        }
 
         internal void CreateAsqRun()
         {
@@ -227,7 +240,7 @@ namespace SparqlParser
 
         }
         
-        internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> CreateTriplet(Variable s, Variable p, Variable o, Literal d)
+        internal Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> CreateTriplet(Variable s, Variable p, Variable o, Literal d)
         {   
            GraphIsDataProperty.Sync(o.graph, p.graph);
             var triplet = s.isNew
@@ -346,9 +359,9 @@ namespace SparqlParser
             return varExpression;
         }
 
-        internal static Expression Call(string name, IEnumerable<Expression> args)
+        internal Expression Call(string name, IEnumerable<Expression> args)
         {   
-            if (name == @"http://www.w3.org/2001/XMLSchema#double")
+            if (name == ts.LiteralStore.@double)
                 return Expression.Call(typeof(double).GetMethod("Parse", new[] { typeof(string), typeof(NumberStyles), typeof(CultureInfo) }), args.First(), Expression.Constant(NumberStyles.Any), Expression.Constant(new CultureInfo("en-us")));
             throw new NotImplementedException("mathod call " + name);
         }
@@ -418,16 +431,6 @@ namespace SparqlParser
 
 
                      
-        //internal string ReplaceNamespacePrefix(string value)
-        //{
-
-        //    var nsO = value.Split(':');
-        //    string nsUri;
-        //    if (!prefixes.TryGetValue(nsO[0].Trim(), out nsUri))
-        //        throw new Exception("неизвестное пространство имён " + nsO[0]);
-        //    return nsUri + nsO[1].Trim();
-        //}
-
         internal static Expression BinaryCompareExpression(ExpressionType typeBinExp, Expression expressionLeft, Expression expressionRight)
         {   
             if (expressionLeft.Type == typeof (bool))
@@ -499,7 +502,7 @@ namespace SparqlParser
             return  SetVariableByType(varExpression, variable, forceType);   
         }
 
-        internal static Expression SetVariableByType(Expression expressionUnknown, Variable variableUnknown, Type type)
+        private static Expression SetVariableByType(Expression expressionUnknown, Variable variableUnknown, Type type)
         {
             if (expressionUnknown.Type == type) return expressionUnknown;
             if (type == typeof(int))
@@ -557,7 +560,7 @@ namespace SparqlParser
             {
                 case LiteralVidEnumeration.integer:
                     return Expression.NotEqual(Expression.Call(currentFilterParameter, typeof(RPackInt).GetMethod("Vai"),
-                        Expression.Constant(variable.index)), Expression.Constant(double.MinValue));
+                        Expression.Constant(variable.index)), Expression.Constant(Double.MinValue));
                 case LiteralVidEnumeration.date:
                     return Expression.NotEqual(Expression.ConvertChecked(
                         Expression.Call(currentFilterParameter, typeof(RPackInt).GetMethod("Val"), Expression.Constant(variable.index)),
@@ -572,7 +575,7 @@ namespace SparqlParser
                     return Expression.NotEqual(Expression.Property(Expression.Convert(Expression.Property(
                         Expression.ConvertChecked(
                             Expression.Call(currentFilterParameter,  typeof(RPackInt).GetMethod("Val"),  Expression.Constant(variable.index)),
-                            typeof (Literal)), "Value"), typeof(Text)),"Value"), Expression.Constant(string.Empty));
+                            typeof (Literal)), "Value"), typeof(Text)),"Value"), Expression.Constant(String.Empty));
                 default:
                     throw new ArgumentOutOfRangeException();
             }   
@@ -592,10 +595,10 @@ namespace SparqlParser
         internal Expression Langmatch(Expression expression, Variable variableLeft)
         {
             if(variableLeft==null)
-                          return Expression.NotEqual(expression, Expression.Constant(string.Empty));
+                          return Expression.NotEqual(expression, Expression.Constant(String.Empty));
             if (variableLeft.graph.IsData == null)
                 variableLeft.graph.Set(LiteralVidEnumeration.text);
-            return Expression.NotEqual(Parameter(variableLeft), Expression.Constant(string.Empty));
+            return Expression.NotEqual(Parameter(variableLeft), Expression.Constant(String.Empty));
 
         }
 
@@ -618,6 +621,19 @@ namespace SparqlParser
                          "Value"),
                                typeof(Text)),
                    "Lang");
+        }
+      
+
+        public void Parse(string te, RDFIntStoreAbstract ts)
+        {
+            ICharStream input = new AntlrInputStream(te);
+
+            var lexer = new sparql2PacNSLexer(input);
+
+            var commonTokenStream = new CommonTokenStream(lexer);
+            var sparqlParser = new sparql2PacNSParser(commonTokenStream) {q = this};
+            sparqlParser.query();       
+          
         }
         public static double Convert(object literal)
         {

@@ -122,6 +122,11 @@ namespace NameTable
             foreach (var q in md5_index.Root.ElementValues()) ;
         }
 
+        public int InsertOne(string entity)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Open(bool readonlyMode)
         {
             if (openMode == readonlyMode) return;

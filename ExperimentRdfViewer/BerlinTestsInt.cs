@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using SparqlParseRun;
 using TripleIntClasses;
 
 namespace TrueRdfViewer
@@ -11,14 +12,16 @@ namespace TrueRdfViewer
         public static string dc = "http://purl.org/dc/elements/1.1/";
         public static string bsbm = "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/";
         public static string bsbm_inst = "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/";
+        
         //TODO repase E to EP
-        private static int E(string so) { return TripleInt.CodeEntities(so); }
-        private static int EP(string p) { return TripleInt.CodePredicates(p); }
+        private static int E(string so) { return _ts.EntityCoding.GetCode(so); }
+        private static int EP(string p) { return _ts.PredicatesCoding.GetCode(p); }
         private static OVal rdftype = new OVal() { vid = OValEnumeration.obj, entity = EP(rdf + "type") };
         private static OVal rdfslabel = new OVal() { vid = OValEnumeration.obj, entity = EP(rdfs + "label") };
 
         public static IEnumerable<OValRowInt> Berlin1(TripleStoreInt ts)
         {
+            _ts = ts;
             short _product = 0, _bsbm_productFeature = 1, _bsbm_inst_ProductFeature19 = 2, _bsbm_inst_ProductFeature8 = 3;
             short _rdftype = 4, _bsbm_inst_ProductType1 = 5, _bsbm_ProductPropertyNumeric1 = 6;
             short _value1 = 7, _label = 8, _rdfslabel = 9;
@@ -427,7 +430,8 @@ namespace TrueRdfViewer
 "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer61/Product2801", 
 "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer61/Product2821", 
 "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer61/Product2841", 
-}; 
+};
 
+        private static TripleStoreInt _ts;
     }
 }

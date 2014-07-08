@@ -61,6 +61,11 @@ new PTypeRecord(new NamedType("check sum", new PType(PTypeEnumeration.longintege
             foreach (var q in c_index.Root.ElementValues()) ;
         }
 
+        public int InsertOne(string entity)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Open(bool readonlyMode)
         {
             if (openMode == null)

@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using TripleIntClasses;
-using TrueRdfViewer;
 
-
-namespace SparqlParser
+namespace SparqlParseRun
 {
     public static class RPackComplexExtensionInt
     {
@@ -74,32 +72,32 @@ namespace SparqlParser
 
         public static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> spo(object subj, object pred, object obj)
         {
-            return pacs => pacs.Where(pk => pk.Store.ChkOSubjPredObj(pk.GetE(subj), pk.GetE(pred), pk.GetE(obj)));
+            return pacs => pacs.Where(pk => pk.StoreAbstract.ChkOSubjPredObj(pk.GetE(subj), pk.GetE(pred), pk.GetE(obj)));
         }
 
         public static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> spd(object subj, object pred, Literal d)
         {
-            return pacs => pacs.Where(pk => pk.Store.GetDataBySubjPred(pk.GetE(subj), pk.GetE(pred)).Any(d1=>d1.Equals(d)));
+            return pacs => pacs.Where(pk => pk.StoreAbstract.GetDataBySubjPred(pk.GetE(subj), pk.GetE(pred)).Any(d1=>d1.Equals(d)));
         }
 
         internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> spO(object sEntityCode, object pEntityCode, short obj)
         {
-            return pack => pack.SelectMany(pk => pk.Store
+            return pack => pack.SelectMany(pk => pk.StoreAbstract
                 .GetObjBySubjPred(pk.GetE(sEntityCode), pk.GetE(pEntityCode))
                 .Select(ob =>
                 {
                     pk.Set(obj, ob);
-                    return new RPackInt(pk.row, pk.Store);
+                    return new RPackInt(pk.row, pk.StoreAbstract);
                 }));
         }
         internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> Spo(short subj, object pEntityCode, object oEntityCode)
         {
-          return pack => pack.SelectMany(pk => pk.Store
+          return pack => pack.SelectMany(pk => pk.StoreAbstract
                 .GetSubjectByObjPred(pk.GetE(oEntityCode), pk.GetE(pEntityCode))
                 .Select(su =>
                 {
                     pk.Set(subj, su);
-                    return new RPackInt(pk.row, pk.Store);
+                    return new RPackInt(pk.row, pk.StoreAbstract);
                 }));
         }
 
@@ -110,12 +108,12 @@ namespace SparqlParser
 
         public static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> spD(object sEntityCode, object pEntityCode, short oParamIndex)
         {
-            return pack => pack.SelectMany(pk => pk.Store
+            return pack => pack.SelectMany(pk => pk.StoreAbstract
              .GetDataBySubjPred(pk.GetE(sEntityCode), pk.GetE(pEntityCode))
              .Select(ob =>
              {
                  pk.Set(oParamIndex, ob);
-                 return new RPackInt(pk.row, pk.Store);
+                 return new RPackInt(pk.row, pk.StoreAbstract);
              }));
         }
 
@@ -167,31 +165,31 @@ namespace SparqlParser
 
         internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> sPo(object sEntityCode, short pParamIndex, object oEntityCode)
         {
-            return pack => pack.SelectMany(pk => pk.Store
+            return pack => pack.SelectMany(pk => pk.StoreAbstract
                 .GetObjBySubj(pk.GetE(sEntityCode))
                 .Where(po => po.Key == pk.GetE(oEntityCode)) //только один
                 .Select(po =>
                 {
                     pk.Set(pParamIndex, po.Value);
-                    return new RPackInt(pk.row, pk.Store);
+                    return new RPackInt(pk.row, pk.StoreAbstract);
                 }));
         }
 
         internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> sPd(object sEntityCode, short pParamIndex, Literal d)
         {
-            return pack => pack.SelectMany(pk => pk.Store
+            return pack => pack.SelectMany(pk => pk.StoreAbstract
                 .GetDataBySubj(pk.GetE(sEntityCode))
                 .Where(po => po.Key.Equals(d.Value)) //только один
                 .Select(po =>
                 {
                     pk.Set(pParamIndex, po.Value);
-                    return new RPackInt(pk.row, pk.Store);
+                    return new RPackInt(pk.row, pk.StoreAbstract);
                 }));
         }
 
         internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> sPO(object sEntityCode, short pParamIndex, short oParamIndex, GraphIsDataProperty graph)
         {
-            return pack => pack.SelectMany(pk => pk.Store
+            return pack => pack.SelectMany(pk => pk.StoreAbstract
                  .GetObjBySubj(pk.GetE(sEntityCode))
                  .Select(po =>
                  {
@@ -199,13 +197,13 @@ namespace SparqlParser
                      pk.Set(oParamIndex, po.Key);
                      if (graph.IsData == null || graph.IsData.Value)
                          graph.ReSet(false);
-                     return new RPackInt(pk.row, pk.Store);
+                     return new RPackInt(pk.row, pk.StoreAbstract);
                  }));
         }
 
         internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> sPD(object sEntityCode, short pParamIndex, short oParamIndex, GraphIsDataProperty graph)
         {
-            return pack => pack.SelectMany(pk => pk.Store
+            return pack => pack.SelectMany(pk => pk.StoreAbstract
                 .GetDataBySubj(pk.GetE(sEntityCode))
                 .Select(po =>
                 {
@@ -213,18 +211,18 @@ namespace SparqlParser
                     pk.Set(oParamIndex, po.Key);
                     if (graph.IsData == null || !graph.IsData.Value)
                         graph.ReSet(po.Key.vid);
-                    return new RPackInt(pk.row, pk.Store);
+                    return new RPackInt(pk.row, pk.StoreAbstract);
                 })); 
         }
 
         internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> Spd(short sParamIndex, object pEntityCode, Literal d)
         {
-            return pack => pack.SelectMany(pk => pk.Store
+            return pack => pack.SelectMany(pk => pk.StoreAbstract
                 .GetSubjectByDataPred(pk.GetE(pEntityCode), d)
                 .Select(su =>
                 {
                     pk.Set(sParamIndex, su);
-                    return new RPackInt(pk.row, pk.Store);
+                    return new RPackInt(pk.row, pk.StoreAbstract);
                 }));
         }
 
@@ -235,13 +233,13 @@ namespace SparqlParser
 
         internal static Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> SPo(short sParamIndex, short pParamIndex, object oEntityCode)
         {
-            return pack => pack.SelectMany(pk => pk.Store
+            return pack => pack.SelectMany(pk => pk.StoreAbstract
                 .GetSubjectByObj(pk.GetE(oEntityCode))
                 .Select(po =>
                 {
                     pk.Set(pParamIndex, po.Value);
                     pk.Set(sParamIndex, po.Key);
-                    return new RPackInt(pk.row, pk.Store);
+                    return new RPackInt(pk.row, pk.StoreAbstract);
                 }));
         }
 

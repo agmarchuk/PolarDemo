@@ -101,6 +101,7 @@ namespace NameTable
             Open(false);
             //DateTime tt0 = DateTime.Now;
             string[] ssa = sorted_arr;
+            Array.Sort(ssa);
             if (ssa.Length == 0) return new Dictionary<string, int>();
 
             this.Close();
@@ -228,6 +229,11 @@ namespace NameTable
             foreach (var q in nc_cell.Root.ElementValues()) ;
             foreach (var q in c_index.Root.ElementValues()) ;
             foreach (var q in n_index.Root.ElementValues()) ; 
+        }
+
+        public int InsertOne(string entity)
+        {
+            throw new NotImplementedException();
         }
     }
 }
