@@ -25,7 +25,7 @@ namespace NameTable
         public StringIntRAMDIctionary(string path)
         {
 
-            niCell = path + "n_index.pac";
+            niCell = path + "/n_index.pac";
 
             // Создание ячеек, предполагается, что все либо есть либо их нет и надо создавать
             if (!File.Exists(niCell))
@@ -71,6 +71,11 @@ namespace NameTable
         {
             //foreach (var q in nc_cell.Root.ElementValues()) ;
            
+        }
+
+        public int InsertOne(string entity)
+        {
+            throw new NotImplementedException();
         }
 
         public void Open(bool readonlyMode)

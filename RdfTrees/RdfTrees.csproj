@@ -7,7 +7,7 @@
     <ProjectGuid>{AC8F68BA-DF90-45BF-B7A2-47CE86CF5914}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RdfTrees</RootNamespace>
+    <RootNamespace>RdfTreesNamespace</RootNamespace>
     <AssemblyName>RdfTrees</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -20,7 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -49,7 +49,6 @@
     <Compile Include="RdfTrees.cs" />
     <Compile Include="RdfTreesLoad.cs" />
     <Compile Include="RdfTreesProcess.cs" />
-    <Compile Include="TurtleInt.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Description.txt" />
@@ -60,9 +59,17 @@
       <Project>{907bb4af-fbc9-4a1e-8f80-194af9337aa4}</Project>
       <Name>PolarDB</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ExperimentRdfViewer\ExperimentRdfViewer.csproj">
-      <Project>{3165cde6-fa27-4fc4-bdbc-01967bb4f0e5}</Project>
-      <Name>ExperimentRdfViewer</Name>
+    <ProjectReference Include="..\LiteralStores\LiteralStores.csproj">
+      <Project>{722b7468-aeda-4b30-a600-cf7314594720}</Project>
+      <Name>LiteralStores</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NameTable\NameTable.csproj">
+      <Project>{5283693D-68CC-4B7A-B2BB-6E901592A272}</Project>
+      <Name>NameTable</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RDFStores\RDFStores.csproj">
+      <Project>{d7c13bce-098b-42d5-b37d-7187a858a85a}</Project>
+      <Name>RDFStores</Name>
     </ProjectReference>
     <ProjectReference Include="..\ScaleBit4Check\ScaleBit4Check.csproj">
       <Project>{7860cd10-44ef-4300-8872-8ebef9f122e8}</Project>

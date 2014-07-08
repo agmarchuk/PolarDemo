@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Antlr4.4.2.0-alpha001\build\Antlr4.props" Condition="Exists('..\packages\Antlr4.4.2.0-alpha001\build\Antlr4.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -12,6 +11,7 @@
     <AssemblyName>SparqlParser</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>d58d521d</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -34,8 +34,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Antlr4.Runtime.v4.5">
-      <HintPath>bin\Debug\Antlr4.Runtime.v4.5.dll</HintPath>
+    <Reference Include="Moppet.Lapa">
+      <HintPath>..\packages\Moppet.Lapa.1.2.3\lib\Moppet.Lapa.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -46,24 +46,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GraphIsDataProperty.cs" />
     <Compile Include="Properties\Annotations.cs" />
-    <Compile Include="Query.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RPackComplexExtensionInt.cs" />
-    <Compile Include="sparq.cs" />
-    <Compile Include="sparql data\queries\parameters\Sarr.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <Antlr4 Include="sparql2XML.g4">
-      <Generator>MSBuild:Compile</Generator>
-      <CustomToolNamespace>SparqlParser</CustomToolNamespace>
-      <Listener>True</Listener>
-      <Visitor>True</Visitor>
-    </Antlr4>
-    <None Include="packages.config" />
     <None Include="sparql data\queries\parameters\1.rq" />
     <None Include="sparql data\queries\parameters\10.rq" />
     <None Include="sparql data\queries\parameters\11.rq" />
@@ -76,10 +64,6 @@
     <None Include="sparql data\queries\parameters\7.rq" />
     <None Include="sparql data\queries\parameters\8.rq" />
     <None Include="sparql data\queries\parameters\9.rq" />
-    <Antlr4 Include="sparql2Pac.g4">
-      <Generator>MSBuild:Compile</Generator>
-      <CustomToolNamespace>SparqlParser</CustomToolNamespace>
-    </Antlr4>
     <None Include="sparql data\queries\with constants\1.rq" />
     <None Include="sparql data\queries\with constants\10.rq" />
     <None Include="sparql data\queries\with constants\11.rq" />
@@ -115,17 +99,25 @@
       <Project>{907bb4af-fbc9-4a1e-8f80-194af9337aa4}</Project>
       <Name>PolarDB</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ExperimentRdfViewer\ExperimentRdfViewer.csproj">
-      <Project>{3165cde6-fa27-4fc4-bdbc-01967bb4f0e5}</Project>
-      <Name>ExperimentRdfViewer</Name>
+    <ProjectReference Include="..\LiteralStores\LiteralStores.csproj">
+      <Project>{722b7468-aeda-4b30-a600-cf7314594720}</Project>
+      <Name>LiteralStores</Name>
     </ProjectReference>
     <ProjectReference Include="..\NameTable\NameTable.csproj">
       <Project>{5283693d-68cc-4b7a-b2bb-6e901592a272}</Project>
       <Name>NameTable</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RDFStores\RDFStores.csproj">
+      <Project>{d7c13bce-098b-42d5-b37d-7187a858a85a}</Project>
+      <Name>RDFStores</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RdfTrees\RdfTrees.csproj">
       <Project>{ac8f68ba-df90-45bf-b7a2-47ce86cf5914}</Project>
       <Name>RdfTrees</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SparqlParseRun\SparqlParseRun.csproj">
+      <Project>{ae8cbedb-a66e-4705-953e-c16793426e89}</Project>
+      <Name>SparqlParseRun</Name>
     </ProjectReference>
     <ProjectReference Include="..\TripleInt\TripleIntClasses.csproj">
       <Project>{4b88e673-1272-46cf-817c-ac76111dac46}</Project>
@@ -133,10 +125,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="obj\" />
+    <Folder Include="obj\Release\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\Antlr4.4.2.0-alpha001\build\Antlr4.targets" Condition="Exists('..\packages\Antlr4.4.2.0-alpha001\build\Antlr4.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

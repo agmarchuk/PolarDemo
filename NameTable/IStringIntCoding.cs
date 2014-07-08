@@ -17,5 +17,6 @@ namespace NameTable
         void MakeIndexed();
         int Count { get; }
         void WarmUp();
+        int InsertOne(string entity);
     }
 }

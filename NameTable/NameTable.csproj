@@ -44,14 +44,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Archive Huffman.cs" />
+    <Compile Include="Bytes2Longs.cs" />
+    <Compile Include="CasheCoding.cs" />
     <Compile Include="DynaIndex.cs" />
     <Compile Include="IStringIntCoding.cs" />
     <Compile Include="NameTableInt.cs" />
+    <Compile Include="PredicatesCoding.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Ref.cs" />
+    <Compile Include="SimpleUnsequentalyCoding.cs" />
+    <Compile Include="StaticFreqEncoding.cs" />
     <Compile Include="StringIntCoding.cs" />
-    <Compile Include="StringIntMD5RAMColisions.cs" />
+    <Compile Include="StringIntEncoded.cs" />
+    <Compile Include="StringIntMD5RAMUnsafe.cs" />
+    <Compile Include="StringIntMD5RAMCollision.cs" />
     <Compile Include="StringIntRAMDIctionary.cs" />
     <Compile Include="StringIntMD5RAMCoding.cs" />
     <Compile Include="StringIntMD5Coding.cs" />
@@ -64,6 +72,10 @@
     <ProjectReference Include="..\..\PolarDB\PolarDB.csproj">
       <Project>{907bb4af-fbc9-4a1e-8f80-194af9337aa4}</Project>
       <Name>PolarDB</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TripleInt\TripleIntClasses.csproj">
+      <Project>{4b88e673-1272-46cf-817c-ac76111dac46}</Project>
+      <Name>TripleIntClasses</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

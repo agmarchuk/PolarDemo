@@ -63,7 +63,7 @@ namespace TrueRdfViewer
             bool totrace = true;
             if (totrace)
             {
-                XElement tracing = XElement.Load(@"D:\Users\Marchuk\Downloads\tracing100th.xml");
+                XElement tracing = XElement.Load(@"C:\Users\Lena\Downloads\tracing100th.xml");
                 Console.WriteLine("N_tests = {0}", tracing.Elements().Count());
                 tt0 = DateTime.Now;
                 int ecnt = 0, ncnt = 0;
@@ -101,7 +101,7 @@ namespace TrueRdfViewer
                             if (isEq) ecnt++; else ncnt++;
                         }
                     }
-                    else if (spo.Name == "spO_")
+                    else if (spo.Name == "spO")
                     {
                         var query = ts.GetObjBySubjPred(
                             s.GetHashCode(),
@@ -109,7 +109,7 @@ namespace TrueRdfViewer
                         if (query.Count() == 0 && res == "") continue;
                         ecnt++;
                     }
-                    else if (spo.Name == "Spo")
+                    else if (spo.Name == "Spo_")
                     {
                         var query = ts.GetSubjectByObjPred(
                             o.GetHashCode(),

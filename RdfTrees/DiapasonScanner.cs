@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using PolarDB;
 
-namespace RdfTrees
+namespace RdfTreesNamespace
 {
     public class DiapasonElementsScanner<Key> where Key: IComparable
     {

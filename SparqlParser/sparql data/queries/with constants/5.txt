@@ -1,5 +1,5 @@
-noname-1105015424, "jacinth medusoids"
-noname621006278, "policewoman"
-noname-1185602848, "recessively garments hotelkeeper"
-noname1297519191, "supermolecular"
-noname-1855556833, "wheelers womby jailor"
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer15/Product709, jacinth medusoids
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer24/Product1106, policewoman
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer40/Product1847, recessively garments hotelkeeper
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer23/Product1072, supermolecular
+http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer54/Product2512, wheelers womby jailor

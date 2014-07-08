@@ -26,7 +26,7 @@ options
 @members{		  	
 
 public static Regex PrefixNSSlpit=new Regex("^([^:]*:)(.*)$");
-public readonly Query q=new Query();		
+public Query q;		
 }
 
 
@@ -396,17 +396,13 @@ varOrTermSub
 {	   
 	var p = $verbObjectList::PredicateVariable;
 	var sVar = $triplesSameSubject::subj;		  	
-		$f = Query.CreateTriplet(sVar, p, $var.p, null);	 		
+		$f = q.CreateTriplet(sVar, p, $var.p, null);	 		
   } 
 | graphTerm 
 {
 	var p = $verbObjectList::PredicateVariable;
 	var sVar = $triplesSameSubject::subj;
-	var o=new Variable();						
-
-
-		
-
+	var o=new Variable();	
 if($graphTerm.d==null)	
 		{		
 		 o.graph=new GraphIsDataProperty(){IsData=false};
@@ -416,7 +412,7 @@ if($graphTerm.d==null)
 		{ 
 		o.graph=new GraphIsDataProperty(){IsData=true, vid=$graphTerm.d.vid};	 		
 		}		 
-	$f = Query.CreateTriplet(sVar, p, o, d:$graphTerm.d);	
+	$f = q.CreateTriplet(sVar, p, o, d:$graphTerm.d);	
 };
 
 varOrIRIref	  returns[Variable p]
@@ -431,7 +427,10 @@ $p=new Variable(){
                 q.isDataGraph.Add($p.pacElement, graph = new GraphIsDataProperty());
             }
 			$p.graph= graph;
-       
+			var  literalType=TripleInt.PredicatesCoding.LiteralVid[(int)$p.pacElement];
+			if(literalType==null)
+			graph.IsData=false;
+			else graph.vid=literalType.Value;       
 };
 
 var returns [Variable p]
@@ -558,7 +557,8 @@ else $value = new Literal(LiteralVidEnumeration.typedObject){ Value = new TypedO
 iRIref returns [string value]	 
 :	IRI_REF  	{	
 		var iri=$IRI_REF.text;
-		$value = iri.Substring(1,iri.Length-2); } 
+		$value = iri.Substring(1,iri.Length-2);
+		 } 
 |	PREFIXED_NAME 	{	
 var match = PrefixNSSlpit.Match($PREFIXED_NAME.text);		            
  $value = q.prefixes[match.Groups[1].Value] + match.Groups[2].Value; } ;	

@@ -9,8 +9,79 @@ namespace BigDBSorting
 {
     class Program
     {
-        // Проверка работоспособности MemoryMappedFiles
+        // Проверка эффективности работы последовательностей фиксированного формата
         static void Main(string[] args)
+        {
+            string path = @"..\..\..\Databases\";
+            DateTime tt0 = DateTime.Now;
+            Random rnd = new Random(7777777);
+            PaCell icell = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)), path + "icell.pac", false);
+            PxCell xcell = new PxCell(new PTypeSequence(new PType(PTypeEnumeration.integer)), path + "xcell.pac", false);
+
+            bool toload = false;
+            int nvalues = 10000000;
+            if (toload)
+            {
+                icell.Clear();
+                icell.Fill(new object[0]);
+                for (int i = 0; i < nvalues; i++)
+                {
+                    icell.Root.AppendElement(rnd.Next());
+                }
+                icell.Flush();
+                Console.WriteLine("Load1 ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                PaEntry.bufferBytes = 200000000;
+                icell.Root.SortByKey<int>(ob => (int)ob); ;
+                Console.WriteLine("Sort ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            }
+            bool toload2 = false;
+            if (toload2)
+            {
+                xcell.Clear();
+                //xcell.Root.SetRepeat(nvalues);
+                //for (int i = 0; i < nvalues; i++)
+                //{
+                //    xcell.Root.Element(i).Set(icell.Root.Element(i).Get());
+                //}
+                //xcell.Flush();
+                //xcell.Fill(icell.Root.Get());
+                xcell.Root.Set(icell.Root.Get());
+                Console.WriteLine("Load2 ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                xcell.Flush();
+            }
+
+            //foreach (var v in icell.Root.ElementValues()) ;
+            //var ooo = xcell.Root.Get();
+            foreach (var xent in xcell.Root.Elements()) { var xxx = xent.Get(); }
+            Console.WriteLine("WarmUp ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            
+            rnd = new Random(7777777);
+            int start = nvalues / 2;
+            for (int i = 0; i < start; i++) { int r0 = rnd.Next(); }
+            for (int i = start; i < start + 10000; i++)
+            {
+                int r = rnd.Next(nvalues - 1);
+                int v = (int)icell.Root.Element(r).Get();
+                //int v = (int)xcell.Root.Element(r).Get();
+            }
+            Console.WriteLine("ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            rnd = new Random(7777777);
+            for (int i = 0; i < start; i++) { int r0 = rnd.Next(); } // Пропустили половину чисел
+            int found = 0;
+            for (int i = start; i < start + 10000; i++)
+            {
+                int r = rnd.Next();
+                PaEntry entry = icell.Root.BinarySearchFirst(en => ((int)en.Get()).CompareTo(r));
+                //PxEntry entry = xcell.Root.BinarySearchFirst(en => ((int)en.Get()).CompareTo(r));
+                if (entry.IsEmpty) continue;
+                int v = (int)entry.Get();
+                //int v = (int)xcell.Root.Element(r).Get();
+                found++;
+            }
+            Console.WriteLine("found {0} ok. duration={1}",found , (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+        }
+        // Проверка таблицы с индексами
+        static void Main4(string[] args)
         {
             Console.WriteLine("Start");
             string path = @"..\..\..\Databases\";
