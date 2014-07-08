@@ -26,7 +26,7 @@ namespace RdfInMemory
             // Разогрев
             //graph.WarmUp();
             // Трассировка
-            XElement tracing = XElement.Load(@"C:\Users\Lena\Downloads\tracing100th.xml");
+            XElement tracing = XElement.Load(@"D:\Users\Marchuk\Downloads\tracing100th.xml");
             Console.WriteLine("N_tests = {0}", tracing.Elements().Count());
             tt0 = DateTime.Now;
             int ecnt = 0, ncnt = 0;

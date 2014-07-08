@@ -6,18 +6,21 @@ using System.Threading.Tasks;
 
 namespace RdfInMemory
 {
+    //
+    // см. https://bitbucket.org/dotnetrdf/dotnetrdf/wiki/User%20Guide
+    //
     public interface INode
     {
-        public NodeType NodeType { public get; }
-        public IGraph Graph { public get; }
+        NodeType NodeType { get; }
+        IGraph Graph { get; }
 
     }
-    public interface IUriNode : INode { public Uri Uri { public get; } }
+    public interface IUriNode : INode { Uri Uri { get; } }
     public interface ILiteralNode : INode
     {
-        public Uri DataType { public get; }
-        public string Language { public get; }
-        public string Value { public get; }
+        Uri DataType { get; }
+        string Language { get; }
+        string Value { get; }
     }
     public enum NodeType
     {
@@ -27,17 +30,17 @@ namespace RdfInMemory
     }
     public class Triple
     {
-        Triple(INode subj, INode pred, INode obj);
-        public IGraph Graph { public get; }
-        public INode Subject { public get; }
-        public INode Predicate { public get; }
-        public INode Object { public get; }
+        public extern Triple(INode subj, INode pred, INode obj);
+        public extern IGraph Graph { get; }
+        public extern INode Subject { get; }
+        public extern INode Predicate { get; }
+        public extern INode Object { get; }
     }
     public interface IGraph
     {
-        public bool IsEmpty { public get; }
-        public INamespaceMapper NamespaceMap { public get; }
-        public IEnumerable<INode> Nodes { public get; }
+        bool IsEmpty { get; }
+        INamespaceMapper NamespaceMap { get; }
+        IEnumerable<INode> Nodes { get; }
         // Создатели
         IUriNode CreateUriNode();
         ILiteralNode CreateLiteralNode(string value);
@@ -46,7 +49,7 @@ namespace RdfInMemory
     }
     public interface INamespaceMapper
     {
-        IEnumerable<string> Prefixes { public get; }
+        IEnumerable<string> Prefixes { get; }
         void Clear();
         void AddNamespace(string prefix, Uri uri);
         void RemoveNamespace(string prefix);
@@ -62,5 +65,26 @@ namespace RdfInMemory
         /// <param name="qname">The value to output the QName to if possible</param>
         /// <returns></returns>
         bool ReduceToQName(string uri, out string qname);
+    }
+    // Парсеры
+    public class TurtleParser
+    {
+        public extern void Load(IGraph g, string filename);
+    }
+    public class TripleStore
+    {
+        //SparqlQueryParser sparqlparser = new SparqlQueryParser();
+        //SparqlQuery query = sparqlparser.ParseFromString("CONSTRUCT { ?s ?p ?o } WHERE { { GRAPH ?g { ?s ?p ?o } } UNION { ?s ?p ?o } }");
+        //results = store.ExecuteQuery(query);
+        //if (results is IGraph)
+    }
+    public class SparqlQueryParser
+    {
+    }
+    public class SparqlQuery
+    {
+    }
+    public class SparqlResultSet
+    {
     }
 }

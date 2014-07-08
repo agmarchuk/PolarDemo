@@ -81,7 +81,7 @@ namespace BigDBSorting
             Console.WriteLine("found {0} ok. duration={1}",found , (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
         }
         // Проверка таблицы с индексами
-        static void Main4(string[] args)
+        static void Main5(string[] args)
         {
             Console.WriteLine("Start");
             string path = @"..\..\..\Databases\";
