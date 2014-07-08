@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.IO.MemoryMappedFiles;
 using BigDbTest;
 using PolarDB;
 
@@ -8,8 +9,79 @@ namespace BigDBSorting
 {
     class Program
     {
-        // Проверка таблицы с индексами
+        // Проверка работоспособности MemoryMappedFiles
         static void Main(string[] args)
+        {
+            Console.WriteLine("Start");
+            string path = @"..\..\..\Databases\";
+            string filename = path + "table.pac";
+            Random rnd = new Random(3333);
+            PaCell table = new PaCell(new PTypeSequence(new PType(PTypeEnumeration.integer)), filename, false);
+            DateTime tt0 = DateTime.Now;
+            int nvalues = 1000000000;
+
+            bool toload = false;
+            if (toload)
+            {
+                table.Clear();
+                table.Fill(new object[0]);
+                for (int i = 0; i < nvalues; i++) table.Root.AppendElement(i);
+                table.Flush();
+                Console.WriteLine("Load ok. duration={0}", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                return;
+            }
+            int portion = 100000;
+            for (int i = 0; i < portion; i++)
+            {
+                int ind = rnd.Next(nvalues - 1);
+                var v = table.Root.Element(ind).Get();
+            }
+            Console.WriteLine("Test1 ok. duration={0}", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
+            table.Close();
+            System.IO.Stream fs = new System.IO.FileStream(filename, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            System.IO.BinaryReader br = new System.IO.BinaryReader(fs);
+            for (int i = 0; i < portion; i++)
+            {
+                int ind = rnd.Next(nvalues - 1);
+                long off = 40 + (long)ind * 4;
+                fs.Position = off;
+                int v = br.ReadInt32();
+            }
+
+            fs.Close();
+            Console.WriteLine("Test2 ok. duration={0}", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            using (MemoryMappedFile mmf = MemoryMappedFile.CreateFromFile(filename))
+            {
+                for (int i = 0; i < portion; i++)
+                {
+                    int ind = rnd.Next(nvalues - 1);
+                    long off = 40 + (long)ind * 4;
+                    using (var accessor = mmf.CreateViewAccessor(off, 4))
+                    {
+                        int v = accessor.ReadInt32(0);
+                    }
+                }
+                Console.WriteLine("Test3 ok. duration={0}", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                using (var accessor = mmf.CreateViewAccessor(0, (long)nvalues * 4 + 40))
+                {
+                    tt0 = DateTime.Now;
+                    for (int i = 0; i < portion; i++)
+                    {
+                        int ind = rnd.Next(nvalues - 1);
+                        long off = 40 + (long)ind * 4;
+                        //using (var accessor = mmf.CreateViewAccessor(off, 4))
+                        //{
+                        //    int v = accessor.ReadInt32(0);
+                        //}
+                        int v = accessor.ReadInt32(off);
+                    }
+                }
+            }
+            Console.WriteLine("Test4 ok. duration={0}", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+        }
+        // Проверка таблицы с индексами
+        static void Main4(string[] args)
         {
             Console.WriteLine("Start");
             string path = @"..\..\..\Databases\";
@@ -130,8 +202,8 @@ namespace BigDBSorting
         static void Main3(string[] args)
         {
             Console.WriteLine("Start");
-            //string path = @"..\..\..\Databases\"; //HDD
-            string path = @"G:\Home\Databases\"; //SSD
+            string path = @"..\..\..\Databases\"; //HDD
+            //string path = @"G:\Home\Databases\"; //SSD
             DateTime tt0 = DateTime.Now;
             Random rnd = new Random(3333);
 
@@ -162,10 +234,10 @@ namespace BigDBSorting
             }
             else
             {
-                //foreach (var q in icell.Root.ElementValues()) ;
-                //Console.WriteLine("Warming-up ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-                //foreach (var q in scell.Root.ElementValues()) ;
-                //Console.WriteLine("Warming-up ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                foreach (var q in icell.Root.ElementValues()) ;
+                Console.WriteLine("Warming-up ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+                foreach (var q in scell.Root.ElementValues()) ;
+                Console.WriteLine("Warming-up ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             }
 
             // Случайные выборки. По rnd выбирается номер рядка, прочитывается offset из индекса, читается строка из scell
