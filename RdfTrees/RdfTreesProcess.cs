@@ -221,23 +221,12 @@ namespace RdfTrees
             return sp;
         }
 
-<<<<<<< HEAD
         //public override void WarmUp()
         //{
-        //    foreach (var element in entitiesTree.Root.Elements())
-        //    {
-        //        element.Get();
-        //    }
-            
+        //  entitiesTree.Close();
+        //    File.ReadAllBytes(entitiesTreePath);
+        //    entitiesTree=new PxCell(tp_entitiesTree, entitiesTreePath);
+        //          LiteralStore.Literals.WarmUp();
         //}
-=======
-        public override void WarmUp()
-        {
-          entitiesTree.Close();
-            File.ReadAllBytes(entitiesTreePath);
-            entitiesTree=new PxCell(tp_entitiesTree, entitiesTreePath);
-                  LiteralStore.Literals.WarmUp();
-        }
->>>>>>> 94d25e470b24e1e4b390d714352cfe532bcf289c
     }
 }

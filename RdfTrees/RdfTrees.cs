@@ -84,7 +84,7 @@ namespace RdfTrees
         {
             //entitiesTree.Flush();
             //object ob = entitiesTree.Root.Get();
-            foreach (var v in dtriples.Root.ElementValues()) ;
+            //foreach (var v in dtriples.Root.ElementValues()) ;
         }
         // Генерация литерала из объектного представления, соответствующего tp_literal 
         //public static Literal GenerateLiteral(object pobj)

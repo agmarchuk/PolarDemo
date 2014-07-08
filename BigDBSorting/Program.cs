@@ -50,7 +50,10 @@ namespace BigDBSorting
             }
 
             //foreach (var v in icell.Root.ElementValues()) ;
-            //Console.WriteLine("WarmUp ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            //var ooo = xcell.Root.Get();
+            foreach (var xent in xcell.Root.Elements()) { var xxx = xent.Get(); }
+            Console.WriteLine("WarmUp ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            
             rnd = new Random(7777777);
             int start = nvalues / 2;
             for (int i = 0; i < start; i++) { int r0 = rnd.Next(); }
