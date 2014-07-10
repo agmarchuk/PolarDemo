@@ -10,7 +10,7 @@ namespace RdfInMemory
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static void Main0(string[] args)
         {
             DateTime tt0 = DateTime.Now;
 
