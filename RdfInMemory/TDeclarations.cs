@@ -10,7 +10,6 @@ namespace RdfInMemory
     {
         NodeType NodeType { get; }
         IGraph Graph { get; }
-
     }
     public interface IUriNode : INode { Uri Uri { get; } }
     public interface ILiteralNode : INode

@@ -47,9 +47,12 @@
     <Compile Include="RdfGraph.cs" />
     <Compile Include="TDeclarations.cs" />
     <Compile Include="TGraph.cs" />
+    <Compile Include="TLiteralNode.cs" />
+    <Compile Include="TNamespaceMapper.cs" />
     <Compile Include="TProgram.cs" />
     <Compile Include="TripleInt.cs" />
     <Compile Include="TTurtleParser.cs" />
+    <Compile Include="TUriNode.cs" />
     <Compile Include="UtilClasses.cs" />
   </ItemGroup>
   <ItemGroup>

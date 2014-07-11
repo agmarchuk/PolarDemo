@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RdfInMemory
 {
-    public class TurtleParser
+    public class TTurtleParser
     {
         public void Load(IGraph g, string datafile)
         {
@@ -63,7 +63,7 @@ namespace RdfInMemory
                     if (isDatatype)
                     {
                         g.Assert(new Triple(g.CreateUriNode(subject),
-                            g.CreateUriNode(predicate), g.CreateLiteralNode(rest_line))); 
+                            g.CreateUriNode(predicate), g.CreateLiteralNode(rest_line)));
                     }
                     else
                     { // entity
@@ -74,9 +74,10 @@ namespace RdfInMemory
                     ntriples++;
                 }
             }
+            g.Build();
 
         }
-        private static string GetEntityString(IGraph g, string line)
+        public static string GetEntityString(IGraph g, string line)
         {
             string subject = null;
             int colon = line.IndexOf(':');
