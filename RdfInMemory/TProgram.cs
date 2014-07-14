@@ -13,12 +13,16 @@ namespace RdfInMemory
         {
             Console.WriteLine("Start");
             string path = @"..\..\..\Databases\";
+            DateTime tt0 = DateTime.Now;
             TGraph gra = new TGraph(path);
+            Console.WriteLine("Построение графа: {0} мс.", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             bool toload = false;
             if (toload)
             {
+                tt0 = DateTime.Now;
                 TTurtleParser parser = new TTurtleParser();
-                parser.Load(gra, @"D:\home\FactographDatabases\dataset\dataset1M.ttl");
+                parser.Load(gra, @"D:\home\FactographDatabases\dataset\dataset10M.ttl");
+                Console.WriteLine("TOTAL: {0} мс.", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             }
             else
             {
@@ -28,7 +32,7 @@ namespace RdfInMemory
         private static void Tracer(TGraph graph)
         {
             // Трассировка
-            XElement tracing = XElement.Load(@"C:\Users\Lena\Downloads\tracing100th.xml");
+            XElement tracing = XElement.Load(@"D:\Users\Marchuk\Downloads\tracing100th.xml");
             Console.WriteLine("N_tests = {0}", tracing.Elements().Count());
             DateTime tt0 = DateTime.Now;
             int ecnt = 0, ncnt = 0;

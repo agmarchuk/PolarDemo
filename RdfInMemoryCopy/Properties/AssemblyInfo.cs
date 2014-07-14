@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // Управление общими сведениями о сборке осуществляется с помощью 
 // набора атрибутов. Измените значения этих атрибутов, чтобы изменить сведения,
 // связанные со сборкой.
-[assembly: AssemblyTitle("RdfInMemory")]
+[assembly: AssemblyTitle("RdfInMemoryCopy")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("RdfInMemory")]
+[assembly: AssemblyProduct("RdfInMemoryCopy")]
 [assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // Следующий GUID служит для идентификации библиотеки типов, если этот проект будет видимым для COM
-[assembly: Guid("8dd1d720-c86c-447b-8cc8-6c68184fe0a1")]
+[assembly: Guid("510bfc14-051b-4d08-8931-317c25b783ab")]
 
 // Сведения о версии сборки состоят из следующих четырех значений:
 //

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RdfInMemory
+namespace RdfInMemoryCopy
 {
-    public interface INode:ICloneable
+    public interface INode
     {
         NodeType NodeType { get; }
         IGraph Graph { get; }
@@ -84,6 +84,7 @@ namespace RdfInMemory
         //SparqlQuery query = sparqlparser.ParseFromString("CONSTRUCT { ?s ?p ?o } WHERE { { GRAPH ?g { ?s ?p ?o } } UNION { ?s ?p ?o } }");
         //results = store.ExecuteQuery(query);
         //if (results is IGraph)
+
     }
     public class SparqlQueryParser
     {

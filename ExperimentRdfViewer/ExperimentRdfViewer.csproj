@@ -78,10 +78,6 @@
       <Project>{7860cd10-44ef-4300-8872-8ebef9f122e8}</Project>
       <Name>ScaleBit4Check</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SparqlParseRun\SparqlParseRun.csproj">
-      <Project>{ae8cbedb-a66e-4705-953e-c16793426e89}</Project>
-      <Name>SparqlParseRun</Name>
-    </ProjectReference>
     <ProjectReference Include="..\TripleInt\TripleIntClasses.csproj">
       <Project>{4b88e673-1272-46cf-817c-ac76111dac46}</Project>
       <Name>TripleIntClasses</Name>

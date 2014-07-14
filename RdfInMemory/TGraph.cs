@@ -73,6 +73,7 @@ namespace RdfInMemory
         private Dictionary<int, record> codeRec = new Dictionary<int, record>();
         #endregion
 
+        bool tofilldictionary = true;
         // Конструктор
         public TGraph(string path)
         {
@@ -82,7 +83,7 @@ namespace RdfInMemory
             literals = new PaCell(tp_rliteral_seq, path + "literals.pac", false);
             dtriples = new PaCell(tp_dtriples, path + "dtriples.pac", false);
             tree_fix = new PxCell(tp_entitiesTree, path + "tree_fix.pxc", false);
-            FillDictionary();
+            if (tofilldictionary) FillDictionary();
         }
 
         public bool IsEmpty { get { return tree_fix.Root.Count() == 0; } }
@@ -294,27 +295,33 @@ namespace RdfInMemory
             for (int i = 0; i < tree_fix.Root.Count(); i++)
             {
                 object[] rec = (object[])tree_fix.Root.Element(i).Get();
-                int key = (int)rec[0];
-                var f = ((object[])rec[1])
-                    .Cast<object[]>()
-                    .Select(ob2 => new KeyValuePair<int, long>((int)ob2[0], (long)ob2[1]))
-                    .ToArray();
-                var d = ((object[])rec[2])
-                    .Cast<object[]>()
-                    .Select(ob2 => new KeyValuePair<int, int>((int)ob2[0], (int)ob2[1]))
-                    .ToArray();
-                var inverse = ((object[])rec[3])
-                    .Cast<object[]>()
-                    .Select(ob2 => new KeyValuePair<int, int[]>((int)ob2[0], ((object[])ob2[1]).Cast<int>().ToArray()))
-                    .ToArray();
-                codeRec.Add(key,
-                    new record()
-                    {
-                        fields = f,
-                        direct = d,
-                        inverse = inverse
-                    });
+                AddRecordToDictionary(rec);
             }
+        }
+
+        private record AddRecordToDictionary(object[] orec)
+        {
+            int key = (int)orec[0];
+            var f = ((object[])orec[1])
+                .Cast<object[]>()
+                .Select(ob2 => new KeyValuePair<int, long>((int)ob2[0], (long)ob2[1]))
+                .ToArray();
+            var d = ((object[])orec[2])
+                .Cast<object[]>()
+                .Select(ob2 => new KeyValuePair<int, int>((int)ob2[0], (int)ob2[1]))
+                .ToArray();
+            var inverse = ((object[])orec[3])
+                .Cast<object[]>()
+                .Select(ob2 => new KeyValuePair<int, int[]>((int)ob2[0], ((object[])ob2[1]).Cast<int>().ToArray()))
+                .ToArray();
+            record rec = new record()
+                {
+                    fields = f,
+                    direct = d,
+                    inverse = inverse
+                };
+            codeRec.Add(key, rec);
+            return rec;
         }
 
         // Доступ к литералу по коду: читается все структурные значение литерала
@@ -348,12 +355,21 @@ namespace RdfInMemory
             return off;
         }
 
+        private bool TryGetRecord(int code, out record rec)
+        {
+            if (codeRec.TryGetValue(code, out rec)) return true;
+            if (tofilldictionary) return false;
+            PxEntry entry = tree_fix.Root.BinarySearchFirst(en => ((int)en.Field(0).Get()).CompareTo(code));
+            if (entry.IsEmpty) return false;
+            rec = AddRecordToDictionary((object[])entry.Get());
+            return true;
+        }
         public bool ContainsTriple(Triple t)
         {
             if (t.Object.NodeType == NodeType.Uri)
             {
                 record rec;
-                if (!codeRec.TryGetValue(((TUriNode)t.Subject).Code, out rec)) return false;
+                if (!TryGetRecord(((TUriNode)t.Subject).Code, out rec)) return false;
                 var direct = rec.direct;
                 return direct.Any(pair => pair.Key == ((TUriNode)t.Predicate).Code && pair.Value == ((TUriNode)t.Object).Code);
 
@@ -364,7 +380,7 @@ namespace RdfInMemory
         public IEnumerable<Triple> GetTriplesWithSubjectPredicate(INode subj, INode pred)
         {
             record rec;
-            if (!codeRec.TryGetValue(((TUriNode)subj).Code, out rec)) return Enumerable.Empty<Triple>();
+            if (!TryGetRecord(((TUriNode)subj).Code, out rec)) return Enumerable.Empty<Triple>();
             return rec.direct.Where(pair => pair.Key == ((TUriNode)pred).Code)
                 .Select(pair => new Triple(
                     new TUriNode(((TUriNode)subj).Code, this),
@@ -375,7 +391,7 @@ namespace RdfInMemory
         public IEnumerable<Triple> GetTriplesWithPredicateObject(INode pred, INode obj)
         {
             record rec;
-            if (!codeRec.TryGetValue(((TUriNode)obj).Code, out rec)) return Enumerable.Empty<Triple>();
+            if (!TryGetRecord(((TUriNode)obj).Code, out rec)) return Enumerable.Empty<Triple>();
             //TODO: Хорошо бы сделать сначала выделение первого, удовлетворяющего условию по предикату 
             var arr = rec.inverse.Where(pair => pair.Key == ((TUriNode)pred).Code).ToArray(); // Может можно экономнее...
             if (arr.Length == 0) return Enumerable.Empty<Triple>();
