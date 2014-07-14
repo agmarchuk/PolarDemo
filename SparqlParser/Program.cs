@@ -49,7 +49,7 @@ namespace SparqlParser
                 new LiteralStore(path, nameSpaceStore) ));
              
                 bool load = false;
-        //    bool load = true;
+         //   bool load = true;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;

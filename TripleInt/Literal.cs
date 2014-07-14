@@ -1,9 +1,10 @@
 using System;
 using System.Globalization;
+using RdfInMemory;
 
 namespace TripleIntClasses
 {
-    public class Literal
+    public class Literal : INode
     {     
         public long Offset;      
         public LiteralVidEnumeration vid;
@@ -40,10 +41,11 @@ namespace TripleIntClasses
                     throw new ArgumentOutOfRangeException();
             }
         }
-        public Literal(LiteralVidEnumeration vid)
+        public Literal(LiteralVidEnumeration vid, IGraph graph)
         {
             this.vid = vid;
-        }                     
+            Graph = graph;
+        }
 
         public object Value { get; set; }
 
@@ -103,35 +105,37 @@ namespace TripleIntClasses
             return da;
         }
 
-        public static Literal ToLiteral(object[] uni)
+        public static Literal ToLiteral(object[] uni, IGraph graph)
         {
             switch ((int)uni[0])
             {
                 case 1:
-                    return new Literal(LiteralVidEnumeration.integer) { Value = Convert.ToDouble(uni[1]) };
+                    return new Literal(LiteralVidEnumeration.integer, graph) { Value = Convert.ToDouble(uni[1]) };
                 case 3:
-                    return new Literal(LiteralVidEnumeration.date) { Value = (long)uni[1] };
+                    return new Literal(LiteralVidEnumeration.date, graph) { Value = (long)uni[1] };
                 case 4:
-                    return new Literal(LiteralVidEnumeration.boolean) { Value = (bool)uni[1] };
+                    return new Literal(LiteralVidEnumeration.boolean, graph) { Value = (bool)uni[1] };
                 case 5:
                 {
                     object[] txt = (object[])uni[1];
-                    return new Literal(LiteralVidEnumeration.typedObject)
+                    return new Literal(LiteralVidEnumeration.typedObject, graph)
                     {
                         Value = new TypedObject() { Value = (string)txt[0], Type = (string)txt[1] }
                     };
                 }
                 case 2:
                     object[] txt1 = (object[])uni[1];
-                    return new Literal(LiteralVidEnumeration.text)
+                    return new Literal(LiteralVidEnumeration.text, graph)
                     {
                         Value = new Text() { Value = (string)txt1[0], Lang = (string)txt1[1] }
                     };
                 default:
-                    return new Literal(LiteralVidEnumeration.nil);
+                    return new Literal(LiteralVidEnumeration.nil, graph);
             }
         }
-       
+
+        public NodeType NodeType { get{return NodeType.Literal;} }
+        public IGraph Graph { get; private set; }
     }
 
 }

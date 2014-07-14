@@ -14,16 +14,16 @@ namespace SparqlParseRun
 {
     public class Query
     {                   
-        internal Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> Where;
+        internal Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> Where;
         internal Dictionary<string, Variable> Variables = new Dictionary<string, Variable>();
         internal short currentNewVariablesIndex = 0;
         internal readonly Dictionary<string, string> prefixes = new Dictionary<string, string>();
         internal static Dictionary<string, Regex> Regexes = new Dictionary<string, Regex>();
         internal Dictionary<object, GraphIsDataProperty> isDataGraph = new Dictionary<object, GraphIsDataProperty>();     
-        internal ParameterExpression currentFilterParameter = Expression.Parameter(typeof (RPackInt));
+        internal ParameterExpression currentFilterParameter = Expression.Parameter(typeof (QueryNodesSet));
 
         internal bool isDistinct, isReduce, all;
-        internal Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> solutionModifierOrder;
+        internal Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> solutionModifierOrder;
         internal Func<IEnumerable<object[]>, IEnumerable<object[]>> solutionModifierCount;
         internal List<string> variables=new List<string>();
         internal List<int> constants=new List<int>();
@@ -52,9 +52,9 @@ namespace SparqlParseRun
                 var row = new object[Variables.Count];
 
                 if (isReduce) throw new NotImplementedException();
-                IEnumerable<RPackInt> result = Where(Repeat(row, ts));
+                IEnumerable<QueryNodesSet> result = Where(Repeat(row, ts));
                 
-                if (solutionModifierOrder != null) result = solutionModifierOrder(result.Select(i => (RPackInt)((ICloneable)i).Clone()));
+                if (solutionModifierOrder != null) result = solutionModifierOrder(result.Select(i => (QueryNodesSet)((ICloneable)i).Clone()));
                 Variable[] SelectVariables;
                 IEnumerable<object[]> selectResult;
                 if (all)
@@ -78,9 +78,9 @@ namespace SparqlParseRun
             };
         }
 
-        private static IEnumerable<RPackInt> Repeat(object[] row, RDFIntStoreAbstract ts)
+        private static IEnumerable<QueryNodesSet> Repeat(object[] row, RDFIntStoreAbstract ts)
         {                                    
-           yield return new RPackInt(row, ts);
+           yield return new QueryNodesSet(row, ts);
         }
 
         public Func<IEnumerable<IEnumerable<string>>> DescribeRun;
@@ -90,8 +90,8 @@ namespace SparqlParseRun
             DescribeRun = () =>
             {
                 var result = Where != null
-                    ? Where(Enumerable.Repeat(new RPackInt(Variables.Values.Select(variable => variable.pacElement).ToArray(), ts), 1))
-                    : Enumerable.Empty<RPackInt>();
+                    ? Where(Enumerable.Repeat(new QueryNodesSet(Variables.Values.Select(variable => variable.pacElement).ToArray()), 1))
+                    : Enumerable.Empty<QueryNodesSet>();
                 if (solutionModifierOrder != null) result = solutionModifierOrder(result);
 
                 IEnumerable<int> describeObjects;
@@ -161,9 +161,9 @@ namespace SparqlParseRun
         {
             ConstructRun = () =>
             {
-                IEnumerable<RPackInt> result = Where != null
-                    ? Where(Enumerable.Repeat(new RPackInt(Variables.Values.Select(variable => variable.pacElement).ToArray(), ts), 1))
-                    : Enumerable.Empty<RPackInt>();
+                IEnumerable<QueryNodesSet> result = Where != null
+                    ? Where(Enumerable.Repeat(new QueryNodesSet(Variables.Values.Select(variable => variable.pacElement).ToArray(), ts), 1))
+                    : Enumerable.Empty<QueryNodesSet>();
                 if (solutionModifierOrder != null) result = solutionModifierOrder(result.ToArray());
                  
                 if (constructTriples == null) return Enumerable.Empty<IEnumerable<string>>();
@@ -189,9 +189,9 @@ namespace SparqlParseRun
         }
 
         public Func<RDFIntStoreAbstract, bool> AsqRun;
-        internal Func<RPackInt, IEnumerable<Tuple<string, string, string>>> constructTemplate;
+        internal Func<QueryNodesSet, IEnumerable<Tuple<string, string, string>>> constructTemplate;
 
-        internal readonly List<Func<RPackInt, IEnumerable<Tuple<string, string, string>>>> constructTriples = new List<Func<RPackInt, IEnumerable<Tuple<string, string, string>>>>();
+        internal readonly List<Func<QueryNodesSet, IEnumerable<Tuple<string, string, string>>>> constructTriples = new List<Func<QueryNodesSet, IEnumerable<Tuple<string, string, string>>>>();
         public static readonly Dictionary<int, string> decodesCasheEntities = new Dictionary<int, string>();
         public static readonly Dictionary<int, string> decodesCashePredicates = new Dictionary<int, string>();
         public RDFIntStoreAbstract ts;
@@ -203,7 +203,7 @@ namespace SparqlParseRun
 
         internal void CreateAsqRun()
         {
-            AsqRun = ts => Where(Enumerable.Repeat(new RPackInt(Variables.Values.Select(variable => variable.pacElement).ToArray(), ts), 1)).Any();
+            AsqRun = ts => Where(Enumerable.Repeat(new QueryNodesSet(Variables.Values.Select(variable => variable.pacElement).ToArray(), ts), 1)).Any();
         }
 
 
@@ -240,7 +240,7 @@ namespace SparqlParseRun
 
         }
         
-        internal Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> CreateTriplet(Variable s, Variable p, Variable o, Literal d)
+        internal Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> CreateTriplet(Variable s, Variable p, Variable o, Literal d)
         {   
            GraphIsDataProperty.Sync(o.graph, p.graph);
             var triplet = s.isNew
@@ -395,9 +395,9 @@ namespace SparqlParseRun
                 return obj;
             }
             if (!parameter.graph.IsData.Value)
-               return Expression.Call(currentFilterParameter, typeof (RPackInt).GetMethod("GetE"), Expression.Constant(parameter.index, typeof (object)));
+               return Expression.Call(currentFilterParameter, typeof (QueryNodesSet).GetMethod("GetE"), Expression.Constant(parameter.index, typeof (object)));
             return LiteraExpression(Expression.Property(
-                Expression.Call(currentFilterParameter, typeof(RPackInt).GetMethod("Val"), Expression.Constant(parameter.index)),
+                Expression.Call(currentFilterParameter, typeof(QueryNodesSet).GetMethod("Val"), Expression.Constant(parameter.index)),
                 "Value"), parameter.graph.vid);
         }
 
@@ -550,20 +550,20 @@ namespace SparqlParseRun
         internal Expression Bound(Variable variable)
         {
             if (variable.graph.IsData == null)
-                return Expression.Call(currentFilterParameter, typeof (RPackInt).GetMethod("Hasvalue"),
+                return Expression.Call(currentFilterParameter, typeof (QueryNodesSet).GetMethod("Hasvalue"),
                     Expression.Constant(variable.index));
             if (!variable.graph.IsData.Value)
-                return Expression.NotEqual(Expression.Call(currentFilterParameter, typeof(RPackInt).GetMethod("GetE"), Expression.Constant((object)variable.index, typeof(object))),
+                return Expression.NotEqual(Expression.Call(currentFilterParameter, typeof(QueryNodesSet).GetMethod("GetE"), Expression.Constant((object)variable.index, typeof(object))),
                         Expression.Constant(Int32.MinValue)); 
             else
             switch (variable.graph.vid)
             {
                 case LiteralVidEnumeration.integer:
-                    return Expression.NotEqual(Expression.Call(currentFilterParameter, typeof(RPackInt).GetMethod("Vai"),
+                    return Expression.NotEqual(Expression.Call(currentFilterParameter, typeof(QueryNodesSet).GetMethod("Vai"),
                         Expression.Constant(variable.index)), Expression.Constant(Double.MinValue));
                 case LiteralVidEnumeration.date:
                     return Expression.NotEqual(Expression.ConvertChecked(
-                        Expression.Call(currentFilterParameter, typeof(RPackInt).GetMethod("Val"), Expression.Constant(variable.index)),
+                        Expression.Call(currentFilterParameter, typeof(QueryNodesSet).GetMethod("Val"), Expression.Constant(variable.index)),
                         typeof(long)), Expression.Constant(DateTime.MinValue.ToBinary()));
                 case LiteralVidEnumeration.boolean:
                     throw new NotImplementedException();
@@ -574,7 +574,7 @@ namespace SparqlParseRun
                 case LiteralVidEnumeration.text:
                     return Expression.NotEqual(Expression.Property(Expression.Convert(Expression.Property(
                         Expression.ConvertChecked(
-                            Expression.Call(currentFilterParameter,  typeof(RPackInt).GetMethod("Val"),  Expression.Constant(variable.index)),
+                            Expression.Call(currentFilterParameter,  typeof(QueryNodesSet).GetMethod("Val"),  Expression.Constant(variable.index)),
                             typeof (Literal)), "Value"), typeof(Text)),"Value"), Expression.Constant(String.Empty));
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -616,7 +616,7 @@ namespace SparqlParseRun
 
            return  Expression.Property(Expression.Convert( Expression.Property(
                         Expression.Convert(
-                                Expression.Call(currentFilterParameter, typeof(RPackInt).GetMethod("Val"), Expression.Constant(variable.index)),
+                                Expression.Call(currentFilterParameter, typeof(QueryNodesSet).GetMethod("Val"), Expression.Constant(variable.index)),
                          typeof(Literal)),
                          "Value"),
                                typeof(Text)),

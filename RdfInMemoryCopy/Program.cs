@@ -1,31 +1,32 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Xml.Linq;
-using LiteralStores;
-using NameTable;
-using TripleIntClasses;
+using PolarDB;
 
-
-namespace RdfTreesNamespace
+namespace RdfInMemory
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static void Main0(string[] args)
         {
             DateTime tt0 = DateTime.Now;
 
             string path = @"..\..\..\Databases\";
-            Console.WriteLine("Start RdfTrees");
-            NameSpaceStore nameSpaceStore = new NameSpaceStore(path);
-            RdfTrees rtrees = new RdfTrees(path, new StringIntMD5RAMCollision(path), new PredicatesCoding(path), nameSpaceStore,   new LiteralStoreSplited(path, nameSpaceStore));
+            Console.WriteLine("Start RdfInMemory");
+            RdfGraph graph = new RdfGraph(path);
+            Console.WriteLine("Graph ok. duration={0}", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             
-            rtrees.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset1M.ttl", true);
-            return;
-
+            // Загрузка
+            //graph.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset10M.ttl");
+            //return;
+            
             // Разогрев
-            rtrees.WarmUp();
+            //graph.WarmUp();
             // Трассировка
-            XElement tracing = XElement.Load(@"C:\Users\Lena\Downloads\tracing100th.xml");
+            XElement tracing = XElement.Load(@"D:\Users\Marchuk\Downloads\tracing100th.xml");
             Console.WriteLine("N_tests = {0}", tracing.Elements().Count());
             tt0 = DateTime.Now;
             int ecnt = 0, ncnt = 0;
@@ -39,25 +40,32 @@ namespace RdfTreesNamespace
                 string p = p_att == null ? null : p_att.Value;
                 string o = o_att == null ? null : o_att.Value;
                 string res = r_att == null ? null : r_att.Value;
-                if (spo.Name == "spo_")
+                if (spo.Name == "spo")
                 {
-                    bool r = rtrees.ChkOSubjPredObj(
+                    bool r = graph.ChkSubjPredObj(
                         s.GetHashCode(),
                         p.GetHashCode(),
                         o.GetHashCode());
                     if ((res == "true" && r) || (res == "false" && !r)) { ecnt++; }
                     else ncnt++;
                 }
-                else if (spo.Name == "spD_")
+                else if (spo.Name == "spD")
                 {
-                   var lit = rtrees.GetDataBySubjPred(
+                    IEnumerable<long> codes = graph.GetDataCodeBySubjPred(
                         s.GetHashCode(),
-                        p.GetHashCode()).FirstOrDefault();
+                        p.GetHashCode());
+                    Literal lit = null;
+                    // Несколько экзотичный способ получения FirstOrDefault()
+                    foreach (var litcode in codes)
+                    {
+                        lit = graph.DecodeDataCode(litcode);
+                        break;
+                    }
                     if (lit == null) { ncnt++; }
                     else
                     {
                         bool isEq = false;
-                        if (lit.vid == LiteralVidEnumeration.text &&
+                        if (lit.Vid == LiteralVidEnumeration.text &&
                             ((Text)lit.Value).Value == res.Substring(1, res.Length - 2)) isEq = true;
                         else isEq = lit.ToString() == res;
                         if (isEq) ecnt++; else ncnt++;
@@ -65,15 +73,15 @@ namespace RdfTreesNamespace
                 }
                 else if (spo.Name == "spO")
                 {
-                    var query = rtrees.GetObjBySubjPred(
+                    var query = graph.GetObjBySubjPred(
                         s.GetHashCode(),
                         p.GetHashCode()).OrderBy(v => v).ToArray();
                     if (query.Count() == 0 && res == "") continue;
                     ecnt++;
                 }
-                else if (spo.Name == "Spo_")
+                else if (spo.Name == "Spo")
                 {
-                    var query = rtrees.GetSubjectByObjPred(
+                    var query = graph.GetSubjectByObjPred(
                         o.GetHashCode(),
                         p.GetHashCode()).OrderBy(v => v).ToArray();
                     if (query.Count() == 0 && res == "") continue;
@@ -81,8 +89,8 @@ namespace RdfTreesNamespace
                 }
                 
             }
-         //   Console.WriteLine("Equal {0} Not equal {1} debug counter {2}", ecnt, ncnt, rtrees.debug_counter);
-            Console.WriteLine("TOTAL: {0} мс.", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            Console.WriteLine("TOTAL: {0} мс. ecnt={1} ncnt={2}", (DateTime.Now - tt0).Ticks / 10000L, ecnt, ncnt); tt0 = DateTime.Now;
+            //Console.ReadKey();
         }
     }
 }

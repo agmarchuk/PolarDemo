@@ -99,13 +99,13 @@ limitOffsetClauses		returns [Func<IEnumerable<object[]>, IEnumerable<object[]>> 
  | offsetClause { $value =$offsetClause.value; } (limitClause { var valueClone=$value.Clone() as Func<IEnumerable<object[]>,IEnumerable<object[]>>; $value = packs=> $limitClause.value (valueClone(packs)); })? ) ;
 
 
-orderClause	returns [Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> value]
+orderClause	returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> value]
  :'ORDER' 'BY' main= orderCondition { $value = $main.value; }
-  (others = orderCondition { var valueClone=$value.Clone()  as Func<IEnumerable<RPackInt>,IEnumerable<RPackInt>>; var othersRes=$others.value; $value = packs => othersRes(valueClone(packs)); })*	;
+  (others = orderCondition { var valueClone=$value.Clone()  as Func<IEnumerable<QueryNodesSet>,IEnumerable<QueryNodesSet>>; var othersRes=$others.value; $value = packs => othersRes(valueClone(packs)); })*	;
 
 
-orderCondition	 returns [Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> value, bool isDescending]
-:  { q.currentFilterParameter = Expression.Parameter(typeof (RPackInt)); }
+orderCondition	 returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> value, bool isDescending]
+:  { q.currentFilterParameter = Expression.Parameter(typeof (QueryNodesSet)); }
 (( 'ASC' | 'DESC' { $isDescending=true;  } ) brackettedExpression 
 { 
  var orderFunc = Expression.Lambda($brackettedExpression.value, q.currentFilterParameter).Compile();
@@ -195,56 +195,56 @@ offsetClause	returns [Func<IEnumerable<object[]>, IEnumerable<object[]>> value]
 :'OFFSET' INTEGER { $value=sequence=>sequence.Skip(int.Parse($INTEGER.text)); };
 
 
-groupGraphPattern	 returns [Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> value]	
+groupGraphPattern	 returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> value]	
 :'{' (strt=triplesBlock {$value=$strt.value;})? 
 
 ( ( graphPatternNotTriples  
 		{ if($value==null) { $value=$graphPatternNotTriples.value;  }
-					else { var valueClone=$value.Clone() as Func<IEnumerable<RPackInt>,IEnumerable<RPackInt>>;
+					else { var valueClone=$value.Clone() as Func<IEnumerable<QueryNodesSet>,IEnumerable<QueryNodesSet>>;
 					  var graphPatternNotTriplesvalue=$graphPatternNotTriples.value;
 					     $value=packs=>graphPatternNotTriplesvalue(valueClone(packs)); }}
 
 	| filter 
 		{ if($value==null) { $value=$filter.value;  }
-					else {var valueClone=$value.Clone() as Func<IEnumerable<RPackInt>,IEnumerable<RPackInt>>; 
+					else {var valueClone=$value.Clone() as Func<IEnumerable<QueryNodesSet>,IEnumerable<QueryNodesSet>>; 
 					var filtervalue=$filter.value; 
 					$value=packs=> filtervalue(valueClone(packs));
 		}			 }
 	) '.'? 
 	(end=triplesBlock 
-		{	var valueClone=$value.Clone() as Func<IEnumerable<RPackInt>,IEnumerable<RPackInt>>;
+		{	var valueClone=$value.Clone() as Func<IEnumerable<QueryNodesSet>,IEnumerable<QueryNodesSet>>;
 			var endvalue=$end.value; $value=packs=>endvalue(valueClone(packs)); }  
 	)? 
 )* '}'	;
 
 
-triplesBlock returns [Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> value]	 
+triplesBlock returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> value]	 
 : triplesSameSubject {$value=$triplesSameSubject.value;} ( '.' (next=triplesBlock 
 { 
-var valueClone=$value.Clone() as Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>>;  
+var valueClone=$value.Clone() as Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>>;  
 var nextvalue=$next.value; 
 $value=packs=>nextvalue(valueClone(packs));} 
 )? 
 )?;
 
 
-graphPatternNotTriples	returns [Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> value] 
+graphPatternNotTriples	returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> value] 
 : optionalGraphPattern {$value=$optionalGraphPattern.value;}
 | groupOrUnionGraphPattern  {$value=$groupOrUnionGraphPattern.value;}
 | graphGraphPattern {$value=$graphGraphPattern.value;} ;
 
 
-optionalGraphPattern returns [Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> value]	 
+optionalGraphPattern returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> value]	 
 :'OPTIONAL' {short parametersStartIndex = (short)q.Variables.Count; } groupGraphPattern
 {
 	$value = $groupGraphPattern.value.Optional(parametersStartIndex, (short)q.Variables.Count);
 } ;
 
 
-graphGraphPattern	returns [Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> value] :'GRAPH' varOrIRIref groupGraphPattern;
+graphGraphPattern	returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> value] :'GRAPH' varOrIRIref groupGraphPattern;
 
 
-groupOrUnionGraphPattern	returns [Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> value] : 
+groupOrUnionGraphPattern	returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> value] : 
 {short lastKnownIndex = (short)q.Variables.Count;}
 first=groupGraphPattern {$value=$first.value;}
  (
@@ -255,11 +255,11 @@ first=groupGraphPattern {$value=$first.value;}
 	newV.Value.isNew=false; };
 
 
-filter		returns [Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> value]  	
-:'FILTER' { q.currentFilterParameter = Expression.Parameter(typeof (RPackInt));}  
+filter		returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> value]  	
+:'FILTER' { q.currentFilterParameter = Expression.Parameter(typeof (QueryNodesSet));}  
 constraint
 {
-var f=Expression.Lambda<Func<RPackInt, bool>>($constraint.value, q.currentFilterParameter).Compile();
+var f=Expression.Lambda<Func<QueryNodesSet, bool>>($constraint.value, q.currentFilterParameter).Compile();
      $value = pacs => pacs.Where(f);
 } ;
 
@@ -285,8 +285,8 @@ constructTriples
 :	triplesSameSubjectConstruct 	{ q.constructTriples.Add($triplesSameSubjectConstruct.value); }
 ( '.' (next= constructTriples)? )?	;
 
-triplesSameSubjectConstruct	 returns [Func<RPackInt,IEnumerable<Tuple<string,string,string>>> value]
-locals [Func<RPackInt, string> subj=null]
+triplesSameSubjectConstruct	 returns [Func<QueryNodesSet,IEnumerable<Tuple<string,string,string>>> value]
+locals [Func<QueryNodesSet, string> subj=null]
 :	varOrTermSubConstruct propertyListNotEmptyConstruct  
 {  $value=$propertyListNotEmptyConstruct.value; } 
 |	triplesNode propertyList	{} ;
@@ -295,12 +295,12 @@ varOrTermSubConstruct
 : varLiteral {  $triplesSameSubjectConstruct::subj= pac=> pac.Get(q.Variables[$varLiteral.text].index); } 
 | graphTermConstuct  {	$triplesSameSubjectConstruct::subj= pac=> $graphTermConstuct.value; };
 
-propertyListNotEmptyConstruct returns [Func<RPackInt, IEnumerable<Tuple<string,string,string>>> value]
+propertyListNotEmptyConstruct returns [Func<QueryNodesSet, IEnumerable<Tuple<string,string,string>>> value]
 : main= verbObjectListConstruct { $value=$main.value; } 
-( ';'(seconds = verbObjectListConstruct {  var valueClone=$value.Clone() as Func<RPackInt,IEnumerable<Tuple<string,string,string>>>;var scnds=$seconds.value; $value=packs=>scnds(packs).Concat(valueClone(packs)); } )?)*  ;
+( ';'(seconds = verbObjectListConstruct {  var valueClone=$value.Clone() as Func<QueryNodesSet,IEnumerable<Tuple<string,string,string>>>;var scnds=$seconds.value; $value=packs=>scnds(packs).Concat(valueClone(packs)); } )?)*  ;
 
-verbObjectListConstruct  returns [Func<RPackInt, IEnumerable<Tuple<string,string,string>>> value]
-locals[Func<RPackInt, string> pred=null]
+verbObjectListConstruct  returns [Func<QueryNodesSet, IEnumerable<Tuple<string,string,string>>> value]
+locals[Func<QueryNodesSet, string> pred=null]
 : verbConstruct objectListConstruct { $value=$objectListConstruct.value; } ;
 
 verbConstruct
@@ -308,15 +308,15 @@ verbConstruct
 | iRIref	  { $verbObjectListConstruct::pred = pac=> $iRIref.value; }
 | 'a' { $verbObjectListConstruct::pred = pac=> "a"; } ;
 
-objectListConstruct returns [Func<RPackInt, IEnumerable<Tuple<string,string,string>>> value]
+objectListConstruct returns [Func<QueryNodesSet, IEnumerable<Tuple<string,string,string>>> value]
  : o0=graphNodeConstruct { var o0value= $o0.value; $value=pack => Enumerable.Repeat(o0value(pack),1);	 } 
-( ',' o1=graphNodeConstruct {  var valueClone=$value.Clone() as Func<RPackInt,IEnumerable<Tuple<string,string,string>>>; var o11=$o1.value; $value=packs=>valueClone(packs).Concat(Enumerable.Repeat(o11(packs),1)); } )*;
+( ',' o1=graphNodeConstruct {  var valueClone=$value.Clone() as Func<QueryNodesSet,IEnumerable<Tuple<string,string,string>>>; var o11=$o1.value; $value=packs=>valueClone(packs).Concat(Enumerable.Repeat(o11(packs),1)); } )*;
 
-graphNodeConstruct returns [Func<RPackInt, Tuple<string,string,string>> value]
+graphNodeConstruct returns [Func<QueryNodesSet, Tuple<string,string,string>> value]
 : varOrTermConstruct	{ $value=$varOrTermConstruct.value; }
 |	triplesNode	;
 
- varOrTermConstruct returns [Func<RPackInt, Tuple<string,string,string>> value]
+ varOrTermConstruct returns [Func<QueryNodesSet, Tuple<string,string,string>> value]
 : varLiteral 
 {	   
 	var p = $verbObjectListConstruct::pred;
@@ -344,25 +344,25 @@ graphTermConstuct returns[string value]
 
 
 
-triplesSameSubject	 returns [Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> value]
+triplesSameSubject	 returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> value]
 locals [Variable subj=new Variable()]
 :	varOrTermSub propertyListNotEmpty  
 {  $value=$propertyListNotEmpty.f; } 
 |	triplesNode propertyList	{} ;
 
-propertyListNotEmpty  returns [Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> f]
+propertyListNotEmpty  returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> f]
 : main= verbObjectList  { $f=$main.f; } 
-( ';'(seconds = verbObjectList { var valueClone=$f.Clone() as Func<IEnumerable<RPackInt>,IEnumerable<RPackInt>>; var scnds=$seconds.f; $f=packs=>scnds(valueClone(packs)); } )?)*  ;
+( ';'(seconds = verbObjectList { var valueClone=$f.Clone() as Func<IEnumerable<QueryNodesSet>,IEnumerable<QueryNodesSet>>; var scnds=$seconds.f; $f=packs=>scnds(valueClone(packs)); } )?)*  ;
 
 propertyList returns	[List<VarOrTermContext> value]	  : (propertyListNotEmpty {  })?;
 
-verbObjectList  returns [Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> f]
+verbObjectList  returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> f]
 locals[Variable PredicateVariable]
 : verb objectList { $f=$objectList.f; } ;
 
-objectList returns [Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> f]
+objectList returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> f]
  : o0=graphNode { $f=$o0.f;	 } 
-( ',' o1=graphNode { var valueClone=$f.Clone() as Func<IEnumerable<RPackInt>,IEnumerable<RPackInt>>; var o11=$o1.f; $f=packs=>o11(valueClone(packs)); } )*;
+( ',' o1=graphNode { var valueClone=$f.Clone() as Func<IEnumerable<QueryNodesSet>,IEnumerable<QueryNodesSet>>; var o11=$o1.f; $f=packs=>o11(valueClone(packs)); } )*;
 
 verb
 : varOrIRIref { $verbObjectList::PredicateVariable=$varOrIRIref.p; $varOrIRIref.p.isPredicate=true; } 
@@ -373,15 +373,15 @@ PredicateVariable.graph	= new GraphIsDataProperty(){IsData=false};
 $verbObjectList::PredicateVariable=PredicateVariable;	   
 } ;
 											
-triplesNode	 returns	[Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> f] 
+triplesNode	 returns	[Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> f] 
  :	collection { }
  |	blankNodePropertyList {};
 
-blankNodePropertyList	returns	[Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> f] :'[' propertyListNotEmpty ']' {	} ;
+blankNodePropertyList	returns	[Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> f] :'[' propertyListNotEmpty ']' {	} ;
 
-collection	 returns	[Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> f] :'(' ( graphNode {	 } )+ ')';
+collection	 returns	[Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> f] :'(' ( graphNode {	 } )+ ')';
 
-graphNode  returns [Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> f]
+graphNode  returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> f]
 : varOrTerm	{ $f=$varOrTerm.f; }
 |	triplesNode	;
 
@@ -391,7 +391,7 @@ varOrTermSub
 | graphTerm  {	$triplesSameSubject::subj.pacElement = q.ts.EntityCoding.GetCode($graphTerm.entity); };
 
 
- varOrTerm returns [Func<IEnumerable<RPackInt>, IEnumerable<RPackInt>> f]
+ varOrTerm returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> f]
 : var 
 {	   
 	var p = $verbObjectList::PredicateVariable;

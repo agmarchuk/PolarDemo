@@ -109,11 +109,11 @@ namespace TrueRdfViewer
         }
 
         //
-        public static IEnumerable<RPackInt> Query1(TripleStoreInt ts)
+        public static IEnumerable<QueryNodesSet> Query1(TripleStoreInt ts)
         {
             object[] row = new object[3];
             short _produc = 0, _value1 = 1, _label = 2;
-            var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
+            var quer = Enumerable.Repeat<QueryNodesSet>(new QueryNodesSet(row, ts), 1)
                 .Spo(_produc, E(bsbm + "productFeature"), E(bsbm_inst + "ProductFeature19"))
                 .spo(_produc, E(bsbm + "productFeature"), E(bsbm_inst + "ProductFeature8"))
                 .spo(_produc, E(rdf + "type"), E(bsbm_inst + "ProductType1"))
@@ -124,11 +124,11 @@ namespace TrueRdfViewer
             return quer;
         }
         // Вариант первого теста
-        public static IEnumerable<RPackInt> Query1_1(TripleStoreInt ts)
+        public static IEnumerable<QueryNodesSet> Query1_1(TripleStoreInt ts)
         {
             object[] row = new object[3];
             short _produc = 0, _value1 = 1, _label = 2;
-            var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
+            var quer = Enumerable.Repeat<QueryNodesSet>(new QueryNodesSet(row, ts), 1)
                 .Spo(_produc, E(bsbm + "productFeature"), E(bsbm_inst + "ProductFeature17"))
                 //.spo(_produc, E(bsbm + "productFeature"), E(bsbm_inst + "ProductFeature7"))
                 //.spo(_produc, E(rdf + "type"), E(bsbm_inst + "ProductType1"))
@@ -139,11 +139,11 @@ namespace TrueRdfViewer
             return quer;
         }
         // Тестовый запрос для экспериментов
-        public static IEnumerable<RPackInt> Query0(TripleStoreInt ts)
+        public static IEnumerable<QueryNodesSet> Query0(TripleStoreInt ts)
         {
             object[] row = new object[3];
             short _produc = 0, _value1 = 1, _label = 2;
-            var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
+            var quer = Enumerable.Repeat<QueryNodesSet>(new QueryNodesSet(row, ts), 1)
                 .Spo(_produc, bsbm + "productFeature", bsbm_inst + "ProductFeature19")
                 //.spo(_produc, bsbm + "productFeature", bsbm_inst + "ProductFeature8")
                 //.spo(_produc, rdf + "type", bsbm_inst + "ProductType1")
@@ -154,7 +154,7 @@ namespace TrueRdfViewer
             return quer;
         }
         // Не выдает результатов, поэтому не доделан
-        public static IEnumerable<RPackInt> Query2(TripleStoreInt ts)
+        public static IEnumerable<QueryNodesSet> Query2(TripleStoreInt ts)
         {
             object[] row = new object[13];
             short _label = 0, _comment = 1, _producer = 2, _productFeature = 3,
@@ -163,14 +163,14 @@ namespace TrueRdfViewer
                 _propertyTextual4 = 8, _propertyTextual5 = 9,
                 _prolertyNumeric4 = 10;
             short _p = 11, f = 12;
-            var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
+            var quer = Enumerable.Repeat<QueryNodesSet>(new QueryNodesSet(row, ts), 1)
                 .spD(E(bsbm_inst + "ProductType1"), E(rdfs + "label"), _label)
                 .spD(E(bsbm_inst + "ProductType1"), E(rdfs + "comment"), _comment)
                 .spO(E(bsbm_inst + "ProductType1"), E(bsbm + "producer"), _p)
                 ;
             return quer;
         }
-        public static IEnumerable<RPackInt> Query2param(TripleStoreInt ts, string sprod)
+        public static IEnumerable<QueryNodesSet> Query2param(TripleStoreInt ts, string sprod)
         {
             object[] row = new object[13];
             short _label = 0, _comment = 1, _producer = 2, _productFeature = 3,
@@ -179,7 +179,7 @@ namespace TrueRdfViewer
                 _propertyTextual4 = 8, _propertyTextual5 = 9,
                 _prolertyNumeric4 = 10;
             short _p = 11, _f = 12;
-            var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
+            var quer = Enumerable.Repeat<QueryNodesSet>(new QueryNodesSet(row, ts), 1)
                 .spD(E(sprod), E(rdfs + "label"), _label)
                 .spD(E(sprod), E(rdfs + "comment"), _comment)
                 .spO(E(sprod), E(bsbm + "producer"), _p)
@@ -199,12 +199,12 @@ namespace TrueRdfViewer
             return quer;
         }
         // Концовка теста не доделана
-        public static IEnumerable<RPackInt> Query3(TripleStoreInt ts)
+        public static IEnumerable<QueryNodesSet> Query3(TripleStoreInt ts)
         {
             object[] row = new object[5];
             short _product = 0, _label = 1;
             short _p1 = 2, _p3 = 3, _testVar = 4;
-            var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
+            var quer = Enumerable.Repeat<QueryNodesSet>(new QueryNodesSet(row, ts), 1)
                 .Spo(_product, E(bsbm + "productFeature"), E(bsbm_inst + "ProductFeature1"))
                 .spD(_product, E(rdfs + "label"), _label)
                 .spo(_product, E(rdf + "type"), E(bsbm + "Product"))
@@ -216,12 +216,12 @@ namespace TrueRdfViewer
             return quer;
         }
         // Вариант третьего теста
-        public static IEnumerable<RPackInt> Query3_1(TripleStoreInt ts)
+        public static IEnumerable<QueryNodesSet> Query3_1(TripleStoreInt ts)
         {
             object[] row = new object[5];
             short _product = 0, _label = 1;
             short _p1 = 2, _p3 = 3, _testVar = 4;
-            var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
+            var quer = Enumerable.Repeat<QueryNodesSet>(new QueryNodesSet(row, ts), 1)
                 .Spo(_product, E(bsbm + "productFeature"), E(bsbm_inst + "ProductFeature1"))
                 .spD(_product, E(rdfs + "label"), _label)
                 .spo(_product, E(rdf + "type"), E(bsbm + "Product"))
@@ -232,13 +232,13 @@ namespace TrueRdfViewer
                 ;
             return quer;
         }
-        public static IEnumerable<RPackInt> Query5(TripleStoreInt ts)
+        public static IEnumerable<QueryNodesSet> Query5(TripleStoreInt ts)
         {
             string dataFromProducer1 = "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/";
             object[] row = new object[7];
             short _product = 0, _productLabel = 1;
             short _prodFeature = 2, _origProperty1 = 3, _simProperty1 = 4, _origProperty2 = 5, _simProperty2 = 6;
-            var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
+            var quer = Enumerable.Repeat<QueryNodesSet>(new QueryNodesSet(row, ts), 1)
                 .spO(E(dataFromProducer1 + "Product12"), E(bsbm + "productFeature"), _prodFeature)
                 .Spo(_product, E(bsbm + "productFeature"), _prodFeature)
                 .Where(pack => E(dataFromProducer1 + "Product12") != pack.GetE(_product))
@@ -253,13 +253,13 @@ namespace TrueRdfViewer
                 ;
             return quer;
         }
-        public static IEnumerable<RPackInt> Query5parameter(TripleStoreInt ts, string sprod)
+        public static IEnumerable<QueryNodesSet> Query5parameter(TripleStoreInt ts, string sprod)
         {
             string dataFromProducer1 = sprod;
             object[] row = new object[7];
             short _product = 0, _productLabel = 1;
             short _prodFeature = 2, _origProperty1 = 3, _simProperty1 = 4, _origProperty2 = 5, _simProperty2 = 6;
-            var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
+            var quer = Enumerable.Repeat<QueryNodesSet>(new QueryNodesSet(row, ts), 1)
                 .spO(E(dataFromProducer1), E(bsbm + "productFeature"), _prodFeature)
                 .Spo(_product, E(bsbm + "productFeature"), _prodFeature)
                 .Where(pack => E(dataFromProducer1) != pack.GetE(_product))
@@ -273,12 +273,12 @@ namespace TrueRdfViewer
                 ;
             return quer;
         }
-        public static IEnumerable<RPackInt> Query6(TripleStoreInt ts)
+        public static IEnumerable<QueryNodesSet> Query6(TripleStoreInt ts)
         {
             System.Text.RegularExpressions.Regex rx = new System.Text.RegularExpressions.Regex("^s");
             object[] row = new object[2];
             short _product = 0, _label = 1;
-            var quer = Enumerable.Repeat<RPackInt>(new RPackInt(row, ts), 1)
+            var quer = Enumerable.Repeat<QueryNodesSet>(new QueryNodesSet(row, ts), 1)
                 .Spo(_product, E(rdf + "type"), E(bsbm + "Product"))
                 .spD(_product, E(rdfs + "label"), _label)
                 .Where(pack => rx.IsMatch(((Text)pack.Val(_label).Value).Value))
