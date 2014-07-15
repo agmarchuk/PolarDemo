@@ -79,13 +79,24 @@ namespace RdfInMemory
         {
             LoadTypes();
             this.path = path;
+
+            if (!tofilldictionary) Warmup(path + "tree_fix.pxc");
+            if (!tofilldictionary) Warmup(path + "literals.pac");
+
             otriples = new PaCell(tp_otriples, path + "otriples.pac", false);
             literals = new PaCell(tp_rliteral_seq, path + "literals.pac", false);
             dtriples = new PaCell(tp_dtriples, path + "dtriples.pac", false);
             tree_fix = new PxCell(tp_entitiesTree, path + "tree_fix.pxc", false);
             if (tofilldictionary) FillDictionary();
+            
         }
-
+        private void Warmup(string path)
+        {
+            byte[] buffer = new byte[1024];
+            System.IO.FileStream fs = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);
+            while (fs.Read(buffer, 0, buffer.Length) == buffer.Length) ;
+            fs.Close();
+        }
         public bool IsEmpty { get { return tree_fix.Root.Count() == 0; } }
 
         public void Clear()
