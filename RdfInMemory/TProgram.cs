@@ -17,12 +17,12 @@ namespace RdfInMemory
             DateTime tt0 = DateTime.Now;
             TGraph gra = new TGraph(path);
             Console.WriteLine("Построение графа: {0} мс.", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-            bool toload = false;
+            bool toload = true;
             if (toload)
             {
                 tt0 = DateTime.Now;
                 TTurtleParser parser = new TTurtleParser();
-                parser.Load(gra, datasetpath + "dataset10M.ttl");
+                parser.Load(gra, datasetpath + "dataset100M.ttl");
                 Console.WriteLine("TOTAL: {0} мс.", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
             }
             else

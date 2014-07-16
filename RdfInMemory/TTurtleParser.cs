@@ -15,12 +15,15 @@ namespace RdfInMemory
             int ntriples = 0;
             string subject = null;
             //Dictionary<string, string> namespaces = new Dictionary<string, string>();
+            long nchars = 0L;
+            DateTime tt0 = DateTime.Now;
             System.IO.StreamReader sr = new System.IO.StreamReader(datafile);
             for (int i = 0; ; i++)
             {
                 string line = sr.ReadLine();
-                //if (i % 10000 == 0) { Console.Write("{0} ", i / 10000); }
+                if (i > 0 && i % 100000 == 0) { Console.Write("{0}:{1} ", i / 100000, (DateTime.Now - tt0).Ticks * 100L / nchars); tt0 = DateTime.Now; nchars = 0; }
                 if (line == null) break;
+                nchars += line.Length;
                 if (line == "") continue;
                 if (line[0] == '@')
                 { // namespace
@@ -30,7 +33,7 @@ namespace RdfInMemory
                         Console.WriteLine("Err: strange line: " + line);
                         continue;
                     }
-                    string pref = parts[1];
+                    string pref = parts[1].Substring(0, parts[1].Length - 1);
                     string nsname = parts[2];
                     if (nsname.Length < 3 || nsname[0] != '<' || nsname[nsname.Length - 1] != '>')
                     {
@@ -40,12 +43,13 @@ namespace RdfInMemory
                     nsname = nsname.Substring(1, nsname.Length - 2);
                     //namespaces.Add(pref, nsname);
                     g.NamespaceMap.AddNamespace(pref, new Uri(nsname));
+                    //Console.WriteLine("ns={0} {1}", pref, nsname);
                 }
                 else if (line[0] != ' ')
                 { // Subject
                     line = line.Trim();
                     subject = GetEntityString(g, line);
-                    if (subject == null) continue;
+                    //if (subject == null) continue;
                 }
                 else
                 { // Predicate and object
@@ -82,7 +86,7 @@ namespace RdfInMemory
             string subject = null;
             int colon = line.IndexOf(':');
             if (colon == -1) { Console.WriteLine("Err in line: " + line); goto End; }
-            string prefix = line.Substring(0, colon + 1);
+            string prefix = line.Substring(0, colon);
             if (!g.NamespaceMap.HasNamespace(prefix)) { Console.WriteLine("Err in line: " + line); goto End; }
             subject = g.NamespaceMap.GetNamespaceUri(prefix).OriginalString + line.Substring(colon + 1);
         End:
