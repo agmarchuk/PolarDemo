@@ -16,7 +16,7 @@ namespace RdfInMemory
         public void RemoveNamespace(string prefix) { prefUri.Remove(prefix); } // Нужна защита
         public Uri GetNamespaceUri(string prefix) { return prefUri[prefix]; } // Нужна защита?
         public string GetPrefix(Uri uri) { return prefUri.Where(pu => pu.Value == uri).Select(pu => pu.Key).FirstOrDefault(); }
-        public bool HasNamespace(string prefix) { return prefUri.Any(pu => pu.Key == prefix); }
+        public bool HasNamespace(string prefix) { return prefUri.ContainsKey(prefix); }
         /// <summary>
         /// A Function which attempts to reduce a Uri to a QName. 
         /// This function will return a Boolean indicated whether it succeeded in reducing the Uri to a QName. 
