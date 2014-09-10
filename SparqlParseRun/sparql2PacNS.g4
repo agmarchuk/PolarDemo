@@ -17,16 +17,15 @@ options
 	using System.Xml.Linq;		
 	using System.Text.RegularExpressions;
     using SparqlParseRun;
-  
+	using RdfInMemoryCopy;
 	using System.Linq.Expressions;
-	using TripleIntClasses;
 }
 
 
 @members{		  	
 
 public static Regex PrefixNSSlpit=new Regex("^([^:]*:)(.*)$");
-public Query q;		
+public SparqlQuery q;		
 }
 
 
@@ -51,23 +50,23 @@ selectQuery	 :'SELECT'
 ( 'DISTINCT' { q.isDistinct=true;	}  | 'REDUCED' { q.isReduce=true;	} )? 
 ( (varLiteral	{ q.variables.Add($varLiteral.text);	 } )+  | '*'  { q.all=true;	} )		   
 datasetClause* whereClause solutionModifier
-{  q.CreateSelectRun(); } ;
+{   q.ResultSet.ResultType=ResultType.Select;} ;
 
 
 constructQuery	 :'CONSTRUCT' constructTemplate datasetClause* whereClause solutionModifier
 {	    
-q.CreateConstructRun();
+ q.ResultSet.ResultType=ResultType.Construct;
 };
 
 
 describeQuery	
  : 'DESCRIBE'  
-( (varLiteral {q.variables.Add($varLiteral.text);} | iRIref { q.constants.Add(q.ts.CodeEntityFullName( $iRIref.text)); } )+ 
+( (varLiteral {q.variables.Add($varLiteral.text);} | iRIref { q.constants.Add($iRIref.text); } )+ 
 | '*' { q.all=true; }) datasetClause* whereClause? solutionModifier  
-{q.CreateDescribeRun();};
+{ q.ResultSet.ResultType=ResultType.Describe; };
 
 
-askQuery	 :'ASK'  datasetClause* whereClause {q.CreateAsqRun();};
+askQuery	 :'ASK'  datasetClause* whereClause {q.ResultSet.ResultType=ResultType.Ask;};
 
 
 datasetClause	 :'FROM'  ( defaultGraphClause | namedGraphClause );
@@ -75,7 +74,7 @@ datasetClause	 :'FROM'  ( defaultGraphClause | namedGraphClause );
 
 defaultGraphClause	 : sourceSelector;
 
-
+ 
 namedGraphClause	 :'NAMED' sourceSelector;
 
 
@@ -83,473 +82,348 @@ sourceSelector	: iRIref ;
 
 
 whereClause	 :'WHERE'?
- groupGraphPattern { q.Where=$groupGraphPattern.value; };
+ groupGraphPattern {q.SparqlWhere.Triples.AddRange($groupGraphPattern.value.Triples);};
 
 
 solutionModifier 
-: (orderClause { q.solutionModifierOrder = $orderClause.value; } )? 
-(limitOffsetClauses 
-{
-q.solutionModifierCount=$limitOffsetClauses.value;
-})? ;
+: (orderClause )? 
+(limitOffsetClauses )? ;
 
 
-limitOffsetClauses		returns [Func<IEnumerable<object[]>, IEnumerable<object[]>> value]
- : (limitClause { $value =$limitClause.value; } ( offsetClause { var valueClone=$value.Clone()  as Func<IEnumerable<object[]>,IEnumerable<object[]>>; $value = packs=> $offsetClause.value (valueClone(packs)); })? 
- | offsetClause { $value =$offsetClause.value; } (limitClause { var valueClone=$value.Clone() as Func<IEnumerable<object[]>,IEnumerable<object[]>>; $value = packs=> $limitClause.value (valueClone(packs)); })? ) ;
+limitOffsetClauses		
+ : (limitClause { q.ListSolutionModifiersCount.Add($limitClause.value); } ( offsetClause { q.ListSolutionModifiersCount.Add($offsetClause.value); })? 
+ | offsetClause { q.ListSolutionModifiersCount.Add($offsetClause.value); } (limitClause { q.ListSolutionModifiersCount.Add($limitClause.value); })? ) ;
 
 
-orderClause	returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> value]
- :'ORDER' 'BY' main= orderCondition { $value = $main.value; }
-  (others = orderCondition { var valueClone=$value.Clone()  as Func<IEnumerable<QueryNodesSet>,IEnumerable<QueryNodesSet>>; var othersRes=$others.value; $value = packs => othersRes(valueClone(packs)); })*	;
+orderClause
+ :'ORDER' 'BY' main= orderCondition {q.ListSolutionModifiersOrder.Add($main.value); }
+  (others = orderCondition { q.ListSolutionModifiersOrder.Add($others.value); })*;
 
 
-orderCondition	 returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> value, bool isDescending]
-:  { q.currentFilterParameter = Expression.Parameter(typeof (QueryNodesSet)); }
+orderCondition	 returns [Func<IEnumerable<SparqlResult>, IEnumerable<SparqlResult>> value, bool isDescending]
+:  
 (( 'ASC' | 'DESC' { $isDescending=true;  } ) brackettedExpression 
 { 
- var orderFunc = Expression.Lambda($brackettedExpression.value, q.currentFilterParameter).Compile();
- if($isDescending)
-	$value = pacs => pacs.OrderByDescending(pac=>
-						{
-						    var o = orderFunc.DynamicInvoke(pac);
-                            if(o is Int32)
-						    return (int)o;
-                            else if (!(o is Literal))
-                                return o;
-                            else
+ var orderExpr = $brackettedExpression.value;
+ 
+ 	Func<SparqlResult, dynamic> orderFunc =  pac =>
+						{ var o = orderExpr(pac);
+                            if(o is VariableNode )
+							return pac[((VariableNode)o).index];
+                            //if(o is IUriNode)
+						    return o;
+                            //if(o is ILiteralNode)                            
                             {
-                                var l = (Literal)o;
-                                if (l.Value is double)
-                                    return (double) l.Value;
-                                if (l.Value is long)
-                                    return (long)l.Value;
-                                return l.ToString();
+                                var l = (ILiteralNode)o;
+                                //if (l.Value is double)
+                                //    return double.Parse(l.Value);
+                                //if (l.Value is long)
+                                //    return long.Parse(l.Value);
+                                return l;
                             }
-						});
- else 
-$value = pacs => pacs.OrderByDescending(pac=>
-						{
-						    var o = orderFunc.DynamicInvoke(pac);
-                            if(o is Int32)
-						    return (int)o;
-                            else if (!(o is Literal))
-                                return o;
-                            else
-                            {
-                                var l = (Literal)o;
-                                if (l.Value is double)
-                                    return (double) l.Value;
-                                if (l.Value is long)
-                                    return (long)l.Value;
-                                return l.ToString();
-                            }
-						});
- 	 } ) 
+							throw new NotImplementedException();						     
+						};
+ if($isDescending)$value = pacs => pacs.OrderByDescending(orderFunc);
+ else  $value = pacs => pacs.OrderBy(orderFunc);
+  	 } ) 
 | ( constraint {
-  var orderExpr = Expression.Lambda($constraint.value, q.currentFilterParameter).Compile();	 
-	$value = pacs=> pacs.OrderBy(pac=>
+  var orderExpr = $constraint.value;
+		Func<SparqlResult, dynamic> orderFunc = pac=>
 						{
-						    var o = orderExpr.DynamicInvoke(pac);
-                            if(o is Int32)
-						    return (int)o;
-                            else if (!(o is Literal))
-                                return o;
-                            else
+						    var o = orderExpr(pac);
+                            if(o is VariableNode )
+														return pac[((VariableNode)o).index];
+                            if(o is IUriNode)
+						    return o;                            
+                            if(o is ILiteralNode)                            
                             {
-                                var l = (Literal)o;
-                                if (l.Value is double)
-                                    return (double) l.Value;
-                                if (l.Value is long)
-                                    return (long)l.Value;
-                                return l.ToString();
+                                var l = (ILiteralNode)o;
+                                //if (l.Value is double)
+                                //    return double.Parse(l.Value);
+                                //if (l.Value is long)
+                                //    return long.Parse(l.Value);
+                                return l;
                             }
-						});
+							throw new NotImplementedException();
+						};
+						$value = packs=>packs.OrderBy(orderFunc);
+
  } | var {
- var orderExpr = Expression.Lambda(q.Parameter($var.p), q.currentFilterParameter).Compile();	 
-	$value = pacs=> pacs.OrderBy(pac=>
-						{
-						    var o = orderExpr.DynamicInvoke(pac);
-                            if(o is Int32)
-						    return (int)o;
-                            else if (!(o is Literal))
-                                return o;
-                            else
-                            {
-                                var l = (Literal)o;
-                                if (l.Value is double)
-                                    return (double) l.Value;
-                                if (l.Value is long)
-                                    return (long)l.Value;
-                                return l.ToString();
-                            }
-						});
+int i = ($var.p.index);
+	Func<SparqlResult, dynamic> orderFunc = pac=> pac[i];
+						
+						$value = pack => pack.OrderBy(orderFunc);
  } )	  ;
 
 
-limitClause	 returns [Func<IEnumerable<object[]>, IEnumerable<object[]>> value]
+limitClause	 returns [Func<IEnumerable<SparqlResult>, IEnumerable<SparqlResult>> value]
 :'LIMIT' INTEGER  { $value=sequence=>sequence.Take(int.Parse($INTEGER.text)); };
 
 
-offsetClause	returns [Func<IEnumerable<object[]>, IEnumerable<object[]>> value] 
+offsetClause	returns [Func<IEnumerable<SparqlResult>, IEnumerable<SparqlResult>> value] 
 :'OFFSET' INTEGER { $value=sequence=>sequence.Skip(int.Parse($INTEGER.text)); };
 
 
-groupGraphPattern	 returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> value]	
-:'{' (strt=triplesBlock {$value=$strt.value;})? 
-
-( ( graphPatternNotTriples  
-		{ if($value==null) { $value=$graphPatternNotTriples.value;  }
-					else { var valueClone=$value.Clone() as Func<IEnumerable<QueryNodesSet>,IEnumerable<QueryNodesSet>>;
-					  var graphPatternNotTriplesvalue=$graphPatternNotTriples.value;
-					     $value=packs=>graphPatternNotTriplesvalue(valueClone(packs)); }}
-
-	| filter 
-		{ if($value==null) { $value=$filter.value;  }
-					else {var valueClone=$value.Clone() as Func<IEnumerable<QueryNodesSet>,IEnumerable<QueryNodesSet>>; 
-					var filtervalue=$filter.value; 
-					$value=packs=> filtervalue(valueClone(packs));
-		}			 }
-	) '.'? 
-	(end=triplesBlock 
-		{	var valueClone=$value.Clone() as Func<IEnumerable<QueryNodesSet>,IEnumerable<QueryNodesSet>>;
-			var endvalue=$end.value; $value=packs=>endvalue(valueClone(packs)); }  
-	)? 
+groupGraphPattern	returns [SparqlWhere value=new SparqlWhere()]	 
+:'{' (triplesBlock {$value.Triples.AddRange($triplesBlock.value.Triples);})? 
+( ( graphPatternNotTriples { $value.Triples.Add($graphPatternNotTriples.value);  }
+	| filter 		{ $value.Triples.Add($filter.value);  }	) '.'? 
+	(triplesBlock {$value.Triples.AddRange($triplesBlock.value.Triples);})? 
 )* '}'	;
 
 
-triplesBlock returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> value]	 
-: triplesSameSubject {$value=$triplesSameSubject.value;} ( '.' (next=triplesBlock 
-{ 
-var valueClone=$value.Clone() as Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>>;  
-var nextvalue=$next.value; 
-$value=packs=>nextvalue(valueClone(packs));} 
-)? 
-)?;
+triplesBlock returns [SparqlWhere value=new SparqlWhere()]	 
+: triplesSameSubject {$value.Triples.AddRange($triplesSameSubject.value.Triples);} 
+( '.' (next=triplesBlock {$value.Triples.AddRange($next.value.Triples); } )? )?;
 
 
-graphPatternNotTriples	returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> value] 
+graphPatternNotTriples	returns [ISparqlWhereItem value] 
 : optionalGraphPattern {$value=$optionalGraphPattern.value;}
 | groupOrUnionGraphPattern  {$value=$groupOrUnionGraphPattern.value;}
 | graphGraphPattern {$value=$graphGraphPattern.value;} ;
 
 
-optionalGraphPattern returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> value]	 
-:'OPTIONAL' {short parametersStartIndex = (short)q.Variables.Count; } groupGraphPattern
+optionalGraphPattern returns [OptionalWhere value]	 
+:'OPTIONAL' {int parametersStartIndex = q.ResultSet.Variables.Count; } groupGraphPattern
 {
-	$value = $groupGraphPattern.value.Optional(parametersStartIndex, (short)q.Variables.Count);
+	$value=new OptionalWhere(q.ResultSet);
+	$value.Triples= $groupGraphPattern.value.Triples;
+	$value.StartIndex=parametersStartIndex;;
+	$value.EndIndex = q.ResultSet.Variables.Count;
 } ;
 
 
-graphGraphPattern	returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> value] :'GRAPH' varOrIRIref groupGraphPattern;
+graphGraphPattern	returns [ISparqlWhereItem value] :'GRAPH' varOrIRIref groupGraphPattern {			throw new NotImplementedException();};
 
 
-groupOrUnionGraphPattern	returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> value] : 
-{short lastKnownIndex = (short)q.Variables.Count;}
-first=groupGraphPattern {$value=$first.value;}
- (
- {  foreach(var newV in q.Variables.Skip(lastKnownIndex))
-	newV.Value.isNew=true; }
- 'UNION' second=groupGraphPattern { $value= $value.Union($second.value);})*   
- { foreach(var newV in q.Variables.Skip(lastKnownIndex))
-	newV.Value.isNew=false; };
+groupOrUnionGraphPattern	returns [UnionWhere value] : 
+{
+ $value=new UnionWhere(q.ResultSet);  
+}
+first=groupGraphPattern { $value.Add($first.value, q.ResultSet.Variables.Count);}
+ ('UNION' second=groupGraphPattern { $value.Add($second.value, q.ResultSet.Variables.Count);})* ;
 
-
-filter		returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> value]  	
-:'FILTER' { q.currentFilterParameter = Expression.Parameter(typeof (QueryNodesSet));}  
+filter		returns [SparqlFilter value]  	
+:'FILTER'  
 constraint
 {
-var f=Expression.Lambda<Func<QueryNodesSet, bool>>($constraint.value, q.currentFilterParameter).Compile();
-     $value = pacs => pacs.Where(f);
+var f=$constraint.value;
+     $value = new SparqlFilter(q.ResultSet){ Filter  = f };
 } ;
 
 
-constraint	returns [Expression value]
+constraint	returns [Func<SparqlResult, dynamic> value]
 : brackettedExpression {$value=$brackettedExpression.value;}
 | builtInCall {$value=$builtInCall.value;}
 | functionCall	{$value=$functionCall.value;};
 
 
-functionCall returns [Expression value]	 
+functionCall returns [Func<SparqlResult, dynamic> value]	 
 :iRIref argList {$value=q.Call($iRIref.value, $argList.value);};
 
 
-argList		returns [List<Expression> value] 
-: ( NIL {} | '(' main=expression { $value=new List<Expression>(){ $main.value }; } ( ',' second=expression { $value.Add($second.value); } )* ')' );
+argList		returns [List<Func<SparqlResult, dynamic>> value] 
+: ( NIL {} | '(' main=expression { $value=new List<Func<SparqlResult, dynamic>>(){ $main.value }; } 
+( ',' second=expression { $value.Add($second.value); } )* ')' );
 
 
 constructTemplate 
-:'{' (constructTriples { q.CreateConstructTemplate(); } )? '}'  ;
+:'{' (constructTriples )? '}'  ;
 
 constructTriples 
-:	triplesSameSubjectConstruct 	{ q.constructTriples.Add($triplesSameSubjectConstruct.value); }
-( '.' (next= constructTriples)? )?	;
+:	triplesSameSubject	 { q.Construct.Triples.AddRange($triplesSameSubject.value.Triples);} 
+( '.' (next= constructTriples )? )?	;
 
-triplesSameSubjectConstruct	 returns [Func<QueryNodesSet,IEnumerable<Tuple<string,string,string>>> value]
-locals [Func<QueryNodesSet, string> subj=null]
-:	varOrTermSubConstruct propertyListNotEmptyConstruct  
-{  $value=$propertyListNotEmptyConstruct.value; } 
-|	triplesNode propertyList	{} ;
-
-varOrTermSubConstruct
-: varLiteral {  $triplesSameSubjectConstruct::subj= pac=> pac.Get(q.Variables[$varLiteral.text].index); } 
-| graphTermConstuct  {	$triplesSameSubjectConstruct::subj= pac=> $graphTermConstuct.value; };
-
-propertyListNotEmptyConstruct returns [Func<QueryNodesSet, IEnumerable<Tuple<string,string,string>>> value]
-: main= verbObjectListConstruct { $value=$main.value; } 
-( ';'(seconds = verbObjectListConstruct {  var valueClone=$value.Clone() as Func<QueryNodesSet,IEnumerable<Tuple<string,string,string>>>;var scnds=$seconds.value; $value=packs=>scnds(packs).Concat(valueClone(packs)); } )?)*  ;
-
-verbObjectListConstruct  returns [Func<QueryNodesSet, IEnumerable<Tuple<string,string,string>>> value]
-locals[Func<QueryNodesSet, string> pred=null]
-: verbConstruct objectListConstruct { $value=$objectListConstruct.value; } ;
-
-verbConstruct
-: varLiteral { $verbObjectListConstruct::pred = pac=> pac.Get(q.Variables[$varLiteral.text].index); } 
-| iRIref	  { $verbObjectListConstruct::pred = pac=> $iRIref.value; }
-| 'a' { $verbObjectListConstruct::pred = pac=> "a"; } ;
-
-objectListConstruct returns [Func<QueryNodesSet, IEnumerable<Tuple<string,string,string>>> value]
- : o0=graphNodeConstruct { var o0value= $o0.value; $value=pack => Enumerable.Repeat(o0value(pack),1);	 } 
-( ',' o1=graphNodeConstruct {  var valueClone=$value.Clone() as Func<QueryNodesSet,IEnumerable<Tuple<string,string,string>>>; var o11=$o1.value; $value=packs=>valueClone(packs).Concat(Enumerable.Repeat(o11(packs),1)); } )*;
-
-graphNodeConstruct returns [Func<QueryNodesSet, Tuple<string,string,string>> value]
-: varOrTermConstruct	{ $value=$varOrTermConstruct.value; }
-|	triplesNode	;
-
- varOrTermConstruct returns [Func<QueryNodesSet, Tuple<string,string,string>> value]
-: varLiteral 
-{	   
-	var p = $verbObjectListConstruct::pred;
-	var s = $triplesSameSubjectConstruct::subj;		  	
-	string oVar=$varLiteral.text;
-	$value = pac=> Tuple.Create(s(pac), p(pac), pac.Get(q.Variables[oVar].index));
-  } 
-| graphTermConstuct
-{
-	
-	var p = $verbObjectListConstruct::pred;
-	var s = $triplesSameSubjectConstruct::subj;		  	
-	string oVar=$graphTermConstuct.text;
-	$value =pac => Tuple.Create( s(pac), p(pac), $graphTermConstuct.value);
-};
-
-graphTermConstuct returns[string value]	 
-:	iRIref 	{   $value = $iRIref.value; } 
-|	rDFLiteral 	{ $value = $rDFLiteral.value.ToString(); } 
-|	numeric {  $value = $numeric.text; } 
-|	BooleanLiteral {	 $value = $BooleanLiteral.text; } 
-|	BlankNode  { $value = $BlankNode.text; } 
-|	NIL	{	$value =$NIL.text;  } ;
-
-
-
-
-triplesSameSubject	 returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> value]
-locals [Variable subj=new Variable()]
+triplesSameSubject	 returns [SparqlWhere value]
+locals [SparqlNode subj]
 :	varOrTermSub propertyListNotEmpty  
-{  $value=$propertyListNotEmpty.f; } 
+{  $value=$propertyListNotEmpty.value; } 
 |	triplesNode propertyList	{} ;
 
-propertyListNotEmpty  returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> f]
-: main= verbObjectList  { $f=$main.f; } 
-( ';'(seconds = verbObjectList { var valueClone=$f.Clone() as Func<IEnumerable<QueryNodesSet>,IEnumerable<QueryNodesSet>>; var scnds=$seconds.f; $f=packs=>scnds(valueClone(packs)); } )?)*  ;
+propertyListNotEmpty  returns [SparqlWhere value]
+: main= verbObjectList  { $value=$main.value; } 
+( ';'(seconds = verbObjectList { $value.Triples.AddRange($seconds.value.Triples); } )?)*  ;
 
-propertyList returns	[List<VarOrTermContext> value]	  : (propertyListNotEmpty {  })?;
+propertyList : (propertyListNotEmpty {  })?;
 
-verbObjectList  returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> f]
-locals[Variable PredicateVariable]
-: verb objectList { $f=$objectList.f; } ;
+verbObjectList  returns [SparqlWhere value]
+locals[SparqlNode Predicate]
+: verb objectList { $value=$objectList.value; } ;
 
-objectList returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> f]
- : o0=graphNode { $f=$o0.f;	 } 
-( ',' o1=graphNode { var valueClone=$f.Clone() as Func<IEnumerable<QueryNodesSet>,IEnumerable<QueryNodesSet>>; var o11=$o1.f; $f=packs=>o11(valueClone(packs)); } )*;
+objectList returns [SparqlWhere value]
+ : o0=graphNode { $value=$o0.value;	 } 
+( ',' o1=graphNode { $value.Triples.AddRange($o1.value.Triples); } )*;
 
 verb
-: varOrIRIref { $verbObjectList::PredicateVariable=$varOrIRIref.p; $varOrIRIref.p.isPredicate=true; } 
-| 'a' {	
-var PredicateVariable=new Variable(){isPredicate=true};							   
-PredicateVariable.pacElement = q.ts.PredicatesCoding.GetCode(q.ts.NameSpaceStore.@type);  
-PredicateVariable.graph	= new GraphIsDataProperty(){IsData=false};
-$verbObjectList::PredicateVariable=PredicateVariable;	   
-} ;
+: varOrIRIref { $verbObjectList::Predicate=$varOrIRIref.p; } 
+| 'a' {	$verbObjectList::Predicate=new SparqlUriNode{ Uri=new Uri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")}; } ;
 											
-triplesNode	 returns	[Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> f] 
- :	collection { }
+triplesNode	 returns	[SparqlWhere value]
+ :	collection { $value=$collection.value; }
  |	blankNodePropertyList {};
 
-blankNodePropertyList	returns	[Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> f] :'[' propertyListNotEmpty ']' {	} ;
+blankNodePropertyList	returns	[SparqlWhere f] :'[' propertyListNotEmpty ']' {	} ;
 
-collection	 returns	[Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> f] :'(' ( graphNode {	 } )+ ')';
+collection	 returns	[SparqlWhere value=new SparqlWhere()] :'(' ( graphNode { $value.Triples.AddRange($graphNode.value.Triples); } )+ ')';
 
-graphNode  returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> f]
-: varOrTerm	{ $f=$varOrTerm.f; }
-|	triplesNode	;
+graphNode  returns [SparqlWhere value =new SparqlWhere()]
+: varOrTerm	{ $value.Triples.Add($varOrTerm.value); }
+|	triplesNode {$value=$triplesNode.value;} ;
 
 
 varOrTermSub 
-: var  { $triplesSameSubject::subj=$var.p; q.SetSubjectIsDataFalse($var.p);} 
-| graphTerm  {	$triplesSameSubject::subj.pacElement = q.ts.EntityCoding.GetCode($graphTerm.entity); };
+: var  { $triplesSameSubject::subj=$var.p; }
+| graphTerm  {	$triplesSameSubject::subj = $graphTerm.value; };
 
 
- varOrTerm returns [Func<IEnumerable<QueryNodesSet>, IEnumerable<QueryNodesSet>> f]
+ varOrTerm returns [SparqlTriplet value]
 : var 
 {	   
-	var p = $verbObjectList::PredicateVariable;
+	var p = $verbObjectList::Predicate;
 	var sVar = $triplesSameSubject::subj;		  	
-		$f = q.CreateTriplet(sVar, p, $var.p, null);	 		
+		$value = new SparqlTriplet(sVar, p, $var.p);	 		
   } 
 | graphTerm 
 {
-	var p = $verbObjectList::PredicateVariable;
+	var p = $verbObjectList::Predicate;
 	var sVar = $triplesSameSubject::subj;
-	var o=new Variable();	
-if($graphTerm.d==null)	
-		{		
-		 o.graph=new GraphIsDataProperty(){IsData=false};
-		o.pacElement = q.ts.EntityCoding.GetCode($graphTerm.entity);
-		}
-	else
-		{ 
-		o.graph=new GraphIsDataProperty(){IsData=true, vid=$graphTerm.d.vid};	 		
-		}		 
-	$f = q.CreateTriplet(sVar, p, o, d:$graphTerm.d);	
+	$value = new SparqlTriplet(sVar, p, $graphTerm.value);	
 };
 
-varOrIRIref	  returns[Variable p]
-:var  {  $p=$var.p;  } 
+varOrIRIref	  returns[SparqlNode p]
+:var  {  $p= $var.p;  } 
 | iRIref 
 {	
-$p=new Variable(){
-    pacElement = q.ts.PredicatesCoding.GetCode($iRIref.value)	 };
-	GraphIsDataProperty graph;
-	if (!q.isDataGraph.TryGetValue($p.pacElement, out graph)) 	
-            {                
-                q.isDataGraph.Add($p.pacElement, graph = new GraphIsDataProperty());
-            }
-			$p.graph= graph;
-			var  literalType=q.ts.PredicatesCoding.LiteralVid[(int)$p.pacElement];
-			if(literalType==null)
-			graph.IsData=false;
-			else graph.vid=literalType.Value;       
+$p= $iRIref.value;    
 };
 
-var returns [Variable p]
+var returns [VariableNode p]
 : varLiteral
 {
-$p =	q.GetVariable($varLiteral.text);
+$p = q.GetVariable($varLiteral.text);
 };
 
 varLiteral 	 
 : VAR1  
 | VAR2 ;
 
-graphTerm returns[string entity, Literal d]	 
-:	iRIref 	{   $entity = $iRIref.value; } 
-|	rDFLiteral {$d = $rDFLiteral.value;}
-|	numeric {  $d = new Literal(LiteralVidEnumeration.integer) {Value = $numeric.num }; } 
-|	BooleanLiteral {	 $d = new Literal(LiteralVidEnumeration.boolean) {Value = bool.Parse($BooleanLiteral.text)}; } 
-|	BlankNode  { $entity =$BlankNode.text; } 
-|	NIL	{	$d = new Literal(LiteralVidEnumeration.nil);  }   ;
+graphTerm returns[SparqlNode value]	 
+:	iRIref 	{   $value =$iRIref.value; } 
+|	rDFLiteral {$value =$rDFLiteral.value;}
+|	numeric {  $value =new SparqlLiteralNode{Content=$numeric.num}; } 
+|	BooleanLiteral {	 $value =new SparqlLiteralNode{ Content=bool.Parse($BooleanLiteral.text)}; } 
+|	BlankNode  { $value = new SparqlBlankNode($BlankNode.text); } 
+|	NIL	{	$value = null;  }   ;
 
-expression	 returns [Expression value, Variable singleNewParameter] 
-: {int lastKnownIndex=q.Variables.Count;} conditionalAndExpression {$value=$conditionalAndExpression.value; $singleNewParameter=$conditionalAndExpression.singleNewParameter; } 
-( {  foreach(var newV in q.Variables.Skip(lastKnownIndex))	newV.Value.isNew=true; }
-'||' conditionalAndExpression {$value=Expression.Or($value, $conditionalAndExpression.value); $singleNewParameter=null;})*
-{  foreach(var newV in q.Variables.Skip(lastKnownIndex))	newV.Value.isNew=false; };
+expression	 returns [Func<SparqlResult, dynamic> value] 
+:  main=conditionalAndExpression { $value=$main.value;  } 
+( '||' alt=conditionalAndExpression 
+{ Func<SparqlResult, dynamic> cloneValue=$value; 
+Func<SparqlResult, dynamic> cloneAlt=$alt.value;
+	$value = x=> cloneValue(x) || cloneAlt(x); 
+	} )* ;
 
-conditionalAndExpression	 returns [Expression value, Variable singleNewParameter] 
-: main=valueLogical		{$value=$main.value;						$singleNewParameter=$main.singleNewParameter; } 
-( '&&' alt=valueLogical {$value=Expression.And($value, $alt.value); $singleNewParameter=null;} )*	;
+conditionalAndExpression returns [Func<SparqlResult, dynamic> value] 
+: main=valueLogical		{$value=$main.value; } 
+( '&&' alt=valueLogical {
+var cloneValue=$value;
+var cloneAlt=$alt.value;
+$value= x=>cloneValue(x) && cloneAlt(x); } )*	;
 
-valueLogical returns [Expression value, Variable singleNewParameter] 
-:	    main = additiveExpression { $value=$main.value; $singleNewParameter=$main.singleNewParameter;}
-( '=' second = additiveExpression { $value=q.EqualOrAssign($value, $second.value, $singleNewParameter, $second.singleNewParameter); $singleNewParameter=null; }
-| '!=' second = additiveExpression { Query.Sync(ref $value, $singleNewParameter, ref $second.value, $second.singleNewParameter);$value=Expression.NotEqual($value,  $second.value); $singleNewParameter=null; }
-| '<' second = additiveExpression {Query.Sync(ref $value, $singleNewParameter, ref $second.value, $second.singleNewParameter); $value=Query.BinaryCompareExpression(ExpressionType.LessThan, $value, $second.value); $singleNewParameter=null; }
-| '>' second = additiveExpression {Query.Sync(ref $value, $singleNewParameter, ref $second.value, $second.singleNewParameter); $value=Query.BinaryCompareExpression(ExpressionType.GreaterThan, $value, $second.value); $singleNewParameter=null; }
-| '<=' second = additiveExpression {Query.Sync(ref $value, $singleNewParameter, ref $second.value, $second.singleNewParameter); $value=Query.BinaryCompareExpression(ExpressionType.LessThanOrEqual, $value, $second.value); $singleNewParameter=null; }
-| '>=' second = additiveExpression { Query.Sync(ref $value, $singleNewParameter, ref $second.value, $second.singleNewParameter); $value=Query.BinaryCompareExpression(ExpressionType.GreaterThanOrEqual, $value, $second.value); $singleNewParameter=null; } )? ;
+valueLogical returns [Func<SparqlResult, dynamic> value] 
+:	    main = additiveExpression { $value=$main.value; }
+( '=' second = additiveExpression { var f= $value; var f1=$second.value; $value=x => f(x)==f1(x);  }
+| '!=' second = additiveExpression { var f= $value; var f1=$second.value; $value=x => f(x)!=f1(x); }
+| '<' second = additiveExpression { var f= $value; var f1=$second.value; $value=x => f(x)<f1(x);  }
+| '>' second = additiveExpression { var f= $value; var f1=$second.value; $value=x => f(x)>f1(x);  }
+| '<=' second = additiveExpression { var f= $value; var f1=$second.value; $value=x => f(x)<=f1(x);  }
+| '>=' second = additiveExpression { var f= $value; var f1=$second.value; $value=x => f(x)>=f1(x);  } )? ;
 
-additiveExpression returns [Expression value, Variable singleNewParameter]	 
-:	    main = multiplicativeExpression { $value=$main.value; $singleNewParameter=$main.singleNewParameter; }
-( '+' second = multiplicativeExpression { Query.Sync(ref $value, $singleNewParameter, ref $second.value, $second.singleNewParameter, typeof(double)); $value=Expression.Add($value, $second.value); $singleNewParameter=null; }
-| '-' second = multiplicativeExpression { Query.Sync(ref $value, $singleNewParameter, ref $second.value, $second.singleNewParameter, typeof(double)); $value=Expression.Subtract($value, $second.value); $singleNewParameter=null; }
-| NumericLiteralPositive   { $value = Expression.Add($value, Expression.Constant(double.Parse($NumericLiteralPositive.text))); $singleNewParameter=null; }
-| NumericLiteralNegative   { $value = Expression.Add($value, Expression.Constant(double.Parse($NumericLiteralNegative.text))); $singleNewParameter=null; })* ;
+additiveExpression returns [Func<SparqlResult, dynamic> value]	 
+:	    main = multiplicativeExpression { $value=$main.value;  }
+( '+' second = multiplicativeExpression {   var f= $value; var f1=$second.value; $value=x => f(x)+f1(x);  }
+| '-' second = multiplicativeExpression {   var f= $value; var f1=$second.value; $value=x => f(x)-f1(x);  }
+| NumericLiteralPositive   { var f= $value; $value=x => f(x)+double.Parse($NumericLiteralPositive.text);  }
+| NumericLiteralNegative   { var f= $value; $value=x => f(x)+double.Parse($NumericLiteralNegative.text);   })* ;
 
-multiplicativeExpression  returns [Expression value, Variable singleNewParameter]	
-:	    main = unaryExpression   { $value=$main.value; $singleNewParameter=$main.singleNewParameter; }
-( '*' second = unaryExpression { Query.Sync(ref $value, $singleNewParameter, ref  $second.value, $second.singleNewParameter, typeof(double)); $value=Expression.Multiply($value, $second.value); $singleNewParameter=null; }
-| '/' second = unaryExpression { Query.Sync(ref $value, $singleNewParameter, ref  $second.value, $second.singleNewParameter, typeof(double)); $value=Expression.Divide($value, $second.value); $singleNewParameter=null;})* ;
+multiplicativeExpression  returns [Func<SparqlResult, dynamic> value]	
+:	    main = unaryExpression   { $value=$main.value;  }
+( '*' second = unaryExpression {  var f= $value; var f1=$second.value; $value=x => f(x)*f1(x);  }
+| '/' second = unaryExpression {  var f= $value; var f1=$second.value; $value=x => f(x)/f1(x); })* ;
 
-unaryExpression	 returns [Expression value, Variable singleNewParameter]	 
-:   '!' primaryExpression { $value=Expression.Not(Query.SetVariableLiteraByType($primaryExpression.value, $primaryExpression.singleNewParameter, typeof(bool))); $singleNewParameter=null;}
-|	'+' primaryExpression { $value= Query.SetVariableLiteraByType($primaryExpression.value, $primaryExpression.singleNewParameter, typeof(double)); $singleNewParameter=$primaryExpression.singleNewParameter; }
-|	'-' primaryExpression { $value=Expression.Subtract(Expression.Constant(0.0), Query.SetVariableLiteraByType($primaryExpression.value, $primaryExpression.singleNewParameter, typeof(double))); $singleNewParameter=null; }
-|		primaryExpression { $value=$primaryExpression.value; $singleNewParameter=$primaryExpression.singleNewParameter; };
+unaryExpression	 returns [Func<SparqlResult, dynamic> value]	 
+:   '!' primaryExpression { var f=$primaryExpression.value; $value=store=>! f(store); }
+|	'+' primaryExpression { $value= $primaryExpression.value; }
+|	'-' primaryExpression { var f=$primaryExpression.value; $value=store=> - f(store);  }
+|		primaryExpression { $value=$primaryExpression.value; };
 															   
-primaryExpression returns [Expression value, Variable singleNewParameter]
-: brackettedExpression { $value=$brackettedExpression.value; $singleNewParameter=$brackettedExpression.singleNewParameter; }
+primaryExpression returns [Func<SparqlResult, dynamic> value]
+: brackettedExpression { $value=$brackettedExpression.value; }
 | builtInCall { $value=$builtInCall.value;  }
-| iRIrefOrFunction { $value = $iRIrefOrFunction.value; }
-| rDFLiteral { $value=Query.LiteraExpression(Expression.Constant($rDFLiteral.value.Value), $rDFLiteral.value.vid); }
-| numeric { $value = Expression.Constant($numeric.num); }
-| BooleanLiteral { $value = Expression.Constant(bool.Parse($BooleanLiteral.text)); }
-| var {	 $value = q.Parameter($var.p); $singleNewParameter=$var.p; };
+| iRIrefOrFunction { $value = $iRIrefOrFunction.value;}
+| rDFLiteral { int index=q.FilterConstants.Count;  q.FilterConstants.Add($rDFLiteral.value);  $value = result=> q.FilterConstants[index].Value;  }
+| numeric { var rDFLiteral=new SparqlLiteralNode($numeric.num);  $value = store=>rDFLiteral.Value;  q.FilterConstants.Add(rDFLiteral); }
+| BooleanLiteral { var rDFLiteral=new SparqlLiteralNode(bool.Parse($BooleanLiteral.text));  $value = store=>rDFLiteral.Value;  q.FilterConstants.Add(rDFLiteral); }
+| var {	 $value = pac => pac[$var.p.index]; };
 
-brackettedExpression returns [Expression value, Variable singleNewParameter] :'(' expression ')' { $value=$expression.value; $singleNewParameter=$expression.singleNewParameter; } ;
+brackettedExpression returns [Func<SparqlResult, dynamic> value] :'(' expression ')' { $value=$expression.value; } ;
 
-builtInCall	 returns [Expression value] 
-:   ('STR' | 'str' | 'Str' ) '(' expression ')' {  $value=Expression.Call(Expression.Convert($expression.value, typeof (Literal)),"GetString", new Type[0]); }
-|	('LANG' | 'lang' | 'Lang' ) '(' rDFLiteral ')'  { $value=q.Lang($rDFLiteral.value);  }
+builtInCall	 returns [Func<SparqlResult, dynamic> value] 
+:   ('STR' | 'str' | 'Str' ) '(' expression ')' { var f= $expression.value; $value =store => f(store).ToString();  }
+|	('LANG' | 'lang' | 'Lang' ) '(' rDFLiteral ')'  { var f=$rDFLiteral.value; $value=q.Lang($rDFLiteral.value);  }
 |	('LANG' | 'lang' | 'Lang' ) '(' var ')'  { $value=q.Lang($var.p);  }
-|	('LANGMATCHES' | 'langmatches' | 'Langmatches' | 'langMatches' | 'LangMatches' ) '(' l=expression ',' '"*"' ')'  { $value  = q.Langmatch($l.value, $l.singleNewParameter);  }
-|	('LANGMATCHES' | 'langmatches' | 'Langmatches' | 'langMatches' | 'LangMatches' ) '(' l=expression ',' r=expression ')'  { $value  = q.Langmatch($l.value, $l.singleNewParameter, $r.value, $r.singleNewParameter);  }
+|	('LANGMATCHES' | 'langmatches' | 'Langmatches' | 'langMatches' | 'LangMatches' ) '(' l=expression ',' '"*"' ')'  { $value  = q.Langmatch($l.value);  }
+|	('LANGMATCHES' | 'langmatches' | 'Langmatches' | 'langMatches' | 'LangMatches' ) '(' l=expression ',' r=expression ')'  { $value  = q.Langmatch($l.value, $r.value);  }
 |	('DATATYPE' | 'datatype' | 'Datatype' | 'dataType' | 'DataType' ) '(' expression ')' {  } 
 |	('BOUND'| 'bound' | 'Bound' ) '(' var ')'   { $value = q.Bound($var.p);  }
-|	'sameTerm' '(' l=expression ',' r=expression ')' { $value=q.EqualOrAssign($l.value, $r.value, $l.singleNewParameter, $r.singleNewParameter);  } 
+|	'sameTerm' '(' l=expression ',' r=expression ')' { var lf=$l.value; var rf= $r.value; $value = pac=> lf(pac) == rf(pac);  } 
 |	'isIRI' '(' expression ')' 	  {}
 |	'isURI' '(' expression ')' { } 
 |	'isBLANK' '(' expression ')'   {  }
 |	'isLITERAL' '(' expression ')'  { }
 |	regexExpression  { $value=$regexExpression.value;  } ;
 
-regexExpression	 returns [Expression value] : ( 'REGEX'| 'regex' | 'Regex' ) '(' v = var ',' rex = String ( ',' extraParam= String )? ')' 
-{ $value=Query.RegExpression(q.Parameter($v.p), $rex.text, $extraParam==null ? null : $extraParam.text); };
+regexExpression	 returns [Func<SparqlResult, dynamic> value] : ( 'REGEX'| 'regex' | 'Regex' ) '(' v = var ',' rex = String ( ',' extraParam= String )? ')' 
+{ $value=SparqlQuery.RegExpression($v.p, $rex.text, $extraParam==null ? null : $extraParam.text); };
 
-iRIrefOrFunction	returns [Expression value] 
-: iRIref { var code=q.ts.EntityCoding.GetCode($iRIref.value); if(code==int.MinValue) code=q.ts.CodePredicateFullName($iRIref.value);  $value = Expression.Constant(code);}
- (argList { $value = q.Call($iRIref.value,  $argList.value);  })? ;
+iRIrefOrFunction	returns [Func<SparqlResult, dynamic> value] 
+: iRIref { 
+int index=q.FilterConstants.Count;  
+q.FilterConstants.Add($iRIref.value);
+  $value = result=> q.FilterConstants[index].Value;  
+   }
+ (argList { throw new Exception(); })? ;
 
-rDFLiteral	returns [Literal value] 
+rDFLiteral	returns [SparqlLiteralNode value] 
 : String LANGTAG 
 {
 var s1= $String.text;	 
 s1 = s1.Substring(1,s1.Length-2);
-$value = q.ts.LiteralStore.Create(null, s1, $LANGTAG.text.ToLower());
+$value = new SparqlLiteralNode(null, s1, $LANGTAG.text.ToLower());
 } | String '^^' iRIref  
 {
  var s2= $String.text;	 
 s2 = s2.Substring(1,s2.Length-2);
 var t=$iRIref.value;
- $value = q.ts.LiteralStore.Create(t, s2, null);
+ $value = new SparqlLiteralNode(t, s2, null);
 }
 | String
 {
 var s= $String.text;	 
 s = s.Substring(1,s.Length-2);
-$value= q.ts.LiteralStore.Create(null, s,null);} ;
+$value= new SparqlLiteralNode(null, s,null);} ;
 
 
-iRIref returns [string value]	 
+iRIref returns [SparqlUriNode value]	 
 :	IRI_REF  	{	
-		var iri=$IRI_REF.text;	
-				    iri = iri.Substring(1, iri.Length - 2);
-		$value = q.ts.NameSpaceStore.FromFullName(iri);
+		var iri=$IRI_REF.text;
+		iri = iri.Substring(1, iri.Length - 2);
+		//= q.ts.NameSpaceStore.FromFullName(iri);
+		$value  = new SparqlUriNode{ Uri = new Uri(iri) };			
 		 } 
 |	PREFIXED_NAME 	{	
 var match = PrefixNSSlpit.Match($PREFIXED_NAME.text);		            
- $value = q.ts.NameSpaceStore.FromSplitted(q.prefixes[match.Groups[1].Value], match.Groups[2].Value); 
+ $value = new SparqlUriNode{Uri = new Uri(q.prefixes[match.Groups[1].Value] + match.Groups[2].Value)}; 
  } ;	
  		
  						 

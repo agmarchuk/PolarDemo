@@ -124,7 +124,59 @@ namespace NameTable
 
         public int InsertOne(string entity)
         {
-            throw new NotImplementedException();
+
+            var newMD5 = BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(entity)), 0);
+            int code = 0;
+
+            List<long> offsets;
+            if (collisionsByMD5.TryGetValue(newMD5, out offsets))
+            {
+                PaEntry ncEntry = nc_cell.Root.Element(0);
+                bool newCollision = true;
+                foreach (int offset in offsets)
+                {
+                    ncEntry.offset = offset;
+                    var code_name = (object[])ncEntry.Get();
+                    if ((string)code_name[1] != entity) continue;
+                    code = (int)code_name[0];
+                    newCollision = false;
+                    break;
+                }
+                if (newCollision)
+                {
+                    //checkSumList.Add(newMD5);
+                    long newOffset = nc_cell.Root.AppendElement(new object[] { code = Count++, entity });
+                    // ofsets2NC.Add(newOffset);
+                    offsetByMd5.Add(newMD5, newOffset);
+                }
+            }
+            else
+            {
+                long offsetOnCodeName = 0;
+                if (offsetByMd5.TryGetValue(newMD5, out offsetOnCodeName))
+                {
+                    //может появилась коллизия
+                    PaEntry ncEntry = nc_cell.Root.Element(0);
+                    ncEntry.offset = offsetOnCodeName;
+                    string existsName = (string)((object[])ncEntry.Get())[1];
+                    if (existsName == entity)
+                        code = (int)((object[])ncEntry.Get())[0];
+                    else
+                    {
+                        //новая коллизия, добавляем строку
+                        collisionsByMD5.Add(newMD5, offsets = new List<long>());
+                        offsets.Add(offsetOnCodeName);
+                        long newOffset = nc_cell.Root.AppendElement(new object[] { code = Count++, entity });
+                        offsets.Add(newOffset);
+                    }
+                }
+                else
+                {
+                    long newOffset = nc_cell.Root.AppendElement(new object[] { code = Count++, entity });
+                    offsetByMd5.Add(newMD5, newOffset);
+                }
+            }
+            return code;
         }
 
         public void Open(bool readonlyMode)
@@ -233,58 +285,7 @@ namespace NameTable
             var insertPortion = new Dictionary<string, int>(portion.Count);
             foreach (var newString in portion)
             {
-                var newMD5 = BitConverter.ToInt64(md5.ComputeHash(Encoding.UTF8.GetBytes(newString)), 0);
-                int code = 0;
-
-                List<long> offsets;
-                if (collisionsByMD5.TryGetValue(newMD5, out offsets))
-                {
-                    PaEntry ncEntry = nc_cell.Root.Element(0);
-                    bool newCollision = true;
-                    foreach (int offset in offsets)
-                    {
-                        ncEntry.offset = offset;
-                        var code_name = (object[])ncEntry.Get();
-                        if ((string)code_name[1] != newString) continue;
-                        code = (int)code_name[0];
-                        newCollision = false;
-                        break;
-                    }
-                    if (newCollision)
-                    {
-                        //checkSumList.Add(newMD5);
-                        long newOffset = nc_cell.Root.AppendElement(new object[] { code = Count++, newString });
-                        // ofsets2NC.Add(newOffset);
-                        offsetByMd5.Add(newMD5, newOffset);
-                    }
-                }
-                else
-                {
-                    long offsetOnCodeName = 0;
-                    if (offsetByMd5.TryGetValue(newMD5, out offsetOnCodeName))
-                    {
-                        //может появилась коллизия
-                        PaEntry ncEntry = nc_cell.Root.Element(0);
-                        ncEntry.offset = offsetOnCodeName;
-                        string existsName = (string)((object[])ncEntry.Get())[1];
-                        if (existsName == newString)
-                            code = (int) ((object[]) ncEntry.Get())[0];
-                        else
-                        {
-                            //новая коллизия, добавляем строку
-                            collisionsByMD5.Add(newMD5, offsets = new List<long>());
-                            offsets.Add(offsetOnCodeName);
-                            long newOffset = nc_cell.Root.AppendElement(new object[] {code = Count++, newString});
-                            offsets.Add(newOffset);
-                        }
-                    }
-                    else
-                    {
-                        long newOffset = nc_cell.Root.AppendElement(new object[] { code = Count++, newString });
-                        offsetByMd5.Add(newMD5, newOffset);
-                    }
-                }
-                insertPortion.Add(newString, code);
+                insertPortion.Add(newString, InsertOne(newString));
             }
 
             nc_cell.Flush();

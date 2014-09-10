@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{B1E7385E-8FC1-4D02-B6D5-07457EE1D8E8}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>RdfInMemoryCopy</RootNamespace>
     <AssemblyName>RdfInMemoryCopy</AssemblyName>
@@ -42,20 +42,37 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IGraph.cs" />
+    <Compile Include="ILiteralNode.cs" />
+    <Compile Include="INamespaceMapper.cs" />
+    <Compile Include="INode.cs" />
+    <Compile Include="IStore.cs" />
+    <Compile Include="RAMGraph.cs" />
     <Compile Include="SLiteralNode.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SGraph.cs" />
     <Compile Include="SNamespaceMap.cs" />
-    <Compile Include="SNode.cs" />
+    <Compile Include="SUriNode.cs" />
+    <Compile Include="SStore.cs" />
     <Compile Include="TDeclarations.cs" />
+    <Compile Include="Triple.cs" />
     <Compile Include="TurtleParser.cs" />
     <Compile Include="UtilClasses.cs" />
+    <Compile Include="XmlSchema.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\PolarDB\PolarDB.csproj">
       <Project>{907bb4af-fbc9-4a1e-8f80-194af9337aa4}</Project>
       <Name>PolarDB</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NameTable\NameTable.csproj">
+      <Project>{5283693d-68cc-4b7a-b2bb-6e901592a272}</Project>
+      <Name>NameTable</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ScaleBit4Check\ScaleBit4Check.csproj">
+      <Project>{7860cd10-44ef-4300-8872-8ebef9f122e8}</Project>
+      <Name>ScaleBit4Check</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

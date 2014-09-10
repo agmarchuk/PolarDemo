@@ -6,7 +6,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{AE8CBEDB-A66E-4705-953E-C16793426E89}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SparqlParseRun</RootNamespace>
     <AssemblyName>SparqlParseRun</AssemblyName>
@@ -22,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,6 +31,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Antlr4.Runtime.v4.5">
@@ -44,24 +48,38 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GraphIsDataProperty.cs" />
+    <Compile Include="Class1.cs" />
+    <Compile Include="ISparqlWhereItem.cs" />
+    <Compile Include="obj\Debug\sparql2PacNSLexer.cs" />
+    <Compile Include="obj\Debug\sparql2PacNSParser.cs" />
+    <Compile Include="OptionalWhere.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Query.cs" />
-    <Compile Include="QueryNodesSet.cs" />
     <Compile Include="RPackComplexExtensionInt.cs" />
-    <Compile Include="sparql2PacNS.g4.lexer.cs">
-      <DependentUpon>sparql2PacNS.g4</DependentUpon>
-    </Compile>
-    <Compile Include="sparql2PacNS.g4.parser.cs">
-      <DependentUpon>sparql2PacNS.g4</DependentUpon>
-    </Compile>
-    <Compile Include="Variable.cs" />
+    <Compile Include="SparqlBlankNode.cs" />
+    <Compile Include="SparqlFilter.cs" />
+    <Compile Include="SparqlLiteralNode.cs" />
+    <Compile Include="SparqlNode.cs" />
+    <Compile Include="SparqlQueryParser.cs" />
+    <Compile Include="SparqlResult.cs" />
+    <Compile Include="SparqlResultSet.cs" />
+    <Compile Include="SparqlTriplet.cs" />
+    <Compile Include="SparqlUriNode.cs" />
+    <Compile Include="SparqlWhere.cs" />
+    <Compile Include="UnionWhere.cs" />
+    <Compile Include="VariableNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <Antlr4 Include="sparql2PacNS.g4">
       <Generator>MSBuild:Compile</Generator>
       <CustomToolNamespace>SparqlParseRun</CustomToolNamespace>
+      <Abstract>False</Abstract>
+      <Visitor>False</Visitor>
+      <Listener>False</Listener>
     </Antlr4>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LiteralStores\LiteralStores.csproj">
@@ -73,20 +91,25 @@
       <Name>NameTable</Name>
     </ProjectReference>
     <ProjectReference Include="..\RdfInMemoryCopy\RdfInMemoryCopy.csproj">
-      <Project>{9a7e3d27-4e7e-46e2-b987-c0d6645c4424}</Project>
+      <Project>{b1e7385e-8fc1-4d02-b6d5-07457ee1d8e8}</Project>
       <Name>RdfInMemoryCopy</Name>
     </ProjectReference>
     <ProjectReference Include="..\RDFStores\RDFStores.csproj">
       <Project>{d7c13bce-098b-42d5-b37d-7187a858a85a}</Project>
       <Name>RDFStores</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RdfTrees\RdfTrees.csproj">
+      <Project>{ac8f68ba-df90-45bf-b7a2-47ce86cf5914}</Project>
+      <Name>RdfTrees</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ScaleBit4Check\ScaleBit4Check.csproj">
+      <Project>{7860cd10-44ef-4300-8872-8ebef9f122e8}</Project>
+      <Name>ScaleBit4Check</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TripleInt\TripleIntClasses.csproj">
       <Project>{4b88e673-1272-46cf-817c-ac76111dac46}</Project>
       <Name>TripleIntClasses</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -1,4 +1,5 @@
-using RdfInMemory;
+
+using RdfInMemoryCopy;
 
 namespace SparqlParseRun
 {

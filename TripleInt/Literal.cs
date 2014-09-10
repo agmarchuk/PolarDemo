@@ -47,6 +47,11 @@ namespace TripleIntClasses
             Graph = graph;
         }
 
+        public Literal(LiteralVidEnumeration literalVidEnumeration)
+        {
+            this.vid = literalVidEnumeration;
+        }
+
         public object Value { get; set; }
 
         public bool HasValue
