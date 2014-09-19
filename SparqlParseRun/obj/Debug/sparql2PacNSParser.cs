@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from C:\Users\Admin\Source\Repos\PolarDemo\SparqlParseRun\sparql2PacNS.g4 by ANTLR 4.2-SNAPSHOT
+// Generated from D:\home\dev2012\PolarDemo\SparqlParseRun\sparql2PacNS.g4 by ANTLR 4.2-SNAPSHOT
 
 // Unreachable code detected
 #pragma warning disable 0162
