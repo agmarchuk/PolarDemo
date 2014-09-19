@@ -38,12 +38,15 @@ namespace TripleStoreForDNR
             RdfXmlWriter rdfxmlwriter = new RdfXmlWriter();
             rdfxmlwriter.Save(g, "HelloWorld.rdf");
 
-            //TripleStore store = new TripleStore();
+           //TripleStore store = new TripleStore();
             //Graph gg = new Graph();
             //TurtleParser ttlparser = new TurtleParser();
             //ttlparser.Load(gg, @"D:\home\FactographDatabases\dataset.ttl");
             //store.Add(gg);
             //store.SaveToFile(@"D:\home\FactographDatabases\dataset_db.bin");
+            PolarTripleStore store=new PolarTripleStore();
+            Graph graph=new Graph();
+            store.Add(graph);
         }
     }
 }
