@@ -64,7 +64,6 @@
     <Compile Include="SNamespaceMap.cs" />
     <Compile Include="SUriNode.cs" />
     <Compile Include="Triple.cs" />
-    <Compile Include="TurtleParser.cs" />
     <Compile Include="UtilClasses.cs" />
     <Compile Include="XmlSchema.cs" />
   </ItemGroup>

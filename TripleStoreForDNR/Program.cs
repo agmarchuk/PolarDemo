@@ -1,5 +1,6 @@
 ﻿using System;
 using VDS.RDF;
+using VDS.RDF.Parsing;
 using VDS.RDF.Writing;
 
 namespace TripleStoreForDNR
@@ -32,18 +33,19 @@ namespace TripleStoreForDNR
           //  RdfXmlWriter rdfxmlwriter = new RdfXmlWriter();
           //  rdfxmlwriter.Save(g, "HelloWorld.rdf");
 
-           //TripleStore store = new TripleStore();
-            //Graph gg = new Graph();
-            //TurtleParser ttlparser = new TurtleParser();
-            //ttlparser.Load(gg, @"D:\home\FactographDatabases\dataset.ttl");
+           //TripleStore store = new TripleStore();  
+            string turtleFile = @"C:\deployed\1M.ttl";//@"D:\home\FactographDatabases\dataset.ttl"
+            Graph gg = new Graph();
+            TurtleParser ttlparser = new TurtleParser();
+            ttlparser.Load(gg, turtleFile);
             //store.Add(gg);
             //store.SaveToFile(@"D:\home\FactographDatabases\dataset_db.bin");
-            PolarTripleStore store=new PolarTripleStore();
-            SGraph graph = new SGraph(@"..\..\..\Databases\", new Uri("https://bsbm1"));
-            string turtleFile = @"C:\deployed\1M.ttl";
-            new TurtleParser().LoadTriplets(graph, turtleFile);
+            SGraph defaultGraph = new SGraph(@"..\..\..\Databases\", new Uri("https://bsbm1"));
+            PolarTripleStore store = new PolarTripleStore(defaultGraph);
+     
+          
 
-            store.Add(graph);
+            store.Add(gg);
         }                                                     
     }
 }

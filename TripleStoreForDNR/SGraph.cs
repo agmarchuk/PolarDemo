@@ -83,7 +83,8 @@ namespace TripleStoreForDNR
 
         public IUriNode CreateUriNode(string uriOrQname)
         {
-            SUriNode sUriNode = new SUriNode(namespaceMaper.coding.InsertOne(GetEntityString(uriOrQname)), this);
+            var code = namespaceMaper.coding.InsertOne(GetEntityString(uriOrQname));
+            SUriNode sUriNode = new SUriNode(code, this);
 
         
             return sUriNode;

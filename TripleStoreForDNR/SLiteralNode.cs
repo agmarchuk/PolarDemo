@@ -83,26 +83,28 @@ namespace TripleStoreForDNR
             
         }
 
-        internal SLiteralNode(string rest_line, SGraph g)
+        internal SLiteralNode(string sdata, SGraph g)
         {
             this.g = g;
             // Последняя двойная кавычка 
-            int lastqu = rest_line.LastIndexOf('\"');
-
-            // Значение данных
-            var sdata = rest_line.Substring(1, lastqu - 1);
+            int lastqu = sdata.LastIndexOf('\"');
+            if (lastqu != -1)
+            {
+                // Значение данных
+                 sdata = sdata.Substring(1, lastqu - 1);
+            }
 
             // Языковый специализатор:
-            int dog = rest_line.LastIndexOf('@');
+            int dog = sdata.LastIndexOf('@');
             string lang = "";
-            if (dog == lastqu + 1) lang = rest_line.Substring(dog + 1, rest_line.Length - dog - 1);
+            if (dog == lastqu + 1) lang = sdata.Substring(dog + 1, sdata.Length - dog - 1);
 
             string datatype = "";
-            int pp = rest_line.IndexOf("^^");
+            int pp = sdata.IndexOf("^^");
             if (pp == lastqu + 1)
             {
                 //  Тип данных
-                string qname = rest_line.Substring(pp + 2);
+                string qname = sdata.Substring(pp + 2);
                 //  тип данных может быть "префиксным" или полным
 
                 datatype = g.GetEntityString(qname);
