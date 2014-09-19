@@ -47,6 +47,8 @@
     <Compile Include="INamespaceMapper.cs" />
     <Compile Include="INode.cs" />
     <Compile Include="IStore.cs" />
+    <Compile Include="NamespaceMapCoding.cs" />
+    <Compile Include="NodeType.cs" />
     <Compile Include="RAMGraph.cs" />
     <Compile Include="SLiteralNode.cs" />
     <Compile Include="Program.cs" />
@@ -55,7 +57,7 @@
     <Compile Include="SNamespaceMap.cs" />
     <Compile Include="SUriNode.cs" />
     <Compile Include="SStore.cs" />
-    <Compile Include="TDeclarations.cs" />
+    <Compile Include="IUriNode.cs" />
     <Compile Include="Triple.cs" />
     <Compile Include="TurtleParser.cs" />
     <Compile Include="UtilClasses.cs" />

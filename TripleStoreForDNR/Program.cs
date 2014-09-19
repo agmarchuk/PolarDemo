@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VDS;
 using VDS.RDF;
-using VDS.RDF.Parsing;
 using VDS.RDF.Writing;
 
 namespace TripleStoreForDNR
@@ -16,27 +10,27 @@ namespace TripleStoreForDNR
         {
             Console.WriteLine("Start TripleStore");
 
-            IGraph g = new Graph();
+          //VDS.RDF.  IGraph g = new Graph();
 
-            var uri = UriFactory.Create("http://example.org/g/12345");
-            IUriNode dotNetRDF = g.CreateUriNode(UriFactory.Create("http://www.dotnetrdf.org"));
-            IUriNode says = g.CreateUriNode(UriFactory.Create("http://example.org/says"));
-            ILiteralNode helloWorld = g.CreateLiteralNode("Hello World");
-            ILiteralNode bonjourMonde = g.CreateLiteralNode("Bonjour tout le Monde", "fr");
+          //  var uri = UriFactory.Create("http://example.org/g/12345");
+          //  VDS.RDF.IUriNode dotNetRDF = g.CreateUriNode(UriFactory.Create("http://www.dotnetrdf.org"));
+          //  VDS.RDF.IUriNode says = g.CreateUriNode(UriFactory.Create("http://example.org/says"));
+          //  VDS.RDF.ILiteralNode helloWorld = g.CreateLiteralNode("Hello World");
+          //  VDS.RDF.ILiteralNode bonjourMonde = g.CreateLiteralNode("Bonjour tout le Monde", "fr");
 
-            g.Assert(new Triple(dotNetRDF, says, helloWorld));
-            g.Assert(new Triple(dotNetRDF, says, bonjourMonde));
+          //  g.Assert(new VDS.RDF.Triple(dotNetRDF, says, helloWorld));
+          //  g.Assert(new VDS.RDF.Triple(dotNetRDF, says, bonjourMonde));
 
-            foreach (Triple t in g.Triples)
-            {
-                Console.WriteLine(t.ToString());
-            }
+          //  foreach (VDS.RDF.Triple t in g.Triples)
+          //  {
+          //      Console.WriteLine(t.ToString());
+          //  }
 
-            NTriplesWriter ntwriter = new NTriplesWriter();
-            ntwriter.Save(g, "HelloWorld.nt");
+          //  NTriplesWriter ntwriter = new NTriplesWriter();
+          //  ntwriter.Save(g, "HelloWorld.nt");
 
-            RdfXmlWriter rdfxmlwriter = new RdfXmlWriter();
-            rdfxmlwriter.Save(g, "HelloWorld.rdf");
+          //  RdfXmlWriter rdfxmlwriter = new RdfXmlWriter();
+          //  rdfxmlwriter.Save(g, "HelloWorld.rdf");
 
            //TripleStore store = new TripleStore();
             //Graph gg = new Graph();
@@ -45,8 +39,11 @@ namespace TripleStoreForDNR
             //store.Add(gg);
             //store.SaveToFile(@"D:\home\FactographDatabases\dataset_db.bin");
             PolarTripleStore store=new PolarTripleStore();
-            Graph graph=new Graph();
+            SGraph graph = new SGraph(@"..\..\..\Databases\", new Uri("https://bsbm1"));
+            string turtleFile = @"C:\deployed\1M.ttl";
+            new TurtleParser().LoadTriplets(graph, turtleFile);
+
             store.Add(graph);
-        }
+        }                                                     
     }
 }

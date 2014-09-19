@@ -4,15 +4,6 @@ namespace RdfInMemoryCopy
 {
     public interface IUriNode : INode { Uri Uri { get; } }
 
-    public enum NodeType
-    {
-        // Blank,
-        Uri, Literal
-        //, GraphLiteral, Variable
-        ,
-        Variable
-    }
-
     // Парсеры
     //public class TurtleParser
     //{

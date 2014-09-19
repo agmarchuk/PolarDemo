@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace RdfInMemoryCopy
+namespace TripleStoreForDNR
 {
   public  class SNamespaceMap : INamespaceMapper
     {
@@ -79,4 +79,6 @@ namespace RdfInMemoryCopy
         public INode type { get; set; }
         
     }
+
+
 }

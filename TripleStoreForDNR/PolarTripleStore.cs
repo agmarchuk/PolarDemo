@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VDS.RDF;
+
 
 namespace TripleStoreForDNR
 {
-    class PolarTripleStore : ITripleStore
+    class PolarTripleStore
     {
         public void Dispose()
         {
@@ -17,7 +14,7 @@ namespace TripleStoreForDNR
         public bool Add(IGraph g)
         {
             Console.WriteLine("added graph"); 
-            GraphAdded(this, new TripleStoreEventArgs(this, g));
+          //  GraphAdded(this, new TripleStoreEventArgs(this, g));
             return false;
         }
 
@@ -47,7 +44,7 @@ namespace TripleStoreForDNR
         }
 
         public bool IsEmpty { get; private set; }
-        public BaseGraphCollection Graphs { get; private set; }
+        public IGraph[] Graphs { get; private set; }
         public IEnumerable<Triple> Triples { get; private set; }
 
         public IGraph this[Uri graphUri]
@@ -55,10 +52,10 @@ namespace TripleStoreForDNR
             get { throw new NotImplementedException(); }
         }
 
-        public event TripleStoreEventHandler GraphAdded;
-        public event TripleStoreEventHandler GraphRemoved;
-        public event TripleStoreEventHandler GraphChanged;
-        public event TripleStoreEventHandler GraphCleared;
-        public event TripleStoreEventHandler GraphMerged;
+        //public event TripleStoreEventHandler GraphAdded;
+        //public event TripleStoreEventHandler GraphRemoved;
+        //public event TripleStoreEventHandler GraphChanged;
+        //public event TripleStoreEventHandler GraphCleared;
+        //public event TripleStoreEventHandler GraphMerged;
     }
 }

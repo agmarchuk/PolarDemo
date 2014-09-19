@@ -20,7 +20,7 @@ namespace SparqlParseRun
             var turtleFile = @"C:\deployed\1M.ttl";
 
             SGraph sGraph = new SGraph(@"..\..\..\Databases\", new Uri("bsbm1m"));
-          // new TurtleParser().LoadTriplets(sGraph, turtleFile);
+           new TurtleParser().LoadTriplets(sGraph, turtleFile);
 
          
 
