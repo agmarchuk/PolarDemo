@@ -17,6 +17,7 @@ namespace TripleStoreForDNR
         public bool Add(IGraph g)
         {
             Console.WriteLine("added graph"); 
+            GraphAdded(this, new TripleStoreEventArgs(this, g));
             return false;
         }
 
