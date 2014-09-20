@@ -1,7 +1,9 @@
 ﻿using System;
+using System.IO;
 using VDS.RDF;
 using VDS.RDF.Parsing;
 using VDS.RDF.Writing;
+using StringWriter = VDS.RDF.Writing.StringWriter;
 
 namespace TripleStoreForDNR
 {
@@ -45,7 +47,12 @@ namespace TripleStoreForDNR
      
           
 
-            store.Add(gg);
+            store.SaveGraph(gg);
+             gg .Clear();
+            store.LoadGraph(gg, string.Empty);
+            using (
+            StreamWriter streamWriter = new StreamWriter(@"..\..\output.txt"))
+            gg.SaveToStream(@"..\..\output.ttl", streamWriter);
         }                                                     
     }
 }
