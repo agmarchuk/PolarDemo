@@ -1,4 +1,4 @@
-using RdfInMemoryCopy;
+using TripleStoreForDNR;
 
 namespace SparqlParseRun
 {
@@ -24,7 +24,7 @@ namespace SparqlParseRun
             Content = parsed;
         }
 
-        internal override void CreateNode(IStore store)
+        internal override void CreateNode(PolarTripleStore store)
         {   
             Value = store.GetLiteralNode( type==null ? null :type.Uri, Content, lang);
         }

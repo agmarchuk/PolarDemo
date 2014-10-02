@@ -18,21 +18,11 @@
 #pragma warning disable 1591
 
 namespace SparqlParseRun {
-
-	using System;
-	using System.Linq;
-	using System.Xml.Linq;		
-	using System.Text.RegularExpressions;
-    using SparqlParseRun;
-	using RdfInMemoryCopy;
-	using System.Linq.Expressions;
-
-using Antlr4.Runtime;
+    using System.Text.RegularExpressions;
+    using Antlr4.Runtime;
 using Antlr4.Runtime.Atn;
-using Antlr4.Runtime.Misc;
-using DFA = Antlr4.Runtime.Dfa.DFA;
 
-[System.CodeDom.Compiler.GeneratedCode("ANTLR", "4.2-SNAPSHOT")]
+    [System.CodeDom.Compiler.GeneratedCode("ANTLR", "4.2-SNAPSHOT")]
 [System.CLSCompliant(false)]
 public partial class sparql2PacNSLexer : Lexer {
 	public const int

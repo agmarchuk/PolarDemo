@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using RdfInMemoryCopy;
+using TripleStoreForDNR;
 
 namespace SparqlParseRun
 {
@@ -15,7 +15,7 @@ namespace SparqlParseRun
         {
             this.resultSet = resultSet;
         }
-        public void CreateNodes(IStore store)
+        public void CreateNodes(PolarTripleStore store)
         {
             SelectVariableValuesOrFilter = ()=> Filter(resultSet.VariablesValues) ? Enumerable.Repeat<Action>(() => { },1) : Enumerable.Empty<Action>();
         }

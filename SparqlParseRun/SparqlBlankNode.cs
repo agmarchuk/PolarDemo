@@ -1,5 +1,5 @@
 using System;
-using RdfInMemoryCopy;
+using TripleStoreForDNR;
 
 namespace SparqlParseRun
 {
@@ -10,7 +10,7 @@ namespace SparqlParseRun
             throw new NotImplementedException();
         }
 
-        internal override void CreateNode(IStore store)
+        internal override void CreateNode(PolarTripleStore store)
         {
             base.CreateNode(store);
         }

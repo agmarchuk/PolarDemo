@@ -39,6 +39,9 @@
     <Reference Include="Antlr4.Runtime.v4.5">
       <HintPath>..\packages\Antlr4.Runtime.4.2.0-alpha001\lib\net45\Antlr4.Runtime.v4.5.dll</HintPath>
     </Reference>
+    <Reference Include="dotNetRDF">
+      <HintPath>..\TripleStoreForDNR\DLLs\dotNetRDF.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -48,7 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="ISparqlWhereItem.cs" />
     <Compile Include="obj\Debug\sparql2PacNSLexer.cs" />
     <Compile Include="obj\Debug\sparql2PacNSParser.cs" />
@@ -90,10 +93,6 @@
       <Project>{5283693d-68cc-4b7a-b2bb-6e901592a272}</Project>
       <Name>NameTable</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RdfInMemoryCopy\RdfInMemoryCopy.csproj">
-      <Project>{b1e7385e-8fc1-4d02-b6d5-07457ee1d8e8}</Project>
-      <Name>RdfInMemoryCopy</Name>
-    </ProjectReference>
     <ProjectReference Include="..\RDFStores\RDFStores.csproj">
       <Project>{d7c13bce-098b-42d5-b37d-7187a858a85a}</Project>
       <Name>RDFStores</Name>
@@ -109,6 +108,10 @@
     <ProjectReference Include="..\TripleInt\TripleIntClasses.csproj">
       <Project>{4b88e673-1272-46cf-817c-ac76111dac46}</Project>
       <Name>TripleIntClasses</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TripleStoreForDNR\TripleStoreForDNR.csproj">
+      <Project>{1e5f028c-aa30-4877-81fd-7c4f0ded5340}</Project>
+      <Name>TripleStoreForDNR</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text.RegularExpressions;
-using Antlr4.Runtime;
-using RdfInMemoryCopy;
-
+using TripleStoreForDNR;
 
 
 namespace SparqlParseRun
@@ -27,7 +23,7 @@ namespace SparqlParseRun
         internal List<string> constants = new List<string>();
         internal SparqlResultSet ResultSet = new SparqlResultSet();
         public List<SparqlNode> FilterConstants = new List<SparqlNode>();
-        public SparqlResultSet Run(IStore store)
+        public SparqlResultSet Run(PolarTripleStore store)
         {
             ResultSet.Store = store;
             SparqlWhere.CreateNodes(store);
@@ -84,7 +80,7 @@ namespace SparqlParseRun
                                                literlNode.type.Uri));
                             throw new NotImplementedException();
                         };
-                        foreach (var sparqlTriplet in Construct.Triples.Cast<SparqlTriplet>())
+                        foreach (var sparqlTriplet in Construct.Triples.Cast<SparqlQuard>())
                         {       
                             ResultSet.GraphResult.Assert(new Triple(GetValueNode(sparqlTriplet.Subj),
                                 GetValueNode(sparqlTriplet.Pred),

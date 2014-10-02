@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using RdfInMemoryCopy;
+using TripleStoreForDNR;
+using VDS.RDF;
+using VDS.RDF.Parsing;
 
 namespace SparqlParseRun
 {
-    class Class1
+    class Program
     {
         static void Main(string[] args)
         
@@ -20,11 +20,14 @@ namespace SparqlParseRun
             var turtleFile = @"C:\deployed\1M.ttl";
 
             SGraph sGraph = new SGraph(@"..\..\..\Databases\", new Uri("bsbm1m"));
-           new TurtleParser().LoadTriplets(sGraph, turtleFile);
+            Graph graph = new Graph();
+            new TurtleParser().Load(graph,turtleFile);
+      
 
-         
 
-            var sStore = new SStore(sGraph);
+
+           var sStore = new PolarTripleStore(sGraph);
+              sStore.SaveGraph(graph);
             File.WriteAllText(@"C:\Users\Admin\Source\Repos\PolarDemo\SparqlParser\sparql data\queries\with constants\res.txt", sparqlQuery.Run(sStore).ToString());
 
         }

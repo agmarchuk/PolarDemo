@@ -1,25 +1,28 @@
 using System;
 using System.Collections.Generic;
-using RdfInMemoryCopy;
+using TripleStoreForDNR;
 
 namespace SparqlParseRun
 {
-    public class SparqlTriplet :ISparqlWhereItem
+    public class SparqlQuard :ISparqlWhereItem
     {
-        public SparqlNode Subj, Pred, Obj;
+       
+        public readonly SparqlNode Graph, Subj, Pred, Obj;
 
-        public SparqlTriplet(SparqlNode subj, SparqlNode pred, SparqlNode obj)
+        public SparqlQuard(SparqlNode subj, SparqlNode pred, SparqlNode obj, SparqlNode graph)
         {
             Subj = subj;
             Pred = pred;
             Obj = obj;
+            this.Graph = graph;
         }
 
-        public void CreateNodes(IStore store)
+        public void CreateNodes(PolarTripleStore store)
         {
             Subj.CreateNode(store);
             Pred.CreateNode(store);
             Obj.CreateNode(store);
+            Graph.CreateNode(store);
             //   GraphIsDataProperty.Sync(o.graph, p.graph);
             VariableNode sVariableNode = this.Subj as VariableNode;
             VariableNode pVariableNode = this.Pred as VariableNode;
@@ -34,7 +37,7 @@ namespace SparqlParseRun
                     if (oVariableNode != null && oVariableNode.isNew)
                     {
                         oVariableNode.isNew = false;
-                        SelectVariableValuesOrFilter = RPackComplexExtensionInt.SPO(store, sVariableNode, pVariableNode, oVariableNode);
+                        SelectVariableValuesOrFilter = RPackComplexExtensionInt.SPO(store, sVariableNode, pVariableNode, oVariableNode, Graph);
                     }
                     else SelectVariableValuesOrFilter = RPackComplexExtensionInt.SPo(store, sVariableNode, pVariableNode, this.Obj);
                 }

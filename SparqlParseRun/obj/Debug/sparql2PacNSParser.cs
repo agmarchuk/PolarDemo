@@ -21,20 +21,13 @@ namespace SparqlParseRun {
 
 	using System;
 	using System.Linq;
-	using System.Xml.Linq;		
 	using System.Text.RegularExpressions;
-    using SparqlParseRun;
-	using RdfInMemoryCopy;
-	using System.Linq.Expressions;
-
-using Antlr4.Runtime;
+	using Antlr4.Runtime;
 using Antlr4.Runtime.Atn;
-using Antlr4.Runtime.Misc;
-using Antlr4.Runtime.Tree;
+	using Antlr4.Runtime.Tree;
 using System.Collections.Generic;
-using DFA = Antlr4.Runtime.Dfa.DFA;
 
-[System.CodeDom.Compiler.GeneratedCode("ANTLR", "4.2-SNAPSHOT")]
+    [System.CodeDom.Compiler.GeneratedCode("ANTLR", "4.2-SNAPSHOT")]
 [System.CLSCompliant(false)]
 public partial class sparql2PacNSParser : Parser {
 	public const int
@@ -2633,7 +2626,7 @@ public partial class sparql2PacNSParser : Parser {
 	}
 
 	public partial class VarOrTermContext : ParserRuleContext {
-		public SparqlTriplet value;
+		public SparqlQuard value;
 		public VarContext _var;
 		public GraphTermContext _graphTerm;
 		public GraphTermContext graphTerm() {
@@ -2664,7 +2657,7 @@ public partial class sparql2PacNSParser : Parser {
 					   
 					var p = ((VerbObjectListContext)GetInvokingContext(34)).Predicate;
 					var sVar = ((TriplesSameSubjectContext)GetInvokingContext(31)).subj;		  	
-						_localctx.value =  new SparqlTriplet(sVar, p, _localctx._var.p);	 		
+						_localctx.value =  new SparqlQuard(sVar, p, _localctx._var.p);	 		
 				  
 				}
 				break;
@@ -2685,7 +2678,7 @@ public partial class sparql2PacNSParser : Parser {
 
 					var p = ((VerbObjectListContext)GetInvokingContext(34)).Predicate;
 					var sVar = ((TriplesSameSubjectContext)GetInvokingContext(31)).subj;
-					_localctx.value =  new SparqlTriplet(sVar, p, _localctx._graphTerm.value);	
+					_localctx.value =  new SparqlQuard(sVar, p, _localctx._graphTerm.value);	
 
 				}
 				break;

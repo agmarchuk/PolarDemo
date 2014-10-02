@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using RdfInMemoryCopy;
+using TripleStoreForDNR;
 
 namespace SparqlParseRun
 {
@@ -13,7 +13,7 @@ namespace SparqlParseRun
         public IGraph GraphResult;
         internal ResultType ResultType;
 
-        internal IStore Store { get; set; }
+        internal PolarTripleStore Store { get; set; }
         
         internal Dictionary<string, VariableNode> Variables = new Dictionary<string, VariableNode>();
 
