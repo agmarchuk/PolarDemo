@@ -17,7 +17,8 @@ options
 	using System.Xml.Linq;		
 	using System.Text.RegularExpressions;
     using SparqlParseRun;
-	using RdfInMemoryCopy;
+using TripleStoreForDNR;
+
 	using System.Linq.Expressions;
 }
 
@@ -276,18 +277,18 @@ varOrTermSub
 | graphTerm  {	$triplesSameSubject::subj = $graphTerm.value; };
 
 
- varOrTerm returns [SparqlTriplet value]
+ varOrTerm returns [SparqlTriple value]
 : var 
 {	   
 	var p = $verbObjectList::Predicate;
 	var sVar = $triplesSameSubject::subj;		  	
-		$value = new SparqlTriplet(sVar, p, $var.p);	 		
+		$value = new SparqlTriple(sVar, p, $var.p);	 		
   } 
 | graphTerm 
 {
 	var p = $verbObjectList::Predicate;
 	var sVar = $triplesSameSubject::subj;
-	$value = new SparqlTriplet(sVar, p, $graphTerm.value);	
+	$value = new SparqlTriple(sVar, p, $graphTerm.value);	
 };
 
 varOrIRIref	  returns[SparqlNode p]
@@ -441,7 +442,7 @@ NumericLiteralNegative	 :INTEGER_NEGATIVE |	DECIMAL_NEGATIVE |	DOUBLE_NEGATIVE	;
 BooleanLiteral	 :'true' |	'false' ;
 String	 : STRING_LITERAL1 | STRING_LITERAL2 | STRING_LITERAL_LONG1 | STRING_LITERAL_LONG2 ;
 BlankNode	 : BLANK_NODE_LABEL |	ANON ;
-IRI_REF	: '<'([a-zA-Zà-ÿÀ-ß0-9:/\\#.\x00-\x20-])*'>';
+IRI_REF	: '<'([a-zA-Zà-ÿÀ-ß0-9:/\\#.%-])*'>';
 BLANK_NODE_LABEL	 :'_:' PN_LOCAL ;
 VAR1	 :'?' VARNAME ;
 VAR2	 :'$' VARNAME	 ;

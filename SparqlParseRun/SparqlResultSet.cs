@@ -13,7 +13,7 @@ namespace SparqlParseRun
         public IGraph GraphResult;
         internal ResultType ResultType;
 
-        internal PolarTripleStore Store { get; set; }
+        internal IStore Store { get; set; }
         
         internal Dictionary<string, VariableNode> Variables = new Dictionary<string, VariableNode>();
 

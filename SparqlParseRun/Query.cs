@@ -80,7 +80,7 @@ namespace SparqlParseRun
                                                literlNode.type.Uri));
                             throw new NotImplementedException();
                         };
-                        foreach (var sparqlTriplet in Construct.Triples.Cast<SparqlQuard>())
+                        foreach (var sparqlTriplet in Construct.Triples.Cast<SparqlTriple>())
                         {       
                             ResultSet.GraphResult.Assert(new Triple(GetValueNode(sparqlTriplet.Subj),
                                 GetValueNode(sparqlTriplet.Pred),

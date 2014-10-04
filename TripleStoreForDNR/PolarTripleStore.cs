@@ -131,13 +131,13 @@ namespace TripleStoreForDNR
         }
         public bool Contains(Triple triple)
         {
-            return graphs.Any(g => g.Contains((IUriNode)triple.Subject, (IUriNode)triple.Predicate, triple.Object));
+            return defaultGraph.Contains((IUriNode)triple.Subject, (IUriNode)triple.Predicate, triple.Object);
         }
 
 
         public IEnumerable<Triple> GetTriplesWithSubjectPredicate(INode subjectNode, INode predicateNode)
         {
-            return graphs.SelectMany(graph => graph.GetTriplesWithSubjectPredicate(subjectNode, predicateNode));
+            return defaultGraph.GetTriplesWithSubjectPredicate(subjectNode, predicateNode);
         }
 
         public IEnumerable<Triple> GetTriplesWithSubjectObject(INode subjectNode, INode objectNode)
@@ -147,12 +147,12 @@ namespace TripleStoreForDNR
 
         public IEnumerable<Triple> GetTriplesWithSubject(INode subjectNode)
         {
-            return graphs.SelectMany(graph => graph.GetTriplesWithSubject(subjectNode));
+            return defaultGraph.GetTriplesWithSubject(subjectNode);
         }
 
         public IEnumerable<Triple> GetTriplesWithPredicateObject(INode predicateNode, INode objectNode)
         {
-            return graphs.SelectMany(graph => graph.GetTriplesWithPredicateObject(predicateNode, objectNode));
+            return defaultGraph.GetTriplesWithPredicateObject(predicateNode, objectNode);
         }
 
         public IEnumerable<Triple> GetTriplesWithPredicate(INode predicateNode)
@@ -162,7 +162,7 @@ namespace TripleStoreForDNR
 
         public IEnumerable<Triple> GetTriplesWithObject(INode objectNode)
         {
-            return graphs.SelectMany(graph => graph.GetTriplesWithObject(objectNode));
+            return defaultGraph.GetTriplesWithObject(objectNode);
         }
 
         public IEnumerable<Triple> GetTriples()
@@ -185,19 +185,21 @@ namespace TripleStoreForDNR
 
         public INode CreateUriNode(string p)
         {
-            return defualutGraph.CreateUriNode(p);
+            return defaultGraph.CreateUriNode(p);
         }
 
-        public INamespaceMapper NamespaceMaper { get { return defualutGraph.NamespaceMap; } }
+        public INamespaceMapper NamespaceMaper { get { return defaultGraph.NamespaceMap; } }
 
         public IUriNode GetUriNode(Uri uri)
         {
-            return graphs.Select(graph => graph.GetUriNode(uri)).FirstOrDefault(ln => ln != null);
+            return defaultGraph.GetUriNode(uri); //).FirstOrDefault(ln => ln != null);
         }
 
         public ILiteralNode GetLiteralNode(Uri type, dynamic content, string lang)
         {
-            return graphs.Select(graph => graph.GetLiteralNode(content, lang, type)).FirstOrDefault(ln => ln != null);
+            var literalNode = defaultGraph.GetLiteralNode(content, lang, type);
+            return literalNode;
+            //TODO if(literalNode==null)
         }
 
         public IGraph CreateGraph()

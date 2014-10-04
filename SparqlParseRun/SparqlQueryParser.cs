@@ -8,13 +8,13 @@ namespace SparqlParseRun
         {
 
             ICharStream input = new AntlrInputStream(sparqlString);
-          
-            var lexer = new sparql2PacNSLexer(input);
+
+            var lexer = new sparq11lTranslatorLexer(input);
 
             var commonTokenStream = new CommonTokenStream(lexer);
             SparqlQuery sparqlQuery = new SparqlQuery();
-            var sparqlParser = new sparql2PacNSParser(commonTokenStream) { q = sparqlQuery };
-            sparqlParser.query();
+            var sparqlParser = new sparq11lTranslatorParser(commonTokenStream);// { q = sparqlQuery };
+            sparqlParser.queryUnit();
             return sparqlQuery;
 
         }

@@ -4,17 +4,17 @@ using TripleStoreForDNR;
 
 namespace SparqlParseRun
 {
-    public class SparqlQuard :ISparqlWhereItem
+    public class SparqlTriple :ISparqlWhereItem
     {
        
         public readonly SparqlNode Graph, Subj, Pred, Obj;
 
-        public SparqlQuard(SparqlNode subj, SparqlNode pred, SparqlNode obj, SparqlNode graph)
+        public SparqlTriple(SparqlNode subj, SparqlNode pred, SparqlNode obj)
         {
             Subj = subj;
             Pred = pred;
             Obj = obj;
-            this.Graph = graph;
+        //    this.Graph = graph;
         }
 
         public void CreateNodes(PolarTripleStore store)

@@ -125,7 +125,8 @@ namespace SparqlParseRun
 
         internal static Func<IEnumerable<Action>> SPO(PolarTripleStore store, VariableNode sParameter, VariableNode pParameter, VariableNode oParameter, SparqlNode graph)
         {
-           return () => store.Triplets
+            throw new NotImplementedException();
+
         }
     }
 }
