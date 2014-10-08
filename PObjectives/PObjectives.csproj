@@ -33,6 +33,9 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PolarBasedEngine">
+      <HintPath>..\..\PolarBasedEngine\bin\Debug\PolarBasedEngine.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -42,26 +45,46 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BufferredProcessing.cs" />
     <Compile Include="Collection.cs" />
+    <Compile Include="Collection2.cs" />
+    <Compile Include="Element2.cs" />
+    <Compile Include="FlexIndex2.cs" />
+    <Compile Include="IIndex.cs" />
+    <Compile Include="IndexView.cs" />
+    <Compile Include="ProgramDatabase.cs" />
+    <Compile Include="ProgramInterpretator.cs" />
+    <Compile Include="ProgramConvert.cs" />
     <Compile Include="Database.cs" />
     <Compile Include="Element.cs" />
     <Compile Include="Experiment.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="ProgramSimpleEngine.cs" />
+    <Compile Include="ProgramSQL.cs" />
+    <Compile Include="ProgramTableEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
     <Compile Include="Subclasses.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Diary.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\PolarBasedEngine\PolarBasedEngine.csproj">
-      <Project>{b5ff9b2d-cdaf-4b1a-95e9-346754466794}</Project>
-      <Name>PolarBasedEngine</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\PolarDB\PolarDB.csproj">
       <Project>{907bb4af-fbc9-4a1e-8f80-194af9337aa4}</Project>
       <Name>PolarDB</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
