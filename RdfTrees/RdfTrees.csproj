@@ -67,6 +67,10 @@
       <Project>{5283693D-68CC-4B7A-B2BB-6E901592A272}</Project>
       <Name>NameTable</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RdfInMemory\RdfInMemory.csproj">
+      <Project>{07C81533-B782-4516-8D67-20133BDAE8A6}</Project>
+      <Name>RdfInMemory</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RDFStores\RDFStores.csproj">
       <Project>{d7c13bce-098b-42d5-b37d-7187a858a85a}</Project>
       <Name>RDFStores</Name>

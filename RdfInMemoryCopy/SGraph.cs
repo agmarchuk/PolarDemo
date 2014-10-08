@@ -1,14 +1,13 @@
-﻿using PolarDB;
+﻿using NameTable;
+using PolarDB;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ScaleBit4Check;
 
 namespace RdfInMemoryCopy
 {
-    class SGraph : IGraph
+    public class SGraph : IGraph
     {
         private static PType tp_entity = new PType(PTypeEnumeration.integer);
 
@@ -28,7 +27,9 @@ namespace RdfInMemoryCopy
  new NamedType("double", new PType(PTypeEnumeration.real)),
  new NamedType("bool", new PType(PTypeEnumeration.boolean)),
  new NamedType("date", new PType(PTypeEnumeration.longinteger)),
- new NamedType("string", new PTypeRecord(
+ new NamedType("dateTime", new PType(PTypeEnumeration.longinteger)),
+ new NamedType("string", new PType(PTypeEnumeration.sstring)),
+ new NamedType("langString", new PTypeRecord(
     new NamedType("s", new PType(PTypeEnumeration.sstring)),
     new NamedType("l", new PType(PTypeEnumeration.sstring)))),
  new NamedType("typedObject", new PTypeRecord(
@@ -50,23 +51,30 @@ namespace RdfInMemoryCopy
         private PaCell dtriples;
         private PaCell dataCell;
         private PxCell entitiesTree;
-        private SNamespaceMap namespaceMaper;
+        internal NamespaceMapCoding namespaceMaper;
+        Dictionary<string, SUriNode> codingHash = new Dictionary<string, SUriNode>();
         private string path;
-        public SGraph(string path)
+        private ScaleCell scale;
+        public SGraph(string path, Uri uri)
         {
             this.path = path;
+            Uri = uri;
             otriples = new PaCell(tp_otriple_seq, path + "otriples.pac", false);
             dtriples = new PaCell(tp_dtriple_spf, path + "dtriples.pac", false); // Временно выведена в переменные класса, открывается при инициализации    
             dataCell = new PaCell(tp_data_seq, path + "data.pac", false);
             entitiesTree = new PxCell(tp_entitiesTree, path + "entitiesTree.pxc", false);
 
-            namespaceMaper = new SNamespaceMap();
+            namespaceMaper = new NamespaceMapCoding(new StringIntMD5RAMUnsafe(path));
+            scale=new ScaleCell(path);
+           
         }
 
         public bool IsEmpty
         {
             get { throw new NotImplementedException(); }
         }
+
+        public Uri Uri { get; private set; }
 
         public INamespaceMapper NamespaceMap
         {
@@ -75,9 +83,26 @@ namespace RdfInMemoryCopy
 
         public IUriNode CreateUriNode(string uriOrQname)
         {
-            return new SUriNode(uriOrQname, this);
-        }
+            SUriNode sUriNode = new SUriNode(namespaceMaper.coding.InsertOne(GetEntityString(uriOrQname)), this);
 
+        
+            return sUriNode;
+        }
+        public string GetEntityString( string line)
+        {
+            if (line[0]=='<')
+                return line.Substring(1, line.Length - 2);
+
+            string subject = null;
+            int colon = line.IndexOf(':');
+            if (colon == -1) { Console.WriteLine("Err in line: " + line); goto End; }
+            string prefix = line.Substring(0, colon + 1);
+            if (!NamespaceMap.HasNamespace(prefix)) { Console.WriteLine("Err in line: " + line); goto End; }
+            subject = NamespaceMap.GetNamespaceUri(prefix).OriginalString + line.Substring(colon + 1);
+        End:
+            return subject;
+        }
+      
         public ILiteralNode CreateLiteralNode(string value)
         {
             return new SLiteralNode(value, this);
@@ -93,6 +118,27 @@ namespace RdfInMemoryCopy
             throw new Exception();
         }
 
+
+      public  IUriNode GetUriNode(Uri uri)
+        {
+          var code = namespaceMaper.coding.GetCode(uri.ToString());
+          if (code == int.MinValue) return null;
+          SUriNode sUriNode = new SUriNode(code, this);
+            return sUriNode;
+        }
+
+        public ILiteralNode GetLiteralNode(dynamic value, string lang, Uri type)
+        {
+           return new SLiteralNode(value, lang, type, this);
+        }
+
+        public IUriNode CreateUriNode(Uri uri)
+        {
+
+            SUriNode sUriNode = new SUriNode(namespaceMaper.coding.InsertOne(uri.ToString()), this);
+            return sUriNode;
+        }
+
         public void Clear()
         {
             dtriples.Clear();
@@ -101,6 +147,8 @@ namespace RdfInMemoryCopy
             otriples.Fill(new object[0]);
             dataCell.Clear();
             dataCell.Fill(new object[0]);
+             namespaceMaper.Clear();
+
         }
 
         public bool Assert(Triple t)
@@ -129,15 +177,42 @@ namespace RdfInMemoryCopy
 
         public void Build()
         {
-            otriples.Close(); // Копирование файла
+            DateTime tt0 = DateTime.Now;
+            otriples.Flush();
+            dtriples.Flush();    
+            otriples.Close(); 
+            
+            // Копирование файла
             if (System.IO.File.Exists(path + "otriples_op.pac")) System.IO.File.Delete(path + "otriples_op.pac");
             System.IO.File.Copy(path + "otriples.pac", path + "otriples_op.pac");
             otriples = new PaCell(tp_otriple_seq, path + "otriples.pac", false);
             PaCell otriples_op = new PaCell(tp_otriple_seq, path + "otriples_op.pac", false);
+            //otriples_op.Clear(); otriples_op.Fill(new object[0]); // Другой вариант - покомпонентная перепись
+            //otriples.Root.Scan((off, pobj) =>
+            //{
+            //    otriples_op.Root.AppendElement(pobj);
+            //    return true;
+            //});
+            //otriples_op.Flush();
+
+            //PaCell dtriples_sp = new PaCell(tp_dtriple_spf, path + "dtriples_spf.pac", false);
+            //dtriples_sp.Clear(); dtriples_sp.Fill(new object[0]);
+            //dtriples.Root.Scan((off, pobj) =>
+            //{
+            //    object[] tri = (object[])pobj;
+            //    int s = (int)tri[0];
+            //    int p = (int)tri[1];
+            //    dtriples_sp.Root.AppendElement(new object[] { s, p, off });
+            //    return true;
+            //});
+            //dtriples_sp.Flush();
+            Console.WriteLine("Additional files ok. duration={0}", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+
+            // Сортировки
+            // Упорядочивание otriples по s-p-o
             SPOComparer spo_compare = new SPOComparer();
-            DateTime tt0 = DateTime.Now;
+
             otriples.Root.SortByKey<SubjPredObjInt>(rec => new SubjPredObjInt(rec), spo_compare);
-            
             Console.WriteLine("otriples.Root.Sort ok. Duration={0} msec.", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             SPComparer sp_compare = new SPComparer();
@@ -156,8 +231,8 @@ namespace RdfInMemoryCopy
                 return new SubjPredInt() { pred = (int)r[1], subj = (int)r[0] };
             }, sp_compare);
             Console.WriteLine("dtriples_sp.Root.Sort ok. Duration={0} msec.", (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
-          //  Scale.WriteScale(otriples);
-         //   Console.WriteLine("CreateScale ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
+            scale.WriteScale(otriples);
+            Console.WriteLine("CreateScale ok. Duration={0} sec.", (DateTime.Now - tt0).Ticks / 10000000L); tt0 = DateTime.Now;
             //int cnt_e = MakeTreeFree(otriples, otriples_op, dtriples_sp);
             //Console.WriteLine("Scan3 ok. Duration={0} msec. cnt_e={1} ", (DateTime.Now - tt0).Ticks / 10000L, cnt_e); tt0 = DateTime.Now;
             //Console.WriteLine("otriples={0} otriples_op={1} dtriples_sp={2}", otriples.Root.Count(), otriples_op.Root.Count(), dtriples_sp.Root.Count());
@@ -167,7 +242,159 @@ namespace RdfInMemoryCopy
             dtriples.Close();
             // Создает ячейку фиксированного формата tree_fix.pxc
             MakeTreeFix();
+            dataCell.Flush();
+            namespaceMaper.coding.MakeIndexed();
+
         }
+
+        public IEnumerable<Triple> GetTriplesWithObject(Uri u)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Triple> GetTriplesWithObject(INode obj)
+        {
+            if (obj is SUriNode)
+            {
+                var objUriCode = (obj as SUriNode).Code;
+                if (objUriCode == Int32.MinValue) return new Triple[0];
+                var rec_ent = this.entitiesTree.Root.Element(objUriCode);
+                // //.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
+                if (rec_ent.IsEmpty) return new Triple[0];     
+                return ((object[])rec_ent.Field(3).Get())
+                    .Cast<object[]>()
+                    .SelectMany(pair =>((object[])pair[1]).Cast<int>().Select(i =>  new Triple(new SUriNode(i, this), new SUriNode((int)pair[0], this), obj)))
+                    .ToArray();
+            }
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Triple> GetTriplesWithPredicate(INode n)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Triple> GetTriplesWithPredicate(Uri u)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Triple> GetTriplesWithSubject(INode subj)
+        {
+            if (subj is SUriNode)
+            {
+                var subjUriCode = (subj as SUriNode).Code;
+                if (subjUriCode == Int32.MinValue) return new Triple[0];
+                var rec_ent = this.entitiesTree.Root.Element(subjUriCode);
+                    // //.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
+                if (rec_ent.IsEmpty) return new Triple[0];
+                var literals = dataCell.Root.Element(0);
+                return ((object[]) rec_ent.Field(2).Get())
+                    .Cast<object[]>()
+                    .Select(
+                        pair => new Triple(subj, new SUriNode((int) pair[0], this), new SUriNode((int) pair[1], this)))
+                    .Concat(((object[]) rec_ent.Field(1).Get())
+                        .Cast<object[]>()
+                        .Select(pair => 
+                        {
+                            literals.offset = (long) pair[1];
+                            return new Triple(subj, new SUriNode((int)pair[0],this), new SLiteralNode(literals.Get(), this));
+                        }))
+                    .ToArray();
+            }
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Triple> GetTriplesWithSubject(Uri u)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Triple> GetTriplesWithSubjectPredicate(INode subj, INode pred)
+        {
+            if (!(pred is SUriNode)) throw new Exception();
+            var predicateUriCode = (pred as SUriNode).Code;
+            if (subj is SUriNode)
+            {
+                var subjUriCode = (subj as SUriNode).Code;
+                if (subjUriCode == Int32.MinValue || predicateUriCode == Int32.MinValue) return new Triple[0];
+                var key = new KeyValuePair<int, int>(subjUriCode, predicateUriCode);
+                var rec_ent = this.entitiesTree.Root.Element(subjUriCode);// //.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
+                if (rec_ent.IsEmpty) return new Triple[0];
+                var literals = dataCell.Root.Element(0);
+                return ((object[])rec_ent.Field(2).Get())
+                    .Cast<object[]>()
+                    .Where(pair => (int)pair[0] == predicateUriCode)
+                    .Select(pair => (int)pair[1])
+                    .Select(i => new Triple(subj, pred, new SUriNode(i, this)))
+                    .Concat(((object[])rec_ent.Field(1).Get())
+                            .Cast<object[]>()
+                            .Where(pair => (int)pair[0] == predicateUriCode)
+                            .Select(pair => (long)pair[1])
+                            .Select(i =>
+                            {
+                                literals.offset = i;
+                                return new Triple(subj, pred, new SLiteralNode(literals.Get(), this));
+                            }))        
+                            .ToArray();
+            }
+            else if (subj is SLiteralNode)
+            {
+                throw new NotImplementedException();
+            }
+            else throw new Exception();
+        }
+
+        public IEnumerable<Triple> GetTriplesWithSubjectObject(INode subj, INode obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Triple> GetTriplesWithPredicateObject(INode pred, INode obj)
+        {
+            if(!(pred is SUriNode)) throw new Exception();
+            var predicateUriCode = (pred as SUriNode).Code;
+            if (obj is SUriNode)
+            {
+                var objectUriCode = (obj as SUriNode).Code;
+                if (objectUriCode == Int32.MinValue || predicateUriCode == Int32.MinValue) return new Triple[0];
+                 var rec_ent = this.entitiesTree.Root.Element(objectUriCode);
+                if (rec_ent.IsEmpty) return new Triple[0];
+                var pred_subj = rec_ent.Field(3).Elements()
+                    .FirstOrDefault(pred_subjseq => (int)pred_subjseq.Field(0).Get() == predicateUriCode);
+
+                return (pred_subj.offset == 0 ? new int[0] : ((object[])pred_subj.Field(1).Get()).Cast<int>()).Select(i => new Triple(new SUriNode(i, this), pred, obj)).ToArray();
+            }
+            else if (obj is SLiteralNode)
+            {
+                throw new NotImplementedException(); 
+            }
+            else throw new Exception();
+        }
+
+        public IEnumerable<Triple> GetTriples()
+        {
+            PaEntry paEntry = dataCell.Root.Element(0);
+
+            //foreach (var element in entitiesTree.Root.Elements())
+            for (int i = 0; i < entitiesTree.Root.Count(); i++)
+            {
+                var element = entitiesTree.Root.Element(i);
+                //(int)element.Field(0).Get(),=WRONG
+                SUriNode sUriNode = new SUriNode(i, this);
+                foreach (object[] po in (object[]) element.Field(1).Get())
+                {
+                    paEntry.offset = (long) po[1];
+                    yield return new Triple(sUriNode, new SUriNode((int)po[0], this), new SLiteralNode(paEntry.Get(),this)); 
+                }
+                foreach (object[] po in (object[])element.Field(2).Get())
+                {
+                    yield return new Triple(sUriNode, new SUriNode((int)po[0], this), new SUriNode((int) po[1], this));
+                }
+            }
+        }
+
+
         public int MakeTreeFix()
         {
             DateTime tt0 = DateTime.Now;
@@ -248,9 +475,9 @@ namespace RdfInMemoryCopy
             // Заведем ячейку для результата сканирования
             PxCell tree_fix = this.entitiesTree; //new PxCell(tp_entitiesTree, path + "tree_fix.pxc", false);
             tree_fix.Clear();
-            tree_fix.Root.SetRepeat(n_entities);
+            tree_fix.Root.SetRepeat(namespaceMaper.coding.Count);
             Console.WriteLine("tree_fix length={0}", tree_fix.Root.Count());
-            long longindex = 0;
+      
 
             int cnt_e = 0; // для отладки
             long c1 = 0, c2 = 0, c3 = 0; // для отладки
@@ -305,7 +532,12 @@ namespace RdfInMemoryCopy
                 //Собираем полную запись
                 object[] record = new object[] { id, list_fields.ToArray(), list_direct.ToArray(), list_inverse.ToArray() };
                 // Записываем в качестве элемента последовательности
-                tree_fix.Root.Element(longindex).Set(record); longindex++;
+
+                if (id == 0)
+                {
+                    Console.WriteLine("sfgh");
+                }
+                tree_fix.Root.Element(id).Set(record); 
             }
             tree_fix.Close();
             this.entitiesTree = new PxCell(tp_entitiesTree, path + "entitiesTree.pxc", false);
@@ -316,6 +548,25 @@ namespace RdfInMemoryCopy
         internal long AddLiteral(object lit)
         {
             return dataCell.Root.AppendElement(lit);
+        }
+
+
+        public bool Contains(IUriNode subject, IUriNode predicate, INode @object)
+        {
+            if(!(subject is SUriNode))  throw new NotImplementedException();
+            if(!(predicate is SUriNode)) throw new NotImplementedException();
+            if(!(@object is SUriNode)) throw new NotImplementedException();
+            var objectUriCode = (@object as SUriNode).Code;
+            //Todo
+            var subjCode = (subject as SUriNode).Code;
+            return scale.ChkInScale(subjCode, (predicate as SUriNode).Code, objectUriCode)
+                   &&
+                   GetTriplesWithPredicateObject(predicate, @object)
+                       .Select(triple => triple.Subject)
+                       .Where(node => node is SUriNode)
+                       .Cast<SUriNode>()
+                       .Select(node => node.Code)
+                       .Contains(subjCode);
         }
     }
 }

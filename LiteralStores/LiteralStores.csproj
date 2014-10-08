@@ -55,6 +55,10 @@
       <Project>{5283693d-68cc-4b7a-b2bb-6e901592a272}</Project>
       <Name>NameTable</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RdfInMemory\RdfInMemory.csproj">
+      <Project>{07C81533-B782-4516-8D67-20133BDAE8A6}</Project>
+      <Name>RdfInMemory</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TripleInt\TripleIntClasses.csproj">
       <Project>{4b88e673-1272-46cf-817c-ac76111dac46}</Project>
       <Name>TripleIntClasses</Name>

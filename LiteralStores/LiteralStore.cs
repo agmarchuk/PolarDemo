@@ -45,7 +45,7 @@ namespace LiteralStores
         {               
             var paEntry = dataCell.Root.Element(0);
             paEntry.offset = offset;
-            return Literal.ToLiteral((object[])paEntry.Get());
+            return Literal.ToLiteral((object[])paEntry.Get(), null);
         }
 
         public override Literal Write(Literal literal)

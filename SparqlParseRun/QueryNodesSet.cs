@@ -1,44 +1,24 @@
 using System;
+using RdfInMemory;
 using RDFStores;
 using TripleIntClasses;
+using Literal = TripleIntClasses.Literal;
+using LiteralVidEnumeration = TripleIntClasses.LiteralVidEnumeration;
+using Text = TripleIntClasses.Text;
 
 namespace SparqlParseRun
 {
-    public class RPackInt : ICloneable
+    public class QueryNodesSet : ICloneable
     {
         //public bool result;
-        public object[] row;
+        public INode[] row;
         private readonly RDFIntStoreAbstract ts;
-        public RDFIntStoreAbstract StoreAbstract { get { return ts; } }
 
-        public RPackInt(object[] row, RDFIntStoreAbstract ts)
+        public QueryNodesSet(INode[] row)
         {
             this.row = row;
-            this.ts = ts;
-        }
-        public string Get(object si)
-        {
-            if (!(si is short)) 
-                return ts.EntityCoding.GetName((int)si);
-            var index = (short)si;
-            var literal = (row[index] as Literal);
-            if (literal != null) return literal.ToString();
-            else return ts.EntityCoding.GetName((int)row[index]);
-        }
-
-        public int GetE(object si)
-        {
-            return si is short ? (int)row[(short)si] : (int)si;
-        }
-
-        public bool Hasvalue(short si)
-        {
-            return
-                (row[si] is int && row[si] != (object)Int32.MinValue)
-                || (row[si] is Literal &&
-                    ((Literal)row[si]).HasValue);
-
-        }
+        
+        }    
         public Literal Val(short ind)
         {
             return (Literal)row[ind];
@@ -49,14 +29,9 @@ namespace SparqlParseRun
             //if (lit.vid != LiteralVidEnumeration.integer) throw new Exception("Wrong literal vid in Vai method");
             return (double)lit.Value;
         }
-        public void Set(object si, object valu)
-        {
-            if (!(si is short)) throw new Exception("argument must be an index");
-            short ind = (short)si;
-            row[ind] = valu;
-        }
+     
 
-        public RPackInt ResetDiapason(short parametersStartIndex, short parametersEndIndex)
+        public QueryNodesSet ResetDiapason(short parametersStartIndex, short parametersEndIndex)
         {
             for (short i = parametersStartIndex; i < parametersEndIndex; i++)
                 Reset(i);
@@ -96,7 +71,7 @@ namespace SparqlParseRun
             }
         }
 
-        public object this[short index]
+        public INode this[short index]
         {
             get { return row[index]; }
             set
@@ -106,24 +81,13 @@ namespace SparqlParseRun
         }
         object ICloneable.Clone()
         {
-            var newRow = new object[row.Length];
+            var newRow = new INode[row.Length];
             for (int i = 0; i < newRow.Length; i++)
             {
-                var literal = row[i] as Literal;
-                if (literal != null)
-                {
-                    var value = literal.Value;
-                    if (value is Text)
-                        newRow[i] = new Literal(literal.vid) { Value = ((ICloneable)value).Clone() };
-                    else if (value is TypedObject)
-                        newRow[i] = new Literal(literal.vid) { Value = ((ICloneable)value).Clone() };
-                    else
-                        newRow[i] = new Literal(literal.vid) { Value = value };
-                }
-                else
-                    newRow[i] = row[i];
+                if (row[i] != null)
+                    newRow[i] = (INode) row[i].Clone();
             }
-            return new RPackInt(newRow, ts);
+            return new QueryNodesSet(newRow);
         }
     }
 }

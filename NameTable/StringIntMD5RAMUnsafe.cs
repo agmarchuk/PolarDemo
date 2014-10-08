@@ -130,6 +130,7 @@ namespace NameTable
             nc_cell.Fill(new object[0]);
             c_index.Fill(new object[0]);
             md5_index.Fill(new object[0]);
+
             Count = 0;
             codeByMd5.Clear();
       

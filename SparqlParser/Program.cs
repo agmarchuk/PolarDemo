@@ -38,18 +38,20 @@ namespace SparqlParser
         {
             string path = (@"C:\Users\Admin\Source\Repos\PolarDemo\Databases\" + Millions + @"mln\");
            
-            var   nameSpaceStore=new NameSpaceStore(path);  
-           
+            var   nameSpaceStore=new NameSpaceStore(path);
+
+            StringIntMD5RAMUnsafe stringIntMd5RamUnsafe = new StringIntMD5RAMUnsafe(path);
+            PredicatesCoding predicatesCoding = new PredicatesCoding(path);
             RDFIntStoreAbstract ts = new CashingTripleStoreInt(
-                new ColumnsStore(path,
+                new RdfTrees(path,
                // new CasheCoding(new StringIntCoding(path+"entitiesCodes")),
-               new StringIntMD5RAMUnsafe(path), 
-                new PredicatesCoding(path),
+               stringIntMd5RamUnsafe, 
+                predicatesCoding,
                 nameSpaceStore,
                 new LiteralStore(path, nameSpaceStore) ));
-             
-                bool load = false;
-        //    bool load = true;
+              //     bool load = false;
+        
+               bool load = false;
             using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
                 wr.WriteLine("millions " + Millions);
             DateTime start = DateTime.Now;
@@ -60,6 +62,25 @@ namespace SparqlParser
             }
             else
             {
+                var obj2 = stringIntMd5RamUnsafe.GetCode(nameSpaceStore.GetShortFromFullOrPrefixed("<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature19>"));
+                var obj1 = stringIntMd5RamUnsafe.GetCode(nameSpaceStore.GetShortFromFullOrPrefixed("<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature8>"));
+                var pred = predicatesCoding.GetCode(nameSpaceStore.GetShortFromFullOrPrefixed("<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature>"));
+                var triplets1 = ts.GetSubjectByObjPred(obj1,pred);
+                var triplets2 = ts.GetSubjectByObjPred(obj2,pred);
+                foreach (var i in triplets1.Where(i => triplets2.Contains(i)))
+                    Console.WriteLine("sdfg");
+               
+
+                for (int i = 0; i < stringIntMd5RamUnsafe.Count; i++)
+                {
+                    if (
+                        ts.GetObjBySubj(i)
+                            .Any(
+                                keyValuePair =>
+                                    !ts.GetSubjectByObjPred(keyValuePair.Key, keyValuePair.Value).Contains(i)))
+                        throw new Exception();
+                }     
+                return;
                 ts.WarmUp();
                 spent = (DateTime.Now - start).Ticks / 10000;
                 using (StreamWriter wr = new StreamWriter(@"..\..\output.txt", true))
@@ -108,7 +129,8 @@ namespace SparqlParser
                         streamQueryParameters))
                         .Select(queryReadParameters =>
                         {
-                            var q = new Query(ts); q.Parse(queryReadParameters, ts); return q.Run(); 
+                            return "";
+                            //      var q = new Query(ts); q.Parse(queryReadParameters, ts); return q.Run(); 
                         })
                         .ToArray();
 
@@ -135,11 +157,11 @@ namespace SparqlParser
                     readAllText = QueryReadParameters(readAllText, streamQueryParameters);
 
                     var st = DateTime.Now;
-                    var q = new Query(ts);
-                    q.Parse(readAllText, ts);
+                  //  var q = new Query(ts);
+               //    q.Parse(readAllText, ts);
                     totalparseMS[i] += (DateTime.Now - st).Ticks / 10000L;
                     var st1 = DateTime.Now;
-                    var resultString = q.Run();
+                 //  var resultString = //q.Run();
                     var totalMilliseconds = (DateTime.Now - st).Ticks / 10000L;
                     totalrun[i] += (DateTime.Now - st1).Ticks / 10000L;
 
@@ -202,9 +224,9 @@ namespace SparqlParser
                     var readAllText = File.ReadAllText(file.FullName);
 
                     //   var st = DateTime.Now;
-                    var q = new Query(ts);
-                    q.Parse(readAllText, ts);
-                    var resultString = q.Run();
+                  //  var q = new Query(ts);
+                  //  q.Parse(readAllText, ts);
+               //     var resultString = q.Run();
                     //var totalMilliseconds = (long)(DateTime.Now - st).TotalMilliseconds;
                     // results[i++] += totalMilliseconds;
                     //   File.WriteAllText(Path.ChangeExtension(file.FullName, ".txt"), resultString);
@@ -217,10 +239,10 @@ namespace SparqlParser
                 foreach (var file in fileInfos)
                 {
                     var readAllText = File.ReadAllText(file.FullName);
-                    var st = DateTime.Now;
-                    var q = new Query(ts);
-                    q.Parse(readAllText, ts);
-                    var resultString = q.Run();
+                  var st = DateTime.Now;
+                //    var q = new Query(ts);
+                //    q.Parse(readAllText, ts);
+                    var resultString = "";//q.Run();
                     var totalMilliseconds = (DateTime.Now - st).Ticks / 10000L;
                     results[i++] += totalMilliseconds;
                     File.WriteAllText(Path.ChangeExtension(file.FullName, ".txt"), resultString);

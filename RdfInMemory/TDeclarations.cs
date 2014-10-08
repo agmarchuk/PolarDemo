@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RdfInMemory
 {
-    public interface INode
+    public interface INode  
     {
         NodeType NodeType { get; }
         IGraph Graph { get; }

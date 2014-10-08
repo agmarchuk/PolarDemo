@@ -60,6 +60,10 @@
       <Project>{5283693d-68cc-4b7a-b2bb-6e901592a272}</Project>
       <Name>NameTable</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RdfInMemory\RdfInMemory.csproj">
+      <Project>{07C81533-B782-4516-8D67-20133BDAE8A6}</Project>
+      <Name>RdfInMemory</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ScaleBit4Check\ScaleBit4Check.csproj">
       <Project>{7860cd10-44ef-4300-8872-8ebef9f122e8}</Project>
       <Name>ScaleBit4Check</Name>

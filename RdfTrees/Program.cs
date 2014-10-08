@@ -19,7 +19,7 @@ namespace RdfTreesNamespace
             NameSpaceStore nameSpaceStore = new NameSpaceStore(path);
             RdfTrees rtrees = new RdfTrees(path, new StringIntMD5RAMCollision(path), new PredicatesCoding(path), nameSpaceStore,   new LiteralStoreSplited(path, nameSpaceStore));
             
-            rtrees.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset1M.ttl");
+            rtrees.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset1M.ttl", true);
             return;
 
             // Разогрев

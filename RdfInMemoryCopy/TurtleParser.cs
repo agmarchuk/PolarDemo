@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RdfInMemoryCopy
 {
@@ -12,6 +8,7 @@ namespace RdfInMemoryCopy
         public void LoadTriplets(IGraph graph, string datafile)
         {
             graph.Clear();
+
 
             int ntriples = 0;
             int nTripletsInBuffer = 0;
@@ -61,9 +58,9 @@ namespace RdfInMemoryCopy
                         // Уберем последний символ
                         rest_line = rest_line.Substring(0, rest_line.Length - 1).Trim();
                         bool isDatatype = rest_line[0] == '\"';
-
+                               
                         string pred_line = line1.Substring(0, first_blank);
-                        INode predicate = graph.CreateUriNode(pred_line);
+                        INode predicate = graph.CreateUriNode(pred_line == "a" ? "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>" : pred_line);
 
                         // объект может быть entity или данное, у данного может быть языковый спецификатор или тип
                         string sdata = null;
@@ -85,7 +82,7 @@ namespace RdfInMemoryCopy
                                 string qname = rest_line.Substring(pp + 2);
                                 //  тип данных может быть "префиксным" или полным
 
-                                datatype = "<" + qname+">";// rdf.NameSpaceStore.GetShortFromFullOrPrefixed(qname);
+                                datatype = "<" + qname + ">"; // rdf.NameSpaceStore.GetShortFromFullOrPrefixed(qname);
                             }
 
                             ILiteralNode literal = graph.CreateLiteralNode(rest_line);
@@ -107,16 +104,6 @@ namespace RdfInMemoryCopy
             Console.WriteLine("ntriples={0}", ntriples);
         }
 
-        public static string GetEntityString(IGraph g, string line)
-        {
-            string subject = null;
-            int colon = line.IndexOf(':');
-            if (colon == -1) { Console.WriteLine("Err in line: " + line); goto End; }
-            string prefix = line.Substring(0, colon + 1);
-            if (!g.NamespaceMap.HasNamespace(prefix)) { Console.WriteLine("Err in line: " + line); goto End; }
-            subject = g.NamespaceMap.GetNamespaceUri(prefix).OriginalString + line.Substring(colon + 1);
-        End:
-            return subject;
-        }
+
     }
 }

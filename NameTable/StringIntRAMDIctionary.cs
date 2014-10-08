@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using PolarDB;
 
 namespace NameTable
@@ -19,7 +17,7 @@ namespace NameTable
 
         private bool? openMode;
         private readonly Dictionary<string, int> codeByString = new Dictionary<string, int>();
-        private string[] stringByCode;
+        private List<string> stringByCode;
         private string niCell;
 
         public StringIntRAMDIctionary(string path)
@@ -39,8 +37,8 @@ namespace NameTable
                 codeByString.Add((string) code_name[1], (int) code_name[0]);
                 stringByCodeList.Add((string)code_name[1]);
             }
-            stringByCode = stringByCodeList.ToArray();
-            Count = stringByCode.Length;
+            stringByCode = stringByCodeList;
+            Count = stringByCode.Count;
           Close();
         }
 
@@ -62,8 +60,8 @@ namespace NameTable
             nc_cell.Flush();
             // Открытие ячеек в режиме работы (чтения)
             codeByString = ReWrite;
-            stringByCode = ReWrite.Select(pair => pair.Key).ToArray();
-            Count = stringByCode.Length;
+            stringByCode = ReWrite.Select(pair => pair.Key).ToList();
+            Count = stringByCode.Count;
             Close();
         }
 
@@ -75,7 +73,14 @@ namespace NameTable
 
         public int InsertOne(string entity)
         {
-            throw new NotImplementedException();
+            var code = GetCode(entity);
+            if (code == Int32.MinValue)
+            {
+                codeByString.Add(entity, code = Count++);
+                nc_cell.Root.AppendElement(new object[] { code, entity });
+                stringByCode.Add(entity);
+            }
+            return code;
         }
 
         public void Open(bool readonlyMode)
@@ -109,7 +114,7 @@ namespace NameTable
        
             Count = 0;
             codeByString.Clear();
-            stringByCode = new string[0];
+            stringByCode = new List<string>();
             
         }
 
@@ -140,17 +145,11 @@ namespace NameTable
             for (int i = 0; i < portion.Length; i++)
                 if (!insertPortion.ContainsKey(portion[i]))
                 {
-                    var code = GetCode(portion[i]);
-                    if (code == Int32.MinValue)
-                    {
-                        codeByString.Add(portion[i], code = Count++);
-                        nc_cell.Root.AppendElement(new object[] { code, portion[i] });
-                        stringByCodeList.Add(portion[i]);
-                    }
-                    insertPortion.Add(portion[i], code);
+                   
+                    insertPortion.Add(portion[i], InsertOne(portion[i]));
                 }
             nc_cell.Flush();
-            stringByCode = stringByCodeList.ToArray();
+            stringByCode = stringByCodeList.ToList();
             return insertPortion;
         }
 

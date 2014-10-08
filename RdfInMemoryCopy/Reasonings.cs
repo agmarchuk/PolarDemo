@@ -4,12 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RdfInMemoryCopy
+namespace RdfInMemory
 {
+    //
+    // см. https://bitbucket.org/dotnetrdf/dotnetrdf/wiki/User%20Guide
+    //
     public interface INode
     {
         NodeType NodeType { get; }
         IGraph Graph { get; }
+
     }
     public interface IUriNode : INode { Uri Uri { get; } }
     public interface ILiteralNode : INode
@@ -26,33 +30,22 @@ namespace RdfInMemoryCopy
     }
     public class Triple
     {
-        private IGraph g;
-        private INode subj, pred, obj;
-        public Triple(INode subj, INode pred, INode obj) 
-        { 
-            this.subj = subj; this.pred = pred; this.obj = obj;
-            this.g = subj.Graph;
-            if (!g.Equals(pred.Graph) || !g.Equals(obj.Graph)) throw new Exception("Err in Triple constructor");
-        }
-        public IGraph Graph { get { return g; } }
-        public INode Subject { get { return subj; } }
-        public INode Predicate { get { return pred; } }
-        public INode Object { get { return obj; } }
+        public extern Triple(INode subj, INode pred, INode obj);
+        public extern IGraph Graph { get; }
+        public extern INode Subject { get; }
+        public extern INode Predicate { get; }
+        public extern INode Object { get; }
     }
     public interface IGraph
     {
         bool IsEmpty { get; }
         INamespaceMapper NamespaceMap { get; }
-        //IEnumerable<INode> Nodes { get; } // Пока вредне не нужен...
+        IEnumerable<INode> Nodes { get; }
         // Создатели
-        IUriNode CreateUriNode(string uriOrQname);
-        ILiteralNode CreateLiteralNode(string value); // Это когда надо разбираться с текстом до точки
+        IUriNode CreateUriNode();
+        ILiteralNode CreateLiteralNode(string value);
         ILiteralNode CreateLiteralNode(string value, Uri datatype);
         ILiteralNode CreateLiteralNode(string value, string lang);
-        // Очистка, добавление триплетов, построение графа
-        void Clear();
-        bool Assert(Triple t);
-        void Build(); // Это действие отсутствует в стандарте dotnetrdf!
     }
     public interface INamespaceMapper
     {
@@ -74,17 +67,16 @@ namespace RdfInMemoryCopy
         bool ReduceToQName(string uri, out string qname);
     }
     // Парсеры
-    //public class TurtleParser
-    //{
-    //    public extern void Load(IGraph g, string filename);
-    //}
+    public class TurtleParser
+    {
+        public extern void Load(IGraph g, string filename);
+    }
     public class TripleStore
     {
         //SparqlQueryParser sparqlparser = new SparqlQueryParser();
         //SparqlQuery query = sparqlparser.ParseFromString("CONSTRUCT { ?s ?p ?o } WHERE { { GRAPH ?g { ?s ?p ?o } } UNION { ?s ?p ?o } }");
         //results = store.ExecuteQuery(query);
         //if (results is IGraph)
-
     }
     public class SparqlQueryParser
     {

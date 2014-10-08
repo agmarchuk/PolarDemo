@@ -24,12 +24,12 @@ namespace RdfTreesNamespace
         {
             return Scale.ChkInScale(subj, pred, obj);
         }
-    
+
         private bool CheckContains(int subj, int pred, int obj)
         {
             if (!Scale.ChkInScale(subj, pred, obj)) return false;
-            return GetObjBySubjPred(subj, pred).Contains(subj);   
-            }
+            return GetObjBySubjPred(subj, pred).Contains(obj);
+        }
 
         public override IEnumerable<Literal> GetDataBySubjPred(int subj, int pred)
         {
@@ -49,7 +49,7 @@ namespace RdfTreesNamespace
         public override IEnumerable<int> GetObjBySubjPred(int subj, int pred)
         {
             if (subj == Int32.MinValue || pred == Int32.MinValue) return new int[0];
-            var key = new KeyValuePair<int, int>(subj, pred);
+         
                 var rec_ent = this.entitiesTree.Root.Element(subj);// //.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(subj));
             if (rec_ent.IsEmpty) return new int[0];
             return ((object[]) rec_ent.Field(2).Get())
@@ -62,7 +62,6 @@ namespace RdfTreesNamespace
         public override IEnumerable<int> GetSubjectByObjPred(int obj, int pred)
         {
             if (obj == Int32.MinValue || pred == Int32.MinValue) return new int[0];
-            var key = new KeyValuePair<int, int>(obj, pred);
             var rec_ent = this.entitiesTree.Root.Element(obj);
                 //.BinarySearchFirst(ent => ((int) ent.Field(0).Get()).CompareTo(obj));
             if (rec_ent.IsEmpty) return new int[0];
