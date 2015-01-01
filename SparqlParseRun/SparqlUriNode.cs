@@ -1,12 +1,12 @@
 using System;
-using RdfInMemoryCopy;
+using TripleStoreForDNR;
 
 namespace SparqlParseRun
 {
     public class SparqlUriNode :SparqlNode
     {
         public Uri Uri;
-        internal override void CreateNode(IStore store)
+        internal override void CreateNode(PolarTripleStore store)
         {
             Value = store.GetUriNode(Uri);
         }

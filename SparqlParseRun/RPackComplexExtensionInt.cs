@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using RdfInMemoryCopy;
+using TripleStoreForDNR;
 
 
 namespace SparqlParseRun
@@ -13,7 +13,7 @@ namespace SparqlParseRun
 
       
    
-        public static Func<IEnumerable<Action>> spo(IStore store, SparqlNode s, SparqlNode p, SparqlNode o)
+        public static Func<IEnumerable<Action>> spo(PolarTripleStore store, SparqlNode s, SparqlNode p, SparqlNode o)
         {
             return ()=> store.Contains(new Triple(s.Value,p.Value,o.Value)) ? new Action[]{(() =>
             {
@@ -26,7 +26,7 @@ namespace SparqlParseRun
             throw new NotImplementedException();
         }
 
-        internal static Func<IEnumerable<Action>> spO(IStore store, SparqlNode subjNode, SparqlNode pEntityCode, VariableNode obj)
+        internal static Func<IEnumerable<Action>> spO(PolarTripleStore store, SparqlNode subjNode, SparqlNode pEntityCode, VariableNode obj)
         {
             return () => store
               .GetTriplesWithSubjectPredicate(subjNode.Value, pEntityCode.Value)
@@ -36,7 +36,7 @@ namespace SparqlParseRun
                   obj.Value = newObj;
               }));
         }
-        internal static Func<IEnumerable<Action>> Spo(IStore store, VariableNode subj, SparqlNode pEntityCode, SparqlNode oEntityCode)
+        internal static Func<IEnumerable<Action>> Spo(PolarTripleStore store, VariableNode subj, SparqlNode pEntityCode, SparqlNode oEntityCode)
         {
             return () => store
                 .GetTriplesWithPredicateObject(pEntityCode.Value, oEntityCode.Value)
@@ -47,7 +47,7 @@ namespace SparqlParseRun
                 }));
         }
 
-        internal static Func<IEnumerable<Action>> SpO(IStore store, VariableNode s, SparqlNode pEntityCode, VariableNode o)
+        internal static Func<IEnumerable<Action>> SpO(PolarTripleStore store, VariableNode s, SparqlNode pEntityCode, VariableNode o)
         {
             throw new NotImplementedException();
         }
@@ -65,7 +65,7 @@ namespace SparqlParseRun
 
    
 
-        internal static Func<IEnumerable<Action>> sPo(IStore store, SparqlNode sEntityCode, VariableNode predicateVariableNode, SparqlNode oEntityCode)
+        internal static Func<IEnumerable<Action>> sPo(PolarTripleStore store, SparqlNode sEntityCode, VariableNode predicateVariableNode, SparqlNode oEntityCode)
         {
             return () => store
                 .GetTriplesWithSubjectObject(sEntityCode.Value,  oEntityCode.Value)
@@ -81,56 +81,52 @@ namespace SparqlParseRun
             throw new NotImplementedException();
         }
 
-        internal static Func<IEnumerable<Action>> sPO(IStore store, SparqlNode sEntityCode, VariableNode pParamIndex, VariableNode oParamIndex)
+        internal static Func<IEnumerable<Action>> sPO(PolarTripleStore store, SparqlNode sEntityCode, VariableNode pParameter, VariableNode oParameter)
         {
             return () => store
                 .GetTriplesWithSubject(sEntityCode.Value)
                 .Select(triple => new Action(() =>
                 {
-                    pParamIndex.Value = triple.Predicate;
-                    oParamIndex.Value = triple.Object;
+                    pParameter.Value = triple.Predicate;
+                    oParameter.Value = triple.Object;
                 }));
         }
 
-        internal static Func<IEnumerable<Action>> sPD(IStore store, SparqlNode sEntityCode, VariableNode pParamIndex, VariableNode oParamIndex)
+        internal static Func<IEnumerable<Action>> sPD(IStore store, SparqlNode sEntityCode, VariableNode pParameter, VariableNode oParameter)
         {
             throw new NotImplementedException();
         }
 
-        internal static Func<IEnumerable<Action>> Spd(VariableNode sParamIndex, object pEntityCode, SparqlNode d)
+        internal static Func<IEnumerable<Action>> Spd(VariableNode sParameter, object pEntityCode, SparqlNode d)
         {
             throw new NotImplementedException();
         }
 
-        internal static Func<IEnumerable<Action>> SpD(VariableNode sParamIndex, object pEntityCode, VariableNode oParamIndex)
+        internal static Func<IEnumerable<Action>> SpD(VariableNode sParameter, object pEntityCode, VariableNode oParameter)
         {
             throw new NotImplementedException();
         }
 
-        internal static Func<IEnumerable<Action>> SPo(IStore store, VariableNode sParamIndex, VariableNode pParamIndex, SparqlNode oEntityCode)
+        internal static Func<IEnumerable<Action>> SPo(PolarTripleStore store, VariableNode sParameter, VariableNode pParameter, SparqlNode oEntityCode)
         {
             return () => store
                  .GetTriplesWithObject(oEntityCode.Value)
                  .Select(triple => new Action(() =>
                  {
-                     pParamIndex.Value = triple.Predicate;
-                     sParamIndex.Value = triple.Subject;
+                     pParameter.Value = triple.Predicate;
+                     sParameter.Value = triple.Subject;
                  }));
         }
 
-        internal static Func<IEnumerable<Action>> SPd(short sParamIndex, short pParamIndex, SparqlNode d)
+        internal static Func<IEnumerable<Action>> SPd(short sParameter, short pParameter, SparqlNode d)
         {
             throw new NotImplementedException();
         }
 
-        internal static Func<IEnumerable<Action>> SPO(IStore paramIndex, VariableNode sParamIndex, VariableNode pParamIndex, VariableNode oParamIndex)
+        internal static Func<IEnumerable<Action>> SPO(PolarTripleStore store, VariableNode sParameter, VariableNode pParameter, VariableNode oParameter, SparqlNode graph)
         {
             throw new NotImplementedException();
-        }
 
-        internal static Func<IEnumerable<Action>> SPD(short sParamIndex, short pParamIndex, short oParamIndex)
-        {
-            throw new NotImplementedException();
         }
     }
 }

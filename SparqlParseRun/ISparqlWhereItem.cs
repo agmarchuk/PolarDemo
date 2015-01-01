@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using RdfInMemoryCopy;
+using TripleStoreForDNR;
 
 namespace SparqlParseRun
 {
     public interface ISparqlWhereItem
     {
         Func<IEnumerable<Action>> SelectVariableValuesOrFilter { get; }
-        void CreateNodes(IStore store);
+        void CreateNodes(PolarTripleStore store);
     }
 }

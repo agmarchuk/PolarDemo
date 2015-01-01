@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2012 for Web
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30501.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FirstSteps", "FirstSteps\FirstSteps.csproj", "{2BE582AC-D3B0-4E76-AE73-BF8129C0E3EF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sorting", "Sorting\Sorting.csproj", "{7EF43579-CEF1-481F-A0F2-AFD1EFE71386}"
@@ -62,8 +64,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RdfInMemoryCopy", "RdfInMemoryCopy\RdfInMemoryCopy.csproj", "{B1E7385E-8FC1-4D02-B6D5-07457EE1D8E8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparqlParseRun", "SparqlParseRun\SparqlParseRun.csproj", "{AE8CBEDB-A66E-4705-953E-C16793426E89}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparqlParser", "SparqlParser\SparqlParser.csproj", "{B3F85355-685E-428F-B9E8-303AEAA8FF2A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TripleStoreForDNR", "TripleStoreForDNR\TripleStoreForDNR.csproj", "{1E5F028C-AA30-4877-81FD-7C4F0DED5340}"
 EndProject
@@ -377,16 +377,6 @@ Global
 		{AE8CBEDB-A66E-4705-953E-C16793426E89}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{AE8CBEDB-A66E-4705-953E-C16793426E89}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{AE8CBEDB-A66E-4705-953E-C16793426E89}.Release|x86.ActiveCfg = Release|Any CPU
-		{B3F85355-685E-428F-B9E8-303AEAA8FF2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B3F85355-685E-428F-B9E8-303AEAA8FF2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B3F85355-685E-428F-B9E8-303AEAA8FF2A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{B3F85355-685E-428F-B9E8-303AEAA8FF2A}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{B3F85355-685E-428F-B9E8-303AEAA8FF2A}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{B3F85355-685E-428F-B9E8-303AEAA8FF2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B3F85355-685E-428F-B9E8-303AEAA8FF2A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B3F85355-685E-428F-B9E8-303AEAA8FF2A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{B3F85355-685E-428F-B9E8-303AEAA8FF2A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{B3F85355-685E-428F-B9E8-303AEAA8FF2A}.Release|x86.ActiveCfg = Release|Any CPU
 		{1E5F028C-AA30-4877-81FD-7C4F0DED5340}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1E5F028C-AA30-4877-81FD-7C4F0DED5340}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E5F028C-AA30-4877-81FD-7C4F0DED5340}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU

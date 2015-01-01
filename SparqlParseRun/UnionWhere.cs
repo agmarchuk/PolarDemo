@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using RdfInMemoryCopy;
+using TripleStoreForDNR;
 
 namespace SparqlParseRun
 {
@@ -36,15 +36,14 @@ namespace SparqlParseRun
                 });
             }
         }
-        public override void CreateNodes(IStore store)
+        public override void CreateNodes(PolarTripleStore store)
         {
          
             foreach (var alternative in alternatives)
             {
                 alternative.CreateNodes(store);
                 sparqlResultSet.ResetDiapason(startVariable, alternative.endIndexVariable);
-            }
-            
+            }             
         }        
     }
 }

@@ -7,7 +7,7 @@ using VDS.RDF.Storage.Management;
 
 namespace TripleStoreForDNR
 {
-    internal class PolarTripleStore : IStorageProvider
+    public class PolarTripleStore : IStorageProvider, IQueryableStorage, IStore 
     {
         private IGraph defaultGraph;
         Dictionary<Uri,IGraph> namedGraphs=new Dictionary<Uri, IGraph>();
@@ -15,13 +15,7 @@ namespace TripleStoreForDNR
         public PolarTripleStore(IGraph defaultGraph)
         {
             this.defaultGraph = defaultGraph;
-        }
-
-
-
-
-
-   
+        }          
 
         public bool IsReady { get; private set; }
         public bool IsReadOnly { get; private set; }
@@ -124,6 +118,93 @@ namespace TripleStoreForDNR
         public void Dispose()
         {
             throw new NotImplementedException();
+        }
+
+        public object Query(string sparqlQuery)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Query(IRdfHandler rdfHandler, ISparqlResultsHandler resultsHandler, string sparqlQuery)
+        {
+            throw new NotImplementedException();
+        }
+        public bool Contains(Triple triple)
+        {
+            return defaultGraph.Contains((IUriNode)triple.Subject, (IUriNode)triple.Predicate, triple.Object);
+        }
+
+
+        public IEnumerable<Triple> GetTriplesWithSubjectPredicate(INode subjectNode, INode predicateNode)
+        {
+            return defaultGraph.GetTriplesWithSubjectPredicate(subjectNode, predicateNode);
+        }
+
+        public IEnumerable<Triple> GetTriplesWithSubjectObject(INode subjectNode, INode objectNode)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Triple> GetTriplesWithSubject(INode subjectNode)
+        {
+            return defaultGraph.GetTriplesWithSubject(subjectNode);
+        }
+
+        public IEnumerable<Triple> GetTriplesWithPredicateObject(INode predicateNode, INode objectNode)
+        {
+            return defaultGraph.GetTriplesWithPredicateObject(predicateNode, objectNode);
+        }
+
+        public IEnumerable<Triple> GetTriplesWithPredicate(INode predicateNode)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Triple> GetTriplesWithObject(INode objectNode)
+        {
+            return defaultGraph.GetTriplesWithObject(objectNode);
+        }
+
+        public IEnumerable<Triple> GetTriples()
+        {
+            throw new NotImplementedException();
+        }
+
+        public ILiteralNode CreateLiteralNode(Uri type, object literal, string lang)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
+        public INode CreateBlankNode(string p)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        public INode CreateUriNode(string p)
+        {
+            return defaultGraph.CreateUriNode(p);
+        }
+
+        public INamespaceMapper NamespaceMaper { get { return defaultGraph.NamespaceMap; } }
+
+        public IUriNode GetUriNode(Uri uri)
+        {
+            return defaultGraph.GetUriNode(uri); //).FirstOrDefault(ln => ln != null);
+        }
+
+        public ILiteralNode GetLiteralNode(Uri type, dynamic content, string lang)
+        {
+            var literalNode = defaultGraph.GetLiteralNode(content, lang, type);
+            return literalNode;
+            //TODO if(literalNode==null)
+        }
+
+        public IGraph CreateGraph()
+        {
+            return new SGraph("TODO", null){};
         }
     }
 }

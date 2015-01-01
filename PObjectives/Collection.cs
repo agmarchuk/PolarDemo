@@ -10,29 +10,19 @@ namespace PObjectives
 {
     public class Collection
     {
-        // Спецификация:
-        //public void Clear();
-        //public Element CreateElement(object pvalue);
-        //public void RemoveElement();
-        //public IEnumerable<Element> Elements();
-        //public Element Element(int key);
-        //public void UpdateElement(Element el, object pvalue);
-        //public TElement Element<TElement>(int key) where TElement : Element, new();
-
         private string collectionname;
         public string Name { get { return collectionname; } }
         private PType eType;
         public PType CollectionElementType { get { return eType; } }
         private Database inDatabase;
+        public Database InDatabase { get { return inDatabase; } }
         private PType eeType; // extended element type
-        //private string path;
         private PaCell cell;
         private FlexIndex<int> key_index;
         private int keyNew = 0;
         private int counter = -1;
         public Collection(string cname, PType eType, Database inDatabase)
         {
-            //this.path = path;
             this.eType = eType;
             collectionname = cname;
             this.inDatabase = inDatabase;
@@ -44,7 +34,24 @@ namespace PObjectives
             cell = new PaCell(new PTypeSequence(eeType), path + cname + ".pac", false);
             if (cell.IsEmpty) cell.Fill(new object[0]); 
             key_index = new FlexIndex<int>(path + cname + "_id_i", cell.Root, en => (int)en.Field(1).Get());
-            keyNew = (int)cell.Root.Count();
+            keyNew = (int)cell.Root.Count(); // Похоже, это есть "разогрев". Только это неправильный способ получения нового ключа
+        }
+        public void Clear()
+        {
+            cell.Clear();
+            cell.Fill(new object[0]);
+            key_index.Load(null);
+        }
+        public void AppendElement(int key, object pvalue)
+        {
+            var off = cell.Root.AppendElement(new object[] { false, key, pvalue });
+            //key_index.AppendEntry(new PaEntry(eeType, off, cell));
+        }
+        public void Flush()
+        {
+            cell.Flush();
+            // Кроме сброса размера в ячейку, произведем вычисление индекса
+            key_index.Load(null);
         }
         public Element CreateElement(object pvalue)
         {
@@ -79,6 +86,17 @@ namespace PObjectives
                 .Select<PaEntry, object[]>(en => (object[])en.Get())
                 .Where(ev => !(bool)ev[0])
                 .Select(ev => ev[2]);
+        }
+        public Element Element(int key) 
+        {
+            PaEntry entry = key_index.GetFirstByKey(key);
+            return new Element() { entry = entry, inCollection = this };
+        }
+        public TElement Element<TElement>(int key) where TElement : Element, new()
+        {
+            Element el = this.Element(key);
+            var res = new TElement() { inCollection = el.inCollection, entry = el.entry };
+            return res;
         }
     }
 }

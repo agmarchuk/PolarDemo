@@ -9,19 +9,11 @@ namespace PObjectives
 {
     public class Database
     {
-        // Спецификация
-        //public Database(string path);
-        //public Collection CreateCollection(string coll);
-        //public void DropCollection(string coll);
-        //public IEnumerable<Collection> Collections();
-        //public Collection Collection(string coll);
-
         // директория для базы данных
         private string path;
         // ячейка для каталога коллекций
         internal string Path { get { return path; } }
         private PaCell cell_catalogue;
-        private Dictionary<string, Collection> collections;
         public Database(string path)
         {
             this.path = path;
@@ -30,6 +22,17 @@ namespace PObjectives
                 new NamedType("collectionelementtype", PType.TType)));
             cell_catalogue = new PaCell(tp_catalogue, path + "catalogue.pac", false);
             if (cell_catalogue.IsEmpty) cell_catalogue.Fill(new object[0]);
+            BuildCollectionCache();
+        }
+        public void Clear()
+        {
+            cell_catalogue.Fill(new object[0]);
+            BuildCollectionCache();
+        }
+        private Dictionary<string, Collection> collections;
+        internal void BuildCollectionCache()
+        {
+            // Построение и заполнение кеша списка коллекций
             collections = new Dictionary<string, Collection>();
             foreach (var coll_element in cell_catalogue.Root.Elements())
             {
@@ -48,6 +51,10 @@ namespace PObjectives
             cell_catalogue.Flush();
             Collection collection = new Collection(collectionname, collectionelementtype, this);
             collections.Add(collectionname, collection);
+        }
+        public IEnumerable<KeyValuePair<string,Collection>> NamedCollections()
+        {
+            return collections.AsEnumerable<KeyValuePair<string, Collection>>();
         }
         public Collection Collection(string cname) 
         {

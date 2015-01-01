@@ -6,6 +6,7 @@ namespace TripleStoreForDNR
         Uri, Literal
         //, GraphLiteral, Variable
         ,
-        Variable
+        Variable,
+        Blank
     }
 }

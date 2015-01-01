@@ -18,7 +18,7 @@ namespace PObjectivesSpec
     {
         public void Clear() { }
         public Element CreateElement(object pvalue) { return null; }
-        public void RemoveElement() { }
+        public void RemoveElement() { } //???
         public IEnumerable<Element> Elements() { return Enumerable.Empty<Element>(); }
         public Element Element(int key) { return null; }
         public void UpdateElement(Element el, object pvalue) { }
