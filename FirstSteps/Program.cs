@@ -51,6 +51,33 @@ namespace FirstSteps
             var cell_pvalue = cell.Root.GetValue();
             Console.WriteLine(cell_pvalue.Type.Interpret(cell_pvalue.Value));
 
+            PTypeUnion tp_u = new PTypeUnion();
+            tp_u.Variants = new[] {
+                new NamedType("empty", new PType(PTypeEnumeration.none)),
+                new NamedType("node", new PTypeRecord(
+                    new NamedType("f0", new PType(PTypeEnumeration.boolean)),
+                    new NamedType("f1", new PTypeSequence(tp_u))))
+            };
+            object[] vv = new object[] { 1,
+                new object[] { 
+                    true, 
+                    new object[] {
+                        new object[] { 1,
+                            new object[] { 
+                                false, 
+                                new object[0]
+                            }
+                        }
+                    }}};
+            PxCell xcell = new PxCell(tp_u, path + "xcell.pxc", false);
+            xcell.Fill(vv);
+            PxEntry e1 = xcell.Root.UElement().Field(1);
+            PxEntry e2 = e1.Element(0);
+            var v = e2.GetValue();
+            Console.WriteLine(v.Type.Interpret(v.Value));
+
+            return;
+
             //cell.Clear();
             //cell.Fill(testtriplets); // проверка на то, что при неочищенной ячейке, записать в нее нельзя
             //cell.Close();
@@ -82,7 +109,8 @@ namespace FirstSteps
             Console.WriteLine("ReadObly cell ok. duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
 
             // Создание ячейки фиксированного формата
-            PxCell xcell = new PxCell(seqtriplets, path + "test.pxc", false);
+            xcell.Clear();
+            xcell = new PxCell(seqtriplets, path + "test.pxc", false);
             var pv = cell2pac.Root.Get();
             tt0 = DateTime.Now;
             xcell.Fill2(pv); // Плохой метод, заменю на хороший
