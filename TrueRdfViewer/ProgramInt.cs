@@ -50,20 +50,22 @@ namespace TrueRdfViewer
                 //ts.LoadXML(path + "0001.xml");
                 //Console.WriteLine("LoadXML ok.");
                 PolarDB.PaEntry.bufferBytes = 1000000000; //2*1000*1000*1000;
-                   //  ts.LoadTurtle(@"C:\deployed\1M.ttl");
-            ts.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset1m.ttl");
+                //  ts.LoadTurtle(@"C:\deployed\1M.ttl");
+                ts.LoadTurtle(@"D:\home\FactographDatabases\dataset\dataset1m.ttl");
                 Console.WriteLine("LoadTurtle ok.");
                 Console.WriteLine("duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
                 return;
             }
-
-            ts.WarmUp();
-            Console.WriteLine("WarmUp duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            else
+            {
+                //ts.WarmUp();
+                //Console.WriteLine("WarmUp duration=" + (DateTime.Now - tt0).Ticks / 10000L); tt0 = DateTime.Now;
+            }
 
             bool totrace = true;
             if (totrace)
             {
-                XElement tracing = XElement.Load(@"C:\Users\Lena\Downloads\tracing100th.xml");
+                XElement tracing = XElement.Load(@"D:\home\FactographDatabases\dataset\tracing100th.xml");
                 Console.WriteLine("N_tests = {0}", tracing.Elements().Count());
                 tt0 = DateTime.Now;
                 int ecnt = 0, ncnt = 0;
@@ -77,7 +79,7 @@ namespace TrueRdfViewer
                     string p = p_att == null ? null : p_att.Value;
                     string o = o_att == null ? null : o_att.Value;
                     string res = r_att == null ? null : r_att.Value;
-                    if (spo.Name == "spo_")
+                    if (spo.Name == "spo")
                     {
                         bool r = ts.ChkOSubjPredObj(
                             s.GetHashCode(),
@@ -101,7 +103,7 @@ namespace TrueRdfViewer
                             if (isEq) ecnt++; else ncnt++;
                         }
                     }
-                    else if (spo.Name == "spO")
+                    else if (spo.Name == "spO_")
                     {
                         var query = ts.GetObjBySubjPred(
                             s.GetHashCode(),
